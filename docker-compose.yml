@@ -5,23 +5,34 @@ services:
   postgres:
     image: postgres:17
     container_name: b2b-postgres
+    networks:
+      - b2b-network
 
     restart: unless-stopped
 
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: b2b168
-      POSTGRES_DB: marketplace
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
 
     ports:
-      - "5432:5432"
+      - "5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./backend
+
+    networks:
+      - b2b-network
 
     container_name: b2b-backend
 
@@ -31,14 +42,18 @@ services:
       - "3000:3000"
 
     environment:
-      DATABASE_URL: postgresql://admin:b2b168@postgres:5432/marketplace
+      DATABASE_URL: ${DATABASE_URL}
 
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   frontend:
     build:
       context: ./mobile
+
+    networks:
+      - b2b-network
 
     container_name: b2b-frontend
 

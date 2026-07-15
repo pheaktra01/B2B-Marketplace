@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:mobile/features/auth/screens/LanguageSelectionScreen.dart';
+import 'package:mobile/features/auth/screens/language_selection_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -44,8 +44,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
                 colors: [
-                  Colors.green.shade900.withOpacity(0.9),
-                  Colors.green.shade900.withOpacity(0.6),
+                  Colors.green.shade900.withValues(alpha: 0.9),
+                  Colors.green.shade900.withValues(alpha: 0.6),
                   Colors.transparent,
                 ],
               ),

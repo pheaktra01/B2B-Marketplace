@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/auth/screens/SplashScreen.dart';
+import 'package:mobile/features/auth/screens/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());

@@ -176,3 +176,27 @@ jobs:
         if: always()
 
         run: docker compose down -v
+
+  #################################################
+  # TEST JOB
+  #################################################
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to DigitalOcean
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            cd ~/projects/B2B-Marketplace
+
+            git pull origin main
+
+            docker compose down
+
+            docker compose up -d --build
+
+            docker image prune -f

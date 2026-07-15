@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/auth/screens/GetStartedScreen.dart';
+import 'package:mobile/features/auth/screens/get_started_screen.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});

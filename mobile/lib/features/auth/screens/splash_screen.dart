@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('../../../assets/background.png'),
+                image: AssetImage('/background.png'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -58,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  '../../../assets/logo.png',
+                  '/logo.png',
                   width: 300,
                   height: 300,
                 ),

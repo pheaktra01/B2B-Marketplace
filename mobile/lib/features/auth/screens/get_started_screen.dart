@@ -12,7 +12,7 @@ class GetStartedScreen extends StatelessWidget {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('../../../assets/farm_background.png'), // Ensure this exists
+                image: AssetImage('/farm_background.png'), // Ensure this exists
                 fit: BoxFit.cover,
               ),
             ),

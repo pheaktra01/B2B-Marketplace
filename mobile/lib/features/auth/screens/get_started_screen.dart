@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/auth/screens/language_selection_screen.dart';
+import 'package:mobile/features/auth/screens/login_screen.dart';
+import 'package:mobile/features/auth/screens/role_selection_screen.dart';
 
 class GetStartedScreen extends StatelessWidget {
   const GetStartedScreen({super.key});
@@ -12,8 +15,34 @@ class GetStartedScreen extends StatelessWidget {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('/farm_background.png'), // Ensure this exists
+                image: AssetImage('assets/farm_background.png'), // Ensure this exists
                 fit: BoxFit.cover,
+              ),
+            ),
+          ),
+
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            left: 16,
+            child: SafeArea(
+              child: Material(
+                color: Colors.white.withValues(alpha: 0.9),
+                shape: const CircleBorder(),
+                elevation: 2,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Colors.black87,
+                  ),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LanguageSelectionScreen(),
+                      ),
+                    );
+                  }
+                ),
               ),
             ),
           ),
@@ -62,7 +91,12 @@ class GetStartedScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RoleSelectionScreen()),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -76,7 +110,12 @@ class GetStartedScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 55,
                     child: OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginScreen()),
+                        );
+                      },
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.green, width: 2),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

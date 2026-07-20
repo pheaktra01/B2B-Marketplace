@@ -159,7 +159,14 @@ jobs:
 
         run: docker ps
 
+      - name: Check running containers
+        run: docker ps -a
 
+      - name: Backend logs
+        run: docker logs b2b-backend
+
+      - name: Postgres logs
+        run: docker logs b2b-postgres
 
       - name: Backend Health Check
 

@@ -12,7 +12,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Controllers to retrieve input data
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -39,256 +39,437 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Custom deep green branding color from your logo/button
-    const brandGreen = Color(0xFF0F6221); 
-    const inputFillColor = Color(0xFFF3F4F6);
+    const brandGreen = Color(0xFF0F6221);
+    const bgLight = Color(0xFFF8FAFC);
+    const borderColor = Color(0xFFE2E8F0);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgLight,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  children: [
-                    Material(
-                      color: Colors.white,
-                      shape: const CircleBorder(),
-                      elevation: 2,
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new,
-                          size: 20,
-                          color: brandGreen,
-                        ),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RoleSelectionScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isDesktopOrTablet = constraints.maxWidth > 600;
+            final isWide = constraints.maxWidth > 768; // For 2-column input fields
+            final inputFill = isDesktopOrTablet ? bgLight : const Color(0xFFF3F4F6);
 
-                const SizedBox(height: 16),
-
-                // Placeholder for Logo Image
-                CircleAvatar(
-                  radius: 45,
-                  backgroundColor: brandGreen.withAlpha(30),
-                  child: const Icon(
-                    Icons.restaurant_menu,
-                    size: 45,
-                    color: brandGreen,
+            return Center(
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktopOrTablet ? 24.0 : 0.0,
+                    vertical: isDesktopOrTablet ? 32.0 : 0.0,
                   ),
-                ),
-                
-                const SizedBox(height: 16),
-                const Text(
-                  'PsarKesekor',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: brandGreen,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Fresh produce marketplace for\nprofessional kitchens.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.3),
-                ),
-                
-                const SizedBox(height: 32),
-                const Text(
-                  'Create Your Account',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Join the elite network of professional\nagricultural trade.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.black54, height: 1.3),
-                ),
-                
-                const SizedBox(height: 32),
-
-                // --- Form Fields ---
-                _buildInputField(
-                  label: 'Full Name',
-                  hint: 'Enter your full name',
-                  prefixIcon: Icons.person_outline,
-                  controller: _nameController,
-                  fillColor: inputFillColor,
-                ),
-                _buildInputField(
-                  label: 'Email',
-                  hint: 'email@business.com',
-                  prefixIcon: Icons.mail_outline,
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  fillColor: inputFillColor,
-                ),
-                _buildInputField(
-                  label: 'Phone number',
-                  hint: '+0123456789',
-                  prefixIcon: Icons.phone_outlined,
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  fillColor: inputFillColor,
-                ),
-                _buildInputField(
-                  label: 'Restaurant name/Farm name',
-                  hint: 'Name of your enterprise',
-                  prefixIcon: Icons.storefront_outlined,
-                  controller: _enterpriseController,
-                  fillColor: inputFillColor,
-                ),
-                _buildInputField(
-                  label: 'Password',
-                  hint: 'Password',
-                  prefixIcon: Icons.lock_outline,
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  fillColor: inputFillColor,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                      color: Colors.black54,
-                    ),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                ),
-                _buildInputField(
-                  label: 'Confirm Password',
-                  hint: 'Confirm Password',
-                  prefixIcon: Icons.lock_outline,
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  fillColor: inputFillColor,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                      color: Colors.black54,
-                    ),
-                    onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
-                  ),
-                ),
-
-                // --- Terms and Conditions Checkbox ---
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _agreedToTerms,
-                      activeColor: brandGreen,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                      onChanged: (value) => setState(() => _agreedToTerms = value ?? false),
-                    ),
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          style: const TextStyle(color: Colors.black87, fontSize: 13, height: 1.4),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: Container(
+                      decoration: isDesktopOrTablet
+                          ? BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.06),
+                                  blurRadius: 24,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                              border: Border.all(color: borderColor, width: 0.5),
+                            )
+                          : const BoxDecoration(color: Colors.white),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(isDesktopOrTablet ? 24 : 0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const TextSpan(text: 'I agree to the '),
-                            TextSpan(
-                              text: 'Terms of\nService',
-                              style: const TextStyle(color: brandGreen, fontWeight: FontWeight.w600, decoration: TextDecoration.underline),
+                            Padding(
+                              padding: EdgeInsets.all(isDesktopOrTablet ? 32.0 : 24.0),
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    // --- Navigation Back Button ---
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Material(
+                                        color: isDesktopOrTablet ? bgLight : Colors.white,
+                                        shape: const CircleBorder(),
+                                        elevation: isDesktopOrTablet ? 0 : 2,
+                                        child: IconButton(
+                                          icon: const Icon(
+                                            Icons.arrow_back_ios_new,
+                                            size: 20,
+                                            color: brandGreen,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => const RoleSelectionScreen(),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 12),
+
+                                    // --- Logo & Title ---
+                                    CircleAvatar(
+                                      radius: 42,
+                                      backgroundColor: brandGreen.withValues(alpha: 0.1),
+                                      child: const Icon(
+                                        Icons.restaurant_menu,
+                                        size: 42,
+                                        color: brandGreen,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 14),
+                                    const Text(
+                                      'PsarKesekor',
+                                      style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        color: brandGreen,
+                                        letterSpacing: -0.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    const Text(
+                                      'Fresh produce marketplace for\nprofessional kitchens.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 14, color: Colors.black87, height: 1.3),
+                                    ),
+
+                                    const SizedBox(height: 28),
+                                    const Text(
+                                      'Create Your Account',
+                                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    const Text(
+                                      'Join the elite network of professional agricultural trade.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 13, color: Colors.black54, height: 1.3),
+                                    ),
+
+                                    const SizedBox(height: 28),
+
+                                    // --- Dynamic Form Grid Layout ---
+                                    if (isWide) ...[
+                                      // 2-Column Row 1: Name & Email
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _buildInputField(
+                                              label: 'Full Name',
+                                              hint: 'Enter full name',
+                                              prefixIcon: Icons.person_outline,
+                                              controller: _nameController,
+                                              fillColor: inputFill,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: _buildInputField(
+                                              label: 'Email',
+                                              hint: 'email@business.com',
+                                              prefixIcon: Icons.mail_outline,
+                                              controller: _emailController,
+                                              keyboardType: TextInputType.emailAddress,
+                                              fillColor: inputFill,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      // 2-Column Row 2: Phone & Enterprise
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _buildInputField(
+                                              label: 'Phone number',
+                                              hint: '+0123456789',
+                                              prefixIcon: Icons.phone_outlined,
+                                              controller: _phoneController,
+                                              keyboardType: TextInputType.phone,
+                                              fillColor: inputFill,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: _buildInputField(
+                                              label: 'Restaurant / Farm Name',
+                                              hint: 'Enterprise name',
+                                              prefixIcon: Icons.storefront_outlined,
+                                              controller: _enterpriseController,
+                                              fillColor: inputFill,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      // 2-Column Row 3: Passwords
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _buildInputField(
+                                              label: 'Password',
+                                              hint: 'Password',
+                                              prefixIcon: Icons.lock_outline,
+                                              controller: _passwordController,
+                                              obscureText: _obscurePassword,
+                                              fillColor: inputFill,
+                                              suffixIcon: IconButton(
+                                                icon: Icon(
+                                                  _obscurePassword
+                                                      ? Icons.visibility_off_outlined
+                                                      : Icons.visibility_outlined,
+                                                  color: Colors.black54,
+                                                ),
+                                                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: _buildInputField(
+                                              label: 'Confirm Password',
+                                              hint: 'Confirm Password',
+                                              prefixIcon: Icons.lock_outline,
+                                              controller: _confirmPasswordController,
+                                              obscureText: _obscureConfirmPassword,
+                                              fillColor: inputFill,
+                                              suffixIcon: IconButton(
+                                                icon: Icon(
+                                                  _obscureConfirmPassword
+                                                      ? Icons.visibility_off_outlined
+                                                      : Icons.visibility_outlined,
+                                                  color: Colors.black54,
+                                                ),
+                                                onPressed: () => setState(
+                                                    () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ] else ...[
+                                      // Single-column mobile view
+                                      _buildInputField(
+                                        label: 'Full Name',
+                                        hint: 'Enter your full name',
+                                        prefixIcon: Icons.person_outline,
+                                        controller: _nameController,
+                                        fillColor: inputFill,
+                                      ),
+                                      _buildInputField(
+                                        label: 'Email',
+                                        hint: 'email@business.com',
+                                        prefixIcon: Icons.mail_outline,
+                                        controller: _emailController,
+                                        keyboardType: TextInputType.emailAddress,
+                                        fillColor: inputFill,
+                                      ),
+                                      _buildInputField(
+                                        label: 'Phone number',
+                                        hint: '+0123456789',
+                                        prefixIcon: Icons.phone_outlined,
+                                        controller: _phoneController,
+                                        keyboardType: TextInputType.phone,
+                                        fillColor: inputFill,
+                                      ),
+                                      _buildInputField(
+                                        label: 'Restaurant name/Farm name',
+                                        hint: 'Name of your enterprise',
+                                        prefixIcon: Icons.storefront_outlined,
+                                        controller: _enterpriseController,
+                                        fillColor: inputFill,
+                                      ),
+                                      _buildInputField(
+                                        label: 'Password',
+                                        hint: 'Password',
+                                        prefixIcon: Icons.lock_outline,
+                                        controller: _passwordController,
+                                        obscureText: _obscurePassword,
+                                        fillColor: inputFill,
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            _obscurePassword
+                                                ? Icons.visibility_off_outlined
+                                                : Icons.visibility_outlined,
+                                            color: Colors.black54,
+                                          ),
+                                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                        ),
+                                      ),
+                                      _buildInputField(
+                                        label: 'Confirm Password',
+                                        hint: 'Confirm Password',
+                                        prefixIcon: Icons.lock_outline,
+                                        controller: _confirmPasswordController,
+                                        obscureText: _obscureConfirmPassword,
+                                        fillColor: inputFill,
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            _obscureConfirmPassword
+                                                ? Icons.visibility_off_outlined
+                                                : Icons.visibility_outlined,
+                                            color: Colors.black54,
+                                          ),
+                                          onPressed: () =>
+                                              setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                                        ),
+                                      ),
+                                    ],
+
+                                    // --- Terms and Conditions Checkbox ---
+                                    Row(
+                                      crossAxisAlignment: CrossAlignmentCheck(isDesktopOrTablet),
+                                      children: [
+                                        SizedBox(
+                                          height: 24,
+                                          width: 24,
+                                          child: Checkbox(
+                                            value: _agreedToTerms,
+                                            activeColor: brandGreen,
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                            onChanged: (value) => setState(() => _agreedToTerms = value ?? false),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: RichText(
+                                            text: const TextSpan(
+                                              style: TextStyle(color: Colors.black87, fontSize: 13, height: 1.4),
+                                              children: [
+                                                TextSpan(text: 'I agree to the '),
+                                                TextSpan(
+                                                  text: 'Terms of Service',
+                                                  style: TextStyle(
+                                                    color: brandGreen,
+                                                    fontWeight: FontWeight.w600,
+                                                    decoration: TextDecoration.underline,
+                                                  ),
+                                                ),
+                                                TextSpan(text: ' and '),
+                                                TextSpan(
+                                                  text: 'Privacy Policy.',
+                                                  style: TextStyle(
+                                                    color: brandGreen,
+                                                    fontWeight: FontWeight.w600,
+                                                    decoration: TextDecoration.underline,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    const SizedBox(height: 24),
+
+                                    // --- Sign Up Button ---
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 52,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: brandGreen,
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                          elevation: 0,
+                                        ),
+                                        onPressed: () {
+                                          if (_formKey.currentState!.validate() && _agreedToTerms) {
+                                            // Registration logic
+                                          }
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => VerifyPhoneScreen(
+                                                type: VerificationType.signup,
+                                                phoneNumber: _phoneController.text,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: const Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Sign Up',
+                                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Icon(Icons.arrow_forward_ios, size: 16),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                            const TextSpan(text: ' and '),
-                            TextSpan(
-                              text: 'Privacy Policy.',
-                              style: const TextStyle(color: brandGreen, fontWeight: FontWeight.w600, decoration: TextDecoration.underline),
+
+                            // --- Footer Navigation ---
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 20.0),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF1F5F9),
+                                border: Border(
+                                  top: BorderSide(color: borderColor, width: 0.5),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text('Already have an account? ', style: TextStyle(color: Colors.black54)),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const LoginScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text(
+                                      'Login',
+                                      style: TextStyle(
+                                        color: brandGreen,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                  ],
-                ),
-                
-                const SizedBox(height: 24),
-
-                // --- Sign Up Button ---
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: brandGreen,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 2,
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate() && _agreedToTerms) {
-                        // Implement form submission / registration API call here
-                      }
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => VerifyPhoneScreen(
-                            type: VerificationType.signup,
-                            phoneNumber: _phoneController.text,
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Sign Up', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        SizedBox(width: 8),
-                        Icon(Icons.arrow_forward_ios, size: 16),
-                      ],
-                    ),
                   ),
                 ),
-
-                const SizedBox(height: 24),
-                const Divider(color: Colors.black12, thickness: 1),
-                const SizedBox(height: 16),
-
-                // --- Bottom Navigation Navigation ---
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Already have an account ', style: TextStyle(color: Colors.black54)),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginScreen(), // Navigate to LoginScreen
-                          ),
-                        );
-                      },
-                      style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(color: brandGreen, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
-  // Helper builder widget to reduce code duplication for inputs
+  // Cross Alignment Helper
+  // ignore: non_constant_identifier_names
+  static CrossAxisAlignment CrossAlignmentCheck(bool isDesktop) {
+    return isDesktop ? CrossAxisAlignment.center : CrossAxisAlignment.start;
+  }
+
+  // Input Field Helper Component
   Widget _buildInputField({
     required String label,
     required String hint,
@@ -300,7 +481,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     Widget? suffixIcon,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
+      padding: const EdgeInsets.only(bottom: 18.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -323,15 +504,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
               contentPadding: const EdgeInsets.symmetric(vertical: 16),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.black12),
+                borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.black12),
+                borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.black26, width: 1.5),
+                borderSide: const BorderSide(color: Color(0xFF0F6221), width: 1.5),
               ),
             ),
           ),

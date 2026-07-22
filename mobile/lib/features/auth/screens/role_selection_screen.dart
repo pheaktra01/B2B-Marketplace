@@ -3,9 +3,6 @@ import 'package:mobile/features/auth/screens/get_started_screen.dart';
 import 'package:mobile/features/auth/screens/login_screen.dart';
 import 'package:mobile/features/auth/screens/sign_up_screen.dart';
 
-// Import LoginScreen if it exists in your project
-// import 'login_screen.dart';
-
 class RoleSelectionScreen extends StatefulWidget {
   const RoleSelectionScreen({super.key});
 
@@ -28,184 +25,251 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     return Scaffold(
       backgroundColor: bgLight,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  Material(
-                    color: Colors.white,
-                    shape: const CircleBorder(),
-                    elevation: 2,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        size: 20,
-                        color: textDark,
-                      ),
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const GetStartedScreen(),
-                          ),
-                        );
-                      },
-                    ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isDesktop = constraints.maxWidth >= 900;
+            final isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 900;
+
+            // Constrain content width so it doesn't stretch infinitely on wide monitors
+            final double maxContentWidth = isDesktop ? 800 : (isTablet ? 650 : double.infinity);
+
+            // Responsive typography
+            final double titleFontSize = isDesktop ? 32 : (isTablet ? 28 : 24);
+            final double bodyFontSize = isDesktop ? 16 : 15;
+
+            return Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxContentWidth),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop || isTablet ? 32.0 : 24.0,
+                    vertical: 20.0,
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // --- Logo & Brand Name ---
-              Center(
-                child: Column(
-                  children: [
-                    // Replace with your real asset or network image
-                    CircleAvatar(
-                      radius: 45,
-                      backgroundColor: primaryGreen.withValues(alpha: 0.1),
-                      child: const Icon(Icons.eco, size: 50, color: primaryGreen),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'PsarKasekor',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: primaryGreen,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // --- Heading Texts ---
-              const Text(
-                'How will you use PsarKasekor?',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: textDark,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Join our premium agricultural network. Choose your role to personalize your experience.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: textMuted,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // --- Restaurant Role Card ---
-              _buildRoleCard(
-                id: 'restaurant',
-                icon: Icons.restaurant,
-                title: 'I am a Restaurant',
-                description: 'Sourcing the freshest ingredients directly from local producers with reliable logistics.',
-                tags: ['Buyer', 'Kitchen'],
-                isSelected: _selectedRole == 'restaurant',
-                primaryColor: primaryGreen,
-              ),
-              const SizedBox(height: 20),
-
-              // --- Farmer Role Card ---
-              _buildRoleCard(
-                id: 'farmer',
-                icon: Icons.agriculture, // Using tractor/agriculture icon
-                title: 'I am a Farmer',
-                description: 'Showcasing my bountiful harvest to top professional kitchens and managing wholesale orders.',
-                tags: ['Seller', 'Producer'],
-                isSelected: _selectedRole == 'farmer',
-                primaryColor: primaryGreen,
-              ),
-              const SizedBox(height: 40),
-
-              // --- Continue Button ---
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _selectedRole == null
-                      ? null // Disabled if no selection
-                      : () {
-                          // Handle navigation or setup logic here
-                          // ignore: avoid_print
-                          print('Selected Role: $_selectedRole');
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SignUpScreen(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // --- Back Button ---
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Material(
+                          color: Colors.white,
+                          shape: const CircleBorder(),
+                          elevation: 2,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.arrow_back_ios_new,
+                              size: 20,
+                              color: textDark,
                             ),
-                          );
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _selectedRole != null ? primaryGreen : const Color(0xFFE2E8F0),
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: const Color(0xFFE2E8F0),
-                    disabledForegroundColor: textMuted.withValues(alpha: 0.6),
-                    elevation: _selectedRole != null ? 2 : 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        'Continue',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const GetStartedScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       ),
-                      SizedBox(width: 8),
-                      Icon(Icons.arrow_forward, size: 18),
+
+                      const SizedBox(height: 16),
+
+                      // --- Logo & Brand Name ---
+                      Center(
+                        child: Column(
+                          children: [
+                            CircleAvatar(
+                              radius: isDesktop ? 50 : 45,
+                              backgroundColor: primaryGreen.withValues(alpha: 0.1),
+                              child: Icon(
+                                Icons.eco,
+                                size: isDesktop ? 56 : 50,
+                                color: primaryGreen,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'PsarKasekor',
+                              style: TextStyle(
+                                fontSize: titleFontSize + 4,
+                                fontWeight: FontWeight.bold,
+                                color: primaryGreen,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: isDesktop ? 36 : 28),
+
+                      // --- Heading Texts ---
+                      Text(
+                        'How will you use PsarKasekor?',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.bold,
+                          color: textDark,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Join our premium agricultural network. Choose your role to personalize your experience.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: bodyFontSize,
+                          color: textMuted,
+                          height: 1.4,
+                        ),
+                      ),
+                      SizedBox(height: isDesktop ? 40 : 32),
+
+                      // --- Role Cards (Side-by-Side on Tablet/Desktop, Stacked on Mobile) ---
+                      if (isTablet || isDesktop)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: _buildRoleCard(
+                                id: 'restaurant',
+                                icon: Icons.restaurant,
+                                title: 'I am a Restaurant',
+                                description:
+                                    'Sourcing the freshest ingredients directly from local producers with reliable logistics.',
+                                tags: ['Buyer', 'Kitchen'],
+                                isSelected: _selectedRole == 'restaurant',
+                                primaryColor: primaryGreen,
+                                isDesktop: isDesktop,
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              child: _buildRoleCard(
+                                id: 'farmer',
+                                icon: Icons.agriculture,
+                                title: 'I am a Farmer',
+                                description:
+                                    'Showcasing my bountiful harvest to top professional kitchens and managing wholesale orders.',
+                                tags: ['Seller', 'Producer'],
+                                isSelected: _selectedRole == 'farmer',
+                                primaryColor: primaryGreen,
+                                isDesktop: isDesktop,
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Column(
+                          children: [
+                            _buildRoleCard(
+                              id: 'restaurant',
+                              icon: Icons.restaurant,
+                              title: 'I am a Restaurant',
+                              description:
+                                  'Sourcing the freshest ingredients directly from local producers with reliable logistics.',
+                              tags: ['Buyer', 'Kitchen'],
+                              isSelected: _selectedRole == 'restaurant',
+                              primaryColor: primaryGreen,
+                              isDesktop: false,
+                            ),
+                            const SizedBox(height: 20),
+                            _buildRoleCard(
+                              id: 'farmer',
+                              icon: Icons.agriculture,
+                              title: 'I am a Farmer',
+                              description:
+                                  'Showcasing my bountiful harvest to top professional kitchens and managing wholesale orders.',
+                              tags: ['Seller', 'Producer'],
+                              isSelected: _selectedRole == 'farmer',
+                              primaryColor: primaryGreen,
+                              isDesktop: false,
+                            ),
+                          ],
+                        ),
+
+                      SizedBox(height: isDesktop ? 48 : 36),
+
+                      // --- Continue Button ---
+                      SizedBox(
+                        width: double.infinity,
+                        height: isDesktop ? 58 : 54,
+                        child: ElevatedButton(
+                          onPressed: _selectedRole == null
+                              ? null
+                              : () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const SignUpScreen(),
+                                    ),
+                                  );
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                _selectedRole != null ? primaryGreen : const Color(0xFFE2E8F0),
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor: const Color(0xFFE2E8F0),
+                            disabledForegroundColor: textMuted.withValues(alpha: 0.6),
+                            elevation: _selectedRole != null ? 2 : 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Continue',
+                                style: TextStyle(
+                                  fontSize: isDesktop ? 18 : 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward, size: 18),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // --- Footer ---
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Already have an account? ',
+                            style: TextStyle(color: textMuted, fontSize: 14),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              'Log in',
+                              style: TextStyle(
+                                color: primaryGreen,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-
-              // --- Footer ---
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Already have an account? ',
-                    style: TextStyle(color: textMuted, fontSize: 14),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Log in',
-                      style: TextStyle(
-                        color: primaryGreen,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -220,6 +284,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     required List<String> tags,
     required bool isSelected,
     required Color primaryColor,
+    required bool isDesktop,
   }) {
     return InkWell(
       onTap: () {
@@ -230,7 +295,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       borderRadius: BorderRadius.circular(20),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(isDesktop ? 28.0 : 22.0),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -240,8 +305,10 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 12,
+              color: isSelected
+                  ? primaryColor.withValues(alpha: 0.1)
+                  : Colors.black.withValues(alpha: 0.04),
+              blurRadius: isSelected ? 16 : 12,
               offset: const Offset(0, 4),
             ),
           ],
@@ -249,32 +316,43 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon Container
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEAE6DA), // Light vintage tint from image
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: const Color(0xFF4A5D4E), size: 28),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Icon Container
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFEAE6DA),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: const Color(0xFF4A5D4E), size: 28),
+                ),
+                // Radio indicator icon
+                Icon(
+                  isSelected ? Icons.check_circle : Icons.circle_outlined,
+                  color: isSelected ? primaryColor : const Color(0xFFCBD5E1),
+                  size: 24,
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             // Title
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 20,
+              style: TextStyle(
+                fontSize: isDesktop ? 22 : 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0F172A),
+                color: const Color(0xFF0F172A),
               ),
             ),
             const SizedBox(height: 8),
             // Description Text
             Text(
               description,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF475569),
+              style: TextStyle(
+                fontSize: isDesktop ? 15 : 14,
+                color: const Color(0xFF475569),
                 height: 1.4,
               ),
             ),
@@ -282,6 +360,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
             // Dynamic Pills/Tags row
             Wrap(
               spacing: 8,
+              runSpacing: 8,
               children: tags.map((tag) {
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),

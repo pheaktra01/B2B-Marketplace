@@ -15,7 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   bool _obscurePassword = true;
 
   @override
@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     // Shared Brand Design Tokens
-    const primaryGreen = Color(0xFF156D27); // Darker rich green used on this button/text
+    const primaryGreen = Color(0xFF156D27);
     const textDark = Color(0xFF0F172A);
     const textMuted = Color(0xFF475569);
     const bgLight = Color(0xFFF8FAFC);
@@ -37,339 +37,383 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: bgLight,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Main scrollable content body
-            Expanded(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Screen Breakpoint Checks
+            final isDesktopOrTablet = constraints.maxWidth > 600;
+
+            return Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Material(
-                            color: Colors.white,
-                            shape: const CircleBorder(),
-                            elevation: 2,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.arrow_back_ios_new,
-                                size: 20,
-                                color: textDark,
-                              ),
-                              onPressed: () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const GetStartedScreen(),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // --- Logo & Brand Identity ---
-                      Center(
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 45,
-                              backgroundColor: primaryGreen.withValues(alpha: 0.1),
-                              child: const Icon(Icons.eco, size: 50, color: primaryGreen),
-                            ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'PsarKasekor',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: primaryGreen,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20.0),
-                              child: Text(
-                                'Fresh produce marketplace for professional kitchens.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: textMuted,
-                                  height: 1.3,
+                physics: const ClampingScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktopOrTablet ? 24.0 : 0.0,
+                    vertical: isDesktopOrTablet ? 32.0 : 0.0,
+                  ),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: Container(
+                      decoration: isDesktopOrTablet
+                          ? BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
                                 ),
+                              ],
+                              border: Border.all(color: borderColor, width: 0.5),
+                            )
+                          : null,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(isDesktopOrTablet ? 24 : 0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Header + Form Content
+                            Padding(
+                              padding: EdgeInsets.all(isDesktopOrTablet ? 32.0 : 24.0),
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // --- Navigation Back Button ---
+                                    Row(
+                                      children: [
+                                        Material(
+                                          color: isDesktopOrTablet ? bgLight : Colors.white,
+                                          shape: const CircleBorder(),
+                                          elevation: isDesktopOrTablet ? 0 : 2,
+                                          child: IconButton(
+                                            icon: const Icon(
+                                              Icons.arrow_back_ios_new,
+                                              size: 20,
+                                              color: textDark,
+                                            ),
+                                            onPressed: () {
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => const GetStartedScreen(),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    const SizedBox(height: 16),
+
+                                    // --- Logo & Brand Identity ---
+                                    Center(
+                                      child: Column(
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 42,
+                                            backgroundColor: primaryGreen.withValues(alpha: 0.1),
+                                            child: const Icon(Icons.eco, size: 46, color: primaryGreen),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          const Text(
+                                            'PsarKasekor',
+                                            style: TextStyle(
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                              color: primaryGreen,
+                                              letterSpacing: -0.5,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          const Padding(
+                                            padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                            child: Text(
+                                              'Fresh produce marketplace for professional kitchens.',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: textMuted,
+                                                height: 1.3,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 28),
+
+                                    // --- Section Heading ---
+                                    const Center(
+                                      child: Text(
+                                        'Welcome Back',
+                                        style: TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          color: textDark,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
+
+                                    // --- Phone Number Input Field ---
+                                    const Text(
+                                      'Phone Number',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: textDark,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                      controller: _phoneController,
+                                      keyboardType: TextInputType.phone,
+                                      decoration: InputDecoration(
+                                        hintText: '0123456789',
+                                        hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                        filled: true,
+                                        fillColor: isDesktopOrTablet ? bgLight : Colors.white,
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(color: borderColor, width: 1),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(color: primaryGreen, width: 1.5),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+
+                                    // --- Password Label with Forgot Action ---
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          'Password',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: textDark,
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => const ForgotPasswordScreen(),
+                                              ),
+                                            );
+                                          },
+                                          child: const Text(
+                                            'Forgot Password?',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: primaryGreen,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+
+                                    // --- Password Input Field ---
+                                    TextFormField(
+                                      controller: _passwordController,
+                                      obscureText: _obscurePassword,
+                                      decoration: InputDecoration(
+                                        hintText: '••••••••',
+                                        hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                        filled: true,
+                                        fillColor: isDesktopOrTablet ? bgLight : Colors.white,
+                                        prefixIcon: const Icon(Icons.lock_outline, color: textMuted, size: 20),
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                            color: textMuted,
+                                            size: 20,
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              _obscurePassword = !_obscurePassword;
+                                            });
+                                          },
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(color: borderColor, width: 1),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(color: primaryGreen, width: 1.5),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
+
+                                    // --- Login Button ---
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 52,
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          if (_formKey.currentState!.validate()) {
+                                            // Execute authentication workflow 
+                                          }
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => VerifyPhoneScreen(
+                                                type: VerificationType.login,
+                                                phoneNumber: _phoneController.text,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: primaryGreen,
+                                          foregroundColor: Colors.white,
+                                          elevation: 0,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        child: const Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Login',
+                                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                            ),
+                                            SizedBox(width: 6),
+                                            Icon(Icons.chevron_right, size: 20),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 28),
+
+                                    // --- Custom "Or continue with" Divider ---
+                                    const Row(
+                                      children: [
+                                        Expanded(child: Divider(color: borderColor, thickness: 1)),
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                          child: Text(
+                                            'Or continue with',
+                                            style: TextStyle(color: textMuted, fontSize: 13),
+                                          ),
+                                        ),
+                                        Expanded(child: Divider(color: borderColor, thickness: 1)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 20),
+
+                                    // --- Social Sign-In Row ---
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildSocialButton(
+                                            label: 'Google',
+                                            iconColor: Colors.red,
+                                            iconData: Icons.g_mobiledata,
+                                            isDesktop: isDesktopOrTablet,
+                                            onTap: () {},
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: _buildSocialButton(
+                                            label: 'Facebook',
+                                            iconColor: const Color(0xFF1877F2),
+                                            iconData: Icons.facebook,
+                                            isDesktop: isDesktopOrTablet,
+                                            onTap: () {},
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // --- Footer Area ---
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 20.0),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF1F5F9),
+                                border: Border(
+                                  top: BorderSide(color: borderColor, width: 0.5),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "Don't have an account? ",
+                                    style: TextStyle(color: textMuted, fontSize: 14),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const RoleSelectionScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text(
+                                      'Create Account',
+                                      style: TextStyle(
+                                        color: primaryGreen,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 32),
-
-                      // --- Section Heading ---
-                      const Center(
-                        child: Text(
-                          'Welcome Back',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: textDark,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-
-                      // --- Phone Number Input Field ---
-                      const Text(
-                        'Phone Number',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: textDark,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        decoration: InputDecoration(
-                          hintText: '0123456789',
-                          hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                          filled: true,
-                          fillColor: Colors.white,
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: borderColor, width: 1),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: primaryGreen, width: 1.5),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // --- Password Label with Forgot Action ---
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Password',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: textDark,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ForgotPasswordScreen(), // Navigate to ForgotPasswordScreen
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              'Forgot Password?',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: primaryGreen,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // --- Password Input Field ---
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          hintText: '••••••••',
-                          hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                          filled: true,
-                          fillColor: Colors.white,
-                          prefixIcon: const Icon(Icons.lock_outline, color: textMuted, size: 20),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                              color: textMuted,
-                              size: 20,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: borderColor, width: 1),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: primaryGreen, width: 1.5),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // --- Login Button ---
-                      SizedBox(
-                        width: double.infinity,
-                        height: 54,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              // Execute authentication workflow 
-                            }
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => VerifyPhoneScreen(
-                                  type: VerificationType.login,
-                                  phoneNumber: _phoneController.text,
-                                ),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryGreen,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text(
-                                'Login',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(width: 6),
-                              Icon(Icons.chevron_right, size: 20),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // --- Custom "Or continue with" Divider ---
-                      Row(
-                        children: const [
-                          Expanded(child: Divider(color: borderColor, thickness: 1)),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Text(
-                              'Or continue with',
-                              style: TextStyle(color: textMuted, fontSize: 14),
-                            ),
-                          ),
-                          Expanded(child: Divider(color: borderColor, thickness: 1)),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-
-                      // --- Social Sign-In Row ---
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildSocialButton(
-                              label: 'Google',
-                              iconColor: Colors.red,
-                              iconData: Icons.g_mobiledata, // Fallback icon frame
-                              onTap: () {},
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _buildSocialButton(
-                              label: 'Facebook',
-                              iconColor: const Color(0xFF1877F2),
-                              iconData: Icons.facebook,
-                              onTap: () {},
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // --- Sticky Footer Area ---
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 24.0),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF1F5F9), // Slight tint break for footer card background
-                border: Border(
-                  top: BorderSide(color: borderColor, width: 0.5),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Don't have an account? ",
-                    style: TextStyle(color: textMuted, fontSize: 14),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const RoleSelectionScreen(), // Navigate to RoleSelectionScreen
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Create Account',
-                      style: TextStyle(
-                        color: primaryGreen,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
   }
 
-  // Social Login Button Builder Helper
+  // Social Login Button Helper
   Widget _buildSocialButton({
     required String label,
     required IconData iconData,
     required Color iconColor,
+    required bool isDesktop,
     required VoidCallback onTap,
   }) {
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         side: const BorderSide(color: Color(0xFFCBD5E1), width: 1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: isDesktop ? const Color(0xFFF8FAFC) : Colors.white,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -381,7 +425,7 @@ class _LoginScreenState extends State<LoginScreen> {
             style: const TextStyle(
               color: Color(0xFF0F172A),
               fontWeight: FontWeight.w600,
-              fontSize: 15,
+              fontSize: 14,
             ),
           ),
         ],

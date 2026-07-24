@@ -13,9 +13,6 @@ class SignUpScreen extends StatefulWidget {
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
-  print(String selectedRole) {
-    print('Selected Role: $selectedRole');
-  }
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {

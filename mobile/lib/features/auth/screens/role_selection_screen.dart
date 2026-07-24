@@ -202,7 +202,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const SignUpScreen(),
+                                      builder: (context) => SignUpScreen(
+                                        selectedRole: _selectedRole!,
+                                      ),
                                     ),
                                   );
                                 },

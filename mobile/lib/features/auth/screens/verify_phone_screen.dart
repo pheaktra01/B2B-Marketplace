@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile/features/auth/screens/reset_password_screen.dart';
 import 'package:mobile/features/farmer/screen/farmer_dashboard_screen.dart';
+import 'package:mobile/features/restaurant/screen/home_screen.dart';
 
 class VerifyPhoneScreen extends StatefulWidget {
   final VerificationType type;
   final String phoneNumber;
+  final String? selectedRole; 
 
   const VerifyPhoneScreen({
     super.key,
     required this.type,
     required this.phoneNumber,
+    this.selectedRole,
   });
 
   @override
@@ -240,15 +243,23 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                           );
                                           break;
 
-                                        case VerificationType.signup:
+                                      case VerificationType.signup:
+                                        if (widget.selectedRole == 'farmer') {
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const FarmerDashboardScreen(),
+                                              builder: (_) => const FarmerDashboardScreen(),
                                             ),
                                           );
-                                          break;
+                                        } else if (widget.selectedRole == 'restaurant') {
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => const HomeScreen(),
+                                            ),
+                                          );
+                                        }
+                                        break;
 
                                         case VerificationType.forgotPassword:
                                           Navigator.push(

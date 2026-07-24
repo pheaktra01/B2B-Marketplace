@@ -13,7 +13,7 @@ class FarmerDashboardScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddProductScreen()),
+            MaterialPageRoute(builder: (context) => const AddProductScreen()), 
           );
         },
         backgroundColor: const Color(0xFFFF9800),
@@ -21,127 +21,200 @@ class FarmerDashboardScreen extends StatelessWidget {
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double screenWidth = constraints.maxWidth;
+            final bool isTablet = screenWidth >= 600;
+            final bool isDesktop = screenWidth >= 900;
+
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isTablet ? 24.0 : 16.0,
+                    vertical: 12.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // --- Header Greeting ---
+                      const Text(
+                        'Good Morning, Farm Manager',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1E1E1E),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Your produce is reaching 14 new professional kitchens today.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // --- Top Stat Cards (Adaptive Grid) ---
+                      _buildResponsiveStatCards(screenWidth),
+                      const SizedBox(height: 20),
+
+                      // --- Main Content Section ---
+                      // On Desktop: Chart and Recent Orders side-by-side
+                      // On Mobile/Tablet: Stacked vertically
+                      if (isDesktop)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 5,
+                              child: _buildSalesSummaryCard(),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(
+                              flex: 6,
+                              child: _buildRecentOrdersSection(),
+                            ),
+                          ],
+                        )
+                      else ...[
+                        _buildSalesSummaryCard(),
+                        const SizedBox(height: 24),
+                        _buildRecentOrdersSection(),
+                      ],
+
+                      const SizedBox(height: 80), // Bottom padding for FAB
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // Helper method to arrange stat cards responsively
+  Widget _buildResponsiveStatCards(double width) {
+    final List<Widget> statCards = [
+      _buildStatCard(
+        title: 'TOTAL PRODUCTS',
+        value: '24',
+        valueColor: const Color(0xFF2E7D32),
+        icon: Icons.inventory_2_outlined,
+      ),
+      _buildStatCard(
+        title: 'ORDERS TODAY',
+        value: '12',
+        valueColor: const Color(0xFF2E7D32),
+        icon: Icons.shopping_cart_outlined,
+      ),
+      _buildStatCard(
+        title: 'REVENUE TODAY',
+        value: '\$1,240',
+        valueColor: const Color(0xFFE57373),
+        icon: Icons.account_balance_wallet_outlined,
+        iconColor: const Color(0xFFFBE9E7),
+      ),
+    ];
+
+    if (width >= 600) {
+      // 3-Column horizontal row for tablet & desktop
+      return Row(
+        children: statCards.map((card) {
+          return Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6.0),
+              child: card,
+            ),
+          );
+        }).toList(),
+      );
+    } else {
+      // Stacked vertical list for mobile phone screens
+      return Column(
+        children: statCards.map((card) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: card,
+          );
+        }).toList(),
+      );
+    }
+  }
+
+  // Extracted Recent Orders Section
+  Widget _buildRecentOrdersSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Header Greeting
             const Text(
-              'Good Morning, Farm Manager',
+              'Recent Orders',
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1E1E1E),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Your produce is reaching 14 new professional kitchens today.',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[600],
+            TextButton(
+              onPressed: () {},
+              child: const Row(
+                children: [
+                  Text(
+                    'View All',
+                    style: TextStyle(
+                      color: Color(0xFF2E7D32),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-
-            // Top Stat Cards
-            _buildStatCard(
-              title: 'TOTAL PRODUCTS',
-              value: '24',
-              valueColor: const Color(0xFF2E7D32),
-              icon: Icons.inventory_2_outlined,
-            ),
-            const SizedBox(height: 12),
-            _buildStatCard(
-              title: 'ORDERS TODAY',
-              value: '12',
-              valueColor: const Color(0xFF2E7D32),
-              icon: Icons.shopping_cart_outlined,
-            ),
-            const SizedBox(height: 12),
-            _buildStatCard(
-              title: 'REVENUE TODAY',
-              value: '\$1,240',
-              valueColor: const Color(0xFFE57373),
-              icon: Icons.account_balance_wallet_outlined,
-              iconColor: const Color(0xFFFBE9E7),
-            ),
-            const SizedBox(height: 16),
-
-            // Weekly Sales Chart Section
-            _buildSalesSummaryCard(),
-            const SizedBox(height: 20),
-
-            // Recent Orders Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Recent Orders',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E1E1E),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Row(
-                    children: [
-                      Text(
-                        'View All',
-                        style: TextStyle(
-                          color: Color(0xFF2E7D32),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right,
-                        size: 18,
-                        color: Color(0xFF2E7D32),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            // Recent Order Items
-            _buildOrderItem(
-              name: 'The Grand Bistro',
-              orderInfo: 'Order #9821 • 5 mins ago',
-              price: '\$420.00',
-              status: 'Pending',
-              statusBgColor: const Color(0xFFFFE0B2),
-              statusTextColor: const Color(0xFFE65100),
-              imageUrl: 'https://picsum.photos/id/1080/100/100',
-            ),
-            const SizedBox(height: 10),
-            _buildOrderItem(
-              name: 'Green Plate Kitchen',
-              orderInfo: 'Order #9819 • 2 hrs ago',
-              price: '\$185.50',
-              status: 'Accepted',
-              statusBgColor: const Color(0xFFC8E6C9),
-              statusTextColor: const Color(0xFF2E7D32),
-              imageUrl: 'https://picsum.photos/id/292/100/100',
-            ),
-            const SizedBox(height: 10),
-            _buildOrderItem(
-              name: 'L\'Avenue Hotel',
-              orderInfo: 'Order #9815 • 5 hrs ago',
-              price: '\$892.00',
-              status: 'Accepted',
-              statusBgColor: const Color(0xFFC8E6C9),
-              statusTextColor: const Color(0xFF2E7D32),
-              imageUrl: 'https://picsum.photos/id/102/100/100',
-            ),
-            const SizedBox(height: 80), // Bottom padding for FAB space
           ],
         ),
-      ),
+        const SizedBox(height: 8),
+        _buildOrderItem(
+          name: 'The Grand Bistro',
+          orderInfo: 'Order #9821 • 5 mins ago',
+          price: '\$420.00',
+          status: 'Pending',
+          statusBgColor: const Color(0xFFFFE0B2),
+          statusTextColor: const Color(0xFFE65100),
+          imageUrl: 'https://picsum.photos/id/1080/100/100',
+        ),
+        const SizedBox(height: 10),
+        _buildOrderItem(
+          name: 'Green Plate Kitchen',
+          orderInfo: 'Order #9819 • 2 hrs ago',
+          price: '\$185.50',
+          status: 'Accepted',
+          statusBgColor: const Color(0xFFC8E6C9),
+          statusTextColor: const Color(0xFF2E7D32),
+          imageUrl: 'https://picsum.photos/id/292/100/100',
+        ),
+        const SizedBox(height: 10),
+        _buildOrderItem(
+          name: 'L\'Avenue Hotel',
+          orderInfo: 'Order #9815 • 5 hrs ago',
+          price: '\$892.00',
+          status: 'Accepted',
+          statusBgColor: const Color(0xFFC8E6C9),
+          statusTextColor: const Color(0xFF2E7D32),
+          imageUrl: 'https://picsum.photos/id/102/100/100',
+        ),
+      ],
     );
   }
 
@@ -239,7 +312,7 @@ class FarmerDashboardScreen extends StatelessWidget {
           ),
           Icon(
             icon,
-            size: 52,
+            size: 44,
             color: iconColor ?? Colors.grey[200],
           ),
         ],
@@ -277,8 +350,8 @@ class FarmerDashboardScreen extends StatelessWidget {
                   height: 1.2,
                 ),
               ),
-              Row(
-                children: const [
+              const Row(
+                children: [
                   Icon(Icons.trending_up, color: Color(0xFF2E7D32), size: 18),
                   SizedBox(width: 4),
                   Text(
@@ -296,7 +369,7 @@ class FarmerDashboardScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Container(
             height: 200,
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
             decoration: BoxDecoration(
               color: const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(12),
@@ -305,12 +378,14 @@ class FarmerDashboardScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: List.generate(7, (index) {
-                return Container(
-                  width: 22,
-                  height: barHeights[index],
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2E7D32),
-                    borderRadius: BorderRadius.circular(6),
+                return Flexible(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 32),
+                    height: barHeights[index],
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2E7D32),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                   ),
                 );
               }),
@@ -321,8 +396,7 @@ class FarmerDashboardScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(7, (index) {
               final isSelected = index == 4; // 'Fri' highlighted
-              return SizedBox(
-                width: 28,
+              return Expanded(
                 child: Text(
                   days[index],
                   textAlign: TextAlign.center,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile/features/auth/screens/reset_password_screen.dart';
-import 'package:mobile/features/farmer/screen/farmer_dashboard_screen.dart';
-import 'package:mobile/features/restaurant/screen/home_screen.dart';
+import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
+import 'package:mobile/features/restaurant/screens/home_screen.dart';
 
 class VerifyPhoneScreen extends StatefulWidget {
   final VerificationType type;

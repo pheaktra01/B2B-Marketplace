@@ -84,155 +84,232 @@ class _AddProductScreenState extends State<AddProductScreen> {
           ],
         ),
         child: SafeArea(
-          child: SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: () {
-                // Submit Form Logic
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2E7D32),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: const Text(
-                'List Product',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+          child: Center(
+            heightFactor: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Submit Form Logic
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2E7D32),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'List Product',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product Photo Header & Upload Card
-            const Text(
-              'PRODUCT PHOTO',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF616161),
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildPhotoUploadCard(),
-            const SizedBox(height: 20),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double screenWidth = constraints.maxWidth;
+            final bool isTabletOrDesktop = screenWidth >= 600;
 
-            // Product Name Field
-            _buildFieldLabel('Product Name'),
-            const SizedBox(height: 6),
-            _buildTextField(
-              controller: _productNameController,
-              hintText: 'e.g. Heirloom Tomatoes',
-            ),
-            const SizedBox(height: 16),
-
-            // Category Field
-            _buildFieldLabel('Category'),
-            const SizedBox(height: 6),
-            _buildDropdownField(
-              value: _selectedCategory,
-              items: _categories,
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedCategory = val);
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Price & Unit Type Row
-            Row(
-              children: [
-                Expanded(
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isTabletOrDesktop ? 24.0 : 16.0,
+                    vertical: 16.0,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildFieldLabel('Price per unit'),
-                      const SizedBox(height: 6),
-                      _buildTextField(
-                        controller: _priceController,
-                        hintText: '\$ 0.00',
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
+                      // Product Photo Header & Upload Card
+                      const Text(
+                        'PRODUCT PHOTO',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF616161),
+                          letterSpacing: 0.5,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildFieldLabel('Unit Type'),
+                      const SizedBox(height: 8),
+                      _buildPhotoUploadCard(),
+                      const SizedBox(height: 20),
+
+                      // Adaptive Form Grid
+                      if (isTabletOrDesktop) ...[
+                        // Row 1: Product Name & Category
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: _buildProductNameField()),
+                            const SizedBox(width: 16),
+                            Expanded(child: _buildCategoryField()),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Row 2: Price, Unit Type & Stock
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: _buildPriceField()),
+                            const SizedBox(width: 12),
+                            Expanded(child: _buildUnitTypeField()),
+                            const SizedBox(width: 12),
+                            Expanded(child: _buildStockField()),
+                          ],
+                        ),
+                      ] else ...[
+                        // Single-column layout for mobile
+                        _buildProductNameField(),
+                        const SizedBox(height: 16),
+                        _buildCategoryField(),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(child: _buildPriceField()),
+                            const SizedBox(width: 12),
+                            Expanded(child: _buildUnitTypeField()),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _buildStockField(),
+                      ],
+
+                      const SizedBox(height: 16),
+
+                      // Product Story & Quality Notes Field
+                      _buildFieldLabel('Product Story & Quality Notes'),
                       const SizedBox(height: 6),
-                      _buildDropdownField(
-                        value: _selectedUnitType,
-                        items: _unitTypes,
-                        onChanged: (val) {
-                          if (val != null) setState(() => _selectedUnitType = val);
-                        },
+                      _buildTextField(
+                        controller: _storyController,
+                        hintText:
+                            'Describe the flavor, harvest date, or special qualities...',
+                        maxLines: 4,
                       ),
+                      const SizedBox(height: 24),
+
+                      const Divider(height: 1, color: Color(0xFFE0E0E0)),
+                      const SizedBox(height: 16),
+
+                      // Toggle Switches
+                      _buildSwitchTile(
+                        title: 'Available for Pickup',
+                        subtitle: 'Allow restaurants to collect directly',
+                        value: _isAvailableForPickup,
+                        onChanged: (val) =>
+                            setState(() => _isAvailableForPickup = val),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildSwitchTile(
+                        title: 'Certified Organic',
+                        subtitle: 'Displays organic badge to buyers',
+                        value: _isCertifiedOrganic,
+                        onChanged: (val) =>
+                            setState(() => _isCertifiedOrganic = val),
+                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Initial Stock Level Field
-            _buildFieldLabel('Initial Stock Level'),
-            const SizedBox(height: 6),
-            _buildTextField(
-              controller: _stockController,
-              hintText: 'Enter quantity',
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 16),
-
-            // Product Story & Quality Notes Field
-            _buildFieldLabel('Product Story & Quality Notes'),
-            const SizedBox(height: 6),
-            _buildTextField(
-              controller: _storyController,
-              hintText: 'Describe the flavor, harvest date, or special qualities...',
-              maxLines: 4,
-            ),
-            const SizedBox(height: 24),
-
-            const Divider(height: 1, color: Color(0xFFE0E0E0)),
-            const SizedBox(height: 16),
-
-            // Toggle 1: Available for Pickup
-            _buildSwitchTile(
-              title: 'Available for Pickup',
-              subtitle: 'Allow restaurants to collect directly',
-              value: _isAvailableForPickup,
-              onChanged: (val) => setState(() => _isAvailableForPickup = val),
-            ),
-            const SizedBox(height: 12),
-
-            // Toggle 2: Certified Organic
-            _buildSwitchTile(
-              title: 'Certified Organic',
-              subtitle: 'Displays organic badge to buyers',
-              value: _isCertifiedOrganic,
-              onChanged: (val) => setState(() => _isCertifiedOrganic = val),
-            ),
-            const SizedBox(height: 20),
-          ],
+              ),
+            );
+          },
         ),
       ),
+    );
+  }
+
+  // Individual Form Field Sub-Widgets
+  Widget _buildProductNameField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFieldLabel('Product Name'),
+        const SizedBox(height: 6),
+        _buildTextField(
+          controller: _productNameController,
+          hintText: 'e.g. Heirloom Tomatoes',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFieldLabel('Category'),
+        const SizedBox(height: 6),
+        _buildDropdownField(
+          value: _selectedCategory,
+          items: _categories,
+          onChanged: (val) {
+            if (val != null) setState(() => _selectedCategory = val);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPriceField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFieldLabel('Price per unit'),
+        const SizedBox(height: 6),
+        _buildTextField(
+          controller: _priceController,
+          hintText: '\$ 0.00',
+          keyboardType: const TextInputType.numberWithOptions(
+            decimal: true,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUnitTypeField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFieldLabel('Unit Type'),
+        const SizedBox(height: 6),
+        _buildDropdownField(
+          value: _selectedUnitType,
+          items: _unitTypes,
+          onChanged: (val) {
+            if (val != null) setState(() => _selectedUnitType = val);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStockField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFieldLabel('Initial Stock Level'),
+        const SizedBox(height: 6),
+        _buildTextField(
+          controller: _stockController,
+          hintText: 'Enter quantity',
+          keyboardType: TextInputType.number,
+        ),
+      ],
     );
   }
 
@@ -263,7 +340,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 14),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         filled: true,
         fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
@@ -363,13 +441,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
         height: 180,
         alignment: Alignment.center,
         child: InkWell(
-          onTap: () {
-            // Add image picker logic
-          },
+          // onPressed: () {
+          //   // Logic to upload photo
+          // },
           borderRadius: BorderRadius.circular(12),
-          child: Column(
+          child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Icon(
                 Icons.add_a_photo_outlined,
                 size: 36,

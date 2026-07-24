@@ -4,10 +4,18 @@ import 'package:mobile/features/auth/screens/role_selection_screen.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+  final String selectedRole;
+
+  const SignUpScreen({
+    super.key,
+    required this.selectedRole,
+  });
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
+  print(String selectedRole) {
+    print('Selected Role: $selectedRole');
+  }
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
@@ -391,6 +399,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               builder: (_) => VerifyPhoneScreen(
                                                 type: VerificationType.signup,
                                                 phoneNumber: _phoneController.text,
+                                                selectedRole: widget.selectedRole,
                                               ),
                                             ),
                                           );

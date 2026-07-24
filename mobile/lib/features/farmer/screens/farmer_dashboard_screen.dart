@@ -507,42 +507,43 @@ class FarmerDashboardScreen extends StatelessWidget {
   Widget _buildBottomNavigationBar() {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF2E7D32),
+      backgroundColor: Colors.white,
+      selectedItemColor: const Color(0xFF1E1E1E),
       unselectedItemColor: Colors.grey[600],
       currentIndex: 0,
-      selectedLabelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-      unselectedLabelStyle: const TextStyle(fontSize: 11),
-      items: [
+      selectedLabelStyle: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+      ),
+      unselectedLabelStyle: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+      ),
+      items: const [
         BottomNavigationBarItem(
-          icon: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE8F5E9),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.home, color: Color(0xFF2E7D32)),
-          ),
-          label: 'Home',
+          icon: Icon(Icons.storefront_outlined),
+          activeIcon: Icon(Icons.storefront),
+          label: 'Dashboard',
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.search),
-          label: 'Search',
-        ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_bag_outlined),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.assignment_outlined),
+          activeIcon: Icon(Icons.assignment),
           label: 'Orders',
         ),
-        const BottomNavigationBarItem(
-          icon: Badge(
-            smallSize: 8,
-            textColor: Colors.red,
-            child: Icon(Icons.chat_bubble_outline),
-          ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.inventory_2_outlined),
+          activeIcon: Icon(Icons.inventory_2),
+          label: 'Inventory',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.chat_bubble_outline),
+          activeIcon: Icon(Icons.chat_bubble),
           label: 'Chat',
         ),
-        const BottomNavigationBarItem(
+        BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
-          label: 'Profile',
+          activeIcon: Icon(Icons.person),
+          label: 'Account',
         ),
       ],
     );

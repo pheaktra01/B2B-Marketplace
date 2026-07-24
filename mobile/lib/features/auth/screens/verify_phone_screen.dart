@@ -241,7 +241,13 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                           break;
 
                                         case VerificationType.signup:
-                                          Navigator.pop(context);
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const FarmerDashboardScreen(),
+                                            ),
+                                          );
                                           break;
 
                                         case VerificationType.forgotPassword:

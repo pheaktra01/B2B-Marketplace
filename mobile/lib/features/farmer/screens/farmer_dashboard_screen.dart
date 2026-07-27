@@ -25,7 +25,9 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           ),
           const Padding(
             padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(),
+            child: CircleAvatar(
+              backgroundImage: NetworkImage('assets/profile.png'),
+            ),
           ),
         ],
       ),

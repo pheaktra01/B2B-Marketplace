@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -8,11 +9,9 @@ class ChatListScreen extends StatefulWidget {
 }
 
 class _ChatListScreenState extends State<ChatListScreen> {
-  int _currentNavIndex = 3; // "Chat" is selected
   int _selectedCategoryIndex = 0;
 
   static const Color primaryGreen = Color(0xFF1B5E20);
-  static const Color lightGreenBg = Color(0xFFD7E8D7);
   static const Color pageBg = Color(0xFFF5F5E9);
   static const Color onlineDotGreen = Color(0xFF4CAF50);
 
@@ -196,7 +195,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.edit_note, color: Colors.white, size: 28),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      bottomNavigationBar: const FarmerBottomNavBar(
+        currentIndex: 3,
+      ),
     );
   }
 
@@ -314,67 +315,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // Custom Bottom Navigation Bar
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(0, Icons.home_outlined, 'Home'),
-          _buildNavItem(1, Icons.search, 'Search'),
-          _buildNavItem(2, Icons.shopping_bag_outlined, 'Orders'),
-          _buildNavItem(3, Icons.chat, 'Chat'),
-          _buildNavItem(4, Icons.person_outline, 'Profile'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(int index, IconData icon, String label) {
-    final isSelected = _currentNavIndex == index;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _currentNavIndex = index;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: isSelected
-            ? BoxDecoration(
-                color: lightGreenBg,
-                borderRadius: BorderRadius.circular(20),
-              )
-            : null,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: primaryGreen,
-              size: 22,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: primaryGreen,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

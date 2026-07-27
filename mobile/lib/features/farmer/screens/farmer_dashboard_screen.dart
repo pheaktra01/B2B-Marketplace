@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/farmer/screens/chat_list_screen.dart';
-import 'package:mobile/features/farmer/screens/farmer_order_management_screen.dart';
-import 'package:mobile/features/farmer/screens/farmer_profile_screen.dart';
-import 'package:mobile/features/farmer/screens/inventory_screen.dart';
 import 'package:mobile/features/farmer/screens/notification_screen.dart';
+import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/features/product/screens/add_product_screen.dart';
 
 class FarmerDashboardScreen extends StatefulWidget {
@@ -15,7 +12,6 @@ class FarmerDashboardScreen extends StatefulWidget {
 }
 
 class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
-  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +29,9 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      bottomNavigationBar: const FarmerBottomNavBar(
+        currentIndex: 0,
+      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -521,97 +519,6 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: const Color(0xFF1E1E1E),
-      unselectedItemColor: Colors.grey[600],
-      currentIndex: _currentIndex,
-
-      onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-        });
-
-        switch (index) {
-          case 0:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const FarmerDashboardScreen(), // Navigate to FarmerDashboardScreen
-              ),
-            );
-            break;
-
-          case 1:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const FarmerOrderManagementScreen(), // Navigate to FarmerOrderManagementScreen
-              ),
-            );
-            break;
-
-          case 2:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const InventoryScreen(), // Navigate to InventoryScreen
-              ),
-            );
-            break;
-
-          case 3:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ChatListScreen(), // Navigate to ChatListScreen
-              ),
-            );
-            break;
-
-          case 4:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const FarmerProfileScreen(), // Navigate to FarmerProfileScreen
-              ),
-            );
-            break;
-        }
-      },
-
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.storefront_outlined),
-          activeIcon: Icon(Icons.storefront),
-          label: 'Dashboard',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.assignment_outlined),
-          activeIcon: Icon(Icons.assignment),
-          label: 'Orders',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.inventory_2_outlined),
-          activeIcon: Icon(Icons.inventory_2),
-          label: 'Inventory',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline),
-          activeIcon: Icon(Icons.chat_bubble),
-          label: 'Chat',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          activeIcon: Icon(Icons.person),
-          label: 'Account',
-        ),
-      ],
     );
   }
 }

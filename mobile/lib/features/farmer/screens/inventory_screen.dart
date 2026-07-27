@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
+import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
@@ -10,7 +10,6 @@ class InventoryScreen extends StatefulWidget {
 
 class _InventoryScreenState extends State<InventoryScreen> {
   int _selectedFilterIndex = 0;
-  int _currentIndex = 0;
 
   final List<String> _filters = ['All Items', 'Vegetables', 'Microgreens'];
 
@@ -231,7 +230,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: _buildBottomNavigationBar()
+      bottomNavigationBar: const FarmerBottomNavBar(
+        currentIndex: 2,
+      ),
     );
   }
 
@@ -442,82 +443,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: const Color(0xFF1E1E1E),
-      unselectedItemColor: Colors.grey[600],
-      currentIndex: _currentIndex,
-
-      onTap: (index) {
-        setState(() {
-          _currentIndex = index;
-        });
-
-        switch (index) {
-          case 0:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const FarmerDashboardScreen(), // Navigate to HomeScreen
-              ),
-            );
-            break;
-
-          case 1:
-            // Orders
-            break;
-
-          case 2:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const InventoryScreen(), // Navigate to InventoryScreen
-              ),
-            );
-            break;
-
-          case 3:
-            // Chat
-            break;
-
-          case 4:
-            // Account
-            break;
-        }
-      },
-
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.storefront_outlined),
-          activeIcon: Icon(Icons.storefront),
-          label: 'Dashboard',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.assignment_outlined),
-          activeIcon: Icon(Icons.assignment),
-          label: 'Orders',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.inventory_2_outlined),
-          activeIcon: Icon(Icons.inventory_2),
-          label: 'Inventory',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline),
-          activeIcon: Icon(Icons.chat_bubble),
-          label: 'Chat',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          activeIcon: Icon(Icons.person),
-          label: 'Account',
-        ),
-      ],
     );
   }
 }

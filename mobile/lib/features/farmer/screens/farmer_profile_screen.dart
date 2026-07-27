@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
-import 'package:mobile/features/farmer/screens/inventory_screen.dart';
+import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 
 class FarmerProfileScreen extends StatefulWidget {
   const FarmerProfileScreen({super.key});
@@ -10,7 +9,6 @@ class FarmerProfileScreen extends StatefulWidget {
 }
 
 class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
-  int _currentIndex = 4; // Set initial active tab to 'Account'
 
   static const Color primaryGreen = Color(0xFF1B5E20);
   static const Color lightGreenBg = Color(0xFFF1F8E9);
@@ -123,89 +121,9 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
         backgroundColor: Colors.orange,
         child: const Icon(Icons.edit_note, color: Colors.white),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  // Custom Navigation Bar Widget
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: const Color(0xFF1E1E1E),
-      unselectedItemColor: Colors.grey[600],
-      currentIndex: _currentIndex,
-      onTap: (index) {
-        if (_currentIndex == index) return; // Avoid redundant pushing of current screen
-
-        setState(() {
-          _currentIndex = index;
-        });
-
-        switch (index) {
-          case 0:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const FarmerDashboardScreen(),
-              ),
-            );
-            break;
-
-          case 1:
-            // Orders
-            break;
-
-          case 2:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const InventoryScreen(),
-              ),
-            );
-            break;
-
-          case 3:
-            // Chat
-            break;
-
-          case 4:
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const FarmerProfileScreen(),
-              ),
-            );
-            break;
-        }
-      },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.storefront_outlined),
-          activeIcon: Icon(Icons.storefront),
-          label: 'Dashboard',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.assignment_outlined),
-          activeIcon: Icon(Icons.assignment),
-          label: 'Orders',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.inventory_2_outlined),
-          activeIcon: Icon(Icons.inventory_2),
-          label: 'Inventory',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline),
-          activeIcon: Icon(Icons.chat_bubble),
-          label: 'Chat',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          activeIcon: Icon(Icons.person),
-          label: 'Account',
-        ),
-      ],
+      bottomNavigationBar: const FarmerBottomNavBar(
+        currentIndex: 4,
+      ),
     );
   }
 

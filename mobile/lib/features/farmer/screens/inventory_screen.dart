@@ -1,0 +1,523 @@
+import 'package:flutter/material.dart';
+import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
+
+class InventoryScreen extends StatefulWidget {
+  const InventoryScreen({super.key});
+
+  @override
+  State<InventoryScreen> createState() => _InventoryScreenState();
+}
+
+class _InventoryScreenState extends State<InventoryScreen> {
+  int _selectedFilterIndex = 0;
+  int _currentIndex = 0;
+
+  final List<String> _filters = ['All Items', 'Vegetables', 'Microgreens'];
+
+  // Sample data to match the UI precisely
+  final List<Map<String, dynamic>> _inventoryItems = [
+    {
+      'name': 'Heirloom Tomatoes',
+      'price': '\$4.50',
+      'unit': '/lb',
+      'stockText': '120 lbs left',
+      'progress': 0.85,
+      'status': 'Active',
+      'statusColor': const Color(0xFF1E5631),
+      'progressColor': const Color(0xFF1E5631),
+      'isAvailable': true,
+      'imageUrl': 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600',
+    },
+    {
+      'name': 'Baby Arugula',
+      'price': '\$12.00',
+      'unit': '/cs',
+      'stockText': '8 cases left',
+      'progress': 0.2,
+      'status': 'Low Stock',
+      'statusColor': const Color(0xFFD9534F),
+      'progressColor': const Color(0xFFD9534F),
+      'isAvailable': true,
+      'imageUrl': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600',
+    },
+    {
+      'name': 'Rainbow Carrots',
+      'price': '\$3.20',
+      'unit': '/lb',
+      'stockText': '0 lbs left',
+      'progress': 0.0,
+      'status': 'Offline',
+      'statusColor': Colors.grey,
+      'progressColor': Colors.grey,
+      'isAvailable': false,
+      'imageUrl': 'https://images.unsplash.com/photo-1447175008436-084171092e8e?w=600',
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    const primaryColor = Color(0xFF1E5631);
+    const backgroundColor = Color(0xFFF7F6E8); // Off-white/light yellow tint background
+
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      appBar: AppBar(
+        backgroundColor: backgroundColor,
+        elevation: 0,
+        titleSpacing: 16,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.agriculture, color: primaryColor, size: 22),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'PsarKasekor',
+              style: TextStyle(
+                color: primaryColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none_rounded, color: primaryColor),
+            onPressed: () {},
+          ),
+          const Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=12'),
+            ),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            // Header Title & Subtitle
+            const Text(
+              'Inventory Management',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Track your yields and manage kitchen supply levels.',
+              style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 16),
+
+            // Top Summary Cards
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSummaryCard(
+                    title: 'ACTIVE ITEMS',
+                    value: '24',
+                    valueColor: primaryColor,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildSummaryCard(
+                    title: 'LOW STOCK',
+                    value: '3',
+                    valueColor: const Color(0xFFB71C1C),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Search Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              height: 46,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.search, color: Colors.grey[600], size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search your inventory...',
+                        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            // Filter Chips
+            SizedBox(
+              height: 38,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _filters.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final isSelected = _selectedFilterIndex == index;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedFilterIndex = index;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected ? primaryColor : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        _filters[index],
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.grey[800],
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Inventory List
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _inventoryItems.length,
+              itemBuilder: (context, index) {
+                final item = _inventoryItems[index];
+                return _buildInventoryCard(item, primaryColor);
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+
+      // Add Item Floating Action Button
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        backgroundColor: const Color(0xFFB86A04), // Warm accent brown/orange color
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
+      ),
+
+      // Bottom Navigation Bar
+      bottomNavigationBar: _buildBottomNavigationBar()
+    );
+  }
+
+  // Widget for Top Metrics (Active Items, Low Stock)
+  Widget _buildSummaryCard({
+    required String title,
+    required String value,
+    required Color valueColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: valueColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget for Individual Item Cards
+  Widget _buildInventoryCard(Map<String, dynamic> item, Color primaryColor) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image Header with Status Tag
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: Image.network(
+                  item['imageUrl'],
+                  height: 140,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.95),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (item['status'] == 'Low Stock') ...[
+                        const Icon(Icons.warning_amber_rounded, size: 14, color: Color(0xFFD9534F)),
+                        const SizedBox(width: 4),
+                      ] else if (item['status'] == 'Active') ...[
+                        const Icon(Icons.circle, size: 8, color: Color(0xFF1E5631)),
+                        const SizedBox(width: 4),
+                      ],
+                      Text(
+                        item['status'],
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: item['statusColor'],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Card Details
+          Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Name & Price
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      item['name'],
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: item['price'],
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E5631),
+                            ),
+                          ),
+                          TextSpan(
+                            text: item['unit'],
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // Stock Level Label & Progress Bar
+                Text(
+                  'Stock Level',
+                  style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: item['progress'],
+                    minHeight: 6,
+                    backgroundColor: Colors.grey[200],
+                    valueColor: AlwaysStoppedAnimation<Color>(item['progressColor']),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  item['stockText'],
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: item['status'] == 'Low Stock' ? const Color(0xFFD9534F) : Colors.grey[700],
+                  ),
+                ),
+                const Divider(height: 24, thickness: 1),
+
+                // Toggle Switch & Action Buttons
+                Row(
+                  children: [
+                    Text(
+                      'Available',
+                      style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                    ),
+                    const SizedBox(width: 8),
+                    Transform.scale(
+                      scale: 0.8,
+                      child: Switch(
+                        value: item['isAvailable'],
+                        activeThumbColor: primaryColor,
+                        onChanged: (val) {
+                          setState(() {
+                            item['isAvailable'] = val;
+                          });
+                        },
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 20, color: Colors.black87),
+                      onPressed: () {},
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.all(8),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 20, color: Colors.black87),
+                      onPressed: () {},
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.all(8),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      backgroundColor: Colors.white,
+      selectedItemColor: const Color(0xFF1E1E1E),
+      unselectedItemColor: Colors.grey[600],
+      currentIndex: _currentIndex,
+
+      onTap: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+
+        switch (index) {
+          case 0:
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const FarmerDashboardScreen(), // Navigate to HomeScreen
+              ),
+            );
+            break;
+
+          case 1:
+            // Orders
+            break;
+
+          case 2:
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const InventoryScreen(), // Navigate to InventoryScreen
+              ),
+            );
+            break;
+
+          case 3:
+            // Chat
+            break;
+
+          case 4:
+            // Account
+            break;
+        }
+      },
+
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.storefront_outlined),
+          activeIcon: Icon(Icons.storefront),
+          label: 'Dashboard',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.assignment_outlined),
+          activeIcon: Icon(Icons.assignment),
+          label: 'Orders',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.inventory_2_outlined),
+          activeIcon: Icon(Icons.inventory_2),
+          label: 'Inventory',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.chat_bubble_outline),
+          activeIcon: Icon(Icons.chat_bubble),
+          label: 'Chat',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          activeIcon: Icon(Icons.person),
+          label: 'Account',
+        ),
+      ],
+    );
+  }
+}

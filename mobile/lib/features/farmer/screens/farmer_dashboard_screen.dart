@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/farmer/screens/chat_list_screen.dart';
+import 'package:mobile/features/farmer/screens/farmer_order_management_screen.dart';
+import 'package:mobile/features/farmer/screens/farmer_profile_screen.dart';
+import 'package:mobile/features/farmer/screens/inventory_screen.dart';
+import 'package:mobile/features/farmer/screens/notification_screen.dart';
 import 'package:mobile/features/product/screens/add_product_screen.dart';
 
-class FarmerDashboardScreen extends StatelessWidget {
+class FarmerDashboardScreen extends StatefulWidget {
   const FarmerDashboardScreen({super.key});
+
+  @override
+  State<FarmerDashboardScreen> createState() =>
+      _FarmerDashboardScreenState();
+}
+
+class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +264,14 @@ class FarmerDashboardScreen extends StatelessWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.notifications_none, color: Colors.black87),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const NotificationsScreen(), // Navigate to NotificationsScreen
+              ),
+            );
+          },
         ),
         const Padding(
           padding: EdgeInsets.only(right: 16.0),
@@ -510,15 +530,61 @@ class FarmerDashboardScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       selectedItemColor: const Color(0xFF1E1E1E),
       unselectedItemColor: Colors.grey[600],
-      currentIndex: 0,
-      selectedLabelStyle: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-      ),
-      unselectedLabelStyle: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
-      ),
+      currentIndex: _currentIndex,
+
+      onTap: (index) {
+        setState(() {
+          _currentIndex = index;
+        });
+
+        switch (index) {
+          case 0:
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const FarmerDashboardScreen(), // Navigate to FarmerDashboardScreen
+              ),
+            );
+            break;
+
+          case 1:
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const FarmerOrderManagementScreen(), // Navigate to FarmerOrderManagementScreen
+              ),
+            );
+            break;
+
+          case 2:
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const InventoryScreen(), // Navigate to InventoryScreen
+              ),
+            );
+            break;
+
+          case 3:
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ChatListScreen(), // Navigate to ChatListScreen
+              ),
+            );
+            break;
+
+          case 4:
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const FarmerProfileScreen(), // Navigate to FarmerProfileScreen
+              ),
+            );
+            break;
+        }
+      },
+
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.storefront_outlined),

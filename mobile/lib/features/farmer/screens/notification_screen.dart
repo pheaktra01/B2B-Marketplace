@@ -1,0 +1,424 @@
+import 'package:flutter/material.dart';
+
+class NotificationsScreen extends StatefulWidget {
+  const NotificationsScreen({super.key});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  static const Color primaryGreen = Color(0xFF1B5E20);
+  static const Color lightGreenIconBg = Color(0xFFB9F6CA);
+  static const Color pageBg = Color(0xFFF7F9F7);
+  static const Color paymentIconBg = Color(0xFFFFE0B2);
+  static const Color deliveryIconBg = Color(0xFFE8EAF6);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: pageBg,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () {
+            Navigator.maybePop(context);
+          },
+        ),
+        title: const Text(
+          'Notifications',
+          style: TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {},
+            child: const Text(
+              'Mark all as read',
+              style: TextStyle(
+                color: primaryGreen,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        children: [
+          // 1. TODAY SECTION
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'TODAY',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                  letterSpacing: 1.0,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: primaryGreen,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  '3 NEW',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Card 1: New Order (Unread)
+          _buildNotificationCard(
+            isUnread: true,
+            iconWidget: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: lightGreenIconBg,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.storefront, color: primaryGreen, size: 22),
+            ),
+            title: 'New Order #8821',
+            timeAgo: '2m ago',
+            bodyText:
+                'The Bistro Kitchen placed a new order for 40kg Heirloom Tomatoes.',
+            actionWidget: Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryGreen,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  ),
+                  child: const Text(
+                    'View Order',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade200,
+                    side: BorderSide.none,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  ),
+                  child: const Text(
+                    'Decline',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Card 2: Message from Chef (Unread)
+          _buildNotificationCard(
+            isUnread: true,
+            iconWidget: const CircleAvatar(
+              radius: 22,
+              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+            ),
+            title: 'Message from Chef Marcus',
+            timeAgo: '1h ago',
+            bodyText:
+                '"Can we increase the delivery quantity for Tuesday? Looking for 20 more crates..."',
+            actionWidget: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.chat_bubble_outline,
+                      size: 18, color: Colors.black54),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryGreen,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  ),
+                  child: const Text(
+                    'Reply Now',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Card 3: Payment Received (Read / No Green Border)
+          _buildNotificationCard(
+            isUnread: false,
+            iconWidget: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: paymentIconBg,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.account_balance_wallet_outlined,
+                  color: Colors.brown, size: 22),
+            ),
+            title: 'Payment Received',
+            timeAgo: '4h ago',
+            bodyText:
+                'Your payout of \$1,240.50 for the period of Oct 1-15 has been processed.',
+            actionWidget: TextButton(
+              onPressed: () {},
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(50, 30),
+                alignment: Alignment.centerLeft,
+              ),
+              child: const Text(
+                'Check Balance >',
+                style: TextStyle(
+                  color: primaryGreen,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // 2. YESTERDAY SECTION
+          const Text(
+            'YESTERDAY',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
+              letterSpacing: 1.0,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Card 4: Order Delivered
+          _buildNotificationCard(
+            isUnread: false,
+            iconWidget: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: deliveryIconBg,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.local_shipping_outlined,
+                  color: Colors.black87, size: 22),
+            ),
+            title: 'Order Delivered',
+            timeAgo: 'Oct 24, 4:12 PM',
+            bodyText:
+                'Order #7749 has been successfully delivered to Green Leaf Brasserie.',
+            actionWidget: OutlinedButton(
+              onPressed: () {},
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.grey.shade200,
+                side: BorderSide.none,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: const Text(
+                'View Details',
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+
+          // Card 5: System Update
+          _buildNotificationCard(
+            isUnread: false,
+            iconWidget: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.info_outline,
+                  color: Colors.black54, size: 22),
+            ),
+            title: 'System Update',
+            timeAgo: 'Oct 24, 10:00 AM',
+            bodyText:
+                'Verdant scheduled maintenance complete. New logistics tracking features are now live!',
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Generic Notification Card Builder
+  Widget _buildNotificationCard({
+    required bool isUnread,
+    required Widget iconWidget,
+    required String title,
+    required String timeAgo,
+    required String bodyText,
+    Widget? actionWidget,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Highlight indicator bar for unread notifications
+              if (isUnread)
+                Container(
+                  width: 4,
+                  color: primaryGreen,
+                ),
+
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      iconWidget,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Header Row: Title & Timestamp
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    title,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      color: Colors.black87,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      timeAgo,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                    if (isUnread) ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        width: 6,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          color: primaryGreen,
+                                          borderRadius:
+                                              BorderRadius.circular(2),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            // Body Text
+                            Text(
+                              bodyText,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade700,
+                                height: 1.35,
+                              ),
+                            ),
+
+                            if (actionWidget != null) ...[
+                              const SizedBox(height: 12),
+                              actionWidget,
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/farmer/screens/farmer_profile_screen.dart';
 import 'package:mobile/features/farmer/screens/notifications_screen.dart';
 
 class FarmerAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -68,19 +69,28 @@ class FarmerAppBar extends StatelessWidget implements PreferredSizeWidget {
             const SizedBox(width: 4),
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFF2E7D32).withValues(alpha: 0.8),
-                    width: 2.0,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FarmerProfileScreen(),
+                    ),
+                  );
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF2E7D32).withValues(alpha: 0.8),
+                      width: 2.0,
+                    ),
                   ),
-                ),
-                child: const CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Colors.transparent,
-                  backgroundImage: AssetImage(
-                    'assets/profile.png', // Removed leading slash
+                  child: const CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.transparent,
+                    backgroundImage: AssetImage('assets/profile.png'),
                   ),
                 ),
               ),

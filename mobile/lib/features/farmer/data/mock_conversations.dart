@@ -8,7 +8,7 @@ final List<Conversation> mockConversations = [
     unreadCount: 2,
     isOnline: true,
     avatarUrl:
-        'https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg',
+        'assets/mokoto.jpg',
   ),
 
   Conversation(
@@ -18,7 +18,7 @@ final List<Conversation> mockConversations = [
     time: 'Yesterday',
     unreadCount: 0,
     isOnline: false,
-    avatarUrl: 'https://via.placeholder.com/150',
+    avatarUrl: 'assets/joker.png',
   ),
 
   Conversation(
@@ -28,6 +28,6 @@ final List<Conversation> mockConversations = [
     time: 'Yesterday',
     unreadCount: 0,
     isOnline: true,
-    avatarUrl: 'https://via.placeholder.com/150',
+    avatarUrl: 'assets/junpei.jpg',
   ),
 ];

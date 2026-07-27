@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 
 class FarmerProfileScreen extends StatefulWidget {
@@ -18,32 +19,15 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black87),
-          onPressed: () {},
-        ),
-        title: Row(
-          children: const [
-            Text(
-              'Verdant Marketplace',
-              style: TextStyle(
-                color: primaryGreen,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ],
-        ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
-            ),
+      appBar: FarmerAppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none),
+            onPressed: () {},
+          ),
+          const Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: CircleAvatar(),
           ),
         ],
       ),

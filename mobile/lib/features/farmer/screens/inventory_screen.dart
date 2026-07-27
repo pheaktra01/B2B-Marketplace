@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 
 class InventoryScreen extends StatefulWidget {
@@ -60,42 +61,15 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: backgroundColor,
-        elevation: 0,
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: primaryColor.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.agriculture, color: primaryColor, size: 22),
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'PsarKasekor',
-              style: TextStyle(
-                color: primaryColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ],
-        ),
+      appBar: FarmerAppBar(
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: primaryColor),
+            icon: const Icon(Icons.notifications_none),
             onPressed: () {},
           ),
           const Padding(
             padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=12'),
-            ),
+            child: CircleAvatar(),
           ),
         ],
       ),

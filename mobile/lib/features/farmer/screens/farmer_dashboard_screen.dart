@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/farmer/screens/notification_screen.dart';
+import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/features/product/screens/add_product_screen.dart';
 
@@ -17,7 +17,18 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      appBar: _buildAppBar(),
+      appBar: FarmerAppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none),
+            onPressed: () {},
+          ),
+          const Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: CircleAvatar(),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -229,59 +240,6 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: const Color(0xFFF8F9FA),
-      elevation: 0,
-      titleSpacing: 16,
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: const BoxDecoration(
-              color: Color(0xFFE8F5E9),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.eco,
-              color: Color(0xFF2E7D32),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 8),
-          const Text(
-            'PsarKasekor',
-            style: TextStyle(
-              color: Color(0xFF2E7D32),
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_none, color: Colors.black87),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const NotificationsScreen(), // Navigate to NotificationsScreen
-              ),
-            );
-          },
-        ),
-        const Padding(
-          padding: EdgeInsets.only(right: 16.0),
-          child: CircleAvatar(
-            radius: 16,
-            backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildStatCard({
     required String title,
     required String value,
@@ -463,6 +421,33 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
               width: 50,
               height: 50,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 50,
+                  height: 50,
+                  color: Colors.grey[200],
+                  child: const Icon(
+                    Icons.image_not_supported_outlined,
+                    color: Colors.grey,
+                  ),
+                );
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                }
+
+                return Container(
+                  width: 50,
+                  height: 50,
+                  color: Colors.grey[100],
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(width: 12),

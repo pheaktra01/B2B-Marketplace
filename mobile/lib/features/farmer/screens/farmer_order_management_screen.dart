@@ -38,7 +38,9 @@ class _FarmerOrderManagementScreenState
           ),
           const Padding(
             padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(),
+            child: CircleAvatar(
+              backgroundImage: NetworkImage('assets/profile.png'),
+            ),
           ),
         ],
       ),

@@ -65,17 +65,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         Row(
                           children: [
                             CircleAvatar(
-                              radius: 18,
-                              backgroundColor: brandGreen.withAlpha(30),
-                              child: const Icon(
-                                Icons.restaurant_menu,
-                                size: 18,
-                                color: brandGreen,
-                              ),
+                              radius: 20,
+                              backgroundColor: brandGreen.withValues(alpha: 0.1),
+                              backgroundImage: const AssetImage('assets/logo01.png'),
                             ),
                             const SizedBox(width: 8),
                             const Text(
-                              'PsarKesekor',
+                              'ផ្សារកសិករ',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

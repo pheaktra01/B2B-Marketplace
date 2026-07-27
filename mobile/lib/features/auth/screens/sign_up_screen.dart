@@ -123,17 +123,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                                     // --- Logo & Title ---
                                     CircleAvatar(
-                                      radius: 42,
+                                      radius: 60,
                                       backgroundColor: brandGreen.withValues(alpha: 0.1),
-                                      child: const Icon(
-                                        Icons.restaurant_menu,
-                                        size: 42,
-                                        color: brandGreen,
-                                      ),
+                                      backgroundImage: const AssetImage('assets/logo01.png'),
                                     ),
                                     const SizedBox(height: 14),
                                     const Text(
-                                      'PsarKesekor',
+                                      'ផ្សារកសិករ',
                                       style: TextStyle(
                                         fontSize: 30,
                                         fontWeight: FontWeight.bold,

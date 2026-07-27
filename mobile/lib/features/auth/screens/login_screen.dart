@@ -113,13 +113,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: Column(
                                         children: [
                                           CircleAvatar(
-                                            radius: 42,
+                                            radius: 60,
                                             backgroundColor: primaryGreen.withValues(alpha: 0.1),
-                                            child: const Icon(Icons.eco, size: 46, color: primaryGreen),
+                                            backgroundImage: const AssetImage('assets/logo01.png'),
                                           ),
                                           const SizedBox(height: 12),
                                           const Text(
-                                            'PsarKasekor',
+                                            'ផ្សារកសិករ',
                                             style: TextStyle(
                                               fontSize: 30,
                                               fontWeight: FontWeight.bold,
@@ -160,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                     // --- Phone Number Input Field ---
                                     const Text(
-                                      'Phone Number',
+                                      'Phone Number or Email',
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
@@ -172,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       controller: _phoneController,
                                       keyboardType: TextInputType.phone,
                                       decoration: InputDecoration(
-                                        hintText: '0123456789',
+                                        hintText: '0123456789 or email@example.com',
                                         hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                         filled: true,
@@ -320,23 +320,29 @@ class _LoginScreenState extends State<LoginScreen> {
                                     Row(
                                       children: [
                                         Expanded(
-                                          child: _buildSocialButton(
-                                            label: 'Google',
-                                            iconColor: Colors.red,
-                                            iconData: Icons.g_mobiledata,
-                                            isDesktop: isDesktopOrTablet,
-                                            onTap: () {},
+                                          child: ConstrainedBox(
+                                            constraints: const BoxConstraints(minHeight: 50),
+                                            child: _buildSocialButton(
+                                              label: 'Google',
+                                              iconColor: Colors.red,
+                                              iconData: Icons.g_mobiledata,
+                                              isDesktop: isDesktopOrTablet,
+                                              onTap: () {},
+                                            ),    
                                           ),
                                         ),
                                         const SizedBox(width: 16),
                                         Expanded(
-                                          child: _buildSocialButton(
-                                            label: 'Facebook',
-                                            iconColor: const Color(0xFF1877F2),
-                                            iconData: Icons.facebook,
-                                            isDesktop: isDesktopOrTablet,
-                                            onTap: () {},
-                                          ),
+                                          child: ConstrainedBox(
+                                            constraints: const BoxConstraints(minHeight: 50),
+                                            child: _buildSocialButton(
+                                              label: 'Facebook',
+                                              iconColor: const Color(0xFF1877F2),
+                                              iconData: Icons.facebook,
+                                              isDesktop: isDesktopOrTablet,
+                                              onTap: () {},
+                                            ),
+                                          )
                                         ),
                                       ],
                                     ),

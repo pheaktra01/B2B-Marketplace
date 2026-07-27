@@ -132,7 +132,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
 
                       // --- Branding Title ---
                       Text(
-                        'PsarKesekor',
+                        'ផ្សារកសិករ',
                         style: TextStyle(
                           fontSize: isShortScreen ? 26 : 32,
                           fontWeight: FontWeight.bold,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/auth/screens/language_selection_screen.dart';
 import 'package:mobile/features/auth/screens/login_screen.dart';
 import 'package:mobile/features/auth/screens/role_selection_screen.dart';
 
@@ -8,224 +7,271 @@ class GetStartedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const primaryGreen = Color(0xFF1B7A32);
+    const accentOrange = Color(0xFFFF9800);
+    const textDark = Color(0xFF1F2937);
+    const textMuted = Color(0xFF5B6472);
+
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isDesktop = constraints.maxWidth >= 900;
-          final isTablet = constraints.maxWidth >= 600 && constraints.maxWidth < 900;
-
-          // Scaled fonts and paddings
-          final double titleFontSize = isDesktop ? 32 : (isTablet ? 30 : 26);
-          final double bodyFontSize = isDesktop ? 16 : 14;
+          final isTablet =
+              constraints.maxWidth >= 600 && constraints.maxWidth < 900;
+          final titleFontSize = isDesktop ? 34.0 : (isTablet ? 30.0 : 28.0);
+          final bodyFontSize = isDesktop ? 17.0 : 15.0;
 
           return Stack(
+            fit: StackFit.expand,
             children: [
-              // 1. Fullscreen Background Image
               Positioned.fill(
                 child: Image.asset(
                   'assets/farm_background.png',
                   fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
                 ),
               ),
-
-              // 2. Dim Overlay for Desktop/Tablet contrast
-              if (isTablet || isDesktop)
-                Positioned.fill(
-                  child: Container(
-                    color: Colors.black.withValues(alpha: 0.3),
-                  ),
-                ),
-
-              // 3. Back Button
-              Positioned(
-                top: MediaQuery.of(context).padding.top + 16,
-                left: 16,
-                child: SafeArea(
-                  child: Material(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    shape: const CircleBorder(),
-                    elevation: 2,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Colors.black87,
-                      ),
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const LanguageSelectionScreen(),
-                          ),
-                        );
-                      },
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withValues(alpha: 0.04),
+                        Colors.white.withValues(alpha: 0.16),
+                        Colors.white.withValues(alpha: 0.62),
+                        Colors.white.withValues(alpha: 0.96),
+                      ],
+                      stops: const [0.0, 0.48, 0.78, 1.0],
                     ),
                   ),
                 ),
               ),
-
-              // 4. White Card Content Panel
+              SafeArea(
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      isDesktop ? 36 : 22,
+                      isDesktop ? 20 : 14,
+                      22,
+                      0,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          'assets/logo01.png',
+                          width: isDesktop ? 92 : 50,
+                          height: isDesktop ? 92 : 50,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'ផ្សារកសិករ',
+                          style: TextStyle(
+                            fontSize: isDesktop ? 38 : 30,
+                            fontWeight: FontWeight.w700,
+                            color: primaryGreen,
+                            height: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               Align(
                 alignment: isTablet || isDesktop
                     ? Alignment.center
                     : Alignment.bottomCenter,
-                child: Container(
-                  width: isDesktop
-                      ? 480
-                      : isTablet
-                          ? 440
-                          : double.infinity,
-                  height: isTablet || isDesktop
-                      ? null // Automatic height driven by content on tablet/desktop
-                      : constraints.maxHeight * 0.58, // Bottom sheet height on mobile
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isDesktop || isTablet ? 36.0 : 24.0,
-                    vertical: isDesktop || isTablet ? 32.0 : 24.0,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    isDesktop ? 36 : 18,
+                    0,
+                    isDesktop ? 36 : 18,
+                    isDesktop ? 36 : 0,
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: isTablet || isDesktop
-                        ? BorderRadius.circular(28)
-                        : const BorderRadius.only(
-                            topLeft: Radius.circular(40),
-                            topRight: Radius.circular(40),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: Container(
+                      width: double.infinity,
+                      height: isTablet || isDesktop
+                          ? null
+                          : constraints.maxHeight * 0.6,
+                      padding: EdgeInsets.fromLTRB(
+                        isDesktop || isTablet ? 36 : 24,
+                        isDesktop || isTablet ? 30 : 24,
+                        isDesktop || isTablet ? 36 : 24,
+                        isDesktop || isTablet ? 34 : 24,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.98),
+                        borderRadius: isTablet || isDesktop
+                            ? BorderRadius.circular(30)
+                            : const BorderRadius.only(
+                                topLeft: Radius.circular(42),
+                                topRight: Radius.circular(42),
+                              ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 30,
+                            offset: const Offset(0, 12),
                           ),
-                    boxShadow: isTablet || isDesktop
-                        ? [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 24,
-                              offset: const Offset(0, 8),
-                            )
-                          ]
-                        : null,
-                  ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Page Indicators
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        ],
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            _buildIndicator(active: true),
-                            const SizedBox(width: 8),
-                            _buildIndicator(active: false),
-                          ],
-                        ),
-                        SizedBox(height: isDesktop || isTablet ? 28 : 20),
-
-                        // Title
-                        Text(
-                          "Direct from the Soil to your Kitchen",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: titleFontSize,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1E293B),
-                            height: 1.25,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Subtitle
-                        Text(
-                          "Connect with local farmers and source the freshest ingredients for your restaurant.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: bodyFontSize,
-                            color: Colors.grey.shade600,
-                            height: 1.4,
-                          ),
-                        ),
-                        SizedBox(height: isDesktop || isTablet ? 32 : 24),
-
-                        // Get Started Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: isDesktop ? 56 : 52,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const RoleSelectionScreen(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildIndicator(active: true),
+                                const SizedBox(width: 8),
+                                _buildIndicator(active: false),
+                                const SizedBox(width: 8),
+                                _buildIndicator(active: false),
+                              ],
+                            ),
+                            SizedBox(height: isTablet || isDesktop ? 30 : 22),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 360),
+                              child: Text(
+                                'Direct from the Soil to your Kitchen',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: titleFontSize,
+                                  fontWeight: FontWeight.w800,
+                                  color: textDark,
+                                  height: 1.22,
+                                  letterSpacing: -0.6,
                                 ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: TextStyleCustom(
-                              text: "Get Started",
-                              fontSize: isDesktop ? 18 : 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Login Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: isDesktop ? 56 : 52,
-                          child: OutlinedButton(
-                            onPressed: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginScreen(),
+                            const SizedBox(height: 14),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 380),
+                              child: Text(
+                                'Connect with local farmers and source the freshest ingredients for your restaurant.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: bodyFontSize,
+                                  color: textMuted,
+                                  height: 1.55,
                                 ),
-                              );
-                            },
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.green, width: 2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: TextStyleCustom(
-                              text: "Login",
-                              fontSize: isDesktop ? 18 : 16,
-                              color: Colors.green,
-                              fontWeight: FontWeight.w600,
+                            SizedBox(height: isTablet || isDesktop ? 34 : 26),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const RoleSelectionScreen(),
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: accentOrange,
+                                  foregroundColor: Colors.white,
+                                  elevation: 6,
+                                  shadowColor: accentOrange.withValues(
+                                    alpha: 0.35,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    TextStyleCustom(
+                                      text: 'Get Started',
+                                      fontSize: isDesktop ? 18 : 17,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        SizedBox(height: isDesktop || isTablet ? 28 : 20),
-
-                        // Social Proof / Trust
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.verified, size: 18, color: Colors.green.shade700),
-                            const SizedBox(width: 6),
+                            const SizedBox(height: 14),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const LoginScreen(),
+                                    ),
+                                  );
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(
+                                    color: primaryGreen,
+                                    width: 2.2,
+                                  ),
+                                  foregroundColor: primaryGreen,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                ),
+                                child: TextStyleCustom(
+                                  text: 'Login',
+                                  fontSize: isDesktop ? 18 : 17,
+                                  color: primaryGreen,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: isTablet || isDesktop ? 30 : 24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildTrustDot(const Color(0xFFE8E7D6)),
+                                const SizedBox(width: 8),
+                                _buildTrustDot(const Color(0xFFC8F4B8)),
+                                const SizedBox(width: 8),
+                                _buildTrustDot(const Color(0xFFF7DDC8)),
+                                const SizedBox(width: 14),
+                                Flexible(
+                                  child: Text(
+                                    'Trusted by 500+ Top Chefs',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 18),
                             Text(
-                              "Trusted by 500+ Top Chefs",
+                              'By continuing, you agree to our Terms & Privacy Policy',
+                              textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: Colors.grey.shade700,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 11.5,
+                                color: Colors.grey.shade500,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-
-                        // Footer Disclaimer
-                        Text(
-                          "By continuing, you agree to our Terms & Privacy Policy",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey.shade500,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -240,12 +286,20 @@ class GetStartedScreen extends StatelessWidget {
   Widget _buildIndicator({required bool active}) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
-      width: active ? 24 : 8,
+      width: active ? 26 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color: active ? Colors.green : Colors.grey.shade300,
+        color: active ? const Color(0xFF1B7A32) : Colors.grey.shade300,
         borderRadius: BorderRadius.circular(4),
       ),
+    );
+  }
+
+  Widget _buildTrustDot(Color color) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }

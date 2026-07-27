@@ -55,17 +55,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       Column(
                         children: [
                           CircleAvatar(
-                            radius: isLandscapeOrShort ? 35 : 45,
-                            backgroundColor: brandGreen.withAlpha(30),
-                            child: Icon(
-                              Icons.restaurant_menu,
-                              size: isLandscapeOrShort ? 35 : 45,
-                              color: brandGreen,
-                            ),
+                            radius: 60,
+                            backgroundColor: brandGreen.withValues(alpha: 0.1),
+                            backgroundImage: const AssetImage('assets/logo01.png'),
                           ),
                           const SizedBox(height: 12),
                           const Text(
-                            'PsarKesekor',
+                            'ផ្សារកសិករ',
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,

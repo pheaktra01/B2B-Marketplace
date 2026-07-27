@@ -80,17 +80,13 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                         child: Column(
                           children: [
                             CircleAvatar(
-                              radius: isDesktop ? 50 : 45,
+                              radius: 60,
                               backgroundColor: primaryGreen.withValues(alpha: 0.1),
-                              child: Icon(
-                                Icons.eco,
-                                size: isDesktop ? 56 : 50,
-                                color: primaryGreen,
-                              ),
+                              backgroundImage: const AssetImage('assets/logo01.png'),
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'PsarKasekor',
+                              'ផ្សារកសិករ',
                               style: TextStyle(
                                 fontSize: titleFontSize + 4,
                                 fontWeight: FontWeight.bold,

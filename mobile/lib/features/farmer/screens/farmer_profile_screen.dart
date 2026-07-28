@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/farmer/screens/notifications_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 
@@ -24,7 +25,14 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationsScreen(),
+                ),
+              );
+            },
           ),
           const Padding(
             padding: EdgeInsets.only(right: 16),
@@ -120,12 +128,6 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
             const SizedBox(height: 32),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: Colors.orange.shade700,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.edit_note, color: Colors.white, size: 28),
       ),
       bottomNavigationBar: const FarmerBottomNavBar(
         currentIndex: 4,

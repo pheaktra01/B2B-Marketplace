@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
+import 'package:mobile/features/product/screens/product_card.dart';
+import 'package:mobile/features/product/screens/product_detail_screen.dart';
+import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -8,7 +12,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
   int _selectedCategoryIndex = 0;
 
   final List<Map<String, dynamic>> _categories = [
@@ -23,41 +26,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: primaryColor.withValues(alpha:0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.agriculture, color: primaryColor, size: 24),
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'PsarKasekor',
-              style: TextStyle(
-                color: primaryColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ],
-        ),
+      appBar: FarmerAppBar(
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: primaryColor),
+            icon: const Icon(Icons.notifications_none),
             onPressed: () {},
           ),
           const Padding(
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
-              radius: 18,
-              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=12'),
+              backgroundImage: NetworkImage('assets/profile.png'),
             ),
           ),
         ],
@@ -202,95 +180,24 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             // Featured Product Card
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha:0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  )
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                        child: Image.network(
-                          'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600',
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: CircleAvatar(
-                          backgroundColor: Colors.white.withValues(alpha:0.9),
-                          child: const Icon(Icons.favorite_border, color: primaryColor),
-                        ),
-                      ),
-                    ],
+            ProductCard(
+              imageUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600',
+              productName: 'Fresh Roma Tomatoes',
+              farmName: 'Green Acres Farm',
+              price: '\$12/kg',
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ProductDetailScreen(),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Fresh Roma Tomatoes',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.grain, size: 16, color: Colors.grey[600]),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Green Acres Farm',
-                              style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              '\$12/kg',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: primaryColor,
-                              ),
-                            ),
-                            ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: primaryColor,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              ),
-                              child: const Text('Add to Cart'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                );
+              },
+
+              onFavoritePressed: () {},
+
+              onAddToCart: () {},
             ),
             const SizedBox(height: 24),
 
@@ -331,46 +238,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: primaryColor,
-        unselectedItemColor: Colors.grey[600],
-        showUnselectedLabels: true,
-        items: [
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              decoration: BoxDecoration(
-                color: _selectedIndex == 0 ? primaryColor.withValues(alpha:0.15) : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Icon(Icons.home),
-            ),
-            label: 'Home',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag_outlined),
-            label: 'Orders',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'Chat',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
+      bottomNavigationBar: const RestaurantBottomNavBar(
+        currentIndex: 0,
       ),
     );
   }

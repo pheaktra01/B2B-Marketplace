@@ -21,10 +21,10 @@ class _FarmerOrderManagementScreenState
   static const Color cardBg = Colors.white;
 
   final List<String> filters = [
-    'All Orders',
-    'Pending',
-    'Accepted',
-    'Preparing'
+    'ការកុម្ម៉ង់ទាំងអស់',
+    'រង់ចាំ',
+    'បានទទួល',
+    'កំពុងរៀបចំ'
   ];
 
   @override
@@ -64,7 +64,7 @@ class _FarmerOrderManagementScreenState
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Order Management',
+                  'ការគ្រប់គ្រងការកុម្ម៉ង់',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -79,7 +79,7 @@ class _FarmerOrderManagementScreenState
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
-                    '24 active',
+                    '24 សកម្ម',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -142,12 +142,12 @@ class _FarmerOrderManagementScreenState
                 _buildOrderCard(
                   customerName: 'The Grand Bistro',
                   orderId: '#VRD-9821',
-                  timeAgo: '5 mins ago',
-                  status: 'PENDING',
+                  timeAgo: '5 នាទីមុន',
+                  status: 'រង់ចាំ',
                   statusBgColor: const Color(0xFFA0520D),
-                  itemsText: 'Heirloom Tomatoes, Baby Arugula + 2 more',
-                  itemCountText: '24 units',
-                  fulfillmentType: 'Delivery',
+                  itemsText: 'ប៉េងប៉ោះ Heirloom, Baby Arugula + 2 ទៀត',
+                  itemCountText: '24 ប្រអប់/ដប',
+                  fulfillmentType: 'ការដឹកជញ្ជូន',
                   fulfillmentTime: '10:00 AM',
                   price: '\$420.00',
                   actionButtons: Row(
@@ -161,7 +161,7 @@ class _FarmerOrderManagementScreenState
                                 borderRadius: BorderRadius.circular(8)),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
-                          child: const Text('Decline',
+                          child: const Text('បដិសេធ',
                               style: TextStyle(
                                   color: Colors.black87,
                                   fontWeight: FontWeight.bold)),
@@ -178,7 +178,7 @@ class _FarmerOrderManagementScreenState
                                 borderRadius: BorderRadius.circular(8)),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
-                          child: const Text('Accept',
+                          child: const Text('ទទួល',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold)),
@@ -192,13 +192,13 @@ class _FarmerOrderManagementScreenState
                 _buildOrderCard(
                   customerName: 'Green Plate Kitchen',
                   orderId: '#VRD-9742',
-                  timeAgo: 'Oct 27, 2:15 PM',
-                  status: 'ACCEPTED',
+                  timeAgo: 'តុលា 27, 2:15 PM',
+                  status: 'បានទទួល',
                   statusBgColor: const Color(0xFFC3D0A8),
                   statusTextColor: const Color(0xFF2E3D12),
-                  itemsText: 'Microgreens Mix, Rainbow Carrots (Bulk)',
-                  itemCountText: '12 cases',
-                  fulfillmentType: 'Pickup',
+                  itemsText: 'Microgreens Mix, ការ៉ុត Rainbow (ដុំ)',
+                  itemCountText: '12 កេស',
+                  fulfillmentType: 'មកយកផ្ទាល់',
                   fulfillmentTime: '11:30 AM',
                   price: '\$185.50',
                   actionButtons: SizedBox(
@@ -212,7 +212,7 @@ class _FarmerOrderManagementScreenState
                             borderRadius: BorderRadius.circular(8)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: const Text('Start Preparing',
+                      child: const Text('ចាប់ផ្តើមរៀបចំ',
                           style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold)),
@@ -224,12 +224,12 @@ class _FarmerOrderManagementScreenState
                 _buildOrderCard(
                   customerName: 'Azure Fine Dining',
                   orderId: '#VRD-9610',
-                  timeAgo: 'Oct 27, 1:40 PM',
-                  status: 'PREPARING',
+                  timeAgo: 'តុលា 27, 1:40 PM',
+                  status: 'កំពុងរៀបចំ',
                   statusBgColor: const Color(0xFF2E6930),
-                  itemsText: 'Organic Honey, Sourdough Starter Kit + 5 more',
-                  itemCountText: '40 items',
-                  fulfillmentType: 'Delivery',
+                  itemsText: 'ទឹកឃ្មុំធម្មជាតិ, Sourdough Starter Kit + 5 ទៀត',
+                  itemCountText: '40 មុខ',
+                  fulfillmentType: 'ការដឹកជញ្ជូន',
                   fulfillmentTime: '09:00 AM',
                   price: '\$1,120.00',
                   actionButtons: SizedBox(
@@ -242,7 +242,7 @@ class _FarmerOrderManagementScreenState
                             borderRadius: BorderRadius.circular(8)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: const Text('Mark as Ready',
+                      child: const Text('ចំណាំថារួចរាល់',
                           style: TextStyle(
                               color: primaryGreen,
                               fontWeight: FontWeight.bold)),
@@ -254,13 +254,13 @@ class _FarmerOrderManagementScreenState
                 _buildOrderCard(
                   customerName: 'The Rustic Table',
                   orderId: '#VRD-9588',
-                  timeAgo: 'Oct 27, 11:20 AM',
-                  status: 'READY',
+                  timeAgo: 'តុលា 27, 11:20 AM',
+                  status: 'រួចរាល់',
                   statusBgColor: primaryGreen,
                   isHighlighted: true,
-                  itemsText: 'Butterhead Lettuce (30 heads), Fresh Mint Bunch',
-                  itemCountText: '32 units',
-                  fulfillmentType: 'Pickup Ready',
+                  itemsText: 'សាឡាត់ Butterhead (30 ដើម), ជីអង្កាមស្រស់',
+                  itemCountText: '32 ប្រអប់/ដប',
+                  fulfillmentType: 'រួចរាល់សម្រាប់មកយក',
                   fulfillmentTime: '',
                   price: '\$340.25',
                   hasCheckIcon: true,
@@ -275,7 +275,7 @@ class _FarmerOrderManagementScreenState
                             borderRadius: BorderRadius.circular(8)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: const Text('Complete Order',
+                      child: const Text('បញ្ចប់ការកុម្ម៉ង់',
                           style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold)),
@@ -430,11 +430,11 @@ class _FarmerOrderManagementScreenState
               ),
               const SizedBox(width: 16),
               Icon(
-                fulfillmentType.contains('Pickup')
+                fulfillmentType.contains('មកយក')
                     ? Icons.local_shipping_outlined
                     : Icons.access_time,
                 size: 14,
-                color: fulfillmentType.contains('Ready')
+                color: fulfillmentType.contains('រួចរាល់')
                     ? primaryGreen
                     : Colors.grey.shade600,
               ),
@@ -444,11 +444,11 @@ class _FarmerOrderManagementScreenState
                     ? '$fulfillmentType: $fulfillmentTime'
                     : fulfillmentType,
                 style: TextStyle(
-                  color: fulfillmentType.contains('Ready')
+                  color: fulfillmentType.contains('រួចរាល់')
                       ? primaryGreen
                       : Colors.grey.shade700,
                   fontSize: 12,
-                  fontWeight: fulfillmentType.contains('Ready')
+                  fontWeight: fulfillmentType.contains('រួចរាល់')
                       ? FontWeight.bold
                       : FontWeight.normal,
                 ),

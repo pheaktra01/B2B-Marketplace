@@ -7,7 +7,7 @@ import 'package:mobile/features/restaurant/screens/home_screen.dart';
 class VerifyPhoneScreen extends StatefulWidget {
   final VerificationType type;
   final String phoneNumber;
-  final String? selectedRole; 
+  final String? selectedRole;
 
   const VerifyPhoneScreen({
     super.key,
@@ -39,11 +39,11 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
   String get buttonText {
     switch (widget.type) {
       case VerificationType.login:
-        return "Login";
+        return "ចូលប្រើប្រាស់";
       case VerificationType.signup:
-        return "Create Account";
+        return "បង្កើតគណនី";
       case VerificationType.forgotPassword:
-        return "Reset Password";
+        return "កំណត់ពាក្យសម្ងាត់ឡើងវិញ";
     }
   }
 
@@ -142,7 +142,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'Secure Marketplace Verification',
+                        'ការផ្ទៀងផ្ទាត់ទីផ្សារប្រកបដោយសុវត្ថិភាព',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 14, color: Colors.black87),
                       ),
@@ -171,7 +171,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                           child: Column(
                             children: [
                               Text(
-                                'Enter Verification Code',
+                                'បញ្ចូលលេខកូដផ្ទៀងផ្ទាត់',
                                 style: TextStyle(
                                   fontSize: isSmallScreen ? 19 : 22,
                                   fontWeight: FontWeight.bold,
@@ -179,7 +179,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                               ),
                               const SizedBox(height: 10),
                               Text(
-                                'We\'ve sent a 6-digit verification code to\n${widget.phoneNumber}',
+                                'យើងបានផ្ញើលេខកូដផ្ទៀងផ្ទាត់ ៦ខ្ទង់ ទៅកាន់\n${widget.phoneNumber}',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontSize: 13,
@@ -243,23 +243,26 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                           );
                                           break;
 
-                                      case VerificationType.signup:
-                                        if (widget.selectedRole == 'farmer') {
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => const FarmerDashboardScreen(),
-                                            ),
-                                          );
-                                        } else if (widget.selectedRole == 'restaurant') {
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => const HomeScreen(),
-                                            ),
-                                          );
-                                        }
-                                        break;
+                                        case VerificationType.signup:
+                                          if (widget.selectedRole == 'farmer') {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    const FarmerDashboardScreen(),
+                                              ),
+                                            );
+                                          } else if (widget.selectedRole ==
+                                              'restaurant') {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    const HomeScreen(),
+                                              ),
+                                            );
+                                          }
+                                          break;
 
                                         case VerificationType.forgotPassword:
                                           Navigator.push(
@@ -297,7 +300,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
 
                               // --- Resend Verification Section ---
                               const Text(
-                                'Didn\'t receive the code?',
+                                'មិនទាន់បានទទួលលេខកូដមែនទេ?',
                                 style: TextStyle(
                                   color: Colors.black54,
                                   fontSize: 13,
@@ -314,7 +317,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                   color: brandGreen,
                                 ),
                                 label: const Text(
-                                  'Resend Code',
+                                  'ផ្ញើលេខកូដឡើងវិញ',
                                   style: TextStyle(
                                     color: brandGreen,
                                     fontWeight: FontWeight.bold,
@@ -330,7 +333,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                     Navigator.pop(context);
                                   },
                                   child: const Text(
-                                    'Wrong phone number? Change number',
+                                    'លេខទូរស័ព្ទមិនត្រឹមត្រូវ? ផ្លាស់ប្តូរលេខ',
                                     style: TextStyle(
                                       color: brandGreen,
                                       fontSize: 13,

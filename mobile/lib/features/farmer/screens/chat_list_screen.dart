@@ -19,7 +19,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   static const Color primaryGreen = Color(0xFF1B5E20);
   static const Color pageBg = Color(0xFFF5F5E9);
 
-  final List<String> categories = ['All Messages', 'Restaurants', 'Logistics', 'Support'];
+  final List<String> categories = ['សារទាំងអស់', 'ភោជនីយដ្ឋាន', 'ការដឹកជញ្ជូន', 'គាំទ្រ'];
 
   // Mock data representing the conversations in the screenshot
   final List<Conversation> conversations = mockConversations;
@@ -58,7 +58,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Search conversations...',
+                hintText: 'ស្វែងរកការសន្ទនា...',
                 hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                 filled: true,

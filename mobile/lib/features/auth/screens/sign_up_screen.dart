@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/auth/screens/login_screen.dart';
 import 'package:mobile/features/auth/screens/role_selection_screen.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
 
@@ -139,19 +138,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ),
                                     const SizedBox(height: 6),
                                     const Text(
-                                      'Fresh produce marketplace for\nprofessional kitchens.',
+                                      'ទីផ្សារផលិតផលកសិកម្មស្រស់សម្រាប់\nអាជីវកម្មផ្ទះបាយអាជីព',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(fontSize: 14, color: Colors.black87, height: 1.3),
                                     ),
 
                                     const SizedBox(height: 28),
                                     const Text(
-                                      'Create Your Account',
+                                      'បង្កើតគណនីរបស់អ្នក',
                                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                                     ),
                                     const SizedBox(height: 4),
                                     const Text(
-                                      'Join the elite network of professional agricultural trade.',
+                                      'ចូលរួមជាមួយបណ្តាញពាណិជ្ជកម្មកសិកម្មឈានមុខគេ',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(fontSize: 13, color: Colors.black54, height: 1.3),
                                     ),
@@ -165,8 +164,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         children: [
                                           Expanded(
                                             child: _buildInputField(
-                                              label: 'Full Name',
-                                              hint: 'Enter full name',
+                                              label: 'ឈ្មោះពេញ',
+                                              hint: 'បញ្ចូលឈ្មោះពេញ',
                                               prefixIcon: Icons.person_outline,
                                               controller: _nameController,
                                               fillColor: inputFill,
@@ -175,7 +174,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           const SizedBox(width: 16),
                                           Expanded(
                                             child: _buildInputField(
-                                              label: 'Email',
+                                              label: 'អ៊ីមែល',
                                               hint: 'email@business.com',
                                               prefixIcon: Icons.mail_outline,
                                               controller: _emailController,
@@ -190,7 +189,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         children: [
                                           Expanded(
                                             child: _buildInputField(
-                                              label: 'Phone number',
+                                              label: 'លេខទូរស័ព្ទ',
                                               hint: '+0123456789',
                                               prefixIcon: Icons.phone_outlined,
                                               controller: _phoneController,
@@ -201,8 +200,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           const SizedBox(width: 16),
                                           Expanded(
                                             child: _buildInputField(
-                                              label: 'Restaurant / Farm Name',
-                                              hint: 'Enterprise name',
+                                              label: 'ឈ្មោះភោជនីយដ្ឋាន / កសិដ្ឋាន',
+                                              hint: 'ឈ្មោះសហគ្រាស',
                                               prefixIcon: Icons.storefront_outlined,
                                               controller: _enterpriseController,
                                               fillColor: inputFill,
@@ -215,8 +214,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         children: [
                                           Expanded(
                                             child: _buildInputField(
-                                              label: 'Password',
-                                              hint: 'Password',
+                                              label: 'ពាក្យសម្ងាត់',
+                                              hint: 'ពាក្យសម្ងាត់',
                                               prefixIcon: Icons.lock_outline,
                                               controller: _passwordController,
                                               obscureText: _obscurePassword,
@@ -235,8 +234,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           const SizedBox(width: 16),
                                           Expanded(
                                             child: _buildInputField(
-                                              label: 'Confirm Password',
-                                              hint: 'Confirm Password',
+                                              label: 'បញ្ជាក់ពាក្យសម្ងាត់',
+                                              hint: 'បញ្ជាក់ពាក្យសម្ងាត់',
                                               prefixIcon: Icons.lock_outline,
                                               controller: _confirmPasswordController,
                                               obscureText: _obscureConfirmPassword,
@@ -258,14 +257,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ] else ...[
                                       // Single-column mobile view
                                       _buildInputField(
-                                        label: 'Full Name',
-                                        hint: 'Enter your full name',
+                                        label: 'ឈ្មោះពេញ',
+                                        hint: 'បញ្ចូលឈ្មោះពេញរបស់អ្នក',
                                         prefixIcon: Icons.person_outline,
                                         controller: _nameController,
                                         fillColor: inputFill,
                                       ),
                                       _buildInputField(
-                                        label: 'Email',
+                                        label: 'អ៊ីមែល',
                                         hint: 'email@business.com',
                                         prefixIcon: Icons.mail_outline,
                                         controller: _emailController,
@@ -273,7 +272,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         fillColor: inputFill,
                                       ),
                                       _buildInputField(
-                                        label: 'Phone number',
+                                        label: 'លេខទូរស័ព្ទ',
                                         hint: '+0123456789',
                                         prefixIcon: Icons.phone_outlined,
                                         controller: _phoneController,
@@ -281,15 +280,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         fillColor: inputFill,
                                       ),
                                       _buildInputField(
-                                        label: 'Restaurant name/Farm name',
-                                        hint: 'Name of your enterprise',
+                                        label: 'ឈ្មោះភោជនីយដ្ឋាន / កសិដ្ឋាន',
+                                        hint: 'ឈ្មោះសហគ្រាសរបស់អ្នក',
                                         prefixIcon: Icons.storefront_outlined,
                                         controller: _enterpriseController,
                                         fillColor: inputFill,
                                       ),
                                       _buildInputField(
-                                        label: 'Password',
-                                        hint: 'Password',
+                                        label: 'ពាក្យសម្ងាត់',
+                                        hint: 'ពាក្យសម្ងាត់',
                                         prefixIcon: Icons.lock_outline,
                                         controller: _passwordController,
                                         obscureText: _obscurePassword,
@@ -305,8 +304,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ),
                                       ),
                                       _buildInputField(
-                                        label: 'Confirm Password',
-                                        hint: 'Confirm Password',
+                                        label: 'បញ្ជាក់ពាក្យសម្ងាត់',
+                                        hint: 'បញ្ជាក់ពាក្យសម្ងាត់',
                                         prefixIcon: Icons.lock_outline,
                                         controller: _confirmPasswordController,
                                         obscureText: _obscureConfirmPassword,
@@ -326,7 +325,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                                     // --- Terms and Conditions Checkbox ---
                                     Row(
-                                      crossAxisAlignment: CrossAlignmentCheck(isDesktopOrTablet),
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         SizedBox(
                                           height: 24,
@@ -344,18 +343,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             text: const TextSpan(
                                               style: TextStyle(color: Colors.black87, fontSize: 13, height: 1.4),
                                               children: [
-                                                TextSpan(text: 'I agree to the '),
+                                                TextSpan(text: 'ខ្ញុំយល់ព្រមតាម '),
                                                 TextSpan(
-                                                  text: 'Terms of Service',
+                                                  text: 'លក្ខខណ្ឌប្រើប្រាស់',
                                                   style: TextStyle(
                                                     color: brandGreen,
                                                     fontWeight: FontWeight.w600,
                                                     decoration: TextDecoration.underline,
                                                   ),
                                                 ),
-                                                TextSpan(text: ' and '),
+                                                TextSpan(text: ' និង '),
                                                 TextSpan(
-                                                  text: 'Privacy Policy.',
+                                                  text: 'គោលការណ៍ឯកជនភាព។',
                                                   style: TextStyle(
                                                     color: brandGreen,
                                                     fontWeight: FontWeight.w600,
@@ -401,54 +400,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              'Sign Up',
+                                              'ចុះឈ្មោះ',
                                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                             ),
-                                            SizedBox(width: 8),
-                                            Icon(Icons.arrow_forward_ios, size: 16),
                                           ],
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ),
-
-                            // --- Footer Navigation ---
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 20.0),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF1F5F9),
-                                border: Border(
-                                  top: BorderSide(color: borderColor, width: 0.5),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text('Already have an account? ', style: TextStyle(color: Colors.black54)),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => const LoginScreen(),
-                                        ),
-                                      );
-                                    },
-                                    child: const Text(
-                                      'Login',
-                                      style: TextStyle(
-                                        color: brandGreen,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ),
                             ),
                           ],
@@ -465,52 +425,50 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  // Cross Alignment Helper
-  // ignore: non_constant_identifier_names
-  static CrossAxisAlignment CrossAlignmentCheck(bool isDesktop) {
-    return isDesktop ? CrossAxisAlignment.center : CrossAxisAlignment.start;
-  }
-
-  // Input Field Helper Component
+  // Helper widget builder for form input fields
   Widget _buildInputField({
     required String label,
     required String hint,
     required IconData prefixIcon,
     required TextEditingController controller,
-    required Color fillColor,
-    bool obscureText = false,
     TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
     Widget? suffixIcon,
+    Color fillColor = const Color(0xFFF3F4F6),
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 18.0),
+      padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
           ),
           const SizedBox(height: 6),
           TextFormField(
             controller: controller,
-            obscureText: obscureText,
             keyboardType: keyboardType,
+            obscureText: obscureText,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: const TextStyle(color: Colors.black38, fontSize: 14),
-              prefixIcon: Icon(prefixIcon, color: Colors.black45, size: 20),
+              prefixIcon: Icon(prefixIcon, color: const Color(0xFF0F6221), size: 20),
               suffixIcon: suffixIcon,
               filled: true,
               fillColor: fillColor,
-              contentPadding: const EdgeInsets.symmetric(vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),

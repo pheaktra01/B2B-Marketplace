@@ -3,19 +3,17 @@ import '../models/conversation_model.dart';
 final List<Conversation> mockConversations = [
   Conversation(
     name: 'Green Valley Organics',
-    message: 'The heirloom tomatoes are ready fo...',
+    message: 'ប៉េងប៉ោះបុរាណត្រូវបានរួចរាល់សម្រាប់ច្រូតហើយ...',
     time: '10:45 AM',
     unreadCount: 2,
     isOnline: true,
-    avatarUrl:
-        'assets/mokoto.jpg',
+    avatarUrl: 'assets/mokoto.jpg',
   ),
 
   Conversation(
     name: 'Bistro 44 - Procurement',
-    message:
-        'Invoice #8842 has been settled.\nThank you for the quick delivery.',
-    time: 'Yesterday',
+    message: 'វិក័យប័ត្រ #8842 ត្រូវបានបង់រួចរាល់។\nសូមអរគុណចំពោះការដឹកជញ្ជូនដែលលឿន។',
+    time: 'ម្សិលមិញ',
     unreadCount: 0,
     isOnline: false,
     avatarUrl: 'assets/joker.png',
@@ -23,9 +21,8 @@ final List<Conversation> mockConversations = [
 
   Conversation(
     name: 'Chef Elena Rossi',
-    message:
-        'Can we double the order of microgreens for Friday\'s event?',
-    time: 'Yesterday',
+    message: 'តើយើងអាចបង្កើនការបញ្ជាទិញនៃ microgreens សម្រាប់ព្រឹត្តិការណ៍ថ្ងៃសុក្របានទេ?',
+    time: 'ម្សិលមិញ',
     unreadCount: 0,
     isOnline: true,
     avatarUrl: 'assets/junpei.jpg',

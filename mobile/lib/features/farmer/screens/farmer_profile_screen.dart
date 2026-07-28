@@ -62,14 +62,14 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
             const SizedBox(height: 24),
 
             // 4. Management Dashboard Grid
-            _buildSectionTitle('Management Dashboard'),
+            _buildSectionTitle('ផ្ទាំងគ្រប់គ្រង'),
             const SizedBox(height: 12),
             _buildDashboardGrid(),
 
             const SizedBox(height: 28),
 
             // 5. Our Sustainable Story Section
-            _buildSectionTitle('Our Sustainable Story'),
+            _buildSectionTitle('រឿងរ៉ាវនិរន្តរភាពរបស់យើង'),
             const SizedBox(height: 12),
             _buildStorySection(),
 
@@ -84,7 +84,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   const Text(
-                    'Current Offerings',
+                    'ផលិតផលបច្ចុប្បន្ន',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -94,7 +94,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                   GestureDetector(
                     onTap: () {},
                     child: const Text(
-                      'View All >',
+                      'មើលទាំងអស់ >',
                       style: TextStyle(
                         color: primaryGreen,
                         fontWeight: FontWeight.bold,
@@ -109,7 +109,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                'Fresh from our Hudson Valley Fields',
+                'ស្រស់ៗពីកសិដ្ឋាន Hudson Valley របស់យើង',
                 style: TextStyle(color: Colors.grey, fontSize: 13),
               ),
             ),
@@ -121,7 +121,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
             const SizedBox(height: 24),
 
             // Duplicate Dashboard Section (as shown at the bottom of the image)
-            _buildSectionTitle('Management Dashboard'),
+            _buildSectionTitle('ផ្ទាំងគ្រប់គ្រង'),
             const SizedBox(height: 12),
             _buildDashboardGrid(),
 
@@ -185,7 +185,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                     children: [
                       Icon(Icons.share, size: 14, color: Colors.black87),
                       SizedBox(width: 6),
-                      Text('Share', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text('ចែករំលែក', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
@@ -204,7 +204,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                     children: [
                       Icon(Icons.edit, size: 14, color: Colors.black87),
                       SizedBox(width: 6),
-                      Text('Edit Cover', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text('កែប្រែរូបគម្រប', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
@@ -282,7 +282,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
             Icon(Icons.verified, size: 15, color: primaryGreen),
             SizedBox(width: 3),
             Text(
-              'Verified Producer',
+              'អ្នកផលិតផ្លូវការ',
               style: TextStyle(color: primaryGreen, fontSize: 13, fontWeight: FontWeight.bold),
             ),
           ],
@@ -295,7 +295,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
               onPressed: () {},
               icon: const Icon(Icons.campaign_outlined, size: 18, color: Colors.white),
               label: const Text(
-                'Promote',
+                'ផ្សព្វផ្សាយ',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
@@ -310,7 +310,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
               onPressed: () {},
               icon: const Icon(Icons.edit_outlined, size: 18, color: primaryGreen),
               label: const Text(
-                'Edit Bio',
+                'កែប្រែប្រវត្តិរូប',
                 style: TextStyle(color: primaryGreen, fontWeight: FontWeight.bold),
               ),
               style: OutlinedButton.styleFrom(
@@ -339,13 +339,13 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildStatColumn('120+', 'ORDERS'),
+          _buildStatColumn('120+', 'ការកុម្ម៉ង់'),
           _buildDivider(),
-          _buildStatColumn('4.9 ★', 'REVIEWS'),
+          _buildStatColumn('4.9 ★', 'ការវាយតម្លៃ'),
           _buildDivider(),
-          _buildStatColumn('2018', 'SINCE'),
+          _buildStatColumn('2018', 'ចាប់តាំងពី'),
           _buildDivider(),
-          _buildStatColumn('\$4.2k', 'REVENUE'),
+          _buildStatColumn('\$4.2k', 'ចំណូល'),
         ],
       ),
     );
@@ -394,10 +394,10 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
         children: [
-          _buildDashboardCard(Icons.inventory_2_outlined, 'Manage Inventory'),
-          _buildDashboardCard(Icons.shopping_cart_outlined, 'View Orders'),
-          _buildDashboardCard(Icons.insert_chart_outlined, 'Sales Analytics'),
-          _buildDashboardCard(Icons.credit_card_outlined, 'Payment Settings'),
+          _buildDashboardCard(Icons.inventory_2_outlined, 'គ្រប់គ្រងស្តុក'),
+          _buildDashboardCard(Icons.shopping_cart_outlined, 'មើលការកុម្ម៉ង់'),
+          _buildDashboardCard(Icons.insert_chart_outlined, 'ការវិភាគការលក់'),
+          _buildDashboardCard(Icons.credit_card_outlined, 'ការកំណត់ការទូទាត់'),
         ],
       ),
     );
@@ -441,13 +441,13 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'At Green Valley Organics, we believe that professional kitchens deserve the highest-grade produce without compromising the health of our soil. We utilize advanced regenerative agriculture techniques, including carbon sequestration and biodynamic composting, to ensure every leaf and root is packed with flavor. Our specialty lies in heritage greens and heirloom vegetable varieties specifically bred for culinary resilience and exceptional plate presentation.',
+            'នៅ Green Valley Organics យើងជឿជាក់ថាផ្ទះបាយអាជីពសក្តិសមទទួលបានបន្លែផ្លែឈើគុណភាពខ្ពស់បំផុត ដោយមិនប៉ះពាល់ដល់សុខភាពដីរបស់យើង។ យើងប្រើប្រាស់បច្ចេកទេសកសិកម្មកែប្រែឡើងវិញកម្រិតខ្ពស់ រួមទាំងការរក្សាទុកកាបូន និងជីកំប៉ុសជីវៈ ដើម្បីធានាថាគ្រប់ស្លឹក និងឫសពោរពេញដោយរសជាតិ។',
             style: TextStyle(color: Colors.grey.shade800, height: 1.4, fontSize: 13),
           ),
           const SizedBox(height: 14),
-          _buildFeatureTile(Icons.eco_outlined, 'Certified Organic'),
-          _buildFeatureTile(Icons.water_drop_outlined, 'Rainwater Irrigation'),
-          _buildFeatureTile(Icons.local_shipping_outlined, 'Same-Day Sourcing'),
+          _buildFeatureTile(Icons.eco_outlined, 'ទទួលស្គាល់ជាសរីរាង្គ'),
+          _buildFeatureTile(Icons.water_drop_outlined, 'ប្រព័ន្ធស្រោចស្រពទឹកភ្លៀង'),
+          _buildFeatureTile(Icons.local_shipping_outlined, 'ការផ្គត់ផ្គង់ភ្លាមៗក្នុងថ្ងៃ'),
           const SizedBox(height: 16),
           Container(
             width: double.infinity,
@@ -460,7 +460,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'SUSTAINABILITY REPORT',
+                  'របាយការណ៍និរន្តរភាព',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -469,9 +469,9 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                _buildProgressRow('Pesticide Free', 1.0, '100%'),
+                _buildProgressRow('គ្មានថ្នាំកសិកម្ម', 1.0, '100%'),
                 const SizedBox(height: 12),
-                _buildProgressRow('Renewable Energy', 0.85, '85%'),
+                _buildProgressRow('ថាមពលកកើតឡើងវិញ', 0.85, '85%'),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
@@ -486,7 +486,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Full Impact Report', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                        Text('របាយការណ៍ផលប៉ះពាល់ពេញលេញ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                         SizedBox(width: 4),
                         Icon(Icons.arrow_forward, color: Colors.white, size: 14),
                       ],
@@ -553,7 +553,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
 
   // Helper: Category Chips
   Widget _buildCategoryChips() {
-    final categories = ['All Harvest', 'Vegetables', 'Herbs', 'Greens'];
+    final categories = ['ទិន្នផលទាំងអស់', 'បន្លែ', 'គ្រឿងទេស', 'បន្លែស្លឹក'];
     return SizedBox(
       height: 34,
       child: ListView.builder(
@@ -586,10 +586,10 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
   // Helper: Product Grid Cards
   Widget _buildProductGrid() {
     final products = [
-      {'name': 'Heirloom Tomatoes', 'category': 'VEGETABLES', 'tag': 'IN STOCK', 'tagColor': primaryGreen},
-      {'name': 'Baby Arugula', 'category': 'GREENS', 'tag': 'IN STOCK', 'tagColor': primaryGreen},
-      {'name': 'Italian Basil', 'category': 'HERBS', 'tag': 'LOW STOCK', 'tagColor': Colors.orange.shade800},
-      {'name': 'Rainbow Chard', 'category': 'VEGETABLES', 'tag': 'IN STOCK', 'tagColor': primaryGreen},
+      {'name': 'ប៉េងប៉ោះបុរាណ', 'category': 'បន្លែ', 'tag': 'មានក្នុងស្តុក', 'tagColor': primaryGreen},
+      {'name': 'ស្ពៃ Arugula', 'category': 'បន្លែស្លឹក', 'tag': 'មានក្នុងស្តុក', 'tagColor': primaryGreen},
+      {'name': 'ជីរនាងវង អ៊ីតាលី', 'category': 'គ្រឿងទេស', 'tag': 'ស្តុកតិច', 'tagColor': Colors.orange.shade800},
+      {'name': 'ស្ពៃចោមស្វាយ', 'category': 'បន្លែ', 'tag': 'មានក្នុងស្តុក', 'tagColor': primaryGreen},
     ];
 
     return Padding(
@@ -662,7 +662,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Live', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500)),
+                          const Text('ផ្សាយផ្ទាល់', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500)),
                           SizedBox(
                             height: 24,
                             child: Transform.scale(
@@ -683,7 +683,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                         child: OutlinedButton.icon(
                           onPressed: () {},
                           icon: const Icon(Icons.edit_outlined, size: 12, color: Colors.black87),
-                          label: const Text('Edit Listing', style: TextStyle(fontSize: 11, color: Colors.black87, fontWeight: FontWeight.w600)),
+                          label: const Text('កែប្រែបញ្ជី', style: TextStyle(fontSize: 11, color: Colors.black87, fontWeight: FontWeight.w600)),
                           style: OutlinedButton.styleFrom(
                             backgroundColor: cardBgColor,
                             padding: EdgeInsets.zero,

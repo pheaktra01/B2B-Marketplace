@@ -71,7 +71,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                           const SizedBox(height: 6),
                           const Text(
-                            'Fresh produce marketplace for\nprofessional kitchens.',
+                            'ផ្សារផលិតផលកសិកម្មស្រស់ៗសម្រាប់\nចុងភៅអាជីព។',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
@@ -109,7 +109,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               const Align(
                                 alignment: Alignment.center,
                                 child: Text(
-                                  'Forgot Password',
+                                  'ភ្លេចពាក្យសម្ងាត់',
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
@@ -118,7 +118,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               ),
                               const SizedBox(height: 12),
                               const Text(
-                                "Enter the email address associated with your Verdant account. We'll send you a link to reset your password and get you back to your professional dashboard.",
+                                "សូមបញ្ចូលអាសយដ្ឋានអ៊ីមែល ឬលេខទូរស័ព្ទដែលភ្ជាប់ជាមួយគណនីរបស់អ្នក។ យើងនឹងផ្ញើតំណ ឬកូដដើម្បីកំណត់ពាក្យសម្ងាត់ឡើងវិញ។",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 14,
@@ -130,7 +130,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                               // --- Input Field ---
                               const Text(
-                                'Email or phone number',
+                                'អ៊ីមែល ឬ លេខទូរស័ព្ទ',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -142,7 +142,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 controller: _identifierController,
                                 keyboardType: TextInputType.emailAddress,
                                 decoration: InputDecoration(
-                                  hintText: 'name@central-kitchen.com',
+                                  hintText: 'name@central-kitchen.com ឬ ០១២៣៤៥៦៧៨',
                                   hintStyle: const TextStyle(
                                     color: Colors.black38,
                                     fontSize: 14,
@@ -179,7 +179,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter your email or phone number';
+                                    return 'សូមបញ្ចូលអ៊ីមែល ឬលេខទូរស័ព្ទរបស់អ្នក';
                                   }
                                   return null;
                                 },
@@ -217,7 +217,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'Send',
+                                        'ផ្ញើ',
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -253,7 +253,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             color: Colors.black54,
                           ),
                           label: const Text(
-                            'Back to Login',
+                            'ត្រឡប់ទៅទំព័រចូលប្រើប្រាស់',
                             style: TextStyle(
                               color: Colors.black87,
                               fontWeight: FontWeight.w600,

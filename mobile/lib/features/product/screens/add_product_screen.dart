@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/farmer/screens/inventory_screen.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});
@@ -93,7 +94,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Submit Form Logic
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const InventoryScreen(), // Navigate to Inventory Management Screen
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2E7D32),

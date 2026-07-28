@@ -52,7 +52,7 @@ class ChatScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 2),
                 Text(
-                  'Online',
+                  'លើបណ្ដាញ',
                   style: TextStyle(
                     color: Color(0xFF2E7D32),
                     fontSize: 12,
@@ -89,7 +89,7 @@ class ChatScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: const Text(
-                      'TODAY',
+                      'ថ្ងៃនេះ',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -105,7 +105,7 @@ class ChatScreen extends StatelessWidget {
                 const ChatBubble(
                   isMe: false,
                   message:
-                      'Good morning, Chef! We just finished the morning harvest. The heirloom tomatoes are looking spectacular today — deep color and perfect firmness.',
+                      'អរុណសួស្តី លោកម្ចាស់ភោជនីយដ្ឋាន! យើងបានបញ្ចប់ការក្រឡេកចាប់ចំណីព្រឹកមួយរួចហើយ។ ប៉េងប៉ោះបុរាណនៅថ្ងៃនេះមើលល្អណាស់ — ពណ៌깊 និងក្លាយឆ្អែតល្អ។',
                   time: '08:42 AM',
                 ),
 
@@ -113,32 +113,32 @@ class ChatScreen extends StatelessWidget {
                 const ChatBubble(
                   isMe: true,
                   message:
-                      "That sounds perfect. I'm looking for about 20kg for our weekend tasting menu. Do you have enough for that?",
+                      'នោះស្តាប់ល្អណាស់។ ខ្ញុំកំពុងស្វែងរកប្រហែល 20kg សម្រាប់បញ្ជីរថ្ងៃសប្ដាហ៍នេះ។ តើអ្នកមានគ្រប់គ្រាន់សម្រាប់នោះទេ?',
                   time: '08:45 AM',
                 ),
 
                 // Incoming Message 2
                 const ChatBubble(
                   isMe: false,
-                  message: 'Absolutely. I\'ve set aside a crate for you. Here are the details:',
+                  message: 'ច្បាស់មែន។ ខ្ញុំបានកាន់កញ្ចប់មួយសម្រាប់អ្នក។ នេះគឺជាព័ត៌មានលម្អិត៖',
                   time: '', // No timestamp on text part since product card follows
                 ),
 
                 // Product Card Attachment
                 const ProductMessageCard(
-                  imageUrl: 'assets/tomato.jpg',
-                  title: 'Heirloom Tomatoes (Mixed)',
+                  imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvkvNcrsOhsZCTUZOu-w7gOezd1Sk2eHM-dYSO6niL28zY5SLuzl0xAU1f&s=10',
+                  title: 'ប៉េងប៉ោះបុរាណ (ចម្រុះ)',
                   price: '\$4.50',
-                  unit: '/kg',
-                  description: 'Farm-to-table fresh, harvested this morning at peak ripeness.',
-                  qty: 'QTY: 20kg',
+                  unit: '/គីឡូក្រាម',
+                  description: 'ស្រស់ពីកសិដ្ឋានទៅតុ មានការប្រមូលនៅព្រឹកនេះនៅពេលទទួលព្រះកុសល។',
+                  qty: 'បរិមាណ: 20 គីឡូក្រាម',
                   time: '08:48 AM',
                 ),
 
                 // Outgoing Message 2
                 const ChatBubble(
                   isMe: true,
-                  message: 'Done! Added to my cart. Can we aim for a 10:00 AM delivery tomorrow?',
+                  message: 'រួចរាល់! បានបន្ថែមទៅក្នុងកន្ត្រករបស់ខ្ញុំ។ តើយើងអាចកំណត់ការដឹកជញ្ជូននៅម៉ោង 10:00 ព្រឹកថ្ងៃស្អែកបានទេ?',
                   time: '08:50 AM',
                 ),
               ],
@@ -350,7 +350,7 @@ class ProductMessageCard extends StatelessWidget {
                             ),
                           ),
                           child: const Text(
-                            'Add to Order',
+                            'បន្ថែមទៅការកុម្ម៉ង់',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 13,
@@ -406,7 +406,7 @@ class ChatInputBar extends StatelessWidget {
             Expanded(
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Type your message...',
+                  hintText: 'វាយសាររបស់អ្នក...',
                   hintStyle: const TextStyle(color: Colors.black38, fontSize: 14),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   filled: true,

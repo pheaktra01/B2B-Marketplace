@@ -139,7 +139,7 @@ class GetStartedScreen extends StatelessWidget {
                             ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 360),
                               child: Text(
-                                'Direct from the Soil to your Kitchen',
+                                'ផ្ទាល់ពីចម្ការ មកកាន់ផ្ទះបាយរបស់អ្នក',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: titleFontSize,
@@ -154,7 +154,7 @@ class GetStartedScreen extends StatelessWidget {
                             ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 380),
                               child: Text(
-                                'Connect with local farmers and source the freshest ingredients for your restaurant.',
+                                'ភ្ជាប់ទំនាក់ទំនងជាមួយកសិករក្នុងស្រុក ដើម្បីទទួលបានគ្រឿងផ្សំស្រស់ៗបំផុតសម្រាប់ភោជនីយដ្ឋានរបស់អ្នក។',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: bodyFontSize,
@@ -192,7 +192,7 @@ class GetStartedScreen extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     TextStyleCustom(
-                                      text: 'Get Started',
+                                      text: 'ចាប់ផ្តើម',
                                       fontSize: isDesktop ? 18 : 17,
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
@@ -231,7 +231,7 @@ class GetStartedScreen extends StatelessWidget {
                                   ),
                                 ),
                                 child: TextStyleCustom(
-                                  text: 'Login',
+                                  text: 'ចូលប្រើប្រាស់',
                                   fontSize: isDesktop ? 18 : 17,
                                   color: primaryGreen,
                                   fontWeight: FontWeight.w700,
@@ -250,7 +250,7 @@ class GetStartedScreen extends StatelessWidget {
                                 const SizedBox(width: 14),
                                 Flexible(
                                   child: Text(
-                                    'Trusted by 500+ Top Chefs',
+                                    'ទទួលបានទំនុកចិត្តពីចុងភៅកំពូលៗជាង ៥០០ នាក់',
                                     style: TextStyle(
                                       color: Colors.grey.shade600,
                                       fontSize: 13,
@@ -262,7 +262,7 @@ class GetStartedScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 18),
                             Text(
-                              'By continuing, you agree to our Terms & Privacy Policy',
+                              'តាមរយៈការបន្ត អ្នកយល់ព្រមតាមលក្ខខណ្ឌ និងគោលការណ៍ឯកជនភាពរបស់យើង',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 11.5,

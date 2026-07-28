@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/core/app_locale.dart';
 import 'package:mobile/features/auth/screens/get_started_screen.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
@@ -9,11 +11,18 @@ class LanguageSelectionScreen extends StatefulWidget {
 }
 
 class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
-  // 0 for Khmer, 1 for English
   int selectedIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    selectedIndex = AppLocale.current.languageCode == 'km' ? 0 : 1;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB), // Light grey background
       body: SafeArea(
@@ -45,7 +54,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                     children: [
                       SizedBox(height: isDesktop ? 40 : 20),
                       Text(
-                        "Choose Your Language",
+                        l10n?.chooseLanguage ?? 'Choose Your Language',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: titleFontSize,
@@ -55,7 +64,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        "Select your language to use\nPsarKasekor",
+                        l10n?.selectLanguageDescription ?? 'Select your language to use\nPsarKasekor',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: bodyFontSize,
@@ -84,9 +93,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
+                          onPressed: () async {
+                            final navigator = Navigator.of(context);
+                            final locale = selectedIndex == 0 ? const Locale('km') : const Locale('en');
+                            await AppLocale.setLocale(locale);
+                            if (!mounted) return;
+                            navigator.pushReplacement(
                               MaterialPageRoute(
                                 builder: (context) => const GetStartedScreen(),
                               ),
@@ -96,7 +108,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                "Continue",
+                                l10n?.continueButton ?? 'Continue',
                                 style: TextStyle(
                                   fontSize: isDesktop ? 18 : 16,
                                   fontWeight: FontWeight.w600,
@@ -124,7 +136,11 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     bool isSelected = selectedIndex == index;
     
     return InkWell(
-      onTap: () => setState(() => selectedIndex = index),
+      onTap: () {
+        setState(() => selectedIndex = index);
+        final locale = index == 0 ? const Locale('km') : const Locale('en');
+        AppLocale.setLocale(locale);
+      },
       borderRadius: BorderRadius.circular(12),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

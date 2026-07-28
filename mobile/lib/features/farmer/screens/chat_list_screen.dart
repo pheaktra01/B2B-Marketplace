@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/farmer/data/mock_conversations.dart';
 import 'package:mobile/features/farmer/models/conversation_model.dart';
+import 'package:mobile/features/farmer/screens/notifications_screen.dart';
 import 'package:mobile/features/farmer/widgets/conversation_card.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
@@ -31,7 +32,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationsScreen(),
+                ),
+              );
+            },
           ),
           const Padding(
             padding: EdgeInsets.only(right: 16),
@@ -134,12 +142,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: Colors.orange,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.edit_note, color: Colors.white, size: 28),
       ),
       bottomNavigationBar: const FarmerBottomNavBar(
         currentIndex: 3,

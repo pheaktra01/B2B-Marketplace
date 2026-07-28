@@ -85,7 +85,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             // Support action
                           },
                           child: const Text(
-                            'SUPPORT',
+                            'ជំនួយ',
                             style: TextStyle(
                               color: brandGreen,
                               fontWeight: FontWeight.bold,
@@ -140,16 +140,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 const Align(
                                   alignment: Alignment.center,
                                   child: Text(
-                                    'Reset Password',
+                                    'កំណត់ពាក្យសម្ងាត់ឡើងវិញ',
                                     style: TextStyle(
-                                      fontSize: 24,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                                 const SizedBox(height: 12),
                                 const Text(
-                                  'Please create a unique password that you don\'t use elsewhere.',
+                                  'សូមបង្កើតពាក្យសម្ងាត់ផ្ទាល់ខ្លួនដែលអ្នកមិនបានប្រើប្រាស់នៅកន្លែងផ្សេង។',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 14,
@@ -162,7 +162,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                                 // --- New Password Field ---
                                 const Text(
-                                  'NEW PASSWORD',
+                                  'ពាក្យសម្ងាត់ថ្មី',
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
@@ -175,7 +175,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   controller: _passwordController,
                                   obscureText: _obscurePassword,
                                   decoration: _buildInputDecoration(
-                                    hint: 'NEW PASSWORD',
+                                    hint: 'បញ្ចូលពាក្យសម្ងាត់ថ្មី',
                                     prefixIcon: Icons.lock_outline,
                                     fillColor: inputFillColor,
                                     suffixIcon: IconButton(
@@ -196,7 +196,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                                 // --- Confirm Password Field ---
                                 const Text(
-                                  'CONFIRM NEW PASSWORD',
+                                  'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី',
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
@@ -209,7 +209,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   controller: _confirmPasswordController,
                                   obscureText: _obscureConfirmPassword,
                                   decoration: _buildInputDecoration(
-                                    hint: 'CONFIRM NEW PASSWORD',
+                                    hint: 'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី',
                                     prefixIcon: Icons.verified_user_outlined,
                                     fillColor: inputFillColor,
                                     suffixIcon: IconButton(
@@ -226,7 +226,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   ),
                                   validator: (value) {
                                     if (value != _passwordController.text) {
-                                      return 'Passwords do not match';
+                                      return 'ពាក្យសម្ងាត់មិនត្រូវគ្នាតែមួយទេ';
                                     }
                                     return null;
                                   },
@@ -236,13 +236,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                                 // --- Dynamic Requirement Checklists ---
                                 _buildRequirementRow(
-                                  'At least 8 characters long',
+                                  'យ៉ាងហោចណាស់ ៨ តួអក្សរ',
                                   _isLongEnough,
                                   brandGreen,
                                 ),
                                 const SizedBox(height: 8),
                                 _buildRequirementRow(
-                                  'Contain at least one number or symbol',
+                                  'មានយ៉ាងហោចណាស់លេខមួយ ឬនិមិត្តសញ្ញាមួយ',
                                   _hasNumberOrSymbol,
                                   brandGreen,
                                 ),
@@ -273,7 +273,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          'Reset Password',
+                                          'កំណត់ពាក្យសម្ងាត់ឡើងវិញ',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
@@ -296,7 +296,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                       Navigator.pop(context);
                                     },
                                     child: const Text(
-                                      'Cancel and return to Sign In',
+                                      'បោះបង់ ហើយត្រឡប់ទៅទំព័រចូល',
                                       style: TextStyle(
                                         color: brandGreen,
                                         fontWeight: FontWeight.bold,

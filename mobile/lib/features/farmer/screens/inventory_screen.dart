@@ -14,45 +14,45 @@ class InventoryScreen extends StatefulWidget {
 class _InventoryScreenState extends State<InventoryScreen> {
   int _selectedFilterIndex = 0;
 
-  final List<String> _filters = ['All Items', 'Vegetables', 'Microgreens'];
+  final List<String> _filters = ['ទំនិញទាំងអស់', 'បន្លែ', 'បន្លែពន្លក'];
 
-  // Sample data to match the UI precisely
+  // Sample data to match the UI precisely with Khmer text & Western numbers
   final List<Map<String, dynamic>> _inventoryItems = [
     {
-      'name': 'Heirloom Tomatoes',
+      'name': 'ប៉េងប៉ោះបុរាណ',
       'price': '\$4.50',
-      'unit': '/lb',
-      'stockText': '120 lbs left',
+      'unit': '/គីឡូក្រាម',
+      'stockText': 'នៅសល់ 120 គីឡូក្រាម',
       'progress': 0.85,
-      'status': 'Active',
+      'status': 'សកម្ម',
       'statusColor': const Color(0xFF1E5631),
       'progressColor': const Color(0xFF1E5631),
       'isAvailable': true,
       'imageUrl': 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600',
     },
     {
-      'name': 'Baby Arugula',
+      'name': 'សាឡាត់ Baby Arugula',
       'price': '\$12.00',
-      'unit': '/cs',
-      'stockText': '8 cases left',
+      'unit': '/កេស',
+      'stockText': 'នៅសល់ 8 កេស',
       'progress': 0.2,
-      'status': 'Low Stock',
+      'status': 'ស្តុកទាប',
       'statusColor': const Color(0xFFD9534F),
       'progressColor': const Color(0xFFD9534F),
       'isAvailable': true,
       'imageUrl': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600',
     },
     {
-      'name': 'Rainbow Carrots',
+      'name': 'ការ៉ុតចម្រុះពណ៌',
       'price': '\$3.20',
-      'unit': '/lb',
-      'stockText': '0 lbs left',
+      'unit': '/គីឡូក្រាម',
+      'stockText': 'នៅសល់ 0 គីឡូក្រាម',
       'progress': 0.0,
-      'status': 'Offline',
+      'status': 'អសកម្ម',
       'statusColor': Colors.grey,
       'progressColor': Colors.grey,
       'isAvailable': false,
-      'imageUrl': 'assets/tomato.jpg', // Placeholder local asset
+      'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvkvNcrsOhsZCTUZOu-w7gOezd1Sk2eHM-dYSO6niL28zY5SLuzl0xAU1f&s=10', // Placeholder local asset
     },
   ];
 
@@ -92,7 +92,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             const SizedBox(height: 8),
             // Header Title & Subtitle
             const Text(
-              'Inventory Management',
+              'ការគ្រប់គ្រងស្តុក',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -101,7 +101,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Track your yields and manage kitchen supply levels.',
+              'តាមដានទិន្នផល និងគ្រប់គ្រងកម្រិតការផ្គត់ផ្គង់ផ្ទះបាយរបស់អ្នក។',
               style: TextStyle(fontSize: 13, color: Colors.grey[700]),
             ),
             const SizedBox(height: 16),
@@ -111,7 +111,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               children: [
                 Expanded(
                   child: _buildSummaryCard(
-                    title: 'ACTIVE ITEMS',
+                    title: 'ទំនិញសកម្ម',
                     value: '24',
                     valueColor: primaryColor,
                   ),
@@ -119,7 +119,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildSummaryCard(
-                    title: 'LOW STOCK',
+                    title: 'ស្តុកទាប',
                     value: '3',
                     valueColor: const Color(0xFFB71C1C),
                   ),
@@ -144,7 +144,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   Expanded(
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: 'Search your inventory...',
+                        hintText: 'ស្វែងរកស្តុករបស់អ្នក...',
                         hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
                         border: InputBorder.none,
                       ),
@@ -303,10 +303,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (item['status'] == 'Low Stock') ...[
+                      if (item['status'] == 'ស្តុកទាប') ...[
                         const Icon(Icons.warning_amber_rounded, size: 14, color: Color(0xFFD9534F)),
                         const SizedBox(width: 4),
-                      ] else if (item['status'] == 'Active') ...[
+                      ] else if (item['status'] == 'សកម្ម') ...[
                         const Icon(Icons.circle, size: 8, color: Color(0xFF1E5631)),
                         const SizedBox(width: 4),
                       ],
@@ -370,7 +370,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
                 // Stock Level Label & Progress Bar
                 Text(
-                  'Stock Level',
+                  'កម្រិតស្តុក',
                   style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 6),
@@ -389,7 +389,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: item['status'] == 'Low Stock' ? const Color(0xFFD9534F) : Colors.grey[700],
+                    color: item['status'] == 'ស្តុកទាប' ? const Color(0xFFD9534F) : Colors.grey[700],
                   ),
                 ),
                 const Divider(height: 24, thickness: 1),
@@ -398,7 +398,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 Row(
                   children: [
                     Text(
-                      'Available',
+                      'មានលក់',
                       style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                     ),
                     const SizedBox(width: 8),

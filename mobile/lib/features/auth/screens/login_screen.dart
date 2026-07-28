@@ -131,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           const Padding(
                                             padding: EdgeInsets.symmetric(horizontal: 16.0),
                                             child: Text(
-                                              'Fresh produce marketplace for professional kitchens.',
+                                              'ផ្សារផលិតផលកសិកម្មស្រស់ៗសម្រាប់ចុងភៅអាជីព។',
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                 fontSize: 14,
@@ -148,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     // --- Section Heading ---
                                     const Center(
                                       child: Text(
-                                        'Welcome Back',
+                                        'សូមស្វាគមន៍មកវិញ',
                                         style: TextStyle(
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold,
@@ -160,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                     // --- Phone Number Input Field ---
                                     const Text(
-                                      'Phone Number or Email',
+                                      'លេខទូរស័ព្ទ ឬ អ៊ីមែល',
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
@@ -172,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       controller: _phoneController,
                                       keyboardType: TextInputType.phone,
                                       decoration: InputDecoration(
-                                        hintText: '0123456789 or email@example.com',
+                                        hintText: '០១២៣៤៥៦៧៨៩ ឬ email@example.com',
                                         hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                         filled: true,
@@ -194,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         const Text(
-                                          'Password',
+                                          'ពាក្យសម្ងាត់',
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
@@ -211,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             );
                                           },
                                           child: const Text(
-                                            'Forgot Password?',
+                                            'ភ្លេចពាក្យសម្ងាត់?',
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
@@ -289,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              'Login',
+                                              'ចូលប្រើប្រាស់',
                                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                             ),
                                             SizedBox(width: 6),
@@ -307,7 +307,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Padding(
                                           padding: EdgeInsets.symmetric(horizontal: 16.0),
                                           child: Text(
-                                            'Or continue with',
+                                            'ឬបន្តជាមួយ',
                                             style: TextStyle(color: textMuted, fontSize: 13),
                                           ),
                                         ),
@@ -342,7 +342,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               isDesktop: isDesktopOrTablet,
                                               onTap: () {},
                                             ),
-                                          )
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -365,7 +365,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   const Text(
-                                    "Don't have an account? ",
+                                    "មិនទាន់មានគណនី? ",
                                     style: TextStyle(color: textMuted, fontSize: 14),
                                   ),
                                   GestureDetector(
@@ -378,7 +378,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       );
                                     },
                                     child: const Text(
-                                      'Create Account',
+                                      'បង្កើតគណនី',
                                       style: TextStyle(
                                         color: primaryGreen,
                                         fontWeight: FontWeight.bold,

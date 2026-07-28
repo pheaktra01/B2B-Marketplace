@@ -101,7 +101,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
                       // --- Heading Texts ---
                       Text(
-                        'How will you use PsarKasekor?',
+                        'តើអ្នកចង់ប្រើប្រាស់ផ្សារកសិករយ៉ាងដូចម្តេច?',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: titleFontSize,
@@ -112,7 +112,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Join our premium agricultural network. Choose your role to personalize your experience.',
+                        'ចូលរួមជាមួយបណ្តាញកសិកម្មឈានមុខគេរបស់យើង។ សូមជ្រើសរើសតួនាទីរបស់អ្នកដើម្បីចាប់ផ្តើម។',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: bodyFontSize,
@@ -131,10 +131,10 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                               child: _buildRoleCard(
                                 id: 'restaurant',
                                 icon: Icons.restaurant,
-                                title: 'I am a Restaurant',
+                                title: 'ខ្ញុំជាភោជនីយដ្ឋាន',
                                 description:
-                                    'Sourcing the freshest ingredients directly from local producers with reliable logistics.',
-                                tags: ['Buyer', 'Kitchen'],
+                                    'បញ្ជាទិញគ្រឿងផ្សំស្រស់ៗដោយផ្ទាល់ពីផលិតករក្នុងស្រុក ជាមួយនឹងសេវាដឹកជញ្ជូនដែលទុកចិត្តបាន។',
+                                tags: ['អ្នកទិញ', 'ចុងភៅ'],
                                 isSelected: _selectedRole == 'restaurant',
                                 primaryColor: primaryGreen,
                                 isDesktop: isDesktop,
@@ -145,10 +145,10 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                               child: _buildRoleCard(
                                 id: 'farmer',
                                 icon: Icons.agriculture,
-                                title: 'I am a Farmer',
+                                title: 'ខ្ញុំជាកសិករ',
                                 description:
-                                    'Showcasing my bountiful harvest to top professional kitchens and managing wholesale orders.',
-                                tags: ['Seller', 'Producer'],
+                                    'ដាក់លក់ផលដំណាំដ៏សសម្បូរបែបរបស់អ្នកទៅកាន់ភោជនីយដ្ឋានធំៗ និងគ្រប់គ្រងការបញ្ជាទិញបោះដុំ។',
+                                tags: ['អ្នកលក់', 'ផលិតករ'],
                                 isSelected: _selectedRole == 'farmer',
                                 primaryColor: primaryGreen,
                                 isDesktop: isDesktop,
@@ -162,10 +162,10 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                             _buildRoleCard(
                               id: 'restaurant',
                               icon: Icons.restaurant,
-                              title: 'I am a Restaurant',
+                              title: 'ខ្ញុំជាភោជនីយដ្ឋាន',
                               description:
-                                  'Sourcing the freshest ingredients directly from local producers with reliable logistics.',
-                              tags: ['Buyer', 'Kitchen'],
+                                  'បញ្ជាទិញគ្រឿងផ្សំស្រស់ៗដោយផ្ទាល់ពីផលិតករក្នុងស្រុក ជាមួយនឹងសេវាដឹកជញ្ជូនដែលទុកចិត្តបាន។',
+                              tags: ['អ្នកទិញ', 'ចុងភៅ'],
                               isSelected: _selectedRole == 'restaurant',
                               primaryColor: primaryGreen,
                               isDesktop: false,
@@ -174,10 +174,10 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                             _buildRoleCard(
                               id: 'farmer',
                               icon: Icons.agriculture,
-                              title: 'I am a Farmer',
+                              title: 'ខ្ញុំជាកសិករ',
                               description:
-                                  'Showcasing my bountiful harvest to top professional kitchens and managing wholesale orders.',
-                              tags: ['Seller', 'Producer'],
+                                  'ដាក់លក់ផលដំណាំដ៏សសម្បូរបែបរបស់អ្នកទៅកាន់ភោជនីយដ្ឋានធំៗ និងគ្រប់គ្រងការបញ្ជាទិញបោះដុំ។',
+                              tags: ['អ្នកលក់', 'ផលិតករ'],
                               isSelected: _selectedRole == 'farmer',
                               primaryColor: primaryGreen,
                               isDesktop: false,
@@ -219,7 +219,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Continue',
+                                'បន្តទៅមុខ',
                                 style: TextStyle(
                                   fontSize: isDesktop ? 18 : 16,
                                   fontWeight: FontWeight.w600,
@@ -238,7 +238,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            'Already have an account? ',
+                            'មានគណនីរួចហើយមែនទេ? ',
                             style: TextStyle(color: textMuted, fontSize: 14),
                           ),
                           GestureDetector(
@@ -251,7 +251,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                               );
                             },
                             child: const Text(
-                              'Log in',
+                              'ចូលប្រព័ន្ធ',
                               style: TextStyle(
                                 color: primaryGreen,
                                 fontWeight: FontWeight.bold,

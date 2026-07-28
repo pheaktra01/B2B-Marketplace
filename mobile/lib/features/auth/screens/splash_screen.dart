@@ -86,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       ),
                       SizedBox(height: screenHeight * 0.025), // Responsive spacing
                       Text(
-                        'PsarKasekor',
+                        'ផ្សារកសិករ',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,

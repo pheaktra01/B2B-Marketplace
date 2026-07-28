@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/farmer/screens/notifications_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
+import 'package:mobile/features/product/screens/add_product_screen.dart';
 
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
@@ -50,7 +52,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       'statusColor': Colors.grey,
       'progressColor': Colors.grey,
       'isAvailable': false,
-      'imageUrl': 'https://images.unsplash.com/photo-1447175008436-084171092e8e?w=600',
+      'imageUrl': 'assets/tomato.jpg', // Placeholder local asset
     },
   ];
 
@@ -65,7 +67,14 @@ class _InventoryScreenState extends State<InventoryScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationsScreen(),
+                ),
+              );
+            },
           ),
           const Padding(
             padding: EdgeInsets.only(right: 16),
@@ -199,7 +208,14 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
       // Add Item Floating Action Button
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const AddProductScreen(), // Placeholder for Add Item Screen
+            ),
+          );
+        },
         backgroundColor: const Color(0xFFB86A04), // Warm accent brown/orange color
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         child: const Icon(Icons.add, color: Colors.white, size: 28),

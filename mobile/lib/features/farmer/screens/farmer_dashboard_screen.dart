@@ -73,7 +73,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
                     children: [
                       // --- Header Greeting ---
                       const Text(
-                        'Good Morning, Farm Manager',
+                        'អរុណសួស្តី អ្នកគ្រប់គ្រងកសិដ្ឋាន',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -82,7 +82,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Your produce is reaching 14 new professional kitchens today.',
+                        'ផលិតផលរបស់អ្នកកំពុងឆ្លើយតបទៅកាន់ 14 ភោជនីយដ្ឋាននៅថ្ងៃនេះ។',
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey[600],
@@ -134,19 +134,19 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
   Widget _buildResponsiveStatCards(double width) {
     final List<Widget> statCards = [
       _buildStatCard(
-        title: 'TOTAL PRODUCTS',
+        title: 'ផលិតផលសរុប',
         value: '24',
         valueColor: const Color(0xFF2E7D32),
         icon: Icons.inventory_2_outlined,
       ),
       _buildStatCard(
-        title: 'ORDERS TODAY',
+        title: 'ការបញ្ជាទិញថ្ងៃនេះ',
         value: '12',
         valueColor: const Color(0xFF2E7D32),
         icon: Icons.shopping_cart_outlined,
       ),
       _buildStatCard(
-        title: 'REVENUE TODAY',
+        title: 'ចំណូលថ្ងៃនេះ',
         value: '\$1,240',
         valueColor: const Color(0xFFE57373),
         icon: Icons.account_balance_wallet_outlined,
@@ -188,7 +188,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'Recent Orders',
+              'ការបញ្ជាទិញថ្មីៗ',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -200,7 +200,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
               child: const Row(
                 children: [
                   Text(
-                    'View All',
+                    'មើលទាំងអស់',
                     style: TextStyle(
                       color: Color(0xFF2E7D32),
                       fontWeight: FontWeight.w600,
@@ -219,9 +219,9 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         const SizedBox(height: 8),
         _buildOrderItem(
           name: 'The Grand Bistro',
-          orderInfo: 'Order #9821 • 5 mins ago',
+          orderInfo: 'ការបញ្ជាទិញ #9821 • 5 នាទីមុន',
           price: '\$420.00',
-          status: 'Pending',
+          status: 'រង់ចាំ',
           statusBgColor: const Color(0xFFFFE0B2),
           statusTextColor: const Color(0xFFE65100),
           imageUrl: 'https://picsum.photos/id/1080/100/100',
@@ -229,9 +229,9 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         const SizedBox(height: 10),
         _buildOrderItem(
           name: 'Green Plate Kitchen',
-          orderInfo: 'Order #9819 • 2 hrs ago',
+          orderInfo: 'ការបញ្ជាទិញ #9819 • 2 ម៉ោងមុន',
           price: '\$185.50',
-          status: 'Accepted',
+          status: 'បានយល់ព្រម',
           statusBgColor: const Color(0xFFC8E6C9),
           statusTextColor: const Color(0xFF2E7D32),
           imageUrl: 'https://picsum.photos/id/292/100/100',
@@ -239,9 +239,9 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         const SizedBox(height: 10),
         _buildOrderItem(
           name: 'L\'Avenue Hotel',
-          orderInfo: 'Order #9815 • 5 hrs ago',
+          orderInfo: 'ការបញ្ជាទិញ #9815 • 5 ម៉ោងមុន',
           price: '\$892.00',
-          status: 'Accepted',
+          status: 'បានយល់ព្រម',
           statusBgColor: const Color(0xFFC8E6C9),
           statusTextColor: const Color(0xFF2E7D32),
           imageUrl: 'https://picsum.photos/id/102/100/100',
@@ -308,7 +308,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
 
   Widget _buildSalesSummaryCard() {
     final List<double> barHeights = [60, 110, 85, 140, 115, 155, 165];
-    final List<String> days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final List<String> days = ['ចន្ទ', 'អង្គារ', 'ពុធ', 'ព្រហ', 'សុក្រ', 'សៅរ៍', 'អាទិត្យ'];
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -329,7 +329,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Weekly Sales\nSummary',
+                'សង្ខេបការលក់\nប្រចាំសប្តាហ៍',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -341,7 +341,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
                   Icon(Icons.trending_up, color: Color(0xFF2E7D32), size: 18),
                   SizedBox(width: 4),
                   Text(
-                    '+12%\nGrowth',
+                    '+12%\nកំណើន',
                     style: TextStyle(
                       color: Color(0xFF2E7D32),
                       fontSize: 12,
@@ -381,7 +381,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(7, (index) {
-              final isSelected = index == 4; // 'Fri' highlighted
+              final isSelected = index == 4; // 'សុក្រ' (Fri) highlighted
               return Expanded(
                 child: Text(
                   days[index],

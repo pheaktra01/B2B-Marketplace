@@ -36,6 +36,7 @@ export class User {
   isVerified: boolean;
 
   @Column({
+    type: 'text',
     nullable: true,
   })
   otp: string | null;

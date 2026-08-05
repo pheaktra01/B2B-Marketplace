@@ -144,7 +144,7 @@ export class AuthService {
     }
 
     user.password = await bcrypt.hash(dto.password, 10);
-    user.otp = '';
+    user.otp = null;
 
     await this.userRepo.save(user);
 

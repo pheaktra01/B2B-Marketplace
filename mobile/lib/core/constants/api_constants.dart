@@ -1,12 +1,26 @@
+import 'package:flutter/foundation.dart';
+
 class ApiConstants {
-  // Android Emulator
-  // static const String baseUrl = "http://10.0.2.2:3000";
+  static const String _androidBaseUrl = 'http://10.0.2.2:3000';
+  static const String _defaultBaseUrl = 'http://localhost:3000';
+  static const String _overrideBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: '',
+  );
 
-  // iOS Simulator
-  // static const String baseUrl = "http://localhost:3000";
+  static String get baseUrl {
+    if (_overrideBaseUrl.isNotEmpty) {
+      return _overrideBaseUrl;
+    }
 
-  // Flutter Web
-  static const String baseUrl = "http://localhost:3000";
+    if (kIsWeb) {
+      return _defaultBaseUrl;
+    }
 
-  static const String auth = "$baseUrl/auth";
+    return defaultTargetPlatform == TargetPlatform.android
+        ? _androidBaseUrl
+        : _defaultBaseUrl;
+  }
+
+  static String get auth => '$baseUrl/auth';
 }

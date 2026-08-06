@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/screens/forgot_password_screen.dart';
 import 'package:mobile/features/auth/screens/get_started_screen.dart';
 import 'package:mobile/features/auth/screens/role_selection_screen.dart';
-import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
+import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
+import 'package:mobile/features/restaurant/screens/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,8 +18,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authService = AuthService();
 
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -77,6 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               padding: EdgeInsets.all(isDesktopOrTablet ? 32.0 : 24.0),
                               child: Form(
                                 key: _formKey,
+                                autovalidateMode: AutovalidateMode.onUserInteraction,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -160,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                     // --- Phone Number Input Field ---
                                     const Text(
-                                      'លេខទូរស័ព្ទ ឬ អ៊ីមែល',
+                                      'លេខទូរស័ព្ទ',
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
@@ -171,8 +177,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                     TextFormField(
                                       controller: _phoneController,
                                       keyboardType: TextInputType.phone,
+                                      validator: (value) {
+                                        if (value == null || value.trim().isEmpty) {
+                                          return 'សូមបញ្ចូលលេខទូរស័ព្ទ';
+                                        }
+
+                                        if (!RegExp(r'^(0|\+855)\d{8,9}$').hasMatch(value.trim())) {
+                                          return 'លេខទូរស័ព្ទមិនត្រឹមត្រូវ';
+                                        }
+
+                                        return null;
+                                      },
                                       decoration: InputDecoration(
-                                        hintText: '០១២៣៤៥៦៧៨៩ ឬ email@example.com',
+                                        hintText: '០១២៣៤៥៦៧៨៩ ឬ +855123456789',
                                         hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                         filled: true,
@@ -227,6 +244,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     TextFormField(
                                       controller: _passwordController,
                                       obscureText: _obscurePassword,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'សូមបញ្ចូលពាក្យសម្ងាត់';
+                                        }
+
+                                        if (value.length < 6) {
+                                          return 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ';
+                                        }
+
+                                        return null;
+                                      },
                                       decoration: InputDecoration(
                                         hintText: '••••••••',
                                         hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
@@ -263,20 +291,80 @@ class _LoginScreenState extends State<LoginScreen> {
                                       width: double.infinity,
                                       height: 52,
                                       child: ElevatedButton(
-                                        onPressed: () {
-                                          if (_formKey.currentState!.validate()) {
-                                            // Execute authentication workflow 
-                                          }
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => VerifyPhoneScreen(
-                                                type: VerificationType.login,
-                                                phoneNumber: _phoneController.text,
-                                              ),
-                                            ),
-                                          );
-                                        },
+                                        onPressed: _isLoading
+                                            ? null
+                                            : () async {
+                                                if (!_formKey.currentState!.validate()) {
+                                                  return;
+                                                }
+
+                                                final navigator = Navigator.of(context);
+                                                final messenger = ScaffoldMessenger.of(context);
+
+                                                setState(() {
+                                                  _isLoading = true;
+                                                });
+
+                                                try {
+                                                  final response = await _authService.login(
+                                                    phone: _phoneController.text.trim(),
+                                                    password: _passwordController.text,
+                                                  );
+                                                  final data = response['data'] as Map<String, dynamic>;
+
+                                                  final status = response['statusCode'] as int;
+                                                  if (status >= 200 && status < 300) {
+                                                    final user = data['user'] as Map<String, dynamic>;
+                                                    final role = user['role']?.toString();
+                                                    final userId = user['id']?.toString();
+
+                                                    if (userId != null && userId.isNotEmpty) {
+                                                      final prefs = await SharedPreferences.getInstance();
+                                                      await prefs.setString('userId', userId);
+                                                    }
+
+                                                    if (!mounted) {
+                                                      return;
+                                                    }
+
+                                                    navigator.pushReplacement(
+                                                      MaterialPageRoute(
+                                                        builder: (_) => role == 'farmer'
+                                                            ? const FarmerDashboardScreen()
+                                                            : const HomeScreen(),
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    if (!mounted) {
+                                                      return;
+                                                    }
+
+                                                    messenger.showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          data['message']?.toString() ?? 'Login failed',
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
+                                                } catch (error) {
+                                                  if (!mounted) {
+                                                    return;
+                                                  }
+
+                                                  messenger.showSnackBar(
+                                                    SnackBar(
+                                                      content: Text('Unable to login: $error'),
+                                                    ),
+                                                  );
+                                                } finally {
+                                                  if (mounted) {
+                                                    setState(() {
+                                                      _isLoading = false;
+                                                    });
+                                                  }
+                                                }
+                                              },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: primaryGreen,
                                           foregroundColor: Colors.white,

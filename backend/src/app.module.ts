@@ -5,6 +5,20 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
+// Debug env values for DB connection troubleshooting (masked)
+try {
+  const pwd = process.env.DB_PASSWORD;
+  console.log('DB ENV:', {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    username: process.env.DB_USERNAME,
+    passwordType: typeof pwd,
+    passwordLength: pwd ? pwd.length : 0,
+    database: process.env.DB_DATABASE,
+  });
+} catch (e) {
+  console.log('Error reading DB env:', e);
+}
 
 @Module({
   imports: [

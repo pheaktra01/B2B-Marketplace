@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/screens/role_selection_screen.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
 
@@ -16,6 +17,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _authService = AuthService();
 
   // Controllers to retrieve input data
   final _nameController = TextEditingController();
@@ -29,6 +31,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreedToTerms = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -90,6 +93,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               padding: EdgeInsets.all(isDesktopOrTablet ? 32.0 : 24.0),
                               child: Form(
                                 key: _formKey,
+                                autovalidateMode: AutovalidateMode.onUserInteraction,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
@@ -168,6 +172,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               hint: 'បញ្ចូលឈ្មោះពេញ',
                                               prefixIcon: Icons.person_outline,
                                               controller: _nameController,
+                                              validator: (value) {
+                                                if (value == null || value.trim().isEmpty) {
+                                                  return 'សូមបញ្ចូលឈ្មោះពេញ';
+                                                }
+                                                return null;
+                                              },
                                               fillColor: inputFill,
                                             ),
                                           ),
@@ -179,6 +189,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               prefixIcon: Icons.mail_outline,
                                               controller: _emailController,
                                               keyboardType: TextInputType.emailAddress,
+                                              validator: (value) {
+                                                if (value == null || value.trim().isEmpty) {
+                                                  return 'សូមបញ្ចូលអ៊ីមែល';
+                                                }
+
+                                                if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value.trim())) {
+                                                  return 'អ៊ីមែលមិនត្រឹមត្រូវ';
+                                                }
+
+                                                return null;
+                                              },
                                               fillColor: inputFill,
                                             ),
                                           ),
@@ -194,6 +215,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               prefixIcon: Icons.phone_outlined,
                                               controller: _phoneController,
                                               keyboardType: TextInputType.phone,
+                                              validator: (value) {
+                                                if (value == null || value.trim().isEmpty) {
+                                                  return 'សូមបញ្ចូលលេខទូរស័ព្ទ';
+                                                }
+
+                                                if (!RegExp(r'^(0|\+855)\d{8,9}$').hasMatch(value.trim())) {
+                                                  return 'លេខទូរស័ព្ទមិនត្រឹមត្រូវ';
+                                                }
+
+                                                return null;
+                                              },
                                               fillColor: inputFill,
                                             ),
                                           ),
@@ -204,6 +236,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               hint: 'ឈ្មោះសហគ្រាស',
                                               prefixIcon: Icons.storefront_outlined,
                                               controller: _enterpriseController,
+                                              validator: (value) {
+                                                if (value == null || value.trim().isEmpty) {
+                                                  return 'សូមបញ្ចូលឈ្មោះភោជនីយដ្ឋាន / កសិដ្ឋាន';
+                                                }
+                                                return null;
+                                              },
                                               fillColor: inputFill,
                                             ),
                                           ),
@@ -219,6 +257,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               prefixIcon: Icons.lock_outline,
                                               controller: _passwordController,
                                               obscureText: _obscurePassword,
+                                              validator: (value) {
+                                                if (value == null || value.isEmpty) {
+                                                  return 'សូមបញ្ចូលពាក្យសម្ងាត់';
+                                                }
+
+                                                if (value.length < 8) {
+                                                  return 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ';
+                                                }
+                                                return null;
+                                              },
                                               fillColor: inputFill,
                                               suffixIcon: IconButton(
                                                 icon: Icon(
@@ -239,6 +287,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               prefixIcon: Icons.lock_outline,
                                               controller: _confirmPasswordController,
                                               obscureText: _obscureConfirmPassword,
+                                              validator: (value) {
+                                                if (value == null || value.isEmpty) {
+                                                  return 'សូមបញ្ជាក់ពាក្យសម្ងាត់';
+                                                }
+
+                                                if (value != _passwordController.text) {
+                                                  return 'ពាក្យសម្ងាត់មិនត្រូវគ្នា';
+                                                }
+                                                return null;
+                                              },
                                               fillColor: inputFill,
                                               suffixIcon: IconButton(
                                                 icon: Icon(
@@ -261,6 +319,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         hint: 'បញ្ចូលឈ្មោះពេញរបស់អ្នក',
                                         prefixIcon: Icons.person_outline,
                                         controller: _nameController,
+                                        validator: (value) {
+                                          if (value == null || value.trim().isEmpty) {
+                                            return 'សូមបញ្ចូលឈ្មោះពេញ';
+                                          }
+                                          return null;
+                                        },
                                         fillColor: inputFill,
                                       ),
                                       _buildInputField(
@@ -269,6 +333,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         prefixIcon: Icons.mail_outline,
                                         controller: _emailController,
                                         keyboardType: TextInputType.emailAddress,
+                                        validator: (value) {
+                                          if (value == null || value.trim().isEmpty) {
+                                            return 'សូមបញ្ចូលអ៊ីមែល';
+                                          }
+
+                                          if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value.trim())) {
+                                            return 'អ៊ីមែលមិនត្រឹមត្រូវ';
+                                          }
+
+                                          return null;
+                                        },
                                         fillColor: inputFill,
                                       ),
                                       _buildInputField(
@@ -277,6 +352,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         prefixIcon: Icons.phone_outlined,
                                         controller: _phoneController,
                                         keyboardType: TextInputType.phone,
+                                        validator: (value) {
+                                          if (value == null || value.trim().isEmpty) {
+                                            return 'សូមបញ្ចូលលេខទូរស័ព្ទ';
+                                          }
+
+                                          if (!RegExp(r'^(0|\+855)\d{8,9}$').hasMatch(value.trim())) {
+                                            return 'លេខទូរស័ព្ទមិនត្រឹមត្រូវ';
+                                          }
+
+                                          return null;
+                                        },
                                         fillColor: inputFill,
                                       ),
                                       _buildInputField(
@@ -284,6 +370,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         hint: 'ឈ្មោះសហគ្រាសរបស់អ្នក',
                                         prefixIcon: Icons.storefront_outlined,
                                         controller: _enterpriseController,
+                                        validator: (value) {
+                                          if (value == null || value.trim().isEmpty) {
+                                            return 'សូមបញ្ចូលឈ្មោះភោជនីយដ្ឋាន / កសិដ្ឋាន';
+                                          }
+                                          return null;
+                                        },
                                         fillColor: inputFill,
                                       ),
                                       _buildInputField(
@@ -292,6 +384,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         prefixIcon: Icons.lock_outline,
                                         controller: _passwordController,
                                         obscureText: _obscurePassword,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'សូមបញ្ចូលពាក្យសម្ងាត់';
+                                          }
+
+                                          if (value.length < 8) {
+                                            return 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ';
+                                          }
+
+                                          return null;
+                                        },
                                         fillColor: inputFill,
                                         suffixIcon: IconButton(
                                           icon: Icon(
@@ -309,6 +412,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         prefixIcon: Icons.lock_outline,
                                         controller: _confirmPasswordController,
                                         obscureText: _obscureConfirmPassword,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'សូមបញ្ជាក់ពាក្យសម្ងាត់';
+                                          }
+
+                                          if (value != _passwordController.text) {
+                                            return 'ពាក្យសម្ងាត់មិនត្រូវគ្នា';
+                                          }
+
+                                          return null;
+                                        },
                                         fillColor: inputFill,
                                         suffixIcon: IconButton(
                                           icon: Icon(
@@ -381,21 +495,77 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                           elevation: 0,
                                         ),
-                                        onPressed: () {
-                                          if (_formKey.currentState!.validate() && _agreedToTerms) {
-                                            // Registration logic
-                                          }
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => VerifyPhoneScreen(
-                                                type: VerificationType.signup,
-                                                phoneNumber: _phoneController.text,
-                                                selectedRole: widget.selectedRole,
-                                              ),
-                                            ),
-                                          );
-                                        },
+                                        onPressed: _isLoading
+                                            ? null
+                                            : () async {
+                                                if (!_formKey.currentState!.validate() || !_agreedToTerms) {
+                                                  return;
+                                                }
+
+                                                final navigator = Navigator.of(context);
+                                                final messenger = ScaffoldMessenger.of(context);
+
+                                                setState(() {
+                                                  _isLoading = true;
+                                                });
+
+                                                try {
+                                                  final response = await _authService.register(
+                                                    name: _nameController.text.trim(),
+                                                    phone: _phoneController.text.trim(),
+                                                    password: _passwordController.text,
+                                                    role: widget.selectedRole,
+                                                  );
+                                                  final data = response['data'] as Map<String, dynamic>;
+
+                                                  if (response['statusCode'] == 201 || response['statusCode'] == 200) {
+                                                    if (!mounted) {
+                                                      return;
+                                                    }
+
+                                                    navigator.pushReplacement(
+                                                      MaterialPageRoute(
+                                                        builder: (_) => VerifyPhoneScreen(
+                                                          type: VerificationType.signup,
+                                                          phoneNumber: _phoneController.text.trim(),
+                                                          selectedRole: widget.selectedRole,
+                                                          userId: data['userId']?.toString(),
+                                                          initialOtp: data['otp']?.toString(),
+                                                          password: _passwordController.text,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    if (!mounted) {
+                                                      return;
+                                                    }
+
+                                                    messenger.showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          data['message']?.toString() ?? 'Sign up failed',
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
+                                                } catch (error) {
+                                                  if (!mounted) {
+                                                    return;
+                                                  }
+
+                                                  messenger.showSnackBar(
+                                                    SnackBar(
+                                                      content: Text('Unable to sign up: $error'),
+                                                    ),
+                                                  );
+                                                } finally {
+                                                  if (mounted) {
+                                                    setState(() {
+                                                      _isLoading = false;
+                                                    });
+                                                  }
+                                                }
+                                              },
                                         child: const Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
@@ -431,6 +601,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     required String hint,
     required IconData prefixIcon,
     required TextEditingController controller,
+    String? Function(String?)? validator,
     TextInputType keyboardType = TextInputType.text,
     bool obscureText = false,
     Widget? suffixIcon,
@@ -454,6 +625,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             controller: controller,
             keyboardType: keyboardType,
             obscureText: obscureText,
+            validator: validator,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: const TextStyle(color: Colors.black38, fontSize: 14),

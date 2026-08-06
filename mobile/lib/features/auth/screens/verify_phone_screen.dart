@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/screens/reset_password_screen.dart';
 import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
 import 'package:mobile/features/restaurant/screens/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class VerifyPhoneScreen extends StatefulWidget {
   final VerificationType type;
   final String phoneNumber;
   final String? selectedRole;
+  final String? userId;
+  final String? initialOtp;
+  final String? password;
 
   const VerifyPhoneScreen({
     super.key,
     required this.type,
     required this.phoneNumber,
     this.selectedRole,
+    this.userId,
+    this.initialOtp,
+    this.password,
   });
 
   @override
@@ -28,6 +36,7 @@ enum VerificationType {
 
 class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _authService = AuthService();
 
   // Create 6 controllers and 6 focus nodes for the 6-digit OTP fields
   final List<TextEditingController> _controllers = List.generate(
@@ -35,6 +44,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
     (_) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+  bool _isLoading = false;
 
   String get buttonText {
     switch (widget.type) {
@@ -50,6 +60,18 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
   bool get showBackButton => widget.type == VerificationType.signup;
 
   bool get showChangePhone => widget.type != VerificationType.signup;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final initialOtp = widget.initialOtp;
+    if (initialOtp != null && initialOtp.length == 6) {
+      for (var index = 0; index < _controllers.length; index++) {
+        _controllers[index].text = initialOtp[index];
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -230,52 +252,158 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                     ),
                                     elevation: 1,
                                   ),
-                                  onPressed: () {
-                                    if (_currentOtpCode.length == 6) {
-                                      switch (widget.type) {
-                                        case VerificationType.login:
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const FarmerDashboardScreen(),
-                                            ),
-                                          );
-                                          break;
-
-                                        case VerificationType.signup:
-                                          if (widget.selectedRole == 'farmer') {
-                                            Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    const FarmerDashboardScreen(),
-                                              ),
-                                            );
-                                          } else if (widget.selectedRole ==
-                                              'restaurant') {
-                                            Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    const HomeScreen(),
-                                              ),
-                                            );
+                                  onPressed: _isLoading
+                                      ? null
+                                      : () async {
+                                          if (_currentOtpCode.length != 6) {
+                                            return;
                                           }
-                                          break;
 
-                                        case VerificationType.forgotPassword:
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const ResetPasswordScreen(),
-                                            ),
-                                          );
-                                          break;
-                                      }
-                                    }
-                                  },
+                                          final navigator = Navigator.of(context);
+                                          final messenger = ScaffoldMessenger.of(context);
+
+                                          setState(() {
+                                            _isLoading = true;
+                                          });
+
+                                          try {
+                                            switch (widget.type) {
+                                              case VerificationType.login:
+                                                if (widget.selectedRole == 'farmer') {
+                                                  navigator.pushReplacement(
+                                                    MaterialPageRoute(
+                                                      builder: (_) => const FarmerDashboardScreen(),
+                                                    ),
+                                                  );
+                                                } else if (widget.selectedRole == 'restaurant') {
+                                                  navigator.pushReplacement(
+                                                    MaterialPageRoute(
+                                                      builder: (_) => const HomeScreen(),
+                                                    ),
+                                                  );
+                                                } else {
+                                                  // Fallback: default to farmer dashboard
+                                                  navigator.pushReplacement(
+                                                    MaterialPageRoute(
+                                                      builder: (_) => const FarmerDashboardScreen(),
+                                                    ),
+                                                  );
+                                                }
+                                                break;
+
+                                              case VerificationType.signup:
+                                                if (widget.userId == null || widget.userId!.isEmpty) {
+                                                  throw StateError('Missing user id for verification');
+                                                }
+                                                final response = await _authService.verifyOtp(
+                                                  userId: widget.userId!,
+                                                  otp: _currentOtpCode,
+                                                );
+                                                final data = response['data'] as Map<String, dynamic>;
+
+                                                final status = response['statusCode'] as int;
+                                                if (status < 200 || status >= 300) {
+                                                  throw StateError(data['message']?.toString() ?? 'OTP verification failed');
+                                                }
+
+                                                final prefs = await SharedPreferences.getInstance();
+                                                await prefs.setString('userId', widget.userId!);
+
+                                                // After successful verification, if we have the password (from signup), auto-login
+                                                if (widget.password != null && widget.password!.isNotEmpty) {
+                                                  final loginResp = await _authService.login(
+                                                    phone: widget.phoneNumber,
+                                                    password: widget.password!,
+                                                  );
+
+                                                  final loginData = loginResp['data'] as Map<String, dynamic>;
+
+                                                  final loginStatus = loginResp['statusCode'] as int;
+                                                  if (loginStatus >= 200 && loginStatus < 300) {
+                                                    final user = loginData['user'] as Map<String, dynamic>?;
+                                                    final role = user?['role']?.toString();
+                                                    final loggedInUserId = user?['id']?.toString();
+
+                                                    if (loggedInUserId != null && loggedInUserId.isNotEmpty) {
+                                                      await prefs.setString('userId', loggedInUserId);
+                                                    }
+
+                                                    if (role == 'farmer') {
+                                                      navigator.pushReplacement(
+                                                        MaterialPageRoute(
+                                                          builder: (_) => const FarmerDashboardScreen(),
+                                                        ),
+                                                      );
+                                                    } else {
+                                                      navigator.pushReplacement(
+                                                        MaterialPageRoute(
+                                                          builder: (_) => const HomeScreen(),
+                                                        ),
+                                                      );
+                                                    }
+                                                  } else {
+                                                    // If login failed, still navigate based on selectedRole to continue UX flow
+                                                    if (widget.selectedRole == 'farmer') {
+                                                      navigator.pushReplacement(
+                                                        MaterialPageRoute(
+                                                          builder: (_) => const FarmerDashboardScreen(),
+                                                        ),
+                                                      );
+                                                    } else {
+                                                      navigator.pushReplacement(
+                                                        MaterialPageRoute(
+                                                          builder: (_) => const HomeScreen(),
+                                                        ),
+                                                      );
+                                                    }
+                                                  }
+                                                } else {
+                                                  // No password provided: just route by selectedRole
+                                                  if (widget.selectedRole == 'farmer') {
+                                                    navigator.pushReplacement(
+                                                      MaterialPageRoute(
+                                                        builder: (_) => const FarmerDashboardScreen(),
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    navigator.pushReplacement(
+                                                      MaterialPageRoute(
+                                                        builder: (_) => const HomeScreen(),
+                                                      ),
+                                                    );
+                                                  }
+                                                }
+                                                break;
+
+                                              case VerificationType.forgotPassword:
+                                                navigator.push(
+                                                  MaterialPageRoute(
+                                                    builder: (_) => ResetPasswordScreen(
+                                                      phoneNumber: widget.phoneNumber,
+                                                      otp: _currentOtpCode,
+                                                    ),
+                                                  ),
+                                                );
+                                                break;
+                                            }
+                                          } catch (error) {
+                                            if (!mounted) {
+                                              return;
+                                            }
+
+                                            messenger.showSnackBar(
+                                              SnackBar(
+                                                content: Text('Unable to verify OTP: $error'),
+                                              ),
+                                            );
+                                          } finally {
+                                            if (mounted) {
+                                              setState(() {
+                                                _isLoading = false;
+                                              });
+                                            }
+                                          }
+                                        },
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [

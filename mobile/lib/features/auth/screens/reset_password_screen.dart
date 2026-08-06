@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/auth/services/auth_service.dart';
+import 'package:mobile/features/auth/screens/login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  final String phoneNumber;
+  final String otp;
+
+  const ResetPasswordScreen({
+    super.key,
+    required this.phoneNumber,
+    required this.otp,
+  });
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -11,9 +20,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _authService = AuthService();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
 
   // Validation states for password dynamic checklist
   bool _isLongEnough = false;
@@ -262,13 +273,73 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                       ),
                                       elevation: 1,
                                     ),
-                                    onPressed: () {
-                                      if (_formKey.currentState!.validate() &&
-                                          _isLongEnough &&
-                                          _hasNumberOrSymbol) {
-                                        // Process secure reset action here
-                                      }
-                                    },
+                                    onPressed: _isLoading
+                                        ? null
+                                        : () async {
+                                            if (!_formKey.currentState!.validate() ||
+                                                !_isLongEnough ||
+                                                !_hasNumberOrSymbol) {
+                                              return;
+                                            }
+
+                                            final navigator = Navigator.of(context);
+                                            final messenger = ScaffoldMessenger.of(context);
+
+                                            setState(() {
+                                              _isLoading = true;
+                                            });
+
+                                            try {
+                                              final response = await _authService.resetPassword(
+                                                phone: widget.phoneNumber,
+                                                otp: widget.otp,
+                                                password: _passwordController.text,
+                                              );
+                                              final data = response['data'] as Map<String, dynamic>;
+
+                                              final status = response['statusCode'] as int;
+                                              if (status >= 200 && status < 300) {
+                                                if (!mounted) {
+                                                  return;
+                                                }
+
+                                                navigator.pushAndRemoveUntil(
+                                                  MaterialPageRoute(
+                                                    builder: (_) => const LoginScreen(),
+                                                  ),
+                                                  (route) => false,
+                                                );
+                                              } else {
+                                                if (!mounted) {
+                                                  return;
+                                                }
+
+                                                messenger.showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      data['message']?.toString() ?? 'Reset password failed',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            } catch (error) {
+                                              if (!mounted) {
+                                                return;
+                                              }
+
+                                              messenger.showSnackBar(
+                                                SnackBar(
+                                                  content: Text('Unable to reset password: $error'),
+                                                ),
+                                              );
+                                            } finally {
+                                              if (mounted) {
+                                                setState(() {
+                                                  _isLoading = false;
+                                                });
+                                              }
+                                            }
+                                          },
                                     child: const Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [

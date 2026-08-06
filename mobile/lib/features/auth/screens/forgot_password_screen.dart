@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/screens/login_screen.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
 
@@ -12,6 +13,9 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _identifierController = TextEditingController();
+  final _authService = AuthService();
+
+  bool _isLoading = false;
 
   String get phone => _identifierController.text;
 
@@ -103,6 +107,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                         child: Form(
                           key: _formKey,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -130,7 +135,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                               // --- Input Field ---
                               const Text(
-                                'អ៊ីមែល ឬ លេខទូរស័ព្ទ',
+                                'លេខទូរស័ព្ទ',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -140,9 +145,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               const SizedBox(height: 6),
                               TextFormField(
                                 controller: _identifierController,
-                                keyboardType: TextInputType.emailAddress,
+                                keyboardType: TextInputType.phone,
                                 decoration: InputDecoration(
-                                  hintText: 'name@central-kitchen.com ឬ ០១២៣៤៥៦៧៨',
+                                  hintText: '០១២៣៤៥៦៧៨៩ ឬ +855123456789',
                                   hintStyle: const TextStyle(
                                     color: Colors.black38,
                                     fontSize: 14,
@@ -179,8 +184,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
-                                    return 'សូមបញ្ចូលអ៊ីមែល ឬលេខទូរស័ព្ទរបស់អ្នក';
+                                    return 'សូមបញ្ចូលលេខទូរស័ព្ទរបស់អ្នក';
                                   }
+
+                                  if (!RegExp(r'^(0|\+855)\d{8,9}$').hasMatch(value.trim())) {
+                                    return 'លេខទូរស័ព្ទមិនត្រឹមត្រូវ';
+                                  }
+
                                   return null;
                                 },
                               ),
@@ -200,19 +210,72 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     ),
                                     elevation: 1,
                                   ),
-                                  onPressed: () {
-                                    if (_formKey.currentState!.validate()) {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => VerifyPhoneScreen(
-                                            type: VerificationType.forgotPassword,
-                                            phoneNumber: phone,
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  },
+                                  onPressed: _isLoading
+                                      ? null
+                                      : () async {
+                                          if (!_formKey.currentState!.validate()) {
+                                            return;
+                                          }
+
+                                          final navigator = Navigator.of(context);
+                                          final messenger = ScaffoldMessenger.of(context);
+
+                                          setState(() {
+                                            _isLoading = true;
+                                          });
+
+                                          try {
+                                            final response = await _authService.forgotPassword(
+                                              phone: phone.trim(),
+                                            );
+                                            final data = response['data'] as Map<String, dynamic>;
+
+                                            final status = response['statusCode'] as int;
+                                            if (status >= 200 && status < 300) {
+                                              if (!mounted) {
+                                                return;
+                                              }
+
+                                              navigator.pushReplacement(
+                                                MaterialPageRoute(
+                                                  builder: (_) => VerifyPhoneScreen(
+                                                    type: VerificationType.forgotPassword,
+                                                    phoneNumber: phone.trim(),
+                                                    initialOtp: data['otp']?.toString(),
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              if (!mounted) {
+                                                return;
+                                              }
+
+                                              messenger.showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    data['message']?.toString() ?? 'Unable to request OTP',
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          } catch (error) {
+                                            if (!mounted) {
+                                              return;
+                                            }
+
+                                            messenger.showSnackBar(
+                                              SnackBar(
+                                                content: Text('Unable to request OTP: $error'),
+                                              ),
+                                            );
+                                          } finally {
+                                            if (mounted) {
+                                              setState(() {
+                                                _isLoading = false;
+                                              });
+                                            }
+                                          }
+                                        },
                                   child: const Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [

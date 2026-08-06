@@ -53,6 +53,16 @@ export class User {
   refreshToken: string;
 
   @Column({
+    nullable: true,
+  })
+  avatarUrl: string;
+
+  @Column({
+    nullable: true,
+  })
+  coverUrl: string;
+
+  @Column({
     default: true,
   })
   isActive: boolean;

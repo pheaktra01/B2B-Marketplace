@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/screens/forgot_password_screen.dart';
 import 'package:mobile/features/auth/screens/get_started_screen.dart';
-import 'package:mobile/features/auth/screens/role_selection_screen.dart';
 import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
 import 'package:mobile/features/restaurant/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -6,15 +6,19 @@ class FarmerAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
   final bool showLogo;
+  final bool isProfileScreen;
+  final VoidCallback? onSettingsTap;
 
   const FarmerAppBar({
     super.key,
     this.title = '',
     this.actions,
     this.showLogo = true,
+    this.isProfileScreen = false,
+    this.onSettingsTap,
   });
 
-@override
+  @override
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
@@ -39,7 +43,7 @@ class FarmerAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'ផ្សារកសិករ',
+                  'PsarKasekor',
                   style: TextStyle(
                     color: const Color(0xFF2E7D32).withValues(alpha: 0.9),
                     fontWeight: FontWeight.bold,
@@ -69,31 +73,43 @@ class FarmerAppBar extends StatelessWidget implements PreferredSizeWidget {
             const SizedBox(width: 4),
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const FarmerProfileScreen(),
+              child: isProfileScreen
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.settings,
+                        size: 28,
+                        color: const Color(0xFF2E7D32).withValues(alpha: 0.9),
+                      ),
+                      onPressed: onSettingsTap ??
+                          () {
+                            // Navigate to Settings screen here
+                          },
+                    )
+                  : InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const FarmerProfileScreen(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFF2E7D32).withValues(alpha: 0.8),
+                            width: 2.0,
+                          ),
+                        ),
+                        child: const CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Colors.transparent,
+                          backgroundImage: AssetImage('assets/profile.png'),
+                        ),
+                      ),
                     ),
-                  );
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xFF2E7D32).withValues(alpha: 0.8),
-                      width: 2.0,
-                    ),
-                  ),
-                  child: const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.transparent,
-                    backgroundImage: AssetImage('assets/profile.png'),
-                  ),
-                ),
-              ),
             ),
           ],
     );

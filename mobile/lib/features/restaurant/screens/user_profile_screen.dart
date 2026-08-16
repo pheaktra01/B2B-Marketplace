@@ -29,7 +29,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           const Padding(
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
-              backgroundImage: NetworkImage('assets/profile.png'),
+              backgroundImage: AssetImage('assets/profile.png'),
             ),
           ),
         ],
@@ -134,7 +134,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
             child: const CircleAvatar(
               radius: 50,
-              backgroundImage: NetworkImage(
+              backgroundImage: AssetImage(
                 'assets/profile.png',
               ),
             ),

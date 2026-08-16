@@ -36,7 +36,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           const Padding(
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
-              backgroundImage: NetworkImage('assets/profile.png'),
+              backgroundImage: AssetImage('assets/profile.png'),
             ),
           ),
         ],
@@ -134,12 +134,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: Colors.orange,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.edit_note, color: Colors.white, size: 28),
       ),
       bottomNavigationBar: const RestaurantBottomNavBar(
         currentIndex: 3,

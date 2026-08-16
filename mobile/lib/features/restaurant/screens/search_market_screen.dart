@@ -217,46 +217,145 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   }
 
   Widget _buildBrowseCategoriesSection() {
+    final categories = [
+      {
+        'title': 'Vegetables',
+        'icon': Icons.eco_rounded,
+        'bgColor': const Color(0xFFEAF5EA),
+        'accentColor': const Color(0xFF2D6A4F),
+      },
+      {
+        'title': 'Fruits',
+        'icon': Icons.apple_rounded,
+        'bgColor': const Color(0xFFFFF3E0),
+        'accentColor': const Color(0xFFE65100),
+      },
+      {
+        'title': 'Meat',
+        'icon': Icons.set_meal_rounded,
+        'bgColor': const Color(0xFFFFEBEE),
+        'accentColor': const Color(0xFFC62828),
+      },
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Browse Categories',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Browse Categories',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+                letterSpacing: -0.2,
+              ),
+            ),
+            GestureDetector(
+              onTap: () {},
+              child: const Text(
+                'See All',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: primaryGreen,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         Row(
-          children: [
-            _buildCategoryTile('Vegetables', Icons.eco_outlined, const Color(0xFFE2EAD8)),
-            const SizedBox(width: 12),
-            _buildCategoryTile('Fruits', Icons.apple_outlined, const Color(0xFFA66000), iconColor: Colors.white),
-            const SizedBox(width: 12),
-            _buildCategoryTile('Meat', Icons.restaurant_outlined, const Color(0xFFFBE4E4)),
-          ],
+          children: categories.map((cat) {
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: _buildCategoryTile(
+                  title: cat['title'] as String,
+                  icon: cat['icon'] as IconData,
+                  bgColor: cat['bgColor'] as Color,
+                  accentColor: cat['accentColor'] as Color,
+                  onTap: () {
+                    // Handle category selection
+                  },
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ],
     );
   }
 
-  Widget _buildCategoryTile(String title, IconData icon, Color bgColor, {Color iconColor = const Color(0xFF425633)}) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            height: 64,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(16),
+  Widget _buildCategoryTile({
+    required String title,
+    required IconData icon,
+    required Color bgColor,
+    required Color accentColor,
+    VoidCallback? onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: accentColor.withValues(alpha: 0.12),
+              width: 1,
             ),
-            child: Icon(icon, color: iconColor, size: 28),
+            boxShadow: [
+              BoxShadow(
+                color: accentColor.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black87),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Inner soft white badge container behind the icon
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: accentColor.withValues(alpha: 0.1),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  icon,
+                  color: accentColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black.withValues(alpha: 0.8),
+                  letterSpacing: -0.1,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -14,52 +14,52 @@ class InventoryScreen extends StatefulWidget {
 class _InventoryScreenState extends State<InventoryScreen> {
   int _selectedFilterIndex = 0;
 
-  final List<String> _filters = ['ទំនិញទាំងអស់', 'បន្លែ', 'បន្លែពន្លក'];
+  final List<String> _filters = ['All Items', 'Vegetables', 'Microgreens'];
 
-  // Sample data to match the UI precisely with Khmer text & Western numbers
+  // Sample data updated with English text
   final List<Map<String, dynamic>> _inventoryItems = [
     {
-      'name': 'ប៉េងប៉ោះបុរាណ',
+      'name': 'Heirloom Tomatoes',
       'price': '\$4.50',
-      'unit': '/គីឡូក្រាម',
-      'stockText': 'នៅសល់ 120 គីឡូក្រាម',
+      'unit': '/kg',
+      'stockText': '120 kg remaining',
       'progress': 0.85,
-      'status': 'សកម្ម',
+      'status': 'Active',
       'statusColor': const Color(0xFF1E5631),
       'progressColor': const Color(0xFF1E5631),
       'isAvailable': true,
       'imageUrl': 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600',
     },
     {
-      'name': 'សាឡាត់ Baby Arugula',
+      'name': 'Baby Arugula',
       'price': '\$12.00',
-      'unit': '/កេស',
-      'stockText': 'នៅសល់ 8 កេស',
+      'unit': '/case',
+      'stockText': '8 cases remaining',
       'progress': 0.2,
-      'status': 'ស្តុកទាប',
+      'status': 'Low Stock',
       'statusColor': const Color(0xFFD9534F),
       'progressColor': const Color(0xFFD9534F),
       'isAvailable': true,
       'imageUrl': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600',
     },
     {
-      'name': 'ការ៉ុតចម្រុះពណ៌',
+      'name': 'Rainbow Carrots',
       'price': '\$3.20',
-      'unit': '/គីឡូក្រាម',
-      'stockText': 'នៅសល់ 0 គីឡូក្រាម',
+      'unit': '/kg',
+      'stockText': '0 kg remaining',
       'progress': 0.0,
-      'status': 'អសកម្ម',
+      'status': 'Inactive',
       'statusColor': Colors.grey,
       'progressColor': Colors.grey,
       'isAvailable': false,
-      'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvkvNcrsOhsZCTUZOu-w7gOezd1Sk2eHM-dYSO6niL28zY5SLuzl0xAU1f&s=10', // Placeholder local asset
+      'imageUrl': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvkvNcrsOhsZCTUZOu-w7gOezd1Sk2eHM-dYSO6niL28zY5SLuzl0xAU1f&s=10',
     },
   ];
 
   @override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF1E5631);
-    const backgroundColor = Color(0xFFF7F6E8); // Off-white/light yellow tint background
+    const backgroundColor = Color(0xFFF7F6E8);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -79,7 +79,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           const Padding(
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
-              backgroundImage: NetworkImage('assets/profile.png'),
+              backgroundImage: AssetImage('assets/profile.png'),
             ),
           ),
         ],
@@ -92,7 +92,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             const SizedBox(height: 8),
             // Header Title & Subtitle
             const Text(
-              'ការគ្រប់គ្រងស្តុក',
+              'Inventory Management',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -101,7 +101,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'តាមដានទិន្នផល និងគ្រប់គ្រងកម្រិតការផ្គត់ផ្គង់ផ្ទះបាយរបស់អ្នក។',
+              'Track yield and manage your kitchen supply levels.',
               style: TextStyle(fontSize: 13, color: Colors.grey[700]),
             ),
             const SizedBox(height: 16),
@@ -111,7 +111,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               children: [
                 Expanded(
                   child: _buildSummaryCard(
-                    title: 'ទំនិញសកម្ម',
+                    title: 'ACTIVE ITEMS',
                     value: '24',
                     valueColor: primaryColor,
                   ),
@@ -119,7 +119,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildSummaryCard(
-                    title: 'ស្តុកទាប',
+                    title: 'LOW STOCK',
                     value: '3',
                     valueColor: const Color(0xFFB71C1C),
                   ),
@@ -144,7 +144,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   Expanded(
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: 'ស្វែងរកស្តុករបស់អ្នក...',
+                        hintText: 'Search your inventory...',
                         hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
                         border: InputBorder.none,
                       ),
@@ -212,11 +212,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => const AddProductScreen(), // Placeholder for Add Item Screen
+              builder: (_) => const AddProductScreen(),
             ),
           );
         },
-        backgroundColor: const Color(0xFFB86A04), // Warm accent brown/orange color
+        backgroundColor: const Color(0xFFB86A04),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
@@ -303,10 +303,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (item['status'] == 'ស្តុកទាប') ...[
+                      if (item['status'] == 'Low Stock') ...[
                         const Icon(Icons.warning_amber_rounded, size: 14, color: Color(0xFFD9534F)),
                         const SizedBox(width: 4),
-                      ] else if (item['status'] == 'សកម្ម') ...[
+                      ] else if (item['status'] == 'Active') ...[
                         const Icon(Icons.circle, size: 8, color: Color(0xFF1E5631)),
                         const SizedBox(width: 4),
                       ],
@@ -370,7 +370,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
                 // Stock Level Label & Progress Bar
                 Text(
-                  'កម្រិតស្តុក',
+                  'Stock Level',
                   style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 6),
@@ -389,7 +389,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: item['status'] == 'ស្តុកទាប' ? const Color(0xFFD9534F) : Colors.grey[700],
+                    color: item['status'] == 'Low Stock' ? const Color(0xFFD9534F) : Colors.grey[700],
                   ),
                 ),
                 const Divider(height: 24, thickness: 1),
@@ -398,7 +398,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 Row(
                   children: [
                     Text(
-                      'មានលក់',
+                      'Available for Sale',
                       style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                     ),
                     const SizedBox(width: 8),

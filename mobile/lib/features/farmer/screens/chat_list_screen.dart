@@ -19,7 +19,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
   static const Color primaryGreen = Color(0xFF1B5E20);
   static const Color pageBg = Color(0xFFF5F5E9);
 
-  final List<String> categories = ['សារទាំងអស់', 'ភោជនីយដ្ឋាន', 'ការដឹកជញ្ជូន', 'គាំទ្រ'];
+  // Updated categories list to English
+  final List<String> categories = ['All Messages', 'Restaurants', 'Deliveries', 'Support'];
 
   // Mock data representing the conversations in the screenshot
   final List<Conversation> conversations = mockConversations;
@@ -44,7 +45,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           const Padding(
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
-              backgroundImage: NetworkImage('assets/profile.png'),
+              backgroundImage: AssetImage('assets/profile.png'),
             ),
           ),
         ],
@@ -58,7 +59,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'ស្វែងរកការសន្ទនា...',
+                hintText: 'Search conversations...',
                 hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                 filled: true,

@@ -28,7 +28,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           },
         ),
         title: const Text(
-          'ការជូនដំណឹង',
+          'Notifications',
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
@@ -39,7 +39,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           TextButton(
             onPressed: () {},
             child: const Text(
-              'អានទាំងអស់',
+              'Mark all as read',
               style: TextStyle(
                 color: primaryGreen,
                 fontWeight: FontWeight.w600,
@@ -58,7 +58,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'ថ្ងៃនេះ',
+                'TODAY',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -73,7 +73,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Text(
-                  'ថ្មី 3',
+                  '3 NEW',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 10,
@@ -97,10 +97,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
               child: const Icon(Icons.storefront, color: primaryGreen, size: 22),
             ),
-            title: 'ការបញ្ជាទិញថ្មី #8821',
-            timeAgo: '2 នាទីមុន',
+            title: 'New Order #8821',
+            timeAgo: '2m ago',
             bodyText:
-                'ហាង The Bistro Kitchen បានកុម្ម៉ង់ទិញប៉េងប៉ោះ Heirloom ចំនួន 40kg។',
+                'The Bistro Kitchen ordered 40kg of Heirloom Tomatoes.',
             actionWidget: Row(
               children: [
                 ElevatedButton(
@@ -115,7 +115,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   ),
                   child: const Text(
-                    'មើលការបញ្ជាទិញ',
+                    'View Order',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -136,7 +136,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   ),
                   child: const Text(
-                    'បដិសេធ',
+                    'Decline',
                     style: TextStyle(
                       color: Colors.black87,
                       fontWeight: FontWeight.w600,
@@ -155,10 +155,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               radius: 22,
               backgroundImage: NetworkImage('https://via.placeholder.com/150'),
             ),
-            title: 'សារពីមេចុងភៅ Marcus',
-            timeAgo: '1 ម៉ោងមុន',
+            title: 'Message from Chef Marcus',
+            timeAgo: '1h ago',
             bodyText:
-                '"តើយើងអាចបន្ថែមបរិមាណដឹកជញ្ជូនសម្រាប់ថ្ងៃអង្គារបានទេ? ខ្ញុំត្រូវការបន្ថែម 20 កេះទៀត..."',
+                '"Can we increase the delivery quantity for Tuesday? I need an extra 20 crates..."',
             actionWidget: Row(
               children: [
                 Container(
@@ -183,7 +183,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   ),
                   child: const Text(
-                    'ឆ្លើយតបឥឡូវនេះ',
+                    'Reply Now',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -207,10 +207,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               child: const Icon(Icons.account_balance_wallet_outlined,
                   color: Colors.brown, size: 22),
             ),
-            title: 'ទទួលបានការទូទាត់ប្រាក់',
-            timeAgo: '4 ម៉ោងមុន',
+            title: 'Payment Received',
+            timeAgo: '4h ago',
             bodyText:
-                'ការទូទាត់ប្រាក់ចំនួន \$1,240.50 របស់អ្នកសម្រាប់កំឡុងថ្ងៃទី 1-15 តុលា ត្រូវបានដំណើរការរួចរាល់។',
+                'Your payment of \$1,240.50 for Oct 1-15 has been processed successfully.',
             actionWidget: TextButton(
               onPressed: () {},
               style: TextButton.styleFrom(
@@ -219,7 +219,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 alignment: Alignment.centerLeft,
               ),
               child: const Text(
-                'ពិនិត្យតុល្យភាព >',
+                'Check Balance >',
                 style: TextStyle(
                   color: primaryGreen,
                   fontWeight: FontWeight.bold,
@@ -233,7 +233,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
           // 2. YESTERDAY SECTION
           const Text(
-            'ម្សិលមិញ',
+            'YESTERDAY',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -256,10 +256,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               child: const Icon(Icons.local_shipping_outlined,
                   color: Colors.black87, size: 22),
             ),
-            title: 'បានដឹកជញ្ជូនរួចរាល់',
-            timeAgo: '24 តុលា, 4:12 PM',
+            title: 'Order Delivered',
+            timeAgo: 'Oct 24, 4:12 PM',
             bodyText:
-                'ការបញ្ជាទិញ #7749 ត្រូវបានដឹកជញ្ជូនដោយជោគជ័យទៅកាន់ Green Leaf Brasserie។',
+                'Order #7749 was successfully delivered to Green Leaf Brasserie.',
             actionWidget: OutlinedButton(
               onPressed: () {},
               style: OutlinedButton.styleFrom(
@@ -272,7 +272,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
               child: const Text(
-                'មើលព័ត៌មានលម្អិត',
+                'View Details',
                 style: TextStyle(
                   color: Colors.black87,
                   fontWeight: FontWeight.w600,
@@ -294,10 +294,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               child: const Icon(Icons.info_outline,
                   color: Colors.black54, size: 22),
             ),
-            title: 'ការធ្វើបច្ចុប្បន្នភាពប្រព័ន្ធ',
-            timeAgo: '24 តុលា, 10:00 AM',
+            title: 'System Update',
+            timeAgo: 'Oct 24, 10:00 AM',
             bodyText:
-                'ការថែទាំប្រព័ន្ធ Verdant ត្រូវបានបញ្ចប់។ មុខងារតាមដានការដឹកជញ្ជូនថ្មីអាចប្រើប្រាស់បានហើយ!',
+                'Verdant system maintenance complete. The new delivery tracking feature is now available!',
           ),
         ],
       ),

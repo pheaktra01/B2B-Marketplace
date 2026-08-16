@@ -57,27 +57,27 @@ class FarmerBottomNavBar extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.storefront_outlined),
           activeIcon: Icon(Icons.storefront),
-          label: 'ផ្ទាំងគ្រប់គ្រង',
+          label: 'Dashboard',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.assignment_outlined),
           activeIcon: Icon(Icons.assignment),
-          label: 'ការកុម្ម៉ង់',
+          label: 'Orders',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.inventory_2_outlined),
           activeIcon: Icon(Icons.inventory_2),
-          label: 'ស្តុក',
+          label: 'Inventory',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.chat_bubble_outline),
           activeIcon: Icon(Icons.chat_bubble),
-          label: 'ជជែក',
+          label: 'Chat',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
           activeIcon: Icon(Icons.person),
-          label: 'គណនី',
+          label: 'Profile',
         ),
       ],
     );

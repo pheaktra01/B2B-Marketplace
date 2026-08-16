@@ -125,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           ),
                                           const SizedBox(height: 12),
                                           const Text(
-                                            'ផ្សារកសិករ',
+                                            'Farmers Market',
                                             style: TextStyle(
                                               fontSize: 30,
                                               fontWeight: FontWeight.bold,
@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           const Padding(
                                             padding: EdgeInsets.symmetric(horizontal: 16.0),
                                             child: Text(
-                                              'ផ្សារផលិតផលកសិកម្មស្រស់ៗសម្រាប់ចុងភៅអាជីព។',
+                                              'Fresh agricultural products marketplace for professional chefs.',
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                 fontSize: 14,
@@ -154,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     // --- Section Heading ---
                                     const Center(
                                       child: Text(
-                                        'សូមស្វាគមន៍មកវិញ',
+                                        'Welcome Back',
                                         style: TextStyle(
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold,
@@ -166,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                     // --- Phone Number Input Field ---
                                     const Text(
-                                      'លេខទូរស័ព្ទ',
+                                      'Phone Number',
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
@@ -179,17 +179,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                       keyboardType: TextInputType.phone,
                                       validator: (value) {
                                         if (value == null || value.trim().isEmpty) {
-                                          return 'សូមបញ្ចូលលេខទូរស័ព្ទ';
+                                          return 'Please enter phone number';
                                         }
 
                                         if (!RegExp(r'^(0|\+855)\d{8,9}$').hasMatch(value.trim())) {
-                                          return 'លេខទូរស័ព្ទមិនត្រឹមត្រូវ';
+                                          return 'Invalid phone number';
                                         }
 
                                         return null;
                                       },
                                       decoration: InputDecoration(
-                                        hintText: '០១២៣៤៥៦៧៨៩ ឬ +855123456789',
+                                        hintText: '+855123456789',
                                         hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
                                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                         filled: true,
@@ -211,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         const Text(
-                                          'ពាក្យសម្ងាត់',
+                                          'Password',
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
@@ -228,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             );
                                           },
                                           child: const Text(
-                                            'ភ្លេចពាក្យសម្ងាត់?',
+                                            'Forgot Password?',
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
@@ -246,11 +246,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                       obscureText: _obscurePassword,
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          return 'សូមបញ្ចូលពាក្យសម្ងាត់';
+                                          return 'Please enter password';
                                         }
 
                                         if (value.length < 6) {
-                                          return 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ';
+                                          return 'Password must be at least 6 characters';
                                         }
 
                                         return null;
@@ -377,7 +377,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              'ចូលប្រើប្រាស់',
+                                              'Log In',
                                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                             ),
                                             SizedBox(width: 6),
@@ -395,7 +395,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Padding(
                                           padding: EdgeInsets.symmetric(horizontal: 16.0),
                                           child: Text(
-                                            'ឬបន្តជាមួយ',
+                                            'Or continue with',
                                             style: TextStyle(color: textMuted, fontSize: 13),
                                           ),
                                         ),
@@ -410,71 +410,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Expanded(
                                           child: ConstrainedBox(
                                             constraints: const BoxConstraints(minHeight: 50),
-                                            child: _buildSocialButton(
-                                              label: 'Google',
-                                              iconColor: Colors.red,
-                                              iconData: Icons.g_mobiledata,
-                                              isDesktop: isDesktopOrTablet,
-                                              onTap: () {},
-                                            ),    
-                                          ),
-                                        ),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: ConstrainedBox(
-                                            constraints: const BoxConstraints(minHeight: 50),
-                                            child: _buildSocialButton(
-                                              label: 'Facebook',
-                                              iconColor: const Color(0xFF1877F2),
-                                              iconData: Icons.facebook,
-                                              isDesktop: isDesktopOrTablet,
-                                              onTap: () {},
-                                            ),
+                                            // Add social sign-in buttons here if needed
                                           ),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
-                              ),
-                            ),
-
-                            // --- Footer Area ---
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 20.0),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF1F5F9),
-                                border: Border(
-                                  top: BorderSide(color: borderColor, width: 0.5),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text(
-                                    "មិនទាន់មានគណនី? ",
-                                    style: TextStyle(color: textMuted, fontSize: 14),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => const RoleSelectionScreen(),
-                                        ),
-                                      );
-                                    },
-                                    child: const Text(
-                                      'បង្កើតគណនី',
-                                      style: TextStyle(
-                                        color: primaryGreen,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ),
                             ),
                           ],
@@ -487,42 +429,6 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           },
         ),
-      ),
-    );
-  }
-
-  // Social Login Button Helper
-  Widget _buildSocialButton({
-    required String label,
-    required IconData iconData,
-    required Color iconColor,
-    required bool isDesktop,
-    required VoidCallback onTap,
-  }) {
-    return OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        side: const BorderSide(color: Color(0xFFCBD5E1), width: 1),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        backgroundColor: isDesktop ? const Color(0xFFF8FAFC) : Colors.white,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(iconData, color: iconColor, size: 24),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Color(0xFF0F172A),
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
-          ),
-        ],
       ),
     );
   }

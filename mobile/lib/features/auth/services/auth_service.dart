@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/api_constants.dart';
 
 class AuthService {
@@ -28,10 +28,37 @@ class AuthService {
     required String phone,
     required String password,
   }) async {
-    return _post('login', {
+    final result = await _post('login', {
       'phone': phone,
       'password': password,
     });
+
+    if (result['statusCode'] == 200) {
+      final data = result['data'];
+
+      // Adjust this depending on your backend response.
+      final token = data['accessToken'] ?? data['token'];
+
+      if (token != null && token.toString().isNotEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', token.toString());
+
+        // If backend returns user id, save that too.
+        if (data['user']?['id'] != null) {
+          await prefs.setString(
+            'userId',
+            data['user']['id'].toString(),
+          );
+        } else if (data['id'] != null) {
+          await prefs.setString(
+            'userId',
+            data['id'].toString(),
+          );
+        }
+      }
+    }
+
+    return result;
   }
 
   Future<Map<String, dynamic>> register({

@@ -9,6 +9,7 @@ import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { ResetPasswordDto } from './dto/reset-password-dto.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -101,12 +102,12 @@ export class AuthService {
     async login(dto: LoginDto) {
         const user = await this.userRepo.findOne({
             where: {
-                phone: dto.phone
-            }
+                phone: dto.phone,
+            },
         });
 
-        console.log("PHONE FROM REQUEST:", dto.phone);
-        console.log("USER FOUND:", user);
+        console.log('PHONE FROM REQUEST:', dto.phone);
+        console.log('USER FOUND:', user);
 
         if (!user) {
             throw new UnauthorizedException('User not found');
@@ -114,28 +115,28 @@ export class AuthService {
 
         const match = await bcrypt.compare(
             dto.password,
-            user.password
+            user.password,
         );
 
-        console.log("PASSWORD MATCH:", match);
+        console.log('PASSWORD MATCH:', match);
 
         if (!match) {
             throw new UnauthorizedException('Wrong password');
         }
 
-        const token = this.jwtService.sign({
+        const accessToken = this.jwtService.sign({
             id: user.id,
             name: user.name,
-            role: user.role
+            role: user.role,
         });
 
         return {
-            accessToken: token,
+            accessToken,
             user: {
                 id: user.id,
                 name: user.name,
-                role: user.role
-            }
+                role: user.role,
+            },
         };
     }
 

@@ -11,29 +11,67 @@ export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'text', nullable: true})
+  @Column({ type: 'varchar' })
+  name: string;
+
+  @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column()
+  @Column({ type: 'varchar' })
   category: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'varchar', default: 'Fresh' })
+  condition: string;
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
   price: number;
 
-  @Column()
-  unit: string;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
   quantity: number;
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
+  minOrder: number;
 
   @Column({ type: 'varchar', nullable: true })
   imageUrl: string | null;
 
-  @Column({ default: true })
-  isAvailable: boolean;
+  @Column({ type: 'date', nullable: true })
+  harvestDate: Date | null;
 
-  @Column()
+  @Column({ type: 'date', nullable: true })
+  availableUntil: Date | null;
+
+  @Column({ type: 'varchar' })
+  location: string;
+
+  @Column({ type: 'varchar' })
+  deliveryMethod: string;
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+  })
+  deliveryFee: number;
+
+  @Column({ type: 'uuid' })
   farmerId: string;
+
+  @Column({ type: 'boolean', default: true })
+  isAvailable: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

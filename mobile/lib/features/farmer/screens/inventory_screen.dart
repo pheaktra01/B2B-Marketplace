@@ -212,7 +212,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => const AddProductScreen(),
+              builder: (_) => const AddProductFlowScreen(),
             ),
           );
         },

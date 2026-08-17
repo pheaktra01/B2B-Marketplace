@@ -49,7 +49,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddProductScreen()),
+            MaterialPageRoute(builder: (context) => const AddProductFlowScreen()),
           );
         },
         backgroundColor: accentOrange,
@@ -269,7 +269,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         'color': primaryGreen,
         'action': () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const AddProductScreen()),
+              MaterialPageRoute(builder: (_) => const AddProductFlowScreen()),
             )
       },
       {

@@ -1,368 +1,773 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/farmer/screens/inventory_screen.dart';
 
-class AddProductScreen extends StatefulWidget {
-  const AddProductScreen({super.key});
+class AddProductFlowScreen extends StatefulWidget {
+  const AddProductFlowScreen({super.key});
 
   @override
-  State<AddProductScreen> createState() => _AddProductScreenState();
+  State<AddProductFlowScreen> createState() => _AddProductFlowScreenState();
 }
 
-class _AddProductScreenState extends State<AddProductScreen> {
-  // Form Controllers
-  final _productNameController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _stockController = TextEditingController();
-  final _storyController = TextEditingController();
+class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
+  // Step Tracking (1: Info, 2: Price & Inventory, 3: Delivery & Review, 4: Success)
+  int _currentStep = 1;
 
-  // State Variables
+  // STEP 1 - PRODUCT INFORMATION
+  final _productNameController = TextEditingController();
+  final _descriptionController = TextEditingController();
   String _selectedCategory = 'Vegetables';
-  String _selectedUnitType = 'per lb';
-  bool _isAvailableForPickup = true;
-  bool _isCertifiedOrganic = false;
+  String _productCondition = 'Fresh'; // 'Fresh' or 'Organic'
 
   final List<String> _categories = [
     'Vegetables',
     'Fruits',
     'Herbs & Spices',
-    'Dairy & Eggs',
-    'Grains'
+    'Rice & Grains',
+    'Eggs & Dairy',
   ];
 
-  final List<String> _unitTypes = [
-    'per lb',
-    'per kg',
-    'per crate',
-    'per bunch',
-    'per item'
+  // STEP 2 - PRICE & INVENTORY
+  final _priceController = TextEditingController();
+  final _quantityController = TextEditingController();
+  final _minOrderController = TextEditingController();
+  DateTime? _harvestDate;
+  DateTime? _availableUntilDate;
+
+  // STEP 3 - DELIVERY & REVIEW
+  String _selectedLocation = 'Phnom Penh';
+  String _deliveryOption = 'Farmer Delivery'; // 'Farmer Delivery' or 'Buyer Pickup'
+  final _deliveryFeeController = TextEditingController(text: '2.00');
+
+  final List<String> _locations = [
+    'Phnom Penh',
+    'Kandal',
+    'Battambang',
+    'Siem Reap',
+    'Kampong Cham',
   ];
 
   @override
   void dispose() {
     _productNameController.dispose();
+    _descriptionController.dispose();
     _priceController.dispose();
-    _stockController.dispose();
-    _storyController.dispose();
+    _quantityController.dispose();
+    _minOrderController.dispose();
+    _deliveryFeeController.dispose();
     super.dispose();
+  }
+
+  void _nextStep() {
+    if (_currentStep < 3) {
+      setState(() => _currentStep++);
+    }
+  }
+
+  void _previousStep() {
+    if (_currentStep > 1) {
+      setState(() => _currentStep--);
+    } else {
+      Navigator.maybePop(context);
+    }
+  }
+
+  void _publishProduct() {
+    setState(() => _currentStep = 4); // Navigate to Success screen
   }
 
   @override
   Widget build(BuildContext context) {
+    const primaryGreen = Color(0xFF2E7D32);
+
+    // Render Success Screen if published
+    if (_currentStep == 4) {
+      return _buildSuccessScreen(primaryGreen);
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF9FBF9),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.maybePop(context),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 20),
+          onPressed: _previousStep,
         ),
-        title: const Text(
-          'Add Product',
-          style: TextStyle(
+        title: Text(
+          _getAppBarTitle(),
+          style: const TextStyle(
             color: Color(0xFF1E1E1E),
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.black87),
-            onPressed: () {},
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top Progress Bar
+            _buildProgressBar(primaryGreen),
+
+            // Scrollable Form Body
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 450),
+                    child: _buildCurrentStepContent(primaryGreen),
+                  ),
+                ),
+              ),
+            ),
+
+            // Fixed Bottom Action Button
+            _buildBottomBar(primaryGreen),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getAppBarTitle() {
+    switch (_currentStep) {
+      case 1:
+        return 'Add Product';
+      case 2:
+        return 'Price & Inventory';
+      case 3:
+        return 'Delivery & Review';
+      default:
+        return 'Add Product';
+    }
+  }
+
+  // Header Progress Indicator
+  Widget _buildProgressBar(Color primaryGreen) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Step $_currentStep of 3',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: primaryGreen,
+                ),
+              ),
+              Text(
+                '${((_currentStep / 3) * 100).toInt()}% Completed',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: _currentStep / 3,
+              backgroundColor: const Color(0xFFE8F5E9),
+              valueColor: AlwaysStoppedAnimation<Color>(primaryGreen),
+              minHeight: 6,
+            ),
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(10),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
+    );
+  }
+
+  // Controller for current step view
+  Widget _buildCurrentStepContent(Color primaryGreen) {
+    switch (_currentStep) {
+      case 1:
+        return _buildStep1Info(primaryGreen);
+      case 2:
+        return _buildStep2PriceInventory(primaryGreen);
+      case 3:
+        return _buildStep3DeliveryReview(primaryGreen);
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  // ================= STEP 1: PRODUCT INFORMATION =================
+  Widget _buildStep1Info(Color primaryGreen) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Photo Upload Box
+        _buildFieldLabel('PRODUCT PHOTO'),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          height: 160,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFC8E6C9), width: 1.5),
+          ),
+          child: InkWell(
+            onTap: () {},
+            borderRadius: BorderRadius.circular(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 26,
+                  backgroundColor: const Color(0xFFE8F5E9),
+                  child: Icon(Icons.add_a_photo_rounded, color: primaryGreen, size: 26),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Upload Product Photo',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Clear photos help sell 2x faster',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // Product Name
+        _buildFieldLabel('Product Name'),
+        const SizedBox(height: 6),
+        _buildTextField(
+          controller: _productNameController,
+          hintText: 'e.g. Fresh Organic Bok Choy',
+        ),
+        const SizedBox(height: 16),
+
+        // Category Dropdown
+        _buildFieldLabel('Category'),
+        const SizedBox(height: 6),
+        _buildDropdownField(
+          value: _selectedCategory,
+          items: _categories,
+          onChanged: (val) => setState(() => _selectedCategory = val!),
+        ),
+        const SizedBox(height: 16),
+
+        // Condition Choice Chips (Fresh / Organic)
+        _buildFieldLabel('Product Condition'),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildChoiceTile(
+                title: 'Fresh',
+                subtitle: 'Standard produce',
+                isSelected: _productCondition == 'Fresh',
+                onTap: () => setState(() => _productCondition = 'Fresh'),
+                primaryGreen: primaryGreen,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildChoiceTile(
+                title: 'Organic',
+                subtitle: 'Chemical-free',
+                isSelected: _productCondition == 'Organic',
+                onTap: () => setState(() => _productCondition = 'Organic'),
+                primaryGreen: primaryGreen,
+              ),
             ),
           ],
         ),
-        child: SafeArea(
-          child: Center(
-            heightFactor: 1,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
-              child: SizedBox(
+        const SizedBox(height: 16),
+
+        // Description Field
+        _buildFieldLabel('Description'),
+        const SizedBox(height: 6),
+        _buildTextField(
+          controller: _descriptionController,
+          hintText: 'Describe quality, taste, or harvest details...',
+          maxLines: 3,
+        ),
+      ],
+    );
+  }
+
+  // ================= STEP 2: PRICE & INVENTORY =================
+  Widget _buildStep2PriceInventory(Color primaryGreen) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // PROMINENT MARKET RECOMMENDATION CARD
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F8E9),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFA5D6A7), width: 1.5),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text('💡', style: TextStyle(fontSize: 18)),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Market Recommendation',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: primaryGreen,
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 20, color: Color(0xFFC8E6C9)),
+              _buildRecommendationRow('Current restaurant demand', 'High 🔥'),
+              const SizedBox(height: 6),
+              _buildRecommendationRow('Typical market price', '\$1.10 – \$1.40 / kg'),
+              const SizedBox(height: 6),
+              _buildRecommendationRow('Recommended price', '\$1.25 / kg', isBold: true),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _priceController.text = '1.25';
+                    });
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: primaryGreen,
+                    side: BorderSide(color: primaryGreen, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    backgroundColor: Colors.white,
+                  ),
+                  child: const Text(
+                    'Use Recommended Price (\$1.25)',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // Selling Price
+        _buildFieldLabel('Selling Price per kg'),
+        const SizedBox(height: 6),
+        _buildTextField(
+          controller: _priceController,
+          hintText: '0.00',
+          keyboardType: TextInputType.number,
+          suffixText: '\$ / kg',
+        ),
+        const SizedBox(height: 16),
+
+        // Available Quantity & Minimum Order Row
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildFieldLabel('Available Quantity'),
+                  const SizedBox(height: 6),
+                  _buildTextField(
+                    controller: _quantityController,
+                    hintText: 'e.g. 100',
+                    keyboardType: TextInputType.number,
+                    suffixText: 'kg',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildFieldLabel('Minimum Order'),
+                  const SizedBox(height: 6),
+                  _buildTextField(
+                    controller: _minOrderController,
+                    hintText: 'e.g. 5',
+                    keyboardType: TextInputType.number,
+                    suffixText: 'kg',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Date Pickers
+        Row(
+          children: [
+            Expanded(
+              child: _buildDatePickerTile(
+                label: 'Harvest Date',
+                selectedDate: _harvestDate,
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2025),
+                    lastDate: DateTime(2030),
+                  );
+                  if (picked != null) setState(() => _harvestDate = picked);
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildDatePickerTile(
+                label: 'Available Until',
+                selectedDate: _availableUntilDate,
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now().add(const Duration(days: 7)),
+                    firstDate: DateTime(2025),
+                    lastDate: DateTime(2030),
+                  );
+                  if (picked != null) setState(() => _availableUntilDate = picked);
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // ================= STEP 3: DELIVERY & REVIEW =================
+  Widget _buildStep3DeliveryReview(Color primaryGreen) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Location Selector
+        _buildFieldLabel('Location / Farm Origin'),
+        const SizedBox(height: 6),
+        _buildDropdownField(
+          value: _selectedLocation,
+          items: _locations,
+          onChanged: (val) => setState(() => _selectedLocation = val!),
+        ),
+        const SizedBox(height: 16),
+
+        // Delivery Options
+        _buildFieldLabel('Delivery Method'),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildChoiceTile(
+                title: 'Farmer Delivery',
+                subtitle: 'Deliver to buyer',
+                isSelected: _deliveryOption == 'Farmer Delivery',
+                onTap: () => setState(() => _deliveryOption = 'Farmer Delivery'),
+                primaryGreen: primaryGreen,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildChoiceTile(
+                title: 'Buyer Pickup',
+                subtitle: 'Pickup at farm',
+                isSelected: _deliveryOption == 'Buyer Pickup',
+                onTap: () => setState(() => _deliveryOption = 'Buyer Pickup'),
+                primaryGreen: primaryGreen,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        if (_deliveryOption == 'Farmer Delivery') ...[
+          _buildFieldLabel('Delivery Fee'),
+          const SizedBox(height: 6),
+          _buildTextField(
+            controller: _deliveryFeeController,
+            hintText: '0.00',
+            keyboardType: TextInputType.number,
+            suffixText: '\$',
+          ),
+          const SizedBox(height: 20),
+        ],
+
+        // Product Summary Preview Card
+        _buildFieldLabel('PRODUCT PREVIEW'),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE0E0E0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Placeholder image box
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.eco_rounded, size: 40, color: primaryGreen),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _productNameController.text.isEmpty
+                              ? 'Fresh Produce'
+                              : _productNameController.text,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F5E9),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            _productCondition,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: primaryGreen,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '\$${_priceController.text.isEmpty ? '0.00' : _priceController.text} / kg',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: primaryGreen,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Stock: ${_quantityController.text.isEmpty ? '0' : _quantityController.text} kg • $_selectedLocation',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Option: $_deliveryOption',
+                      style: const TextStyle(fontSize: 11, color: Color(0xFF616161)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ================= STEP 4: SUCCESS VIEW =================
+  Widget _buildSuccessScreen(Color primaryGreen) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(),
+              CircleAvatar(
+                radius: 46,
+                backgroundColor: const Color(0xFFE8F5E9),
+                child: Icon(Icons.check_circle_rounded, color: primaryGreen, size: 64),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Product Published!',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E1E1E),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Your product is now available for restaurants in Cambodia to discover and order.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Color(0xFF757575), height: 1.4),
+              ),
+              const Spacer(),
+              SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const InventoryScreen(), // Navigate to Inventory Management Screen
-                      ),
-                    );
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7D32),
+                    backgroundColor: primaryGreen,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 0,
                   ),
                   child: const Text(
-                    'List Product',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                    'View Product Listing',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.maybePop(context),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFD6D6D6)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                  child: const Text(
+                    'Back to Dashboard',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF424242)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Fixed Bottom Bar Button
+  Widget _buildBottomBar(Color primaryGreen) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 450),
+          child: SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: _currentStep == 3 ? _publishProduct : _nextStep,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryGreen,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                _currentStep == 3 ? 'Publish Product' : 'Next Step',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
           ),
         ),
       ),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final double screenWidth = constraints.maxWidth;
-            final bool isTabletOrDesktop = screenWidth >= 600;
-
-            return Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 800),
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isTabletOrDesktop ? 24.0 : 16.0,
-                    vertical: 16.0,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Product Photo Header & Upload Card
-                      const Text(
-                        'PRODUCT PHOTO',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF616161),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildPhotoUploadCard(),
-                      const SizedBox(height: 20),
-
-                      // Adaptive Form Grid
-                      if (isTabletOrDesktop) ...[
-                        // Row 1: Product Name & Category
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: _buildProductNameField()),
-                            const SizedBox(width: 16),
-                            Expanded(child: _buildCategoryField()),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Row 2: Price, Unit Type & Stock
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: _buildPriceField()),
-                            const SizedBox(width: 12),
-                            Expanded(child: _buildUnitTypeField()),
-                            const SizedBox(width: 12),
-                            Expanded(child: _buildStockField()),
-                          ],
-                        ),
-                      ] else ...[
-                        // Single-column layout for mobile
-                        _buildProductNameField(),
-                        const SizedBox(height: 16),
-                        _buildCategoryField(),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(child: _buildPriceField()),
-                            const SizedBox(width: 12),
-                            Expanded(child: _buildUnitTypeField()),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _buildStockField(),
-                      ],
-
-                      const SizedBox(height: 16),
-
-                      // Product Story & Quality Notes Field
-                      _buildFieldLabel('Product Story & Quality Notes'),
-                      const SizedBox(height: 6),
-                      _buildTextField(
-                        controller: _storyController,
-                        hintText:
-                            'Describe the flavor, harvest date, or special qualities...',
-                        maxLines: 4,
-                      ),
-                      const SizedBox(height: 24),
-
-                      const Divider(height: 1, color: Color(0xFFE0E0E0)),
-                      const SizedBox(height: 16),
-
-                      // Toggle Switches
-                      _buildSwitchTile(
-                        title: 'Available for Pickup',
-                        subtitle: 'Allow restaurants to collect directly',
-                        value: _isAvailableForPickup,
-                        onChanged: (val) =>
-                            setState(() => _isAvailableForPickup = val),
-                      ),
-                      const SizedBox(height: 12),
-                      _buildSwitchTile(
-                        title: 'Certified Organic',
-                        subtitle: 'Displays organic badge to buyers',
-                        value: _isCertifiedOrganic,
-                        onChanged: (val) =>
-                            setState(() => _isCertifiedOrganic = val),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
     );
   }
 
-  // Individual Form Field Sub-Widgets
-  Widget _buildProductNameField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildFieldLabel('Product Name'),
-        const SizedBox(height: 6),
-        _buildTextField(
-          controller: _productNameController,
-          hintText: 'e.g. Heirloom Tomatoes',
-        ),
-      ],
-    );
-  }
+  // ================= UI HELPER COMPONENTS =================
 
-  Widget _buildCategoryField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildFieldLabel('Category'),
-        const SizedBox(height: 6),
-        _buildDropdownField(
-          value: _selectedCategory,
-          items: _categories,
-          onChanged: (val) {
-            if (val != null) setState(() => _selectedCategory = val);
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPriceField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildFieldLabel('Price per unit'),
-        const SizedBox(height: 6),
-        _buildTextField(
-          controller: _priceController,
-          hintText: '\$ 0.00',
-          keyboardType: const TextInputType.numberWithOptions(
-            decimal: true,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUnitTypeField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildFieldLabel('Unit Type'),
-        const SizedBox(height: 6),
-        _buildDropdownField(
-          value: _selectedUnitType,
-          items: _unitTypes,
-          onChanged: (val) {
-            if (val != null) setState(() => _selectedUnitType = val);
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStockField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildFieldLabel('Initial Stock Level'),
-        const SizedBox(height: 6),
-        _buildTextField(
-          controller: _stockController,
-          hintText: 'Enter quantity',
-          keyboardType: TextInputType.number,
-        ),
-      ],
-    );
-  }
-
-  // Label Widget Helper
   Widget _buildFieldLabel(String label) {
     return Text(
       label,
       style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: Color(0xFF212121),
+        fontSize: 13,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF424242),
+        letterSpacing: 0.3,
       ),
     );
   }
 
-  // Text Input Field Builder
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
     int maxLines = 1,
     TextInputType keyboardType = TextInputType.text,
+    String? suffixText,
   }) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
-      style: const TextStyle(fontSize: 14, color: Color(0xFF212121)),
+      style: const TextStyle(fontSize: 15, color: Color(0xFF212121)),
       decoration: InputDecoration(
         hintText: hintText,
+        suffixText: suffixText,
+        suffixStyle: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF616161)),
         hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 14),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         filled: true,
         fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFD6D6D6)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 1.5),
         ),
       ),
     );
   }
 
-  // Dropdown Field Builder
   Widget _buildDropdownField({
     required String value,
     required List<String> items,
@@ -372,7 +777,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFD6D6D6)),
       ),
       child: DropdownButtonHideUnderline(
@@ -380,9 +785,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
           value: value,
           isExpanded: true,
           icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black54),
-          style: const TextStyle(fontSize: 14, color: Color(0xFF212121)),
+          style: const TextStyle(fontSize: 15, color: Color(0xFF212121)),
           onChanged: onChanged,
-          items: items.map<DropdownMenuItem<String>>((String item) {
+          items: items.map((item) {
             return DropdownMenuItem<String>(
               value: item,
               child: Text(item),
@@ -393,125 +798,106 @@ class _AddProductScreenState extends State<AddProductScreen> {
     );
   }
 
-  // Switch Tile Builder
-  Widget _buildSwitchTile({
+  Widget _buildChoiceTile({
     required String title,
     required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required Color primaryGreen,
   }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF212121),
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF757575),
-                ),
-              ),
-            ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? primaryGreen : const Color(0xFFD6D6D6),
+            width: isSelected ? 1.5 : 1,
           ),
         ),
-        Switch(
-          value: value,
-          onChanged: onChanged,
-          activeThumbColor: Colors.white,
-          activeTrackColor: const Color(0xFF2E7D32),
-          inactiveThumbColor: Colors.white,
-          inactiveTrackColor: const Color(0xFFE0E0E0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: isSelected ? primaryGreen : const Color(0xFF212121),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: const TextStyle(fontSize: 11, color: Color(0xFF757575)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDatePickerTile({
+    required String label,
+    required DateTime? selectedDate,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFieldLabel(label),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFD6D6D6)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  selectedDate == null
+                      ? 'Select date'
+                      : '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: selectedDate == null ? const Color(0xFF9E9E9E) : const Color(0xFF212121),
+                  ),
+                ),
+                const Icon(Icons.calendar_today_rounded, size: 16, color: Colors.black54),
+              ],
+            ),
+          ),
         ),
       ],
     );
   }
 
-  // Dashed Photo Upload Box
-  Widget _buildPhotoUploadCard() {
-    return CustomPaint(
-      painter: DashedBorderPainter(),
-      child: Container(
-        width: double.infinity,
-        height: 180,
-        alignment: Alignment.center,
-        child: InkWell(
-          // onPressed: () {
-          //   // Logic to upload photo
-          // },
-          borderRadius: BorderRadius.circular(12),
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.add_a_photo_outlined,
-                size: 36,
-                color: Color(0xFF2E7D32),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Tap to upload product photo',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF616161),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+  Widget _buildRecommendationRow(String label, String value, {bool isBold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 13, color: Color(0xFF424242)),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+            color: isBold ? const Color(0xFF2E7D32) : const Color(0xFF212121),
           ),
         ),
-      ),
+      ],
     );
   }
-}
-
-// Painter for exact Dashed Border Box around Photo Upload
-class DashedBorderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = const Color(0xFFBDBDBD)
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    const double dashWidth = 6;
-    const double dashSpace = 4;
-    final RRect rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      const Radius.circular(12),
-    );
-
-    final Path path = Path()..addRRect(rrect);
-    final Path metricsPath = Path();
-
-    for (final pathMetric in path.computeMetrics()) {
-      double distance = 0.0;
-      while (distance < pathMetric.length) {
-        final double length = (distance + dashWidth < pathMetric.length)
-            ? dashWidth
-            : pathMetric.length - distance;
-        metricsPath.addPath(
-          pathMetric.extractPath(distance, distance + length),
-          Offset.zero,
-        );
-        distance += dashWidth + dashSpace;
-      }
-    }
-
-    canvas.drawPath(metricsPath, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

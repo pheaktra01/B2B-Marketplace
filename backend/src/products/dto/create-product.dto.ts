@@ -1,28 +1,56 @@
-import { IsNumber, IsOptional, IsString, Min } from "class-validator";
+import {
+  IsDateString,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateProductDto {
-    @IsString()
-    name: string;
+  @IsString()
+  name: string;
 
-    @IsOptional()
-    @IsString()
-    description?: string;
+  @IsOptional()
+  @IsString()
+  description?: string;
 
-    @IsNumber()
-    @Min(0)
-    price: number;
+  @IsString()
+  category: string;
 
-    @IsString()
-    category: string;
+  @IsString()
+  condition: string;
 
-    @IsString()
-    unit: string;
+  @IsNumber()
+  @Min(0)
+  price: number;
 
-    @IsNumber()
-    @Min(0)
-    quantity: number;
+  @IsNumber()
+  @Min(0)
+  quantity: number;
 
-    @IsOptional()
-    @IsString()
-    imageUrl?: string;
+  @IsNumber()
+  @Min(0)
+  minOrder: number;
+
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @IsOptional()
+  @IsDateString()
+  harvestDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  availableUntil?: string;
+
+  @IsString()
+  location: string;
+
+  @IsString()
+  deliveryMethod: string;
+
+  @IsNumber()
+  @Min(0)
+  deliveryFee: number;
 }

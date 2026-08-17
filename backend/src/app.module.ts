@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
+import { ProductsModule } from './products/products.module';
 // Debug env values for DB connection troubleshooting (masked)
 try {
   const pwd = process.env.DB_PASSWORD;
@@ -35,6 +36,7 @@ try {
     }),
     AuthModule,
     UsersModule,
+    ProductsModule, 
   ],
   controllers: [AppController],
   providers: [AppService],

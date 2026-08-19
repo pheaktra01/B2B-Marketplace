@@ -19,6 +19,13 @@ export class ProductsService {
         const product = this.productRepo.create({
             ...dto,
             farmerId,
+            harvestDate: dto.harvestDate
+                ? new Date(dto.harvestDate)
+                : null,
+            availableUntil: dto.availableUntil
+                ? new Date(dto.availableUntil)
+                : null,
+            isAvailable: true,
         })
 
         return this.productRepo.save(product);
@@ -50,18 +57,29 @@ export class ProductsService {
         dto: UpdateProductDto,
     ) {
         const product = await this.productRepo.findOne({
-            where: { id},
+            where: { 
+                id,
+                farmerId,
+            },
         });
 
         if (!product) {
             throw new NotFoundException('Product not found');
         }
 
+        Object.assign(product, dto);
+
+        if (dto.harvestDate) {
+            product.harvestDate = new Date(dto.harvestDate);
+        }
+
+        if (dto.availableUntil) {
+            product.availableUntil = new Date(dto.availableUntil);
+        }
+
         if (product.farmerId !== farmerId) {
             throw new ForbiddenException('You are not allowed to update this product');
         }
-
-        Object.assign(product, dto);
 
         return this.productRepo.save(product);
     }
@@ -82,7 +100,7 @@ export class ProductsService {
             throw new ForbiddenException('You are not allowed to delete this product');
         }
 
-        await this.productRepo.remove(product);
+        await this.productRepo.remove(product); 
 
         return {
             message: 'Product deleted successfully',

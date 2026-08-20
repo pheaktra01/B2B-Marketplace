@@ -44,8 +44,11 @@ export class Product {
   })
   minOrder: number;
 
-  @Column({ type: 'varchar', nullable: true })
-  imageUrl: string | null;
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
+  imageBase64: string | null;
 
   @Column({ type: 'date', nullable: true })
   harvestDate: Date | null;

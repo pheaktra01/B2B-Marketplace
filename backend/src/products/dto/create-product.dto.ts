@@ -34,7 +34,7 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
-  imageUrl?: string;
+  imageBase64?: string;
 
   @IsOptional()
   @IsDateString()

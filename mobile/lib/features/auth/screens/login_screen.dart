@@ -290,80 +290,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       width: double.infinity,
                                       height: 52,
                                       child: ElevatedButton(
-                                        onPressed: _isLoading
-                                            ? null
-                                            : () async {
-                                                if (!_formKey.currentState!.validate()) {
-                                                  return;
-                                                }
-
-                                                final navigator = Navigator.of(context);
-                                                final messenger = ScaffoldMessenger.of(context);
-
-                                                setState(() {
-                                                  _isLoading = true;
-                                                });
-
-                                                try {
-                                                  final response = await _authService.login(
-                                                    phone: _phoneController.text.trim(),
-                                                    password: _passwordController.text,
-                                                  );
-                                                  final data = response['data'] as Map<String, dynamic>;
-
-                                                  final status = response['statusCode'] as int;
-                                                  if (status >= 200 && status < 300) {
-                                                    final user = data['user'] as Map<String, dynamic>;
-                                                    final role = user['role']?.toString();
-                                                    final userId = user['id']?.toString();
-
-                                                    if (userId != null && userId.isNotEmpty) {
-                                                      final prefs = await SharedPreferences.getInstance();
-                                                      await prefs.setString('userId', userId);
-                                                    }
-
-                                                    if (!mounted) {
-                                                      return;
-                                                    }
-
-                                                    navigator.pushReplacement(
-                                                      MaterialPageRoute(
-                                                        builder: (_) => role == 'farmer'
-                                                            ? const FarmerDashboardScreen()
-                                                            : const HomeScreen(),
-                                                      ),
-                                                    );
-                                                  } else {
-                                                    if (!mounted) {
-                                                      return;
-                                                    }
-
-                                                    messenger.showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          data['message']?.toString() ?? 'Login failed',
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }
-                                                } catch (error) {
-                                                  if (!mounted) {
-                                                    return;
-                                                  }
-
-                                                  messenger.showSnackBar(
-                                                    SnackBar(
-                                                      content: Text('Unable to login: $error'),
-                                                    ),
-                                                  );
-                                                } finally {
-                                                  if (mounted) {
-                                                    setState(() {
-                                                      _isLoading = false;
-                                                    });
-                                                  }
-                                                }
-                                              },
+                                        onPressed: _isLoading ? null : _handleLogin,
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: primaryGreen,
                                           foregroundColor: Colors.white,
@@ -430,5 +357,100 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleLogin() async {
+    if (_isLoading) return;
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    print('========== LOGIN BUTTON PRESSED ==========');
+    print('Phone: ${_phoneController.text.trim()}');
+
+    try {
+      final response = await _authService.login(
+        phone: _phoneController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      final data = response['data'] as Map<String, dynamic>;
+      final status = response['statusCode'] as int;
+
+      print('========== LOGIN RESULT ==========');
+      print('Status: $status');
+      print('Message: ${data['message']}');
+
+      if (status >= 200 && status < 300) {
+        final user = data['user'] as Map<String, dynamic>;
+
+        final role = user['role']?.toString();
+        final userId = user['id']?.toString();
+
+        print('Login successful');
+        print('User ID: $userId');
+        print('Role: $role');
+
+        if (userId != null && userId.isNotEmpty) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userId', userId);
+        }
+
+        if (!mounted) return;
+
+        if (role == 'farmer') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const FarmerDashboardScreen(),
+            ),
+          );
+        } else if (role == 'restaurant') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const HomeScreen(),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unknown user role'),
+            ),
+          );
+        }
+      } else {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              data['message']?.toString() ?? 'Login failed',
+            ),
+          ),
+        );
+      }
+    } catch (error) {
+      print('LOGIN ERROR: $error');
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Unable to login: $error'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 }

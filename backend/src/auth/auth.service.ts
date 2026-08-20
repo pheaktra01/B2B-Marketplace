@@ -163,29 +163,29 @@ export class AuthService {
     }
 
     async resetPassword(dto: ResetPasswordDto) {
-    const user = await this.userRepo.findOne({
-        where: { phone: dto.phone },
-    });
+        const user = await this.userRepo.findOne({
+            where: { phone: dto.phone },
+        });
 
-    if (!user) {
-        throw new NotFoundException('User not found');
-    }
-
-        const staticOtp = this.getStaticOtp();
-
-        // Allow verification with the stored OTP or the static OTP fallback (e.g. 123456)
-        if (user.otp !== dto.otp && dto.otp !== staticOtp) {
-            throw new BadRequestException('Invalid OTP');
+        if (!user) {
+            throw new NotFoundException('User not found');
         }
 
-    user.password = await bcrypt.hash(dto.password, 10);
-    user.otp = null;
+            const staticOtp = this.getStaticOtp();
 
-    await this.userRepo.save(user);
+            // Allow verification with the stored OTP or the static OTP fallback (e.g. 123456)
+            if (user.otp !== dto.otp && dto.otp !== staticOtp) {
+                throw new BadRequestException('Invalid OTP');
+            }
 
-    return {
-        message: 'Password reset successful',
-    };
+        user.password = await bcrypt.hash(dto.password, 10);
+        user.otp = null;
+
+        await this.userRepo.save(user);
+
+        return {
+            message: 'Password reset successful',
+        };
     }
 
 }

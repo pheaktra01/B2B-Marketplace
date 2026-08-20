@@ -1,4 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mobile/features/farmer/screens/inventory_screen.dart';
+
+import 'package:mobile/features/product/services/product_service.dart';
 
 class AddProductFlowScreen extends StatefulWidget {
   const AddProductFlowScreen({super.key});
@@ -16,6 +24,14 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   final _descriptionController = TextEditingController();
   String _selectedCategory = 'Vegetables';
   String _productCondition = 'Fresh'; // 'Fresh' or 'Organic'
+
+  bool _isPublishing = false;
+
+  File? _productImage;
+
+  Uint8List? _selectedImageBytes;
+
+  String? _selectedImageBase64;
 
   final List<String> _categories = [
     'Vegetables',
@@ -47,18 +63,100 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
 
   @override
   void dispose() {
+    _productNameController.removeListener(_refresh);
+    _priceController.removeListener(_refresh);
+    _quantityController.removeListener(_refresh);
+    _descriptionController.removeListener(_refresh);
+
     _productNameController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
     _quantityController.dispose();
     _minOrderController.dispose();
     _deliveryFeeController.dispose();
+
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+
+    _productNameController.addListener(_refresh);
+    _priceController.addListener(_refresh);
+    _quantityController.addListener(_refresh);
+    _descriptionController.addListener(_refresh);
+  }
+
+  void _refresh() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   void _nextStep() {
-    if (_currentStep < 3) {
-      setState(() => _currentStep++);
+    if (_currentStep == 1) {
+      if (_selectedImageBase64 == null) {
+        _showError('Please upload a product photo');
+        return;
+      }
+
+      if (_productNameController.text.trim().isEmpty) {
+        _showError('Please enter a product name');
+        return;
+      }
+
+      if (_descriptionController.text.trim().isEmpty) {
+        _showError('Please enter a product description');
+        return;
+      }
+
+      setState(() {
+        _currentStep = 2;
+      });
+
+      return;
+    }
+
+    if (_currentStep == 2) {
+      final price = double.tryParse(_priceController.text.trim());
+      final quantity = double.tryParse(_quantityController.text.trim());
+      final minOrderText = _minOrderController.text.trim();
+
+      final minOrder = minOrderText.isEmpty
+          ? 1.0
+          : double.tryParse(minOrderText);
+
+      if (price == null || price <= 0) {
+        _showError('Please enter a valid selling price');
+        return;
+      }
+
+      if (quantity == null || quantity <= 0) {
+        _showError('Please enter a valid available quantity');
+        return;
+      }
+
+      if (minOrder == null || minOrder <= 0) {
+        _showError('Please enter a valid minimum order');
+        return;
+      }
+
+      if (minOrder > quantity) {
+        _showError('Minimum order cannot be greater than available quantity');
+        return;
+      }
+
+      if (_harvestDate != null &&
+          _availableUntilDate != null &&
+          _availableUntilDate!.isBefore(_harvestDate!)) {
+        _showError('Available Until cannot be before Harvest Date');
+        return;
+      }
+
+      setState(() {
+        _currentStep = 3;
+      });
     }
   }
 
@@ -70,8 +168,151 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
     }
   }
 
-  void _publishProduct() {
-    setState(() => _currentStep = 4); // Navigate to Success screen
+  Future<void> _pickProductImage() async {
+    final picker = ImagePicker();
+
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 1200,
+    );
+
+    if (image == null) return;
+
+    final bytes = await image.readAsBytes();
+
+    final base64Image = base64Encode(bytes);
+
+    setState(() {
+      _productImage = File(image.path);
+      _selectedImageBytes = bytes;
+      _selectedImageBase64 = base64Image;
+    });
+
+    print('========== PRODUCT IMAGE ==========');
+    print('Image selected: ${image.name}');
+    print('Image bytes: ${bytes.length}');
+    print('Base64 length: ${base64Image.length}');
+    print('===================================');
+  }
+
+  Future<void> _publishProduct() async {
+    final name = _productNameController.text.trim();
+    final description = _descriptionController.text.trim();
+    final price = double.tryParse(_priceController.text.trim());
+    final quantity = double.tryParse(_quantityController.text.trim());
+
+    final minOrderText = _minOrderController.text.trim();
+    final minOrder = minOrderText.isEmpty
+        ? 1.0
+        : double.tryParse(minOrderText);
+
+    if (name.isEmpty) {
+      _showError('Please enter a product name');
+      return;
+    }
+
+    if (description.isEmpty) {
+      _showError('Please enter a product description');
+      return;
+    }
+
+    if (price == null || price <= 0) {
+      _showError('Please enter a valid selling price');
+      return;
+    }
+
+    if (quantity == null || quantity <= 0) {
+      _showError('Please enter a valid available quantity');
+      return;
+    }
+
+    if (minOrder == null || minOrder <= 0) {
+      _showError('Please enter a valid minimum order');
+      return;
+    }
+
+    if (minOrder > quantity) {
+      _showError(
+        'Minimum order cannot be greater than available quantity',
+      );
+      return;
+    }
+
+    if (_harvestDate != null &&
+        _availableUntilDate != null &&
+        _availableUntilDate!.isBefore(_harvestDate!)) {
+      _showError(
+        'Available Until cannot be before Harvest Date',
+      );
+      return;
+    }
+
+    double deliveryFee = 0;
+
+    if (_deliveryOption == 'Farmer Delivery') {
+      final parsedDeliveryFee = double.tryParse(
+        _deliveryFeeController.text.trim(),
+      );
+
+      if (parsedDeliveryFee == null || parsedDeliveryFee < 0) {
+        _showError('Please enter a valid delivery fee');
+        return;
+      }
+
+      deliveryFee = parsedDeliveryFee;
+    }
+
+    try {
+      setState(() {
+        _isPublishing = true;
+      });
+
+      await ProductService.createProduct(
+        name: name,
+        description: description,
+        category: _selectedCategory,
+        condition: _productCondition,
+        price: price,
+        quantity: quantity,
+        minOrder: minOrder,
+        harvestDate: _harvestDate,
+        availableUntil: _availableUntilDate,
+        location: _selectedLocation,
+        deliveryMethod: _deliveryOption,
+        deliveryFee: deliveryFee,
+        imageBase64: _selectedImageBase64,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _isPublishing = false;
+        _currentStep = 4;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isPublishing = false;
+      });
+
+      _showError(
+        e.toString().replaceFirst(
+          'Exception: ',
+          '',
+        ),
+      );
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
@@ -209,35 +450,76 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFC8E6C9), width: 1.5),
+            border: Border.all(
+              color: const Color(0xFFC8E6C9),
+              width: 1.5,
+            ),
           ),
           child: InkWell(
-            onTap: () {},
+            onTap: _pickProductImage,
             borderRadius: BorderRadius.circular(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 26,
-                  backgroundColor: const Color(0xFFE8F5E9),
-                  child: Icon(Icons.add_a_photo_rounded, color: primaryGreen, size: 26),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'Upload Product Photo',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2E7D32),
+            child: _productImage == null
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 26,
+                        backgroundColor: const Color(0xFFE8F5E9),
+                        child: Icon(
+                          Icons.add_a_photo_rounded,
+                          color: primaryGreen,
+                          size: 26,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Upload Product Photo',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2E7D32),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Clear photos help sell 2x faster',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.file(
+                          _productImage!,
+                          fit: BoxFit.cover,
+                        ),
+                        Positioned(
+                          right: 10,
+                          top: 10,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              onPressed: _pickProductImage,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Clear photos help sell 2x faster',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
-            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -638,7 +920,14 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const InventoryScreen(),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryGreen,
                     shape: RoundedRectangleBorder(
@@ -699,7 +988,11 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: _currentStep == 3 ? _publishProduct : _nextStep,
+              onPressed: _isPublishing
+                  ? null
+                  : (_currentStep == 3
+                      ? _publishProduct
+                      : _nextStep),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryGreen,
                 shape: RoundedRectangleBorder(
@@ -707,14 +1000,28 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                 ),
                 elevation: 0,
               ),
-              child: Text(
-                _currentStep == 3 ? 'Publish Product' : 'Next Step',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              child: _isPublishing
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      _currentStep == 3
+                          ? 'Publish Product'
+                          : 'Next Step',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ),
         ),

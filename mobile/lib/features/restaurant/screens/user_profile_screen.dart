@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/auth/screens/get_started_screen.dart';
+import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 
@@ -11,10 +12,13 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
-  // Theme Colors
   static const Color primaryGreen = Color(0xFF135A27);
   static const Color pageBgColor = Color(0xFFF7F9F8);
   static const Color iconBgColor = Color(0xFFEAF2EB);
+
+  final AuthService _authService = AuthService();
+
+  bool _isLoggingOut = false;
 
   @override
   Widget build(BuildContext context) {
@@ -81,29 +85,34 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               width: double.infinity,
               height: 50,
               child: OutlinedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const GetStartedScreen(),
-                    ),
-                  );
-                },
+                onPressed: _isLoggingOut ? null : _handleLogout,
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: primaryGreen, width: 1.5),
+                  side: const BorderSide(
+                    color: primaryGreen,
+                    width: 1.5,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   backgroundColor: Colors.transparent,
                 ),
-                child: const Text(
-                  'Log Out',
-                  style: TextStyle(
-                    color: primaryGreen,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
+                child: _isLoggingOut
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: primaryGreen,
+                        ),
+                      )
+                    : const Text(
+                        'Log Out',
+                        style: TextStyle(
+                          color: primaryGreen,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
               ),
             ),
 
@@ -282,5 +291,106 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         }),
       ),
     );
+  }
+
+  Future<void> _handleLogout() async {
+    if (_isLoggingOut) return;
+
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Log Out',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            'Are you sure you want to log out of your account?',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+            ),
+          ),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, false);
+              },
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext, true);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryGreen,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                'Log Out',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    // User pressed Cancel or closed the dialog
+    if (confirmed != true) {
+      return;
+    }
+
+    setState(() {
+      _isLoggingOut = true;
+    });
+
+    try {
+      final result = await _authService.logout();
+
+      debugPrint('Logout result: $result');
+
+      if (!mounted) return;
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const GetStartedScreen(),
+        ),
+        (route) => false,
+      );
+    } catch (e) {
+      debugPrint('Logout error: $e');
+
+      if (!mounted) return;
+
+      // AuthService already clears local authentication
+      // even when the backend request fails.
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const GetStartedScreen(),
+        ),
+        (route) => false,
+      );
+    }
   }
 }

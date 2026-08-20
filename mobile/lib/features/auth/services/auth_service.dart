@@ -33,30 +33,48 @@ class AuthService {
       'password': password,
     });
 
-    if (result['statusCode'] == 200) {
-      final data = result['data'];
+    print('========== LOGIN RESPONSE ==========');
+    print('Status: ${result['statusCode']}');
+    print('Data: ${result['data']}');
 
-      // Adjust this depending on your backend response.
+    if (result['statusCode'] >= 200 &&
+        result['statusCode'] < 300) {
+      final data = result['data'] as Map<String, dynamic>;
+
       final token = data['accessToken'] ?? data['token'];
+
+      print('Token exists: ${token != null}');
+      print('Token length: ${token?.toString().length ?? 0}');
 
       if (token != null && token.toString().isNotEmpty) {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accessToken', token.toString());
 
-        // If backend returns user id, save that too.
-        if (data['user']?['id'] != null) {
+        await prefs.setString(
+          'accessToken',
+          token.toString(),
+        );
+
+        final userId = data['user']?['id'] ?? data['id'];
+
+        if (userId != null) {
           await prefs.setString(
             'userId',
-            data['user']['id'].toString(),
-          );
-        } else if (data['id'] != null) {
-          await prefs.setString(
-            'userId',
-            data['id'].toString(),
+            userId.toString(),
           );
         }
+
+        final savedToken = prefs.getString('accessToken');
+        final savedUserId = prefs.getString('userId');
+
+        print('========== AUTH DATA SAVED ==========');
+        print('User ID: $savedUserId');
+        print('Token exists: ${savedToken != null}');
+        print('Token length: ${savedToken?.length ?? 0}');
+        print('=====================================');
       }
     }
+
+    print('====================================');
 
     return result;
   }
@@ -103,5 +121,58 @@ class AuthService {
       'otp': otp,
       'password': password,
     });
+  }
+
+  Future<Map<String, dynamic>> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString('accessToken');
+
+    print('========== LOGOUT ==========');
+    print('Token exists: ${token != null}');
+    print('Token length: ${token?.length ?? 0}');
+
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiConstants.auth}/logout'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null && token.isNotEmpty)
+            'Authorization': 'Bearer $token',
+        },
+      );
+
+      final decodedBody =
+          response.body.isEmpty ? {} : jsonDecode(response.body);
+
+      print('Logout status: ${response.statusCode}');
+      print('Logout response: $decodedBody');
+
+      // Always clear local authentication
+      await prefs.remove('accessToken');
+      await prefs.remove('userId');
+
+      print('Local authentication data cleared');
+      print('============================');
+
+      return {
+        'statusCode': response.statusCode,
+        'data': decodedBody,
+      };
+    } catch (e) {
+      print('Logout error: $e');
+
+      // Even if backend fails, remove local credentials
+      await prefs.remove('accessToken');
+      await prefs.remove('userId');
+
+      return {
+        'statusCode': 0,
+        'data': {
+          'message': 'Logout failed locally cleared',
+          'error': e.toString(),
+        },
+      };
+    }
   }
 }

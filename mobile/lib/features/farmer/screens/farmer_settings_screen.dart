@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/auth/screens/get_started_screen.dart';
+import 'package:mobile/features/auth/services/auth_service.dart';
 
 class FarmerSettingsScreen extends StatefulWidget {
   const FarmerSettingsScreen({super.key});
@@ -14,6 +15,9 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
   bool _smsAlerts = false;
   bool _darkMode = false;
   String _selectedLanguage = 'English';
+
+  final AuthService _authService = AuthService();
+  bool _isLoggingOut = false;
 
   final Color _primaryColor = const Color(0xFF2E7D32);
 
@@ -256,25 +260,92 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
   void _showLogoutConfirmation() {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Log Out'),
-          content: const Text('Are you sure you want to log out of the app?'),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          content: const Text(
+            'Are you sure you want to log out of the app?',
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey),
+              ),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const GetStartedScreen()));
-              },
-              child: const Text('Log Out', style: TextStyle(color: Colors.red)),
+              onPressed: _isLoggingOut
+                  ? null
+                  : () async {
+                      Navigator.pop(dialogContext);
+                      await _logout();
+                    },
+              child: const Text(
+                'Log Out',
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
         );
       },
     );
+  }
+
+  Future<void> _logout() async {
+    if (_isLoggingOut) return;
+
+    setState(() {
+      _isLoggingOut = true;
+    });
+
+    try {
+      final result = await _authService.logout();
+
+      if (!mounted) return;
+
+      print('LOGOUT STATUS: ${result['statusCode']}');
+      print('LOGOUT RESPONSE: ${result['data']}');
+
+      if (result['statusCode'] >= 200 &&
+          result['statusCode'] < 300) {
+        
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const GetStartedScreen(),
+          ),
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result['data']['message']?.toString() ??
+                  'Logout failed',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Logout error: $e'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoggingOut = false;
+        });
+      }
+    }
   }
 }

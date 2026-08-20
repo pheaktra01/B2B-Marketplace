@@ -1,10 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 class ProductDetailScreen extends StatefulWidget {
-  const ProductDetailScreen({super.key});
+  final Map<String, dynamic> product;
+
+  const ProductDetailScreen({
+    super.key,
+    required this.product,
+  });
 
   @override
-  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+  State<ProductDetailScreen> createState() =>
+      _ProductDetailScreenState();
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
@@ -17,15 +25,64 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _selectedImageIndex = 0;
   int _quantity = 1;
   bool _isFavorite = false;
-  final double _pricePerKg = 12.0;
 
   // Sample Images for the Gallery
-  final List<String> _productImages = [
-    'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?auto=format&fit=crop&w=800&q=80',
-  ];
+  List<String> get _productImages {
+    final image = widget.product['imageBase64']?.toString();
+
+    if (image == null || image.isEmpty) {
+      return [];
+    }
+
+    return [image];
+  }
+
+  double get _pricePerKg {
+    final value = widget.product['price'];
+
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(
+          value?.toString() ?? '',
+        ) ??
+        0;
+  }
+
+  String get _productName {
+    return widget.product['name']?.toString() ??
+        'Unnamed Product';
+  }
+
+  String get _category {
+    return widget.product['category']?.toString() ??
+        '';
+  }
+
+  String get _description {
+    return widget.product['description']?.toString() ??
+        'No description available.';
+  }
+
+  double get _stock {
+    final value = widget.product['quantity'];
+
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(
+          value?.toString() ?? '',
+        ) ??
+        0;
+  }
+
+  String get _farmName {
+    return widget.product['farmerName']?.toString() ??
+        widget.product['farmName']?.toString() ??
+        'Farmer';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +95,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.maybePop(context),
         ),
-        title: const Text(
-          'Fresh Roma Tomatoes',
-          style: TextStyle(
+        title: Text(
+          _productName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -98,26 +157,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   // --- WIDGET BUILDERS ---
-
   Widget _buildMainImageView() {
+    if (_productImages.isEmpty) {
+      return _buildImagePlaceholder(
+        height: 320,
+      );
+    }
+
     return Stack(
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: Image.network(
+          child: _buildImage(
             _productImages[_selectedImageIndex],
             height: 320,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                height: 320,
-                color: Colors.grey.shade300,
-                child: const Icon(Icons.broken_image, size: 50, color: Colors.grey),
-              );
-            },
           ),
         ),
+
         Positioned(
           top: 12,
           right: 12,
@@ -134,14 +190,98 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                _isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: _isFavorite ? Colors.red : primaryGreen,
+                _isFavorite
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                color: _isFavorite
+                    ? Colors.red
+                    : primaryGreen,
                 size: 22,
               ),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildImage(
+    String image,
+    {
+    required double height,
+  }) {
+    if (image.isEmpty) {
+      return _buildImagePlaceholder(
+        height: height,
+      );
+    }
+
+    // Base64
+    if (_looksLikeBase64(image)) {
+      try {
+        String base64String = image;
+
+        if (base64String.contains(',')) {
+          base64String =
+              base64String.split(',').last;
+        }
+
+        final bytes = base64Decode(base64String);
+
+        return Image.memory(
+          bytes,
+          height: height,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) {
+            return _buildImagePlaceholder(
+              height: height,
+            );
+          },
+        );
+      } catch (e) {
+        debugPrint(
+          'Detail image decode error: $e',
+        );
+
+        return _buildImagePlaceholder(
+          height: height,
+        );
+      }
+    }
+
+    // URL
+    return Image.network(
+      image,
+      height: height,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) {
+        return _buildImagePlaceholder(
+          height: height,
+        );
+      },
+    );
+  }
+
+  bool _looksLikeBase64(String value) {
+    return value.startsWith('data:image') ||
+        (!value.startsWith('http://') &&
+            !value.startsWith('https://'));
+  }
+
+  Widget _buildImagePlaceholder({
+    required double height,
+  }) {
+    return Container(
+      height: height,
+      width: double.infinity,
+      color: Colors.grey.shade200,
+      child: const Icon(
+        Icons.eco_rounded,
+        size: 60,
+        color: primaryGreen,
+      ),
     );
   }
 
@@ -172,9 +312,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
+                child: _buildThumbnailImage(
                   _productImages[index],
-                  fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -184,52 +323,160 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
+  Widget _buildThumbnailImage(String image) {
+    if (image.isEmpty) {
+      return Container(
+        color: Colors.grey.shade200,
+        child: const Icon(
+          Icons.eco,
+          color: primaryGreen,
+        ),
+      );
+    }
+
+    // URL
+    if (image.startsWith('http://') ||
+        image.startsWith('https://')) {
+      return Image.network(
+        image,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) {
+          return Container(
+            color: Colors.grey.shade200,
+            child: const Icon(
+              Icons.eco,
+              color: primaryGreen,
+            ),
+          );
+        },
+      );
+    }
+
+    // Base64
+    try {
+      String base64String = image;
+
+      if (base64String.contains(',')) {
+        base64String = base64String.split(',').last;
+      }
+
+      final bytes = base64Decode(base64String);
+
+      return Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) {
+          return Container(
+            color: Colors.grey.shade200,
+            child: const Icon(
+              Icons.eco,
+              color: primaryGreen,
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      return Container(
+        color: Colors.grey.shade200,
+        child: const Icon(
+          Icons.eco,
+          color: primaryGreen,
+        ),
+      );
+    }
+  }
+
   Widget _buildTitleAndQuantityRow() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
       children: [
-        const Expanded(
-          child: Text(
-            'Fresh Roma\nTomatoes',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              height: 1.15,
-              color: Colors.black87,
-            ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              Text(
+                _productName,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  height: 1.15,
+                  color: Colors.black87,
+                ),
+              ),
+
+              if (_category.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  _category,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
+
+        const SizedBox(width: 12),
+
         Container(
           decoration: BoxDecoration(
             color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius:
+                BorderRadius.circular(12),
           ),
           child: Row(
             children: [
               IconButton(
                 onPressed: () {
                   if (_quantity > 1) {
-                    setState(() => _quantity--);
+                    setState(() {
+                      _quantity--;
+                    });
                   }
                 },
-                icon: const Icon(Icons.remove, size: 18, color: primaryGreen),
-                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                icon: const Icon(
+                  Icons.remove,
+                  size: 18,
+                  color: primaryGreen,
+                ),
+                constraints:
+                    const BoxConstraints(
+                  minWidth: 36,
+                  minHeight: 36,
+                ),
                 padding: EdgeInsets.zero,
               ),
+
               Text(
                 '$_quantity',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
                 ),
               ),
+
               IconButton(
                 onPressed: () {
-                  setState(() => _quantity++);
+                  if (_quantity < _stock) {
+                    setState(() {
+                      _quantity++;
+                    });
+                  }
                 },
-                icon: const Icon(Icons.add, size: 18, color: primaryGreen),
-                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                icon: const Icon(
+                  Icons.add,
+                  size: 18,
+                  color: primaryGreen,
+                ),
+                constraints:
+                    const BoxConstraints(
+                  minWidth: 36,
+                  minHeight: 36,
+                ),
                 padding: EdgeInsets.zero,
               ),
             ],
@@ -243,27 +490,39 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Row(
       children: [
         Text(
-          '\$${_pricePerKg.toStringAsFixed(0)}/kg',
+          '\$${_pricePerKg.toStringAsFixed(2)}/kg',
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
             color: primaryGreen,
           ),
         ),
+
         const SizedBox(width: 10),
+
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 4,
+          ),
           decoration: BoxDecoration(
             color: lightGreenBg,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius:
+                BorderRadius.circular(12),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.circle, color: primaryGreen, size: 8),
-              SizedBox(width: 6),
+              const Icon(
+                Icons.circle,
+                color: primaryGreen,
+                size: 8,
+              ),
+
+              const SizedBox(width: 6),
+
               Text(
-                '5KG IN STOCK',
-                style: TextStyle(
+                '${_stock.toStringAsFixed(1)} KG IN STOCK',
+                style: const TextStyle(
                   color: primaryGreen,
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -279,7 +538,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Widget _buildProductDescription() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
       children: [
         Text(
           'PRODUCT DESCRIPTION',
@@ -290,9 +550,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             letterSpacing: 0.5,
           ),
         ),
+
         const SizedBox(height: 8),
+
         Text(
-          'Hand-picked at peak ripeness, our Roma tomatoes are known for their firm, meaty texture and low seed count. Perfect for sauces, canning, and high-volume kitchen prep. These tomatoes offer a rich, concentrated flavor that intensifies during cooking.',
+          _description,
           style: TextStyle(
             fontSize: 14,
             height: 1.45,
@@ -308,57 +570,76 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius:
+            BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color:
+                Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               const CircleAvatar(
                 radius: 24,
-                backgroundImage: NetworkImage(
-                  'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150&q=80',
+                child: Icon(
+                  Icons.agriculture,
+                  color: primaryGreen,
                 ),
               ),
+
               const SizedBox(width: 12),
+
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Green Acres\nFarm',
-                      style: TextStyle(
+                    Text(
+                      _farmName,
+                      style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        height: 1.2,
+                        fontWeight:
+                            FontWeight.bold,
                       ),
                     ),
+
                     const SizedBox(height: 4),
+
                     Row(
                       children: [
-                        const Icon(Icons.star, color: Colors.orange, size: 14),
+                        const Icon(
+                          Icons.star,
+                          color: Colors.orange,
+                          size: 14,
+                        ),
+
                         const SizedBox(width: 4),
+
                         const Text(
                           '4.9',
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                            fontWeight:
+                                FontWeight.bold,
                           ),
                         ),
+
                         const SizedBox(width: 4),
+
                         Text(
-                          '(1.2k Reviews)',
+                          '(Reviews)',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color:
+                                Colors.grey.shade600,
                           ),
                         ),
                       ],
@@ -366,34 +647,42 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ],
                 ),
               ),
+
               OutlinedButton(
                 onPressed: () {},
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: primaryGreen, width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(
+                    color: primaryGreen,
+                    width: 1.5,
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape:
+                      RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(12),
+                  ),
                 ),
                 child: const Text(
-                  'Contact\nFarmer',
-                  textAlign: TextAlign.center,
+                  'Contact',
                   style: TextStyle(
                     color: primaryGreen,
-                    fontWeight: FontWeight.bold,
+                    fontWeight:
+                        FontWeight.bold,
                     fontSize: 12,
-                    height: 1.1,
                   ),
                 ),
               ),
             ],
           ),
+
           const SizedBox(height: 12),
+
           Wrap(
             spacing: 8,
             runSpacing: 6,
             children: [
-              _buildTagChip('Organic'),
+              if (_category.isNotEmpty)
+                _buildTagChip(_category),
+
               _buildTagChip('Local Delivery'),
               _buildTagChip('Wholesale Pricing'),
             ],
@@ -422,35 +711,47 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Widget _buildBottomCartBar() {
-    final double totalAmount = _pricePerKg * _quantity;
+    final double totalAmount =
+        _pricePerKg * _quantity;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding:
+          const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 12,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
-          top: BorderSide(color: Colors.grey.shade200),
+          top: BorderSide(
+            color: Colors.grey.shade200,
+          ),
         ),
       ),
       child: SafeArea(
         child: Row(
           children: [
             Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize:
+                  MainAxisSize.min,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 Text(
                   'Estimated Total',
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                    fontWeight:
+                        FontWeight.w500,
                   ),
                 ),
+
                 const SizedBox(height: 2),
+
                 Text(
                   '\$${totalAmount.toStringAsFixed(2)}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: primaryGreen,
@@ -458,25 +759,41 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
               ],
             ),
+
             const SizedBox(width: 24),
+
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 20),
+                onPressed: () {
+                  // TODO: Add to cart
+                },
+                icon: const Icon(
+                  Icons.shopping_cart_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 label: const Text(
                   'Add to Cart',
                   style: TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    fontWeight:
+                        FontWeight.bold,
                     fontSize: 15,
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: buttonOrange,
+                style:
+                    ElevatedButton.styleFrom(
+                  backgroundColor:
+                      buttonOrange,
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  padding:
+                      const EdgeInsets.symmetric(
+                    vertical: 14,
+                  ),
+                  shape:
+                      RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(12),
                   ),
                 ),
               ),

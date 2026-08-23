@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/screens/product_detail_screen.dart';
@@ -142,10 +143,17 @@ class _HomeScreenState extends State<HomeScreen> {
   // ==========================================================
 
   String _getProductImage(Map<String, dynamic> product) {
-    final image =
-        product['imageBase64']?.toString() ?? '';
+    final images = product['imageUrls'];
 
-    return image;
+    if (images is List && images.isNotEmpty) {
+      final image = images.first.toString().trim();
+
+      if (image.isNotEmpty) {
+        return ApiConstants.imageUrl(image);
+      }
+    }
+
+    return '';
   }
 
   // ==========================================================
@@ -467,35 +475,33 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
 
                       child: ProductCard(
-                        imageUrl:
-                            _getProductImage(
-                          product,
-                        ),
+                        imageUrl: _getProductImage(product),
 
                         productName:
-                            product['name']
-                                    ?.toString() ??
-                                'Unnamed Product',
+                            product['name']?.toString() ??
+                            'Unnamed Product',
 
                         farmName:
-                            _getFarmerName(
-                          product,
-                        ),
+                            _getFarmerName(product),
 
                         price:
-                            _formatPrice(
-                          product['price'],
-                        ),
+                            _formatPrice(product['price']),
+
+                        location:
+                            product['location']?.toString() ??
+                            'Unknown',
+
+                        availableQuantity:
+                            _formatQuantity(product['quantity']),
+
+                        isAvailable:
+                            product['isAvailable'] ?? true,
 
                         onTap: () {
-                          // IMPORTANT:
-                          // Send the exact product
-                          // clicked by the user.
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  ProductDetailScreen(
+                              builder: (_) => ProductDetailScreen(
                                 product: product,
                               ),
                             ),
@@ -776,5 +782,25 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  String _formatQuantity(dynamic value) {
+    if (value == null) {
+      return '0 kg';
+    }
+
+    final quantity = double.tryParse(
+      value.toString(),
+    );
+
+    if (quantity == null) {
+      return '0 kg';
+    }
+
+    if (quantity % 1 == 0) {
+      return '${quantity.toInt()} kg';
+    }
+
+    return '${quantity.toStringAsFixed(1)} kg';
   }
 }

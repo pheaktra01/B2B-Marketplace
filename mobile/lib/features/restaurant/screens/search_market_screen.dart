@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/screens/product_detail_screen.dart';
 import 'package:mobile/features/product/services/product_service.dart';
@@ -867,8 +868,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     return Column(
       children: _filteredProducts.map(
         (product) {
-          final farmerName =
-              _getFarmerName(product);
+          _getFarmerName(product);
 
           return Padding(
             padding:
@@ -876,29 +876,33 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               bottom: 14,
             ),
             child: ProductCard(
-              imageUrl:
-                  product['imageBase64']
-                          ?.toString() ??
-                      '',
+              imageUrl: _getProductImage(product),
 
               productName:
-                  product['name']
-                          ?.toString() ??
-                      'Unnamed Product',
+                  product['name']?.toString() ??
+                  'Unnamed Product',
 
-              farmName: farmerName,
+              farmName:
+                  _getFarmerName(product),
 
               price:
-                  _formatPrice(
-                product['price'],
-              ),
+                  _formatPrice(product['price']),
+
+              location:
+                  product['location']?.toString() ??
+                  'Unknown',
+
+              availableQuantity:
+                  _formatQuantity(product['quantity']),
+
+              isAvailable:
+                  product['isAvailable'] ?? true,
 
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) =>
-                        ProductDetailScreen(
+                    builder: (_) => ProductDetailScreen(
                       product: product,
                     ),
                   ),
@@ -1009,5 +1013,39 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
         ),
       ),
     );
+  }
+
+  String _getProductImage(Map<String, dynamic> product) {
+    final images = product['imageUrls'];
+
+    if (images is List && images.isNotEmpty) {
+      final image = images.first.toString().trim();
+
+      if (image.isNotEmpty) {
+        return ApiConstants.imageUrl(image);
+      }
+    }
+
+    return '';
+  }
+
+  String _formatQuantity(dynamic value) {
+    if (value == null) {
+      return '0 kg';
+    }
+
+    final quantity = double.tryParse(
+      value.toString(),
+    );
+
+    if (quantity == null) {
+      return '0 kg';
+    }
+
+    if (quantity % 1 == 0) {
+      return '${quantity.toInt()} kg';
+    }
+
+    return '${quantity.toStringAsFixed(1)} kg';
   }
 }

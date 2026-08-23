@@ -21,22 +21,33 @@ export class ProductsController {
     private readonly productsService: ProductsService,
   ) {}
 
-  // Get all products
+  // ============================================================
+  // GET ALL PRODUCTS
+  // ============================================================
+
   @Get()
   async findAll() {
     return this.productsService.findAll();
   }
 
-  // Get products belonging to logged-in farmer
+  // ============================================================
+  // GET MY PRODUCTS
+  // ============================================================
+
   @Get('my')
   @UseGuards(JwtAuthGuard)
-  async findMyProducts(@Req() req: any) {
+  async findMyProducts(
+    @Req() req: any,
+  ) {
     return this.productsService.findMyProducts(
       req.user.id,
     );
   }
 
-  // Get one product
+  // ============================================================
+  // GET ONE PRODUCT
+  // ============================================================
+
   @Get(':id')
   async findOne(
     @Param('id') id: string,
@@ -44,20 +55,55 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
-  // Create product
+  // ============================================================
+  // CREATE PRODUCT
+  // ============================================================
+
   @Post()
   @UseGuards(JwtAuthGuard)
   async create(
     @Req() req: any,
     @Body() dto: CreateProductDto,
   ) {
-    console.log('=================================');
+    console.log(
+      '=================================',
+    );
+
     console.log('CREATE PRODUCT');
-    console.log('Farmer ID:', req.user.id);
-    console.log('Farmer Name:', req.user.name);
-    console.log('Farmer Role:', req.user.role);
-    console.log('Product:', dto.name);
-    console.log('=================================');
+
+    console.log(
+      'Farmer ID:',
+      req.user.id,
+    );
+
+    console.log(
+      'Farmer Name:',
+      req.user.name,
+    );
+
+    console.log(
+      'Farmer Role:',
+      req.user.role,
+    );
+
+    console.log(
+      'Product:',
+      dto.name,
+    );
+
+    console.log(
+      'Images:',
+      dto.imageUrls?.length ?? 0,
+    );
+
+    console.log(
+      'Image URLs:',
+      dto.imageUrls ?? [],
+    );
+
+    console.log(
+      '=================================',
+    );
 
     return this.productsService.create(
       req.user.id,
@@ -65,7 +111,10 @@ export class ProductsController {
     );
   }
 
-  // Update product
+  // ============================================================
+  // UPDATE PRODUCT
+  // ============================================================
+
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   async update(
@@ -80,7 +129,10 @@ export class ProductsController {
     );
   }
 
-  // Delete product
+  // ============================================================
+  // DELETE PRODUCT
+  // ============================================================
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   async remove(

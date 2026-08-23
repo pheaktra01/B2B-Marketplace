@@ -2,8 +2,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './enterties/product.entity';
@@ -15,24 +17,66 @@ export class ProductsService {
     private readonly productRepo: Repository<Product>,
   ) {}
 
+  // ============================================================
+  // CREATE
+  // ============================================================
+
   async create(
     farmerId: string,
     dto: CreateProductDto,
   ) {
     const product = this.productRepo.create({
-      ...dto,
+      name: dto.name,
+
+      description:
+        dto.description ?? null,
+
+      category: dto.category,
+
+      condition: dto.condition,
+
+      price: dto.price,
+
+      quantity: dto.quantity,
+
+      minOrder: dto.minOrder,
+
+      // ========================================================
+      // MULTIPLE IMAGE PATHS
+      // ========================================================
+
+      imageUrls:
+        dto.imageUrls ?? [],
+
+      harvestDate:
+        dto.harvestDate
+          ? new Date(dto.harvestDate)
+          : null,
+
+      availableUntil:
+        dto.availableUntil
+          ? new Date(dto.availableUntil)
+          : null,
+
+      location: dto.location,
+
+      deliveryMethod:
+        dto.deliveryMethod,
+
+      deliveryFee:
+        dto.deliveryFee,
+
       farmerId,
-      harvestDate: dto.harvestDate
-        ? new Date(dto.harvestDate)
-        : null,
-      availableUntil: dto.availableUntil
-        ? new Date(dto.availableUntil)
-        : null,
+
       isAvailable: true,
     });
 
     return this.productRepo.save(product);
   }
+
+  // ============================================================
+  // GET ALL
+  // ============================================================
 
   async findAll() {
     return this.productRepo.find({
@@ -42,7 +86,13 @@ export class ProductsService {
     });
   }
 
-  async findMyProducts(farmerId: string) {
+  // ============================================================
+  // GET MY PRODUCTS
+  // ============================================================
+
+  async findMyProducts(
+    farmerId: string,
+  ) {
     return this.productRepo.find({
       where: {
         farmerId,
@@ -53,10 +103,17 @@ export class ProductsService {
     });
   }
 
+  // ============================================================
+  // GET ONE
+  // ============================================================
+
   async findOne(id: string) {
-    const product = await this.productRepo.findOne({
-      where: { id },
-    });
+    const product =
+      await this.productRepo.findOne({
+        where: {
+          id,
+        },
+      });
 
     if (!product) {
       throw new NotFoundException(
@@ -67,17 +124,22 @@ export class ProductsService {
     return product;
   }
 
+  // ============================================================
+  // UPDATE
+  // ============================================================
+
   async update(
     id: string,
     farmerId: string,
     dto: UpdateProductDto,
   ) {
-    const product = await this.productRepo.findOne({
-      where: {
-        id,
-        farmerId,
-      },
-    });
+    const product =
+      await this.productRepo.findOne({
+        where: {
+          id,
+          farmerId,
+        },
+      });
 
     if (!product) {
       throw new NotFoundException(
@@ -100,16 +162,21 @@ export class ProductsService {
     return this.productRepo.save(product);
   }
 
+  // ============================================================
+  // DELETE
+  // ============================================================
+
   async remove(
     id: string,
     farmerId: string,
   ) {
-    const product = await this.productRepo.findOne({
-      where: {
-        id,
-        farmerId,
-      },
-    });
+    const product =
+      await this.productRepo.findOne({
+        where: {
+          id,
+          farmerId,
+        },
+      });
 
     if (!product) {
       throw new NotFoundException(
@@ -120,7 +187,8 @@ export class ProductsService {
     await this.productRepo.remove(product);
 
     return {
-      message: 'Product deleted successfully',
+      message:
+        'Product deleted successfully',
     };
   }
 }

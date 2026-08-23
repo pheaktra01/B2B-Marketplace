@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsDateString,
   IsNumber,
   IsOptional,
@@ -32,9 +33,14 @@ export class CreateProductDto {
   @Min(0)
   minOrder: number;
 
+  // ============================================================
+  // MULTIPLE PRODUCT IMAGE PATHS
+  // ============================================================
+
   @IsOptional()
-  @IsString()
-  imageBase64?: string;
+  @IsArray()
+  @IsString({ each: true })
+  imageUrls?: string[];
 
   @IsOptional()
   @IsDateString()

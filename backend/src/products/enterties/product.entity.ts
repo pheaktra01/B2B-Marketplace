@@ -44,11 +44,15 @@ export class Product {
   })
   minOrder: number;
 
-  @Column({
-    type: 'text',
-    nullable: true,
+  // ============================================================
+  // MULTIPLE PRODUCT IMAGE PATHS
+  // ============================================================
+
+  @Column('text', {
+    array: true,
+    default: '{}',
   })
-  imageBase64: string | null;
+  imageUrls: string[];
 
   @Column({ type: 'date', nullable: true })
   harvestDate: Date | null;

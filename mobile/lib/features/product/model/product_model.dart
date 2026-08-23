@@ -7,7 +7,9 @@ class Product {
   final double price;
   final double quantity;
   final double minOrder;
-  final String? imageBase64;
+
+  final List<String> imagePaths;
+
   final DateTime? harvestDate;
   final DateTime? availableUntil;
   final String location;
@@ -15,6 +17,8 @@ class Product {
   final double deliveryFee;
   final String farmerId;
   final bool isAvailable;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   Product({
     required this.id,
@@ -25,7 +29,7 @@ class Product {
     required this.price,
     required this.quantity,
     required this.minOrder,
-    this.imageBase64,
+    required this.imagePaths,
     this.harvestDate,
     this.availableUntil,
     required this.location,
@@ -33,17 +37,18 @@ class Product {
     required this.deliveryFee,
     required this.farmerId,
     required this.isAvailable,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory Product.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      category: json['category'] ?? '',
-      condition: json['condition'] ?? 'Fresh',
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      description: json['description']?.toString(),
+
+      category: json['category']?.toString() ?? '',
+      condition: json['condition']?.toString() ?? 'Fresh',
 
       price: double.tryParse(
             json['price']?.toString() ?? '0',
@@ -60,36 +65,68 @@ class Product {
           ) ??
           0,
 
-      imageBase64: json['imageBase64'],
+      imagePaths: _parseImages(json),
 
-      harvestDate:
-          json['harvestDate'] != null
-              ? DateTime.parse(
-                  json['harvestDate'].toString(),
-                )
-              : null,
+      harvestDate: _parseDate(
+        json['harvestDate'],
+      ),
 
-      availableUntil:
-          json['availableUntil'] != null
-              ? DateTime.parse(
-                  json['availableUntil'].toString(),
-                )
-              : null,
+      availableUntil: _parseDate(
+        json['availableUntil'],
+      ),
 
-      location: json['location'] ?? '',
+      location: json['location']?.toString() ?? '',
 
       deliveryMethod:
-          json['deliveryMethod'] ?? '',
+          json['deliveryMethod']?.toString() ?? '',
 
       deliveryFee: double.tryParse(
             json['deliveryFee']?.toString() ?? '0',
           ) ??
           0,
 
-      farmerId: json['farmerId'],
+      farmerId:
+          json['farmerId']?.toString() ?? '',
 
       isAvailable:
-          json['isAvailable'] ?? true,
+          json['isAvailable'] == true,
+
+      createdAt: _parseDate(
+        json['createdAt'],
+      ),
+
+      updatedAt: _parseDate(
+        json['updatedAt'],
+      ),
     );
+  }
+
+  static List<String> _parseImages(
+    Map<String, dynamic> json,
+  ) {
+    final images = json['imageUrls'];
+
+    if (images is List) {
+      return images
+          .map(
+            (image) => image.toString(),
+          )
+          .where(
+            (image) => image.isNotEmpty,
+          )
+          .toList();
+    }
+
+    return [];
+  }
+
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+
+    try {
+      return DateTime.parse(value.toString());
+    } catch (_) {
+      return null;
+    }
   }
 }

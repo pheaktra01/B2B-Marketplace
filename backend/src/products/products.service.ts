@@ -24,54 +24,57 @@ export class ProductsService {
   async create(
     farmerId: string,
     dto: CreateProductDto,
+    imageUrls: string[],
   ) {
-    const product = this.productRepo.create({
-      name: dto.name,
+    const product =
+      this.productRepo.create({
+        name: dto.name,
 
-      description:
-        dto.description ?? null,
+        description:
+          dto.description ?? null,
 
-      category: dto.category,
+        category: dto.category,
 
-      condition: dto.condition,
+        condition:
+          dto.condition,
 
-      price: dto.price,
+        price: dto.price,
 
-      quantity: dto.quantity,
+        quantity:
+          dto.quantity,
 
-      minOrder: dto.minOrder,
+        minOrder:
+          dto.minOrder,
 
-      // ========================================================
-      // MULTIPLE IMAGE PATHS
-      // ========================================================
+        imageUrls,
 
-      imageUrls:
-        dto.imageUrls ?? [],
+        harvestDate:
+          dto.harvestDate
+            ? new Date(dto.harvestDate)
+            : null,
 
-      harvestDate:
-        dto.harvestDate
-          ? new Date(dto.harvestDate)
-          : null,
+        availableUntil:
+          dto.availableUntil
+            ? new Date(dto.availableUntil)
+            : null,
 
-      availableUntil:
-        dto.availableUntil
-          ? new Date(dto.availableUntil)
-          : null,
+        location:
+          dto.location,
 
-      location: dto.location,
+        deliveryMethod:
+          dto.deliveryMethod,
 
-      deliveryMethod:
-        dto.deliveryMethod,
+        deliveryFee:
+          dto.deliveryFee,
 
-      deliveryFee:
-        dto.deliveryFee,
+        farmerId,
 
-      farmerId,
+        isAvailable: true,
+      });
 
-      isAvailable: true,
-    });
-
-    return this.productRepo.save(product);
+    return this.productRepo.save(
+      product,
+    );
   }
 
   // ============================================================

@@ -7,8 +7,23 @@ import {
   Patch,
   Post,
   Req,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+
+import {
+  FilesInterceptor,
+} from '@nestjs/platform-express';
+
+import {
+  diskStorage,
+} from 'multer';
+
+import {
+  extname,
+  join,
+} from 'path';
 
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -61,8 +76,59 @@ export class ProductsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FilesInterceptor('images', 5, {
+      storage: diskStorage({
+        destination: join(
+          process.cwd(),
+          'uploads',
+          'products',
+        ),
+
+        filename: (
+          req,
+          file,
+          callback,
+        ) => {
+          const uniqueName =
+            `${Date.now()}-${Math.round(Math.random() * 1e9)}${extname(file.originalname)}`;
+
+          callback(
+            null,
+            uniqueName,
+          );
+        },
+      }),
+
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+
+      fileFilter: (
+        req,
+        file,
+        callback,
+      ) => {
+        if (
+          !file.mimetype.startsWith(
+            'image/',
+          )
+        ) {
+          return callback(
+            new Error(
+              'Only image files are allowed',
+            ),
+            false,
+          );
+        }
+
+        callback(null, true);
+      },
+    }),
+  )
   async create(
     @Req() req: any,
+    @UploadedFiles() files: Express.Multer.File[],
     @Body() dto: CreateProductDto,
   ) {
     console.log(
@@ -93,21 +159,23 @@ export class ProductsController {
 
     console.log(
       'Images:',
-      dto.imageUrls?.length ?? 0,
-    );
-
-    console.log(
-      'Image URLs:',
-      dto.imageUrls ?? [],
+      files?.length ?? 0,
     );
 
     console.log(
       '=================================',
     );
 
+    const imageUrls =
+      (files ?? []).map(
+        (file) =>
+          `/uploads/products/${file.filename}`,
+      );
+
     return this.productsService.create(
       req.user.id,
       dto,
+      imageUrls,
     );
   }
 

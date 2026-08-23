@@ -7,16 +7,21 @@ import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app =
+    await NestFactory.create<NestExpressApplication>(
+      AppModule,
+    );
 
-  // cookie parser middleware
+  // Cookie parser
   app.use(cookieParser());
 
+  // CORS
   app.enableCors({
-    origin:true,
-    credentials:true,
+    origin: true,
+    credentials: true,
   });
 
+  // Validation
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -24,9 +29,31 @@ async function bootstrap() {
     }),
   );
 
-  // Serve uploaded files from /uploads URL
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), { prefix: '/uploads' });
+  // ============================================================
+  // SERVE UPLOADED IMAGES
+  // ============================================================
 
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+  const uploadsPath = join(
+    process.cwd(),
+    'uploads',
+  );
+
+  console.log(
+    'Uploads directory:',
+    uploadsPath,
+  );
+
+  app.useStaticAssets(
+    uploadsPath,
+    {
+      prefix: '/uploads/',
+    },
+  );
+
+  await app.listen(
+    process.env.PORT ?? 3000,
+    '0.0.0.0',
+  );
 }
+
 bootstrap();

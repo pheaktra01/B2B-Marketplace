@@ -1,5 +1,6 @@
+import { Type } from 'class-transformer';
+
 import {
-  IsArray,
   IsDateString,
   IsNumber,
   IsOptional,
@@ -21,26 +22,20 @@ export class CreateProductDto {
   @IsString()
   condition: string;
 
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   price: number;
 
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   quantity: number;
 
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   minOrder: number;
-
-  // ============================================================
-  // MULTIPLE PRODUCT IMAGE PATHS
-  // ============================================================
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  imageUrls?: string[];
 
   @IsOptional()
   @IsDateString()
@@ -56,6 +51,7 @@ export class CreateProductDto {
   @IsString()
   deliveryMethod: string;
 
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   deliveryFee: number;

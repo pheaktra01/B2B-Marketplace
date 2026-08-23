@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -50,9 +48,6 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   String _productCondition = 'Fresh';
 
   final List<XFile> _productImages = [];
-
-  // Base64 strings sent to backend
-  final List<String> _selectedImagesBase64 = [];
 
   final List<String> _categories = [
     'Vegetables',
@@ -1318,7 +1313,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         boxShadow: [
           BoxShadow(
             color:
-                Colors.black.withOpacity(0.05),
+                Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset:
                 const Offset(0, -4),

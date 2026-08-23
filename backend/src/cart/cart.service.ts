@@ -285,6 +285,10 @@ export class CartService {
       items: formattedItems,
       total: Number(total.toFixed(2)),
       itemCount: formattedItems.length,
+      totalQuantity: formattedItems.reduce(
+        (sum, item) => sum + item.quantity,
+        0,
+      ),
     };
   }
 }

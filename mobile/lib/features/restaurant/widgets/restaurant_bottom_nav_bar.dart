@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/restaurant/screens/chat_list_screen.dart';
 import 'package:mobile/features/restaurant/screens/home_screen.dart';
-import 'package:mobile/features/order/screens/cart_screen.dart';
+import 'package:mobile/features/cart/screens/cart_screen.dart';
 import 'package:mobile/features/restaurant/screens/search_market_screen.dart';
 import 'package:mobile/features/restaurant/screens/user_profile_screen.dart';
 

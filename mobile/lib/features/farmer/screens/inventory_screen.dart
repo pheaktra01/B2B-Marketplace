@@ -1,10 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 import 'package:mobile/features/farmer/screens/notifications_screen.dart';
+import 'package:mobile/features/farmer/widgets/edit_product_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
+import 'package:mobile/features/farmer/widgets/farmer_product_card.dart';
+import 'package:mobile/features/farmer/widgets/farmer_product_detail_screen.dart';
 import 'package:mobile/features/product/screens/add_product_screen.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 
@@ -517,413 +518,64 @@ class _InventoryScreenState extends State<InventoryScreen> {
     }
 
     return Column(
-      children:
-          products.map((product) {
-        return _buildProductCard(
-          product,
+      children: products.map((product) {
+        final id = product['id']?.toString();
+
+        return FarmerProductCard(
+          product: product,
+
+          // View details
+          onTap: () {
+            if (id == null) return;
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    FarmerProductDetailScreen(
+                  product: product,
+                ),
+              ),
+            );
+          },
+
+          // Edit
+          onEdit: () async {
+            if (id == null) return;
+
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    EditProductScreen(
+                  product: product,
+                ),
+              ),
+            );
+
+            if (!mounted) return;
+
+            await _loadProducts();
+          },
+
+          // Delete
+          onDelete: () {
+            _confirmDelete(product);
+          },
+
+          // Available toggle
+          onAvailabilityChanged: (value) {
+            _toggleAvailability(
+              product,
+              value,
+            );
+          },
         );
       }).toList(),
     );
   }
 
-  // ============================================================
-  // PRODUCT CARD
-  // ============================================================
 
-  Widget _buildProductCard(
-    Map<String, dynamic> product,
-  ) {
-    final name =
-        product['name']?.toString() ??
-            'Unnamed Product';
-
-    final category =
-        product['category']?.toString() ??
-            '';
-
-    final price =
-        _toDouble(product['price']);
-
-    final quantity =
-        _toDouble(product['quantity']);
-
-    final isAvailable =
-        product['isAvailable'] == true;
-
-    final imageBase64 =
-        product['imageBase64']?.toString();
-
-    final bool lowStock =
-        quantity > 0 && quantity <= 20;
-
-    final bool outOfStock =
-        quantity <= 0;
-
-    String status;
-    Color statusColor;
-
-    if (outOfStock ||
-        !isAvailable) {
-      status = 'Inactive';
-      statusColor = Colors.grey;
-    } else if (lowStock) {
-      status = 'Low Stock';
-      statusColor =
-          const Color(0xFFD9534F);
-    } else {
-      status = 'Active';
-      statusColor = primaryColor;
-    }
-
-    return Container(
-      margin:
-          const EdgeInsets.only(
-        bottom: 16,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.shade200,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-        children: [
-          // IMAGE
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(
-                  top: Radius.circular(16),
-                ),
-                child: _buildProductImage(
-                  imageBase64,
-                ),
-              ),
-
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(
-                      alpha: 0.95,
-                    ),
-                    borderRadius:
-                        BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize:
-                        MainAxisSize.min,
-                    children: [
-                      if (status == 'Low Stock')
-                        const Icon(
-                          Icons.warning_amber_rounded,
-                          size: 14,
-                          color: Color(0xFFD9534F),
-                        ),
-
-                      if (status == 'Low Stock')
-                        const SizedBox(width: 4),
-
-                      Text(
-                        status,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight:
-                              FontWeight.bold,
-                          color: statusColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          // DETAILS
-          Padding(
-            padding:
-                const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment
-                                .start,
-                        children: [
-                          Text(
-                            name,
-                            style:
-                                const TextStyle(
-                              fontSize: 17,
-                              fontWeight:
-                                  FontWeight.bold,
-                            ),
-                          ),
-
-                          if (category
-                              .isNotEmpty)
-                            Padding(
-                              padding:
-                                  const EdgeInsets
-                                      .only(
-                                top: 3,
-                              ),
-                              child: Text(
-                                category,
-                                style: TextStyle(
-                                  fontSize:
-                                      12,
-                                  color:
-                                      Colors.grey[
-                                          600],
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-
-                    Text(
-                      '\$${price.toStringAsFixed(2)}',
-                      style:
-                          const TextStyle(
-                        fontSize: 17,
-                        fontWeight:
-                            FontWeight.bold,
-                        color:
-                            primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(
-                  height: 14,
-                ),
-
-                Text(
-                  'Stock Level',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color:
-                        Colors.grey[600],
-                  ),
-                ),
-
-                const SizedBox(
-                  height: 6,
-                ),
-
-                LinearProgressIndicator(
-                  value:
-                      _calculateProgress(
-                    quantity,
-                  ),
-                  minHeight: 6,
-                  borderRadius:
-                      BorderRadius.circular(
-                    4,
-                  ),
-                  backgroundColor:
-                      Colors.grey[200],
-                  valueColor:
-                      AlwaysStoppedAnimation<
-                          Color>(
-                    statusColor,
-                  ),
-                ),
-
-                const SizedBox(
-                  height: 6,
-                ),
-
-                Text(
-                  '${quantity.toStringAsFixed(1)} kg remaining',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight:
-                        FontWeight.w500,
-                    color: lowStock
-                        ? const Color(
-                            0xFFD9534F,
-                          )
-                        : Colors.grey[700],
-                  ),
-                ),
-
-                const Divider(
-                  height: 24,
-                ),
-
-                Row(
-                  children: [
-                    Text(
-                      'Available for Sale',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color:
-                            Colors.grey[700],
-                      ),
-                    ),
-
-                    const SizedBox(
-                      width: 8,
-                    ),
-
-                    Transform.scale(
-                      scale: 0.8,
-                      child: Switch(
-                        value:
-                            isAvailable,
-                        activeThumbColor:
-                            primaryColor,
-                        onChanged:
-                            (value) {
-                          _toggleAvailability(
-                            product,
-                            value,
-                          );
-                        },
-                      ),
-                    ),
-
-                    const Spacer(),
-
-                    IconButton(
-                      tooltip:
-                          'Edit Product',
-                      icon:
-                          const Icon(
-                        Icons
-                            .edit_outlined,
-                        size: 20,
-                      ),
-                      onPressed: () {
-                        _showEditProductDialog(
-                          product,
-                        );
-                      },
-                    ),
-
-                    IconButton(
-                      tooltip:
-                          'Delete Product',
-                      icon:
-                          const Icon(
-                        Icons
-                            .delete_outline,
-                        size: 20,
-                        color: Colors.red,
-                      ),
-                      onPressed: () {
-                        _confirmDelete(
-                          product,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  double _calculateProgress(
-    double quantity,
-  ) {
-    if (quantity <= 0) return 0;
-
-    if (quantity >= 100) {
-      return 1;
-    }
-
-    return quantity / 100;
-  }
-
-  Widget _buildImagePlaceholder() {
-    return Container(
-      height: 160,
-      width: double.infinity,
-      color: Colors.grey[100],
-      child: const Icon(
-        Icons.eco_rounded,
-        size: 50,
-        color: primaryColor,
-      ),
-    );
-  }
-
-  Widget _buildProductImage(String? imageBase64) {
-    if (imageBase64 == null || imageBase64.trim().isEmpty) {
-      debugPrint('Product image: no imageBase64');
-      return _buildImagePlaceholder();
-    }
-
-    try {
-      String base64String = imageBase64.trim();
-
-      // Handles:
-      // data:image/jpeg;base64,/9j/4AAQ...
-      // OR
-      // /9j/4AAQ...
-      if (base64String.contains(',')) {
-        base64String = base64String.split(',').last;
-      }
-
-      // Remove possible whitespace/newlines
-      base64String =
-          base64String.replaceAll(RegExp(r'\s+'), '');
-
-      final bytes = base64Decode(base64String);
-
-      debugPrint(
-        'Product image decoded successfully: ${bytes.length} bytes',
-      );
-
-      return Image.memory(
-        bytes,
-        height: 160,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        gaplessPlayback: true,
-        errorBuilder: (context, error, stackTrace) {
-          debugPrint(
-            'Image.memory error: $error',
-          );
-
-          return _buildImagePlaceholder();
-        },
-      );
-    } catch (e) {
-      debugPrint(
-        'Failed to decode product image: $e',
-      );
-
-      return _buildImagePlaceholder();
-    }
-  }
 
   // ============================================================
   // TOGGLE AVAILABLE
@@ -1079,65 +731,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       );
     }
   }
-
-  // ============================================================
-  // EDIT PRODUCT
-  // ============================================================
-
-  Future<void> _showEditProductDialog(
-    Map<String, dynamic> product,
-  ) async {
-    final id =
-        product['id']?.toString();
-
-    if (id == null) return;
-
-    final result =
-        await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return _EditProductDialog(
-          product: product,
-          onSave: ({
-            required String name,
-            required double price,
-            required double quantity,
-            required String description,
-          }) async {
-            await ProductService
-                .updateProduct(
-              productId: id,
-              data: {
-                'name': name,
-                'price': price,
-                'quantity': quantity,
-                'description':
-                    description,
-              },
-            );
-          },
-        );
-      },
-    );
-
-    if (!mounted) return;
-
-    if (result == true) {
-      await _loadProducts();
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Product updated successfully',
-          ),
-        ),
-      );
-    }
-  }
-
+  
   // ============================================================
   // EMPTY
   // ============================================================

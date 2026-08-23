@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/constants/api_constants.dart';
+import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/screens/product_detail_screen.dart';
@@ -20,6 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _isLoading = true;
   String? _errorMessage;
+
+  final CartService _cartService = CartService();
 
   List<Map<String, dynamic>> _products = [];
 
@@ -515,9 +518,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
 
                         onAddToCart: () {
-                          debugPrint(
-                            'Add to cart: ${product['name']}',
-                          );
+                          _addToCart(product);
                         },
                       ),
                     );
@@ -802,5 +803,38 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return '${quantity.toStringAsFixed(1)} kg';
+  }
+
+  Future<void> _addToCart(
+    Map<String, dynamic> product,
+  ) async {
+    try {
+      await _cartService.addToCart(
+        productId: product['id'].toString(),
+        quantity: 1,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${product['name']} added to cart',
+          ),
+          backgroundColor: primaryColor,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to add ${product['name']} to cart',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

@@ -15,6 +15,8 @@ class ProductCard extends StatelessWidget {
   final bool isAvailable;
   final bool isFavorite;
 
+  final bool isInCart;
+
   final VoidCallback? onTap;
   final VoidCallback? onFavoritePressed;
   final VoidCallback? onAddToCart;
@@ -31,6 +33,8 @@ class ProductCard extends StatelessWidget {
 
     this.isAvailable = true,
     this.isFavorite = false,
+
+    this.isInCart = false,
 
     this.localImage,
 
@@ -232,39 +236,55 @@ class ProductCard extends StatelessWidget {
                       child: SizedBox(
                         height: 38,
                         child: ElevatedButton.icon(
-                          onPressed:
-                              isAvailable ? onAddToCart : null,
+                          onPressed: !isAvailable
+                              ? null
+                              : isInCart
+                                  ? onAddToCart
+                                  : onAddToCart,
+
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryGreen,
+                            backgroundColor:
+                                isInCart ? primaryGreen : primaryGreen,
+
                             foregroundColor: Colors.white,
+
                             disabledBackgroundColor:
                                 Colors.grey.shade300,
+
                             disabledForegroundColor:
                                 Colors.grey.shade600,
+
                             elevation: 0,
-                            padding:
-                                const EdgeInsets.symmetric(
+
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 14,
                             ),
+
                             shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          icon: const Icon(
-                            Icons.add_shopping_cart_outlined,
+
+                          icon: Icon(
+                            isInCart
+                                ? Icons.shopping_cart
+                                : Icons.add_shopping_cart_outlined,
                             size: 17,
                           ),
+
                           label: Text(
-                            isAvailable
-                                ? 'Add to Cart'
-                                : 'Unavailable',
+                            !isAvailable
+                                ? 'Unavailable'
+                                : isInCart
+                                    ? 'In Cart'
+                                    : 'Add to Cart',
+
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                        ),
+                        )
                       ),
                     ),
                   ],

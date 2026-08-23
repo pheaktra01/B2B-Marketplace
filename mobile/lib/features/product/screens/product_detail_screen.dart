@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/constants/api_constants.dart';
+import 'package:mobile/features/cart/screens/cart_screen.dart';
+import 'package:mobile/features/cart/services/cart_service.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Map<String, dynamic> product;
@@ -27,6 +29,14 @@ class _ProductDetailScreenState
   double _orderQuantity = 1;
 
   bool _isFavorite = false;
+
+  final CartService _cartService = CartService();
+
+  bool _isAddingToCart = false;
+  bool _isAddedToCart = false;
+
+  bool _isInCart = false;
+  bool _isCheckingCart = true;
 
   // ==========================================================
   // PRODUCT DATA
@@ -228,8 +238,9 @@ class _ProductDetailScreenState
     super.initState();
 
     // Start ordering at minimum order.
-    _orderQuantity =
-        _minOrder > 0 ? _minOrder : 1;
+    _orderQuantity = _minOrder > 0 ? _minOrder : 1;
+
+    _checkIfProductIsInCart();
   }
 
   // ==========================================================
@@ -1334,60 +1345,174 @@ class _ProductDetailScreenState
 
             Expanded(
               child: ElevatedButton(
-                onPressed: canAdd
-                    ? () {
-                        debugPrint(
-                          'Add to cart: $_orderQuantity kg',
-                        );
-                      }
-                    : null,
-                style:
-                    ElevatedButton.styleFrom(
-                  backgroundColor: buttonOrange,
+              onPressed: canAdd &&
+                      !_isAddingToCart &&
+                      !_isInCart &&
+                      !_isCheckingCart
+                  ? _addToCart
+                  : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isAddedToCart
+                      ? primaryGreen
+                      : buttonOrange,
                   disabledBackgroundColor:
                       Colors.grey.shade300,
                   elevation: 0,
-                  padding:
-                      const EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     vertical: 13,
                   ),
-                  shape:
-                      RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Column(
-                  mainAxisSize:
-                      MainAxisSize.min,
-                  children: [
-                    Text(
-                      canAdd
-                          ? 'Add to Cart'
-                          : 'Unavailable',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight:
-                            FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-
-                    if (canAdd)
-                      Text(
-                        '\$${total.toStringAsFixed(2)}',
-                        style: const TextStyle(
+                child: _isCheckingCart
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
                           color: Colors.white,
-                          fontSize: 11,
                         ),
-                      ),
-                  ],
-                ),
+                      )
+                    : _isAddingToCart
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _isInCart
+                                    ? 'Added to Cart'
+                                    : canAdd
+                                        ? 'Add to Cart'
+                                        : 'Unavailable',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+
+                              if (canAdd && !_isInCart)
+                                Text(
+                                  '\$${total.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                            ],
+                          ),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _addToCart() async {
+    if (_isAddingToCart || _isInCart) return;
+
+    final productId =
+        widget.product['id']?.toString();
+
+    if (productId == null || productId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Product ID is missing'),
+          backgroundColor: Colors.red,
+        ),
+      );
+
+      return;
+    }
+
+    setState(() {
+      _isAddingToCart = true;
+    });
+
+    try {
+      await _cartService.addToCart(
+        productId: productId,
+        quantity: _orderQuantity,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _isInCart = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Added to cart successfully'),
+          backgroundColor: primaryGreen,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().replaceFirst(
+              'Exception: ',
+              '',
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAddingToCart = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _checkIfProductIsInCart() async {
+    final productId = widget.product['id']?.toString();
+
+    if (productId == null || productId.isEmpty) {
+      if (!mounted) return;
+
+      setState(() {
+        _isCheckingCart = false;
+      });
+
+      return;
+    }
+
+    try {
+      final cart = await _cartService.getCart();
+
+      final found = cart.items.any(
+        (item) => item.productId == productId,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _isInCart = found;
+        _isCheckingCart = false;
+      });
+    } catch (e) {
+      debugPrint('Failed to check cart: $e');
+
+      if (!mounted) return;
+
+      setState(() {
+        _isCheckingCart = false;
+      });
+    }
   }
 }

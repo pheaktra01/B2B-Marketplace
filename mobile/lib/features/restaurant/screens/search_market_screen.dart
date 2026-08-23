@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/constants/api_constants.dart';
+import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/screens/product_detail_screen.dart';
 import 'package:mobile/features/product/services/product_service.dart';
@@ -21,6 +22,8 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
   int _selectedTabIndex = 0;
 
+  final CartService _cartService = CartService();
+
   final TextEditingController _searchController =
       TextEditingController();
 
@@ -31,14 +34,6 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
   String _selectedCategory = 'All';
 
-  final List<String> _categories = [
-    'All',
-    'Vegetables',
-    'Fruits',
-    'Meat',
-    'Seafood',
-    'Herbs & Spices',
-  ];
 
   @override
   void initState() {
@@ -173,32 +168,6 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     }
 
     return '\$${price.toStringAsFixed(2)}/kg';
-  }
-
-  // ==========================================================
-  // STOCK
-  // ==========================================================
-
-  String _formatStock(dynamic value) {
-    double? quantity;
-
-    if (value is num) {
-      quantity = value.toDouble();
-    } else {
-      quantity = double.tryParse(
-        value?.toString() ?? '',
-      );
-    }
-
-    if (quantity == null) {
-      return '0 kg';
-    }
-
-    if (quantity % 1 == 0) {
-      return '${quantity.toInt()} kg';
-    }
-
-    return '${quantity.toStringAsFixed(1)} kg';
   }
 
   // ==========================================================
@@ -916,9 +885,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               },
 
               onAddToCart: () {
-                debugPrint(
-                  'Add to cart: ${product['name']}',
-                );
+                _addToCart(product);
               },
             ),
           );
@@ -1047,5 +1014,38 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     }
 
     return '${quantity.toStringAsFixed(1)} kg';
+  }
+
+  Future<void> _addToCart(
+    Map<String, dynamic> product,
+  ) async {
+    try {
+      await _cartService.addToCart(
+        productId: product['id'].toString(),
+        quantity: 1,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${product['name']} added to cart',
+          ),
+          backgroundColor: primaryGreen,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to add ${product['name']} to cart',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

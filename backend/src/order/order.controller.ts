@@ -10,7 +10,6 @@ import {
 
 import { OrderService } from './order.service';
 import { CheckoutDto } from './dto/checkout.dto';
-
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('orders')
@@ -20,7 +19,10 @@ export class OrderController {
     private readonly orderService: OrderService,
   ) {}
 
+  // ==========================================
   // POST /orders/checkout
+  // ==========================================
+
   @Post('checkout')
   async checkout(
     @Req() req: any,
@@ -32,7 +34,10 @@ export class OrderController {
     );
   }
 
+  // ==========================================
   // GET /orders
+  // ==========================================
+
   @Get()
   async getOrders(
     @Req() req: any,
@@ -42,7 +47,10 @@ export class OrderController {
     );
   }
 
+  // ==========================================
   // GET /orders/:id
+  // ==========================================
+
   @Get(':id')
   async getOrder(
     @Req() req: any,

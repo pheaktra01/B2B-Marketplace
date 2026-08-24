@@ -25,15 +25,25 @@ export enum PaymentStatus {
   REFUNDED = 'refunded',
 }
 
+export enum PaymentMethod {
+  KHQR = 'khqr',
+}
+
 @Entity('orders')
 export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'restaurant_id', type: 'uuid' })
+  @Column({
+    name: 'restaurant_id',
+    type: 'uuid',
+  })
   restaurantId: string;
 
-  @Column({ name: 'farmer_id', type: 'uuid' })
+  @Column({
+    name: 'farmer_id',
+    type: 'uuid',
+  })
   farmerId: string;
 
   @Column({
@@ -45,10 +55,10 @@ export class Order {
 
   @Column({
     name: 'payment_method',
-    type: 'varchar',
-    length: 50,
+    type: 'enum',
+    enum: PaymentMethod,
   })
-  paymentMethod: string;
+  paymentMethod: PaymentMethod;
 
   @Column({
     name: 'payment_status',
@@ -86,6 +96,15 @@ export class Order {
     default: 0,
   })
   deliveryFee: number;
+
+  @Column({
+    name: 'transaction_fee',
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    default: 0,
+  })
+  transactionFee: number;
 
   @Column({
     type: 'decimal',

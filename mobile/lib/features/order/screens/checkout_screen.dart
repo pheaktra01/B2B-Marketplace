@@ -1,554 +1,983 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/order/screens/khqr_payment_modal.dart';
-import 'package:mobile/features/order/screens/payment_method_screen.dart';
+import 'package:mobile/core/constants/api_constants.dart';
+import 'package:mobile/features/cart/models/cart_model.dart';
+import 'package:mobile/features/cart/services/cart_service.dart';
+import 'package:mobile/features/order/models/order_model.dart';
+import 'package:mobile/features/order/screens/order_success_screen.dart';
+import 'package:mobile/features/order/services/order_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  const CheckoutScreen({super.key});
+  final Cart cart;
+  final String deliveryAddress;
+  final String deliveryNotes;
+
+  const CheckoutScreen({
+    super.key,
+    required this.cart,
+    required this.deliveryAddress,
+    this.deliveryNotes = '',
+  });
 
   @override
-  State<CheckoutScreen> createState() => _CheckoutScreenState();
+  State<CheckoutScreen> createState() =>
+      _CheckoutScreenState();
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  // Theme Colors
+  // ==========================================================
+  // COLORS
+  // ==========================================================
+
+  static const Color pageBgColor = Color(0xFFF5F7E8);
   static const Color primaryGreen = Color(0xFF135A27);
-  static const Color pageBgColor = Color(0xFFF7F9F8);
   static const Color buttonOrange = Color(0xFFFF8C00);
 
-  int _selectedDateIndex = 0; // 0 for Date, 1 for Window selection
+  // ==========================================================
+  // SERVICES
+  // ==========================================================
+
+  final CartService _cartService = CartService();
+
+  final OrderService _orderService =
+      OrderService();
+
+  // ==========================================================
+  // STATE
+  // ==========================================================
+
+  bool _isCheckingOut = false;
+
+  String _paymentMethod = 'KHQR';
+
+  // ==========================================================
+  // FORMAT PRICE
+  // ==========================================================
+
+  String _formatPrice(double value) {
+    return '\$${value.toStringAsFixed(2)}';
+  }
+
+  String _formatQuantity(double value) {
+    if (value % 1 == 0) {
+      return value.toInt().toString();
+    }
+
+    return value.toStringAsFixed(1);
+  }
+
+  // ==========================================================
+  // TOTALS
+  // ==========================================================
+
+  double get subtotal {
+    return widget.cart.total;
+  }
+
+  double get deliveryFee {
+    return 2.00;
+  }
+
+  double get tax {
+    return subtotal * 0.03;
+  }
+
+  double get total {
+    return subtotal + deliveryFee + tax;
+  }
+
+  // ==========================================================
+  // BUILD
+  // ==========================================================
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: pageBgColor,
+
       appBar: AppBar(
         backgroundColor: pageBgColor,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: primaryGreen),
-          onPressed: () => Navigator.maybePop(context),
-        ),
+        centerTitle: true,
         title: const Text(
           'Checkout',
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
-            fontSize: 20,
           ),
         ),
-        centerTitle: false,
+        iconTheme: const IconThemeData(
+          color: Colors.black87,
+        ),
       ),
+
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
           children: [
-            // 1. Delivery Address Card
-            _buildDeliveryAddressCard(),
+            _buildOrderHeader(),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
 
-            // 2. Billing Address Card
-            _buildBillingAddressCard(),
+            _buildProductsCard(),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
 
-            // 3. Delivery Schedule Box
-            _buildDeliveryScheduleCard(),
+            _buildDeliveryCard(),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
 
-            // 4. Order Summary Card
-            _buildOrderSummaryCard(),
+            _buildPaymentCard(),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
 
-            // 5. Payment Method Card
-            _buildPaymentMethodCard(),
+            _buildOrderSummary(),
 
             const SizedBox(height: 24),
+
+            _buildPlaceOrderButton(),
+
+            const SizedBox(height: 20),
           ],
         ),
       ),
-
-      // 6. Fixed Bottom Total Bar
-      bottomNavigationBar: _buildBottomActionBar(),
     );
   }
 
-  // --- WIDGET BUILDERS ---
+  // ==========================================================
+  // ORDER HEADER
+  // ==========================================================
 
-  Widget _buildDeliveryAddressCard() {
-    return _buildCardWrapper(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildOrderHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: primaryGreen,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildSectionHeader(Icons.location_on_outlined, 'DELIVERY ADDRESS'),
-              _buildEditButton(onTap: () {}),
-            ],
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color:
+                  Colors.white.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.shopping_bag_outlined,
+              color: Colors.white,
+              size: 25,
+            ),
           ),
-          const SizedBox(height: 10),
-          const Padding(
-            padding: EdgeInsets.only(left: 28.0),
+
+          const SizedBox(width: 12),
+
+          Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
-                Text(
-                  'The Green Kitchen',
+                const Text(
+                  'Review Your Order',
                   style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black87,
                   ),
                 ),
-                SizedBox(height: 4),
+
+                const SizedBox(height: 4),
+
                 Text(
-                  '123 Culinary Way, Suite 400',
+                  '${widget.cart.itemCount} items in your order',
                   style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBillingAddressCard() {
-    return _buildCardWrapper(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildSectionHeader(Icons.receipt_long_outlined, 'BILLING ADDRESS'),
-              _buildEditButton(onTap: () {}),
-            ],
-          ),
-          const SizedBox(height: 10),
-          const Padding(
-            padding: EdgeInsets.only(left: 28.0),
-            child: Text(
-              'Same as delivery address',
-              style: TextStyle(
-                color: Colors.black87,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDeliveryScheduleCard() {
-    return _buildCardWrapper(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSectionHeader(Icons.access_time, 'DELIVERY SCHEDULE'),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              // Date Box (Selected)
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => setState(() => _selectedDateIndex = 0),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: _selectedDateIndex == 0 ? Colors.white : Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _selectedDateIndex == 0 ? primaryGreen : Colors.grey.shade300,
-                        width: _selectedDateIndex == 0 ? 1.5 : 1,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'DATE',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: _selectedDateIndex == 0 ? primaryGreen : Colors.grey.shade600,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Tomorrow, Oct\n27',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.black87,
-                            height: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-
-              // Window Box
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => setState(() => _selectedDateIndex = 1),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: _selectedDateIndex == 1 ? Colors.white : Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _selectedDateIndex == 1 ? primaryGreen : Colors.grey.shade200,
-                        width: _selectedDateIndex == 1 ? 1.5 : 1,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'WINDOW',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: _selectedDateIndex == 1 ? primaryGreen : Colors.grey.shade600,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          '6:00 AM - 8:00\nAM',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.black87,
-                            height: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOrderSummaryCard() {
-    return _buildCardWrapper(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSectionHeader(Icons.shopping_basket_outlined, 'ORDER SUMMARY'),
-          const SizedBox(height: 14),
-
-          // Item 1
-          _buildSummaryItemRow(
-            imageUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=150&q=80',
-            title: 'Heirloom Tomatoes',
-            subtitle: 'Qty: 12 Units',
-            price: '\$108.00',
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1, color: Colors.grey.shade100),
-          ),
-
-          // Item 2
-          _buildSummaryItemRow(
-            imageUrl: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=150&q=80',
-            title: 'Baby Arugula',
-            subtitle: 'Qty: 2 Bags',
-            price: '\$24.50',
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Divider(height: 1, color: Colors.grey.shade100),
-          ),
-
-          // Subtotal & Fee
-          _buildPriceLine('Subtotal', '\$132.50'),
-          const SizedBox(height: 8),
-          _buildPriceLine('Delivery Fee', '\$10.45'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentMethodCard() {
-    return _buildCardWrapper(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildSectionHeader(Icons.credit_card_outlined, 'PAYMENT METHOD'),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const PaymentMethodScreen()),
-                  );
-                },
-                child: const Text(
-                  'Change',
-                  style: TextStyle(
-                    color: primaryGreen,
-                    fontWeight: FontWeight.bold,
+                    color:
+                        Colors.white.withValues(alpha: 0.8),
                     fontSize: 13,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E252B),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Text(
-                  'VISA',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Visa ************4242',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomActionBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Colors.grey.shade200),
-        ),
-      ),
-      child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'TOTAL AMOUNT',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                const Text(
-                  '\$142.95',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: primaryGreen,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              width: 180,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const KhqrPaymentModal()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: buttonOrange,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Place Order',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // ==========================================================
+  // PRODUCTS
+  // ==========================================================
 
-  // --- HELPER COMPONENTS ---
-
-  Widget _buildCardWrapper({required Widget child}) {
+  Widget _buildProductsCard() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Order Items',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          ...widget.cart.items.map(
+            (item) => _buildProductItem(item),
           ),
         ],
       ),
-      child: child,
     );
   }
 
-  Widget _buildSectionHeader(IconData icon, String title) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: primaryGreen),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey.shade700,
-            letterSpacing: 0.8,
+  Widget _buildProductItem(CartItem item) {
+    final image = item.imageUrl.trim();
+
+    String imageUrl = '';
+
+    if (image.isNotEmpty) {
+      imageUrl = ApiConstants.imageUrl(image);
+    }
+
+    return Container(
+      margin:
+          const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius:
+            BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius:
+                BorderRadius.circular(10),
+            child: imageUrl.isEmpty
+                ? Container(
+                    width: 65,
+                    height: 65,
+                    color: Colors.grey.shade200,
+                    child: const Icon(
+                      Icons.image_outlined,
+                      color: Colors.grey,
+                    ),
+                  )
+                : Image.network(
+                    imageUrl,
+                    width: 65,
+                    height: 65,
+                    fit: BoxFit.cover,
+                    errorBuilder:
+                        (_, __, ___) {
+                      return Container(
+                        width: 65,
+                        height: 65,
+                        color: Colors.grey.shade200,
+                        child: const Icon(
+                          Icons
+                              .image_not_supported_outlined,
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
+                  ),
           ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildEditButton({required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: const Text(
-        'Edit',
-        style: TextStyle(
-          color: primaryGreen,
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
-        ),
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.productName,
+                  maxLines: 1,
+                  overflow:
+                      TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight:
+                        FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                Text(
+                  '${_formatQuantity(item.quantity)} kg × '
+                  '${_formatPrice(item.unitPrice)}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color:
+                        Colors.grey.shade600,
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(
+                  'Delivery: ${_formatPrice(item.deliveryFee)}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color:
+                        Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          Text(
+            _formatPrice(item.subtotal),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: primaryGreen,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildSummaryItemRow({
-    required String imageUrl,
-    required String title,
-    required String subtitle,
-    required String price,
-  }) {
+  // ==========================================================
+  // DELIVERY
+  // ==========================================================
+
+  Widget _buildDeliveryCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius:
+            BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Delivery Information',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight:
+                  FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          _buildInfoRow(
+            Icons.local_shipping_outlined,
+            'Delivery Method',
+            'Farmer / Local Delivery',
+          ),
+
+          const SizedBox(height: 12),
+
+          _buildInfoRow(
+            Icons.payments_outlined,
+            'Delivery Fee',
+            _formatPrice(deliveryFee),
+          ),
+
+          const SizedBox(height: 12),
+
+          _buildInfoRow(
+            Icons.access_time_outlined,
+            'Expected Delivery',
+            'Tomorrow, 6:00 AM - 8:00 AM',
+          ),
+
+          if (widget.deliveryNotes.isNotEmpty) ...[
+            const SizedBox(height: 12),
+
+            _buildInfoRow(
+              Icons.note_alt_outlined,
+              'Delivery Notes',
+              widget.deliveryNotes,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    IconData icon,
+    String title,
+    String value,
+  ) {
     return Row(
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Image.network(
-            imageUrl,
-            width: 48,
-            height: 48,
-            fit: BoxFit.cover,
+        Container(
+          padding:
+              const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: primaryGreen.withValues(
+              alpha: 0.08,
+            ),
+            borderRadius:
+                BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            color: primaryGreen,
+            size: 20,
           ),
         ),
+
         const SizedBox(width: 12),
+
         Expanded(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: Colors.black87,
+                style: TextStyle(
+                  fontSize: 11,
+                  color:
+                      Colors.grey.shade600,
+                  fontWeight:
+                      FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 2),
+
+              const SizedBox(height: 3),
+
               Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 12,
+                value,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.black87,
+                  fontWeight:
+                      FontWeight.w600,
                 ),
               ),
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  // ==========================================================
+  // PAYMENT
+  // ==========================================================
+
+  Widget _buildPaymentCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius:
+            BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Payment Method',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight:
+                  FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          _buildPaymentOption(
+            value: 'KHQR',
+            title: 'Bakong / KHQR',
+            subtitle:
+                'Pay securely with KHQR',
+            icon: Icons.qr_code_2,
+          ),
+
+          const SizedBox(height: 8),
+
+          _buildPaymentOption(
+            value: 'CASH',
+            title: 'Cash on Delivery',
+            subtitle:
+                'Pay when your order arrives',
+            icon:
+                Icons.payments_outlined,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentOption({
+    required String value,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+  }) {
+    final selected =
+        _paymentMethod == value;
+
+    return InkWell(
+      borderRadius:
+          BorderRadius.circular(12),
+      onTap: () {
+        setState(() {
+          _paymentMethod = value;
+        });
+      },
+      child: Container(
+        padding:
+            const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: selected
+              ? primaryGreen.withValues(
+                  alpha: 0.06,
+                )
+              : Colors.grey.shade50,
+          borderRadius:
+              BorderRadius.circular(12),
+          border: Border.all(
+            color: selected
+                ? primaryGreen
+                : Colors.grey.shade300,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: primaryGreen,
+              size: 25,
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style:
+                        const TextStyle(
+                      fontSize: 14,
+                      fontWeight:
+                          FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 3),
+
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color:
+                          Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Radio<String>(
+              value: value,
+              groupValue:
+                  _paymentMethod,
+              activeColor:
+                  primaryGreen,
+              onChanged: (value) {
+                if (value == null) {
+                  return;
+                }
+
+                setState(() {
+                  _paymentMethod = value;
+                });
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==========================================================
+  // ORDER SUMMARY
+  // ==========================================================
+
+  Widget _buildOrderSummary() {
+    return Container(
+      width: double.infinity,
+      padding:
+          const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius:
+            BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Order Summary',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight:
+                  FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          _buildSummaryRow(
+            'Subtotal',
+            _formatPrice(subtotal),
+          ),
+
+          const SizedBox(height: 10),
+
+          _buildSummaryRow(
+            'Delivery Fee',
+            deliveryFee == 0
+                ? 'Free'
+                : _formatPrice(deliveryFee),
+          ),
+
+          const SizedBox(height: 10),
+
+          _buildSummaryRow(
+            'Tax (3%)',
+            _formatPrice(tax),
+          ),
+
+          const Padding(
+            padding:
+                EdgeInsets.symmetric(
+              vertical: 14,
+            ),
+            child: Divider(),
+          ),
+
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment
+                    .spaceBetween,
+            children: [
+              const Text(
+                'Total',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight:
+                      FontWeight.bold,
+                  color: primaryGreen,
+                ),
+              ),
+
+              Text(
+                _formatPrice(total),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight:
+                      FontWeight.bold,
+                  color: primaryGreen,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          Align(
+            alignment:
+                Alignment.centerRight,
+            child: Text(
+              'Subtotal + Delivery + 3% Tax',
+              style: TextStyle(
+                fontSize: 11,
+                color:
+                    Colors.grey.shade600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(
+    String title,
+    String value,
+  ) {
+    return Row(
+      mainAxisAlignment:
+          MainAxisAlignment
+              .spaceBetween,
+      children: [
         Text(
-          price,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
+          title,
+          style: TextStyle(
             fontSize: 14,
-            color: primaryGreen,
+            color:
+                Colors.grey.shade700,
+          ),
+        ),
+
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight:
+                FontWeight.w600,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildPriceLine(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey.shade600,
+  // ==========================================================
+  // PLACE ORDER BUTTON
+  // ==========================================================
+
+  Widget _buildPlaceOrderButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        onPressed: _isCheckingOut
+            ? null
+            : _placeOrder,
+        style:
+            ElevatedButton.styleFrom(
+          backgroundColor:
+              buttonOrange,
+          disabledBackgroundColor:
+              Colors.grey.shade300,
+          elevation: 0,
+          shape:
+              RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(
+              12,
+            ),
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-      ],
+        child: _isCheckingOut
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child:
+                    CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Colors.white,
+                ),
+              )
+            : Row(
+                mainAxisAlignment:
+                    MainAxisAlignment
+                        .center,
+                children: [
+                  const Icon(
+                    Icons.lock_outline,
+                    color: Colors.white,
+                    size: 19,
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  Text(
+                    'Place Order • '
+                    '${_formatPrice(total)}',
+                    style:
+                        const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight:
+                          FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+      ),
     );
+  }
+
+  // ==========================================================
+  // PLACE ORDER
+  // ==========================================================
+
+  Future<void> _placeOrder() async {
+    if (_isCheckingOut) return;
+
+    setState(() {
+      _isCheckingOut = true;
+    });
+
+    try {
+      // ======================================================
+      // DEBUG
+      // ======================================================
+
+      debugPrint(
+        '========== PLACE ORDER ==========',
+      );
+
+      debugPrint(
+        'Cart ID: ${widget.cart.id}',
+      );
+
+      debugPrint(
+        'Delivery Address: ${widget.deliveryAddress}',
+      );
+
+      debugPrint(
+        'Delivery Method: delivery',
+      );
+
+      debugPrint(
+        'Payment Method: khqr',
+      );
+
+      debugPrint(
+        '=================================',
+      );
+
+      // ======================================================
+      // CALL BACKEND
+      // ======================================================
+
+      final List<OrderModel> orders =
+          await _orderService.checkout(
+        deliveryAddress:
+            widget.deliveryAddress.trim(),
+        deliveryMethod: 'delivery',
+        paymentMethod: _paymentMethod,
+      );
+
+      // ======================================================
+      // CHECK RESPONSE
+      // ======================================================
+
+      if (orders.isEmpty) {
+        throw Exception(
+          'No orders were created',
+        );
+      }
+
+      debugPrint(
+        '========== ORDERS CREATED =========',
+      );
+
+      debugPrint(
+        'Number of orders: ${orders.length}',
+      );
+
+      for (final order in orders) {
+        debugPrint(
+          'Order ID: ${order.id}',
+        );
+
+        debugPrint(
+          'Subtotal: ${order.subtotal}',
+        );
+
+        debugPrint(
+          'Transaction Fee: ${order.transactionFee}',
+        );
+
+        debugPrint(
+          'Delivery Fee: ${order.deliveryFee}',
+        );
+
+        debugPrint(
+          'Total: ${order.total}',
+        );
+      }
+
+      debugPrint(
+        '===================================',
+      );
+
+      // ======================================================
+      // CLEAR CART
+      //
+      // IMPORTANT:
+      // Only clear after backend successfully created
+      // the order.
+      // ======================================================
+
+      await _cartService.clearCart();
+
+      if (!mounted) return;
+
+      // ======================================================
+      // GO TO SUCCESS SCREEN
+      //
+      // Pass the REAL backend orders.
+      // ======================================================
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => OrderSuccessScreen(
+            orders: orders,
+          ),
+        ),
+        (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      debugPrint(
+        'Checkout error: $e',
+      );
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to place order: $e',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (!mounted) return;
+
+      setState(() {
+        _isCheckingOut = false;
+      });
+    }
   }
 }

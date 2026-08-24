@@ -1,19 +1,21 @@
 import {
   IsIn,
-  IsNotEmpty,
+  IsOptional,
   IsString,
 } from 'class-validator';
 
+import { PaymentMethod } from '../entities/order.entity';
+
 export class CheckoutDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  deliveryAddress: string;
+  deliveryAddress?: string;
 
   @IsString()
   @IsIn(['delivery', 'pickup'])
   deliveryMethod: string;
 
   @IsString()
-  @IsIn(['bakong', 'cash'])
-  paymentMethod: string;
+  @IsIn([PaymentMethod.KHQR])
+  paymentMethod: PaymentMethod;
 }

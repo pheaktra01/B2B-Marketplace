@@ -56,8 +56,22 @@ export class OrderService {
   ) {
     return this.dataSource.transaction(
       async (manager) => {
+
         // --------------------------------------
-        // 1. Find cart
+        // 1. Validate delivery address
+        // --------------------------------------
+
+        if (
+          checkoutDto.deliveryMethod === 'delivery' &&
+          !checkoutDto.deliveryAddress
+        ) {
+          throw new BadRequestException(
+            'Delivery address is required for delivery',
+          );
+        }
+
+        // --------------------------------------
+        // 2. Find cart
         // --------------------------------------
 
         const cart = await manager.findOne(Cart, {
@@ -77,14 +91,17 @@ export class OrderService {
           );
         }
 
-        if (!cart.items || cart.items.length === 0) {
+        if (
+          !cart.items ||
+          cart.items.length === 0
+        ) {
           throw new BadRequestException(
             'Your cart is empty',
           );
         }
 
         // --------------------------------------
-        // 2. Validate cart items
+        // 3. Validate cart items
         // --------------------------------------
 
         for (const item of cart.items) {
@@ -122,14 +139,15 @@ export class OrderService {
         }
 
         // --------------------------------------
-        // 3. Group cart items by farmer
+        // 4. Group cart items by farmer
         // --------------------------------------
 
         const farmerGroups =
           new Map<string, CartItem[]>();
 
         for (const item of cart.items) {
-          const farmerId = item.product.farmerId;
+          const farmerId =
+            item.product.farmerId;
 
           if (!farmerGroups.has(farmerId)) {
             farmerGroups.set(
@@ -144,7 +162,7 @@ export class OrderService {
         }
 
         // --------------------------------------
-        // 4. Create orders
+        // 5. Create orders
         // --------------------------------------
 
         const createdOrders: Order[] = [];
@@ -153,6 +171,11 @@ export class OrderService {
           farmerId,
           items,
         ] of farmerGroups.entries()) {
+
+          // ------------------------------------
+          // Calculate subtotal
+          // ------------------------------------
+
           let subtotal = 0;
 
           for (const item of items) {
@@ -160,6 +183,19 @@ export class OrderService {
               Number(item.quantity) *
               Number(item.unitPrice);
           }
+
+          // Round subtotal to 2 decimals
+          subtotal = Number(
+            subtotal.toFixed(2),
+          );
+
+          // ------------------------------------
+          // Transaction fee - 5%
+          // ------------------------------------
+
+          const transactionFee = Number(
+            (subtotal * 0.05).toFixed(2),
+          );
 
           // ------------------------------------
           // Delivery fee
@@ -174,8 +210,17 @@ export class OrderService {
             deliveryFee = 2;
           }
 
-          const total =
-            subtotal + deliveryFee;
+          // ------------------------------------
+          // Total
+          // ------------------------------------
+
+          const total = Number(
+            (
+              subtotal +
+              transactionFee +
+              deliveryFee
+            ).toFixed(2),
+          );
 
           // ------------------------------------
           // Create Order
@@ -185,6 +230,7 @@ export class OrderService {
             Order,
             {
               restaurantId,
+
               farmerId,
 
               status:
@@ -200,11 +246,13 @@ export class OrderService {
                 checkoutDto.deliveryMethod,
 
               deliveryAddress:
-                checkoutDto.deliveryAddress,
+                checkoutDto.deliveryAddress ?? '',
 
               subtotal,
 
               deliveryFee,
+
+              transactionFee,
 
               total,
             },
@@ -224,9 +272,12 @@ export class OrderService {
             const product =
               item.product;
 
-            const itemSubtotal =
-              Number(item.quantity) *
-              Number(item.unitPrice);
+            const itemSubtotal = Number(
+              (
+                Number(item.quantity) *
+                Number(item.unitPrice)
+              ).toFixed(2),
+            );
 
             const orderItem =
               manager.create(
@@ -285,7 +336,7 @@ export class OrderService {
         }
 
         // --------------------------------------
-        // 5. Clear cart
+        // 6. Clear cart
         // --------------------------------------
 
         await manager.delete(
@@ -296,7 +347,7 @@ export class OrderService {
         );
 
         // --------------------------------------
-        // 6. Return result
+        // 7. Return result
         // --------------------------------------
 
         return {
@@ -307,6 +358,7 @@ export class OrderService {
             createdOrders.map(
               (order) => ({
                 id: order.id,
+
                 farmerId:
                   order.farmerId,
 
@@ -327,6 +379,11 @@ export class OrderService {
 
                 subtotal:
                   Number(order.subtotal),
+
+                transactionFee:
+                  Number(
+                    order.transactionFee,
+                  ),
 
                 deliveryFee:
                   Number(

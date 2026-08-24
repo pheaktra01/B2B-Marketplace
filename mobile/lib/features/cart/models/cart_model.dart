@@ -36,6 +36,33 @@ class Cart {
 
     return double.tryParse(value?.toString() ?? '') ?? 0;
   }
+
+  // ==========================================================
+  // DELIVERY FEE
+  // ==========================================================
+
+  double get deliveryFee {
+    return items.fold(
+      0,
+      (sum, item) => sum + item.deliveryFee,
+    );
+  }
+
+  // ==========================================================
+  // TAX - 3%
+  // ==========================================================
+
+  double get tax {
+    return total * 0.03;
+  }
+
+  // ==========================================================
+  // FINAL TOTAL
+  // ==========================================================
+
+  double get grandTotal {
+    return total + deliveryFee + tax;
+  }
 }
 
 class CartItem {
@@ -47,6 +74,10 @@ class CartItem {
   final double unitPrice;
   final double subtotal;
 
+  // NEW
+  final double deliveryFee;
+  final String deliveryMethod;
+
   CartItem({
     required this.id,
     required this.productId,
@@ -55,6 +86,8 @@ class CartItem {
     required this.quantity,
     required this.unitPrice,
     required this.subtotal,
+    required this.deliveryFee,
+    required this.deliveryMethod,
   });
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
@@ -66,6 +99,13 @@ class CartItem {
       quantity: _toDouble(json['quantity']),
       unitPrice: _toDouble(json['unitPrice']),
       subtotal: _toDouble(json['subtotal']),
+
+      // NEW
+      deliveryFee: _toDouble(json['deliveryFee']),
+
+      // NEW
+      deliveryMethod:
+          json['deliveryMethod']?.toString() ?? 'Local Delivery',
     );
   }
 
@@ -74,14 +114,21 @@ class CartItem {
       return value.toDouble();
     }
 
-    return double.tryParse(value?.toString() ?? '') ?? 0;
+    return double.tryParse(
+          value?.toString() ?? '',
+        ) ??
+        0;
   }
 
   static List<String> _parseImages(dynamic value) {
     if (value is List) {
       return value
-          .map((image) => image.toString())
-          .where((image) => image.isNotEmpty)
+          .map(
+            (image) => image.toString(),
+          )
+          .where(
+            (image) => image.isNotEmpty,
+          )
           .toList();
     }
 

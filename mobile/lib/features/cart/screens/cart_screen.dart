@@ -810,38 +810,28 @@ class _CartScreenState extends State<CartScreen> {
   // ==========================================================
 
   Widget _buildOrderSummaryCard() {
-    final subtotal =
-        _cart?.total ?? 0;
+    final subtotal = _cart?.total ?? 0;
 
-    // These are currently UI estimates.
-    // Replace them with backend values when
-    // your checkout/order API provides them.
+    // These will be calculated by checkout/backend later.
     const deliveryFee = 0.0;
     const estimatedTax = 0.0;
 
-    final total =
-        subtotal +
-        deliveryFee +
-        estimatedTax;
+    final total = subtotal + deliveryFee + estimatedTax;
 
     return Container(
-      padding:
-          const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Order Summary',
             style: TextStyle(
               fontSize: 16,
-              fontWeight:
-                  FontWeight.bold,
+              fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
           ),
@@ -859,9 +849,7 @@ class _CartScreenState extends State<CartScreen> {
             'Delivery Fee',
             deliveryFee == 0
                 ? 'Calculated at checkout'
-                : _formatPrice(
-                    deliveryFee,
-                  ),
+                : _formatPrice(deliveryFee),
           ),
 
           const SizedBox(height: 10),
@@ -870,43 +858,30 @@ class _CartScreenState extends State<CartScreen> {
             'Tax',
             estimatedTax == 0
                 ? 'Calculated at checkout'
-                : _formatPrice(
-                    estimatedTax,
-                  ),
+                : _formatPrice(estimatedTax),
           ),
 
           const Padding(
-            padding:
-                EdgeInsets.symmetric(
-              vertical: 14,
-            ),
-            child: Divider(
-              height: 1,
-            ),
+            padding: EdgeInsets.symmetric(vertical: 14),
+            child: Divider(height: 1),
           ),
 
           Row(
-            mainAxisAlignment:
-                MainAxisAlignment
-                    .spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'Total',
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight:
-                      FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                   color: primaryGreen,
                 ),
               ),
-
               Text(
                 _formatPrice(total),
-                style:
-                    const TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
-                  fontWeight:
-                      FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                   color: primaryGreen,
                 ),
               ),
@@ -915,61 +890,50 @@ class _CartScreenState extends State<CartScreen> {
 
           const SizedBox(height: 16),
 
-          // CHECKOUT
           SizedBox(
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
               onPressed:
-                  _cart == null ||
-                          _cart!.items.isEmpty
+                  _cart == null || _cart!.items.isEmpty
                       ? null
                       : () {
+                          FocusScope.of(context).unfocus();
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  const CheckoutScreen(),
+                              builder: (_) => CheckoutScreen(
+                                cart: _cart!,
+                                deliveryNotes:
+                                    _notesController.text.trim(), deliveryAddress: '<ADDRESS>',
+                              ),
                             ),
                           );
                         },
-              style:
-                  ElevatedButton.styleFrom(
-                backgroundColor:
-                    buttonOrange,
-                disabledBackgroundColor:
-                    Colors.grey.shade300,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: buttonOrange,
+                disabledBackgroundColor: Colors.grey.shade300,
                 elevation: 0,
-                shape:
-                    RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(
-                    12,
-                  ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: const Row(
-                mainAxisAlignment:
-                    MainAxisAlignment
-                        .center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Proceed to Checkout',
                     style: TextStyle(
-                      color:
-                          Colors.white,
+                      color: Colors.white,
                       fontSize: 15,
-                      fontWeight:
-                          FontWeight.bold,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   SizedBox(width: 4),
-
                   Icon(
                     Icons.chevron_right,
-                    color:
-                        Colors.white,
+                    color: Colors.white,
                     size: 20,
                   ),
                 ],

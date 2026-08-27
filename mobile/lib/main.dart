@@ -5,7 +5,9 @@ import 'package:mobile/l10n/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await AppLocale.load();
+
   runApp(const MyApp());
 }
 
@@ -20,9 +22,15 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'PsarKasekor',
           debugShowCheckedModeBanner: false,
+
           locale: locale,
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+
+          supportedLocales:
+              AppLocalizations.supportedLocales,
+
+          localizationsDelegates:
+              AppLocalizations.localizationsDelegates,
+
           home: const SplashScreen(),
         );
       },

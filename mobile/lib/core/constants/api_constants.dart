@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class ApiConstants {
   static const String _androidBaseUrl =
-      'http://192.168.8.128:3000';
+      'http://10.151.80.126:3000';
 
   static const String _defaultBaseUrl =
       'http://localhost:3000';

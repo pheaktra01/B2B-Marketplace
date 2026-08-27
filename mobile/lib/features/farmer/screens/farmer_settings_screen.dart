@@ -1,152 +1,230 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/core/app_locale.dart';
 import 'package:mobile/features/auth/screens/get_started_screen.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class FarmerSettingsScreen extends StatefulWidget {
   const FarmerSettingsScreen({super.key});
 
   @override
-  State<FarmerSettingsScreen> createState() => _FarmerSettingsScreenState();
+  State<FarmerSettingsScreen> createState() =>
+      _FarmerSettingsScreenState();
 }
 
 class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
-  // State variables for toggles
   bool _pushNotifications = true;
   bool _smsAlerts = false;
   bool _darkMode = false;
-  String _selectedLanguage = 'English';
 
   final AuthService _authService = AuthService();
   bool _isLoggingOut = false;
 
-  final Color _primaryColor = const Color(0xFF2E7D32);
+  static const Color _primaryColor = Color(0xFF2E7D32);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFC),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFBFBFC),
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: _primaryColor),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Settings',
-          style: TextStyle(
-            color: _primaryColor.withValues(alpha: 0.9),
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        children: [
-          // Section: Account
-          _buildSectionHeader('Account'),
-          _buildSettingsTile(
-            icon: Icons.person_outline,
-            title: 'Edit Profile',
-            subtitle: 'Name, Phone Number, Location',
-            onTap: () {
-              // Navigate to Edit Profile screen
-            },
-          ),
-          _buildSettingsTile(
-            icon: Icons.lock_outline,
-            title: 'Security',
-            subtitle: 'Change Password',
-            onTap: () {
-              // Navigate to Password/Security screen
-            },
-          ),
+    return ValueListenableBuilder<Locale>(
+      valueListenable: AppLocale.notifier,
+      builder: (context, locale, child) {
+        final l10n = AppLocalizations.of(context)!;
 
-          const SizedBox(height: 16),
+        return Scaffold(
+          backgroundColor: const Color(0xFFFBFBFC),
 
-          // Section: Preferences
-          _buildSectionHeader('Preferences'),
-          _buildSettingsTile(
-            icon: Icons.language,
-            title: 'Language',
-            subtitle: _selectedLanguage,
-            onTap: _showLanguageDialog,
-          ),
-          _buildSwitchTile(
-            icon: Icons.notifications_none,
-            title: 'Notifications',
-            subtitle: 'Receive market alerts',
-            value: _pushNotifications,
-            onChanged: (val) => setState(() => _pushNotifications = val),
-          ),
-          _buildSwitchTile(
-            icon: Icons.sms_outlined,
-            title: 'SMS Alerts',
-            subtitle: 'Receive updates via SMS',
-            value: _smsAlerts,
-            onChanged: (val) => setState(() => _smsAlerts = val),
-          ),
-          _buildSwitchTile(
-            icon: Icons.dark_mode_outlined,
-            title: 'Dark Mode',
-            subtitle: 'Switch app theme',
-            value: _darkMode,
-            onChanged: (val) => setState(() => _darkMode = val),
-          ),
+          // ============================================================
+          // APP BAR
+          // ============================================================
 
-          const SizedBox(height: 16),
-
-          // Section: Support & Info
-          _buildSectionHeader('Support & Info'),
-          _buildSettingsTile(
-            icon: Icons.help_outline,
-            title: 'Help Center',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.privacy_tip_outlined,
-            title: 'Privacy Policy',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.info_outline,
-            title: 'About App',
-            subtitle: 'Version 2.1.0',
-            onTap: () {},
-          ),
-
-          const SizedBox(height: 24),
-
-          // Logout Button
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade50,
-              foregroundColor: Colors.red.shade700,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.red.shade200),
+          appBar: AppBar(
+            backgroundColor: const Color(0xFFFBFBFC),
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(
+                Icons.arrow_back_ios,
+                color: _primaryColor,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              l10n.settings,
+              style: const TextStyle(
+                color: _primaryColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
-            icon: const Icon(Icons.logout),
-            label: const Text(
-              'Log Out',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            onPressed: _showLogoutConfirmation,
+            centerTitle: true,
           ),
-          const SizedBox(height: 24),
-        ],
-      ),
+
+          // ============================================================
+          // BODY
+          // ============================================================
+
+          body: ListView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            children: [
+              // ========================================================
+              // ACCOUNT
+              // ========================================================
+
+              _buildSectionHeader(l10n.account),
+
+              _buildSettingsTile(
+                icon: Icons.person_outline,
+                title: l10n.editProfile,
+                subtitle: l10n.namePhoneNumberLocation,
+                onTap: () {
+                  // Navigate to Edit Profile
+                },
+              ),
+
+              _buildSettingsTile(
+                icon: Icons.lock_outline,
+                title: l10n.security,
+                subtitle: l10n.changePassword,
+                onTap: () {
+                  // Navigate to Security
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // ========================================================
+              // PREFERENCES
+              // ========================================================
+
+              _buildSectionHeader(l10n.preferences),
+
+              // LANGUAGE
+              _buildSettingsTile(
+                icon: Icons.language,
+                title: l10n.language,
+                subtitle: locale.languageCode == 'km'
+                    ? l10n.khmer
+                    : l10n.english,
+                onTap: _showLanguageDialog,
+              ),
+
+              // NOTIFICATIONS
+              _buildSwitchTile(
+                icon: Icons.notifications_none,
+                title: l10n.notifications,
+                subtitle: l10n.receiveMarketAlerts,
+                value: _pushNotifications,
+                onChanged: (value) {
+                  setState(() {
+                    _pushNotifications = value;
+                  });
+                },
+              ),
+
+              // SMS ALERTS
+              _buildSwitchTile(
+                icon: Icons.sms_outlined,
+                title: l10n.smsAlerts,
+                subtitle: l10n.receiveUpdatesViaSms,
+                value: _smsAlerts,
+                onChanged: (value) {
+                  setState(() {
+                    _smsAlerts = value;
+                  });
+                },
+              ),
+
+              // DARK MODE
+              _buildSwitchTile(
+                icon: Icons.dark_mode_outlined,
+                title: l10n.darkMode,
+                subtitle: l10n.switchAppTheme,
+                value: _darkMode,
+                onChanged: (value) {
+                  setState(() {
+                    _darkMode = value;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // ========================================================
+              // SUPPORT & INFO
+              // ========================================================
+
+              _buildSectionHeader(l10n.supportAndInfo),
+
+              _buildSettingsTile(
+                icon: Icons.help_outline,
+                title: l10n.helpCenter,
+                onTap: () {},
+              ),
+
+              _buildSettingsTile(
+                icon: Icons.privacy_tip_outlined,
+                title: l10n.privacyPolicy,
+                onTap: () {},
+              ),
+
+              _buildSettingsTile(
+                icon: Icons.info_outline,
+                title: l10n.aboutApp,
+                subtitle: l10n.version210,
+                onTap: () {},
+              ),
+
+              const SizedBox(height: 24),
+
+              // ========================================================
+              // LOG OUT
+              // ========================================================
+
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade50,
+                  foregroundColor: Colors.red.shade700,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: Colors.red.shade200,
+                    ),
+                  ),
+                ),
+                icon: const Icon(Icons.logout),
+                label: Text(
+                  l10n.logOut,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                onPressed: _showLogoutConfirmation,
+              ),
+
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
     );
   }
 
+  // ============================================================
+  // SECTION HEADER
+  // ============================================================
+
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      padding: const EdgeInsets.only(
+        left: 4,
+        bottom: 8,
+      ),
       child: Text(
         title,
         style: TextStyle(
@@ -157,6 +235,10 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
       ),
     );
   }
+
+  // ============================================================
+  // SETTINGS TILE
+  // ============================================================
 
   Widget _buildSettingsTile({
     required IconData icon,
@@ -169,25 +251,47 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(
+          color: Colors.grey.shade200,
+        ),
       ),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: _primaryColor.withValues(alpha: 0.1),
-          child: Icon(icon, color: _primaryColor, size: 22),
+          child: Icon(
+            icon,
+            color: _primaryColor,
+            size: 22,
+          ),
         ),
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+          ),
         ),
         subtitle: subtitle != null
-            ? Text(subtitle, style: TextStyle(color: Colors.grey.shade600, fontSize: 13))
+            ? Text(
+                subtitle,
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 13,
+                ),
+              )
             : null,
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+        trailing: const Icon(
+          Icons.chevron_right,
+          color: Colors.grey,
+        ),
         onTap: onTap,
       ),
     );
   }
+
+  // ============================================================
+  // SWITCH TILE
+  // ============================================================
 
   Widget _buildSwitchTile({
     required IconData icon,
@@ -201,18 +305,33 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(
+          color: Colors.grey.shade200,
+        ),
       ),
       child: SwitchListTile(
         secondary: CircleAvatar(
           backgroundColor: _primaryColor.withValues(alpha: 0.1),
-          child: Icon(icon, color: _primaryColor, size: 22),
+          child: Icon(
+            icon,
+            color: _primaryColor,
+            size: 22,
+          ),
         ),
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+          ),
         ),
-        subtitle: Text(subtitle, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 13,
+          ),
+        ),
         activeColor: _primaryColor,
         value: value,
         onChanged: onChanged,
@@ -220,52 +339,102 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
     );
   }
 
+  // ============================================================
+  // LANGUAGE DIALOG
+  // ============================================================
+
   void _showLanguageDialog() {
+    final l10n = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Select Language'),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('Khmer'),
-                trailing: _selectedLanguage == 'Khmer'
-                    ? Icon(Icons.check, color: _primaryColor)
-                    : null,
-                onTap: () {
-                  setState(() => _selectedLanguage = 'Khmer');
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('English'),
-                trailing: _selectedLanguage == 'English'
-                    ? Icon(Icons.check, color: _primaryColor)
-                    : null,
-                onTap: () {
-                  setState(() => _selectedLanguage = 'English');
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+          title: Text(l10n.selectLanguage),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: ValueListenableBuilder<Locale>(
+            valueListenable: AppLocale.notifier,
+            builder: (context, locale, child) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // ====================================================
+                  // KHMER
+                  // ====================================================
+
+                  ListTile(
+                    leading: const Text(
+                      '🇰🇭',
+                      style: TextStyle(fontSize: 22),
+                    ),
+                    title: Text(l10n.khmer),
+                    trailing: locale.languageCode == 'km'
+                        ? const Icon(
+                            Icons.check,
+                            color: _primaryColor,
+                          )
+                        : null,
+                    onTap: () async {
+                      await AppLocale.setLocale(
+                        const Locale('km'),
+                      );
+
+                      if (!dialogContext.mounted) return;
+
+                      Navigator.pop(dialogContext);
+                    },
+                  ),
+
+                  // ====================================================
+                  // ENGLISH
+                  // ====================================================
+
+                  ListTile(
+                    leading: const Text(
+                      '🇬🇧',
+                      style: TextStyle(fontSize: 22),
+                    ),
+                    title: Text(l10n.english),
+                    trailing: locale.languageCode == 'en'
+                        ? const Icon(
+                            Icons.check,
+                            color: _primaryColor,
+                          )
+                        : null,
+                    onTap: () async {
+                      await AppLocale.setLocale(
+                        const Locale('en'),
+                      );
+
+                      if (!dialogContext.mounted) return;
+
+                      Navigator.pop(dialogContext);
+                    },
+                  ),
+                ],
+              );
+            },
           ),
         );
       },
     );
   }
 
+  // ============================================================
+  // LOGOUT CONFIRMATION
+  // ============================================================
+
   void _showLogoutConfirmation() {
+    final l10n = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Log Out'),
-          content: const Text(
-            'Are you sure you want to log out of the app?',
-          ),
+          title: Text(l10n.logOut),
+          content: Text(l10n.logoutConfirmation),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -274,9 +443,11 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
               onPressed: () {
                 Navigator.pop(dialogContext);
               },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.grey),
+              child: Text(
+                l10n.cancel,
+                style: const TextStyle(
+                  color: Colors.grey,
+                ),
               ),
             ),
             TextButton(
@@ -286,9 +457,11 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
                       Navigator.pop(dialogContext);
                       await _logout();
                     },
-              child: const Text(
-                'Log Out',
-                style: TextStyle(color: Colors.red),
+              child: Text(
+                l10n.logOut,
+                style: const TextStyle(
+                  color: Colors.red,
+                ),
               ),
             ),
           ],
@@ -297,8 +470,14 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
     );
   }
 
+  // ============================================================
+  // LOGOUT
+  // ============================================================
+
   Future<void> _logout() async {
     if (_isLoggingOut) return;
+
+    final l10n = AppLocalizations.of(context)!;
 
     setState(() {
       _isLoggingOut = true;
@@ -309,12 +488,16 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
 
       if (!mounted) return;
 
-      print('LOGOUT STATUS: ${result['statusCode']}');
-      print('LOGOUT RESPONSE: ${result['data']}');
+      debugPrint(
+        'LOGOUT STATUS: ${result['statusCode']}',
+      );
+
+      debugPrint(
+        'LOGOUT RESPONSE: ${result['data']}',
+      );
 
       if (result['statusCode'] >= 200 &&
           result['statusCode'] < 300) {
-        
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
@@ -327,7 +510,7 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
           SnackBar(
             content: Text(
               result['data']['message']?.toString() ??
-                  'Logout failed',
+                  l10n.logoutFailed,
             ),
           ),
         );
@@ -337,7 +520,9 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Logout error: $e'),
+          content: Text(
+            '${l10n.logoutError}: $e',
+          ),
         ),
       );
     } finally {

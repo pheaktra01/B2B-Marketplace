@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile/l10n/app_localizations.dart';
+
 import 'package:mobile/features/farmer/screens/inventory_screen.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/services/product_service.dart';
@@ -10,7 +12,8 @@ class AddProductFlowScreen extends StatefulWidget {
   const AddProductFlowScreen({super.key});
 
   @override
-  State<AddProductFlowScreen> createState() => _AddProductFlowScreenState();
+  State<AddProductFlowScreen> createState() =>
+      _AddProductFlowScreenState();
 }
 
 class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
@@ -29,6 +32,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // 2 = Price & Inventory
   // 3 = Delivery & Review
   // 4 = Success
+
   int _currentStep = 1;
 
   bool _isPublishing = false;
@@ -43,6 +47,8 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   final TextEditingController _descriptionController =
       TextEditingController();
 
+  // Keep backend values in English.
+  // Only the displayed labels are translated.
   String _selectedCategory = 'Vegetables';
 
   String _productCondition = 'Fresh';
@@ -61,11 +67,14 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // STEP 2 - PRICE & INVENTORY
   // ============================================================
 
-  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _priceController =
+      TextEditingController();
 
-  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _quantityController =
+      TextEditingController();
 
-  final TextEditingController _minOrderController = TextEditingController();
+  final TextEditingController _minOrderController =
+      TextEditingController();
 
   DateTime? _harvestDate;
 
@@ -75,6 +84,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // STEP 3 - DELIVERY & REVIEW
   // ============================================================
 
+  // Keep backend values in English.
   String _selectedLocation = 'Phnom Penh';
 
   String _deliveryOption = 'Farmer Delivery';
@@ -174,18 +184,20 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // ============================================================
 
   bool _validateStep1() {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_productImages.isEmpty) {
-      _showError('Please upload at least one product photo');
+      _showError(l10n.uploadAtLeastOnePhoto);
       return false;
     }
 
     if (_productNameController.text.trim().isEmpty) {
-      _showError('Please enter a product name');
+      _showError(l10n.enterProductName);
       return false;
     }
 
     if (_descriptionController.text.trim().isEmpty) {
-      _showError('Please enter a product description');
+      _showError(l10n.enterProductDescription);
       return false;
     }
 
@@ -193,6 +205,8 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   }
 
   bool _validateStep2() {
+    final l10n = AppLocalizations.of(context)!;
+
     final price = double.tryParse(
       _priceController.text.trim(),
     );
@@ -208,23 +222,23 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         : double.tryParse(minOrderText);
 
     if (price == null || price <= 0) {
-      _showError('Please enter a valid selling price');
+      _showError(l10n.enterValidSellingPrice);
       return false;
     }
 
     if (quantity == null || quantity <= 0) {
-      _showError('Please enter a valid available quantity');
+      _showError(l10n.enterValidQuantity);
       return false;
     }
 
     if (minOrder == null || minOrder <= 0) {
-      _showError('Please enter a valid minimum order');
+      _showError(l10n.enterValidMinimumOrder);
       return false;
     }
 
     if (minOrder > quantity) {
       _showError(
-        'Minimum order cannot be greater than available quantity',
+        l10n.minimumOrderGreaterThanQuantity,
       );
       return false;
     }
@@ -233,7 +247,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         _availableUntilDate != null &&
         _availableUntilDate!.isBefore(_harvestDate!)) {
       _showError(
-        'Available Until cannot be before Harvest Date',
+        l10n.availableUntilBeforeHarvest,
       );
       return false;
     }
@@ -246,19 +260,20 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // ============================================================
 
   Future<void> _pickProductImages() async {
+    final l10n = AppLocalizations.of(context)!;
+
     try {
       final remainingSlots =
           maxImages - _productImages.length;
 
       if (remainingSlots <= 0) {
         _showError(
-          'You can upload a maximum of $maxImages images',
+          l10n.maximumImages(maxImages),
         );
         return;
       }
 
-      final ImagePicker picker =
-          ImagePicker();
+      final ImagePicker picker = ImagePicker();
 
       final List<XFile> images =
           await picker.pickMultiImage(
@@ -271,22 +286,19 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
       }
 
       final List<XFile> selectedImages =
-          images
-              .take(remainingSlots)
-              .toList();
+          images.take(remainingSlots).toList();
 
       if (images.length > remainingSlots) {
         _showError(
-          'Only $remainingSlots more image'
-          '${remainingSlots == 1 ? '' : 's'} can be added. '
-          'Maximum is $maxImages.',
+          l10n.onlyMoreImages(
+            remainingSlots,
+            maxImages,
+          ),
         );
       }
 
       setState(() {
-        _productImages.addAll(
-          selectedImages,
-        );
+        _productImages.addAll(selectedImages);
       });
 
       debugPrint(
@@ -316,7 +328,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
       );
 
       _showError(
-        'Failed to select images',
+        l10n.failedToSelectImages,
       );
     }
   }
@@ -337,6 +349,8 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // ============================================================
 
   Future<void> _publishProduct() async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_isPublishing) return;
 
     if (!_validateStep1()) {
@@ -357,14 +371,15 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
     double deliveryFee = 0;
 
     if (_deliveryOption == 'Farmer Delivery') {
-      final parsedDeliveryFee = double.tryParse(
+      final parsedDeliveryFee =
+          double.tryParse(
         _deliveryFeeController.text.trim(),
       );
 
       if (parsedDeliveryFee == null ||
           parsedDeliveryFee < 0) {
         _showError(
-          'Please enter a valid delivery fee',
+          l10n.enterValidDeliveryFee,
         );
         return;
       }
@@ -379,31 +394,44 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         _descriptionController.text.trim();
 
     final double price =
-        double.parse(_priceController.text.trim());
+        double.parse(
+      _priceController.text.trim(),
+    );
 
     final double quantity =
-        double.parse(_quantityController.text.trim());
+        double.parse(
+      _quantityController.text.trim(),
+    );
 
     final String minOrderText =
         _minOrderController.text.trim();
 
-    final double minOrder = minOrderText.isEmpty
-        ? 1.0
-        : double.parse(minOrderText);
+    final double minOrder =
+        minOrderText.isEmpty
+            ? 1.0
+            : double.parse(minOrderText);
 
     try {
       setState(() {
         _isPublishing = true;
       });
 
-      debugPrint('========== PUBLISH PRODUCT ==========');
+      debugPrint(
+        '========== PUBLISH PRODUCT ==========',
+      );
       debugPrint('Name: $name');
-      debugPrint('Category: $_selectedCategory');
-      debugPrint('Condition: $_productCondition');
+      debugPrint(
+        'Category: $_selectedCategory',
+      );
+      debugPrint(
+        'Condition: $_productCondition',
+      );
       debugPrint('Price: $price');
       debugPrint('Quantity: $quantity');
       debugPrint('Min Order: $minOrder');
-      debugPrint('Location: $_selectedLocation');
+      debugPrint(
+        'Location: $_selectedLocation',
+      );
       debugPrint(
         'Delivery: $_deliveryOption',
       );
@@ -413,7 +441,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
       debugPrint(
         'Images: ${_productImages.length}',
       );
-      debugPrint('=====================================');
+      debugPrint(
+        '=====================================',
+      );
 
       await ProductService.createProduct(
         name: name,
@@ -450,7 +480,11 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                 '',
               );
 
-      _showError(errorMessage);
+      _showError(
+        errorMessage.isEmpty
+            ? l10n.failedToPublishProduct
+            : errorMessage,
+      );
     }
   }
 
@@ -483,12 +517,15 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_currentStep == 4) {
-      return _buildSuccessScreen();
+      return _buildSuccessScreen(l10n);
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FBF9),
+      backgroundColor:
+          const Color(0xFFF9FBF9),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.5,
@@ -499,10 +536,12 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
             size: 20,
           ),
           onPressed:
-              _isPublishing ? null : _previousStep,
+              _isPublishing
+                  ? null
+                  : _previousStep,
         ),
         title: Text(
-          _getAppBarTitle(),
+          _getAppBarTitle(l10n),
           style: const TextStyle(
             color: Color(0xFF1E1E1E),
             fontSize: 18,
@@ -514,11 +553,12 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildProgressBar(),
+            _buildProgressBar(l10n),
 
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
+                padding:
+                    const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 16,
                 ),
@@ -529,13 +569,15 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                       maxWidth: 450,
                     ),
                     child:
-                        _buildCurrentStepContent(),
+                        _buildCurrentStepContent(
+                      l10n,
+                    ),
                   ),
                 ),
               ),
             ),
 
-            _buildBottomBar(),
+            _buildBottomBar(l10n),
           ],
         ),
       ),
@@ -546,16 +588,18 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // APP BAR TITLE
   // ============================================================
 
-  String _getAppBarTitle() {
+  String _getAppBarTitle(
+    AppLocalizations l10n,
+  ) {
     switch (_currentStep) {
       case 1:
-        return 'Add Product';
+        return l10n.addProduct;
       case 2:
-        return 'Price & Inventory';
+        return l10n.priceAndInventory;
       case 3:
-        return 'Delivery & Review';
+        return l10n.deliveryAndReview;
       default:
-        return 'Add Product';
+        return l10n.addProduct;
     }
   }
 
@@ -563,13 +607,16 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // PROGRESS BAR
   // ============================================================
 
-  Widget _buildProgressBar() {
+  Widget _buildProgressBar(
+    AppLocalizations l10n,
+  ) {
     final double progress =
         _currentStep / 3;
 
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(
+      padding:
+          const EdgeInsets.symmetric(
         horizontal: 20,
         vertical: 12,
       ),
@@ -580,15 +627,21 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                 MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Step $_currentStep of 3',
+                l10n.stepOf(
+                  _currentStep,
+                  3,
+                ),
                 style: const TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w600,
+                  fontWeight:
+                      FontWeight.w600,
                   color: primaryGreen,
                 ),
               ),
               Text(
-                '${(progress * 100).toInt()}% Completed',
+                l10n.percentCompleted(
+                  (progress * 100).toInt(),
+                ),
                 style: const TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
@@ -596,16 +649,20 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
               ),
             ],
           ),
+
           const SizedBox(height: 8),
+
           ClipRRect(
             borderRadius:
                 BorderRadius.circular(4),
-            child: LinearProgressIndicator(
+            child:
+                LinearProgressIndicator(
               value: progress,
               backgroundColor:
                   const Color(0xFFE8F5E9),
               valueColor:
-                  const AlwaysStoppedAnimation<Color>(
+                  const AlwaysStoppedAnimation<
+                      Color>(
                 primaryGreen,
               ),
               minHeight: 6,
@@ -620,16 +677,22 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // CURRENT STEP
   // ============================================================
 
-  Widget _buildCurrentStepContent() {
+  Widget _buildCurrentStepContent(
+    AppLocalizations l10n,
+  ) {
     switch (_currentStep) {
       case 1:
-        return _buildStep1Info();
+        return _buildStep1Info(l10n);
 
       case 2:
-        return _buildStep2PriceInventory();
+        return _buildStep2PriceInventory(
+          l10n,
+        );
 
       case 3:
-        return _buildStep3DeliveryReview();
+        return _buildStep3DeliveryReview(
+          l10n,
+        );
 
       default:
         return const SizedBox.shrink();
@@ -640,19 +703,24 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // STEP 1
   // ============================================================
 
-  Widget _buildStep1Info() {
+  Widget _buildStep1Info(
+    AppLocalizations l10n,
+  ) {
     return Column(
       crossAxisAlignment:
           CrossAxisAlignment.start,
       children: [
         _buildFieldLabel(
-          'PRODUCT PHOTOS',
+          l10n.productPhotos,
         ),
 
         const SizedBox(height: 6),
 
         Text(
-          '${_productImages.length}/$maxImages photos',
+          l10n.photosCount(
+            _productImages.length,
+            maxImages,
+          ),
           style: TextStyle(
             fontSize: 12,
             color: Colors.grey.shade600,
@@ -662,14 +730,14 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         const SizedBox(height: 10),
 
         if (_productImages.isEmpty)
-          _buildEmptyImageUploadBox()
+          _buildEmptyImageUploadBox(l10n)
         else
-          _buildProductImagesGrid(),
+          _buildProductImagesGrid(l10n),
 
         const SizedBox(height: 20),
 
         _buildFieldLabel(
-          'Product Name',
+          l10n.productName,
         ),
 
         const SizedBox(height: 6),
@@ -678,13 +746,13 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
           controller:
               _productNameController,
           hintText:
-              'e.g. Fresh Organic Bok Choy',
+              l10n.productNameHint,
         ),
 
         const SizedBox(height: 16),
 
         _buildFieldLabel(
-          'Category',
+          l10n.category,
         ),
 
         const SizedBox(height: 6),
@@ -692,6 +760,11 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         _buildDropdownField(
           value: _selectedCategory,
           items: _categories,
+          itemLabel: (item) =>
+              _getCategoryLabel(
+            item,
+            l10n,
+          ),
           onChanged: (value) {
             if (value == null) return;
 
@@ -704,7 +777,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         const SizedBox(height: 16),
 
         _buildFieldLabel(
-          'Product Condition',
+          l10n.productCondition,
         ),
 
         const SizedBox(height: 8),
@@ -713,9 +786,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
           children: [
             Expanded(
               child: _buildChoiceTile(
-                title: 'Fresh',
+                title: l10n.fresh,
                 subtitle:
-                    'Standard produce',
+                    l10n.standardProduce,
                 isSelected:
                     _productCondition ==
                         'Fresh',
@@ -732,9 +805,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
 
             Expanded(
               child: _buildChoiceTile(
-                title: 'Organic',
+                title: l10n.organic,
                 subtitle:
-                    'Chemical-free',
+                    l10n.chemicalFree,
                 isSelected:
                     _productCondition ==
                         'Organic',
@@ -752,7 +825,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         const SizedBox(height: 16),
 
         _buildFieldLabel(
-          'Description',
+          l10n.description,
         ),
 
         const SizedBox(height: 6),
@@ -761,7 +834,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
           controller:
               _descriptionController,
           hintText:
-              'Describe quality, taste, or harvest details...',
+              l10n.descriptionHint,
           maxLines: 3,
         ),
       ],
@@ -772,17 +845,19 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // STEP 2
   // ============================================================
 
-  Widget _buildStep2PriceInventory() {
+  Widget _buildStep2PriceInventory(
+    AppLocalizations l10n,
+  ) {
     return Column(
       crossAxisAlignment:
           CrossAxisAlignment.start,
       children: [
-        _buildRecommendationCard(),
+        _buildRecommendationCard(l10n),
 
         const SizedBox(height: 20),
 
         _buildFieldLabel(
-          'Selling Price per kg',
+          l10n.sellingPricePerKg,
         ),
 
         const SizedBox(height: 6),
@@ -792,10 +867,11 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
               _priceController,
           hintText: '0.00',
           keyboardType:
-              const TextInputType.numberWithOptions(
+              const TextInputType
+                  .numberWithOptions(
             decimal: true,
           ),
-          suffixText: '\$ / kg',
+          suffixText: l10n.perKg,
         ),
 
         const SizedBox(height: 16),
@@ -808,14 +884,17 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                     CrossAxisAlignment.start,
                 children: [
                   _buildFieldLabel(
-                    'Available Quantity',
+                    l10n.availableQuantity,
                   ),
-                  const SizedBox(height: 6),
+
+                  const SizedBox(
+                    height: 6,
+                  ),
+
                   _buildTextField(
                     controller:
                         _quantityController,
-                    hintText:
-                        'e.g. 100',
+                    hintText: 'e.g. 100',
                     keyboardType:
                         const TextInputType
                             .numberWithOptions(
@@ -835,14 +914,17 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                     CrossAxisAlignment.start,
                 children: [
                   _buildFieldLabel(
-                    'Minimum Order',
+                    l10n.minimumOrder,
                   ),
-                  const SizedBox(height: 6),
+
+                  const SizedBox(
+                    height: 6,
+                  ),
+
                   _buildTextField(
                     controller:
                         _minOrderController,
-                    hintText:
-                        'e.g. 5',
+                    hintText: 'e.g. 5',
                     keyboardType:
                         const TextInputType
                             .numberWithOptions(
@@ -862,11 +944,13 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
           children: [
             Expanded(
               child: _buildDatePickerTile(
-                label: 'Harvest Date',
+                label: l10n.harvestDate,
                 selectedDate:
                     _harvestDate,
                 onTap:
                     _selectHarvestDate,
+                selectDateText:
+                    l10n.selectDate,
               ),
             ),
 
@@ -874,11 +958,14 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
 
             Expanded(
               child: _buildDatePickerTile(
-                label: 'Available Until',
+                label:
+                    l10n.availableUntil,
                 selectedDate:
                     _availableUntilDate,
                 onTap:
                     _selectAvailableUntilDate,
+                selectDateText:
+                    l10n.selectDate,
               ),
             ),
           ],
@@ -891,7 +978,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // MARKET RECOMMENDATION
   // ============================================================
 
-  Widget _buildRecommendationCard() {
+  Widget _buildRecommendationCard(
+    AppLocalizations l10n,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -915,11 +1004,13 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                 style:
                     TextStyle(fontSize: 18),
               ),
+
               const SizedBox(width: 8),
-              const Expanded(
+
+              Expanded(
                 child: Text(
-                  'Market Recommendation',
-                  style: TextStyle(
+                  l10n.marketRecommendation,
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight:
                         FontWeight.bold,
@@ -936,21 +1027,21 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
           ),
 
           _buildRecommendationRow(
-            'Current restaurant demand',
-            'High 🔥',
+            l10n.currentRestaurantDemand,
+            l10n.highDemand,
           ),
 
           const SizedBox(height: 6),
 
           _buildRecommendationRow(
-            'Typical market price',
+            l10n.typicalMarketPrice,
             '\$1.10 – \$1.40 / kg',
           ),
 
           const SizedBox(height: 6),
 
           _buildRecommendationRow(
-            'Recommended price',
+            l10n.recommendedPrice,
             '\$1.25 / kg',
             isBold: true,
           ),
@@ -982,9 +1073,11 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                 backgroundColor:
                     Colors.white,
               ),
-              child: const Text(
-                'Use Recommended Price (\$1.25)',
-                style: TextStyle(
+              child: Text(
+                l10n.useRecommendedPrice(
+                  '\$1.25',
+                ),
+                style: const TextStyle(
                   fontWeight:
                       FontWeight.bold,
                 ),
@@ -1000,13 +1093,15 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // STEP 3
   // ============================================================
 
-  Widget _buildStep3DeliveryReview() {
+  Widget _buildStep3DeliveryReview(
+    AppLocalizations l10n,
+  ) {
     return Column(
       crossAxisAlignment:
           CrossAxisAlignment.start,
       children: [
         _buildFieldLabel(
-          'Location / Farm Origin',
+          l10n.locationFarmOrigin,
         ),
 
         const SizedBox(height: 6),
@@ -1014,6 +1109,11 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         _buildDropdownField(
           value: _selectedLocation,
           items: _locations,
+          itemLabel: (item) =>
+              _getLocationLabel(
+            item,
+            l10n,
+          ),
           onChanged: (value) {
             if (value == null) return;
 
@@ -1026,7 +1126,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         const SizedBox(height: 16),
 
         _buildFieldLabel(
-          'Delivery Method',
+          l10n.deliveryMethod,
         ),
 
         const SizedBox(height: 8),
@@ -1036,9 +1136,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
             Expanded(
               child: _buildChoiceTile(
                 title:
-                    'Farmer Delivery',
+                    l10n.farmerDelivery,
                 subtitle:
-                    'Deliver to buyer',
+                    l10n.deliverToBuyer,
                 isSelected:
                     _deliveryOption ==
                         'Farmer Delivery',
@@ -1056,9 +1156,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
             Expanded(
               child: _buildChoiceTile(
                 title:
-                    'Buyer Pickup',
+                    l10n.buyerPickup,
                 subtitle:
-                    'Pickup at farm',
+                    l10n.pickupAtFarm,
                 isSelected:
                     _deliveryOption ==
                         'Buyer Pickup',
@@ -1078,7 +1178,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         if (_deliveryOption ==
             'Farmer Delivery') ...[
           _buildFieldLabel(
-            'Delivery Fee',
+            l10n.deliveryFee,
           ),
 
           const SizedBox(height: 6),
@@ -1099,12 +1199,12 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         ],
 
         _buildFieldLabel(
-          'PRODUCT PREVIEW',
+          l10n.productPreview,
         ),
 
         const SizedBox(height: 8),
 
-        _buildProductPreview(),
+        _buildProductPreview(l10n),
       ],
     );
   }
@@ -1113,19 +1213,28 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // PRODUCT PREVIEW
   // ============================================================
 
-  Widget _buildProductPreview() {
+  Widget _buildProductPreview(
+    AppLocalizations l10n,
+  ) {
     final String productName =
-        _productNameController.text.trim().isEmpty
-            ? 'Fresh Produce'
-            : _productNameController.text.trim();
+        _productNameController.text
+                .trim()
+                .isEmpty
+            ? l10n.freshProduce
+            : _productNameController.text
+                .trim();
 
     final String price =
-        _priceController.text.trim().isEmpty
+        _priceController.text
+                .trim()
+                .isEmpty
             ? '\$0.00 / kg'
             : '\$${_priceController.text.trim()} / kg';
 
     final String quantity =
-        _quantityController.text.trim().isEmpty
+        _quantityController.text
+                .trim()
+                .isEmpty
             ? '0 kg'
             : '${_quantityController.text.trim()} kg';
 
@@ -1137,10 +1246,13 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
               : null,
 
       productName: productName,
-      farmName: 'Your Farm',
+      farmName: l10n.yourFarm,
       price: price,
 
-      location: _selectedLocation,
+      location: _getLocationLabel(
+        _selectedLocation,
+        l10n,
+      ),
       availableQuantity: quantity,
 
       isAvailable: true,
@@ -1156,7 +1268,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // STEP 4 SUCCESS
   // ============================================================
 
-  Widget _buildSuccessScreen() {
+  Widget _buildSuccessScreen(
+    AppLocalizations l10n,
+  ) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -1182,9 +1296,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
 
               const SizedBox(height: 24),
 
-              const Text(
-                'Product Published!',
-                style: TextStyle(
+              Text(
+                l10n.productPublished,
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight:
                       FontWeight.bold,
@@ -1195,11 +1309,11 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
 
               const SizedBox(height: 12),
 
-              const Text(
-                'Your product is now available for restaurants in Cambodia to discover and order.',
+              Text(
+                l10n.productPublishedDescription,
                 textAlign:
                     TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   color:
                       Color(0xFF757575),
@@ -1236,11 +1350,10 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child:
-                      const Text(
-                    'View Product Listing',
+                  child: Text(
+                    l10n.viewProductListing,
                     style:
-                        TextStyle(
+                        const TextStyle(
                       fontSize: 16,
                       fontWeight:
                           FontWeight.bold,
@@ -1277,11 +1390,10 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                       ),
                     ),
                   ),
-                  child:
-                      const Text(
-                    'Back to Dashboard',
+                  child: Text(
+                    l10n.backToDashboard,
                     style:
-                        TextStyle(
+                        const TextStyle(
                       fontSize: 16,
                       fontWeight:
                           FontWeight.bold,
@@ -1304,7 +1416,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // BOTTOM BAR
   // ============================================================
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(
+    AppLocalizations l10n,
+  ) {
     return Container(
       padding:
           const EdgeInsets.all(16),
@@ -1313,7 +1427,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
         boxShadow: [
           BoxShadow(
             color:
-                Colors.black.withValues(alpha: 0.05),
+                Colors.black.withValues(
+              alpha: 0.05,
+            ),
             blurRadius: 10,
             offset:
                 const Offset(0, -4),
@@ -1367,8 +1483,8 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                     )
                   : Text(
                       _currentStep == 3
-                          ? 'Publish Product'
-                          : 'Next Step',
+                          ? l10n.publishProduct
+                          : l10n.nextStep,
                       style:
                           const TextStyle(
                         fontSize: 16,
@@ -1411,7 +1527,8 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
     });
   }
 
-  Future<void> _selectAvailableUntilDate() async {
+  Future<void>
+      _selectAvailableUntilDate() async {
     final DateTime initialDate =
         _availableUntilDate ??
             DateTime.now().add(
@@ -1534,6 +1651,8 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   Widget _buildDropdownField({
     required String value,
     required List<String> items,
+    required String Function(String)
+        itemLabel,
     required ValueChanged<String?>
         onChanged,
   }) {
@@ -1584,8 +1703,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
               return DropdownMenuItem<
                   String>(
                 value: item,
-                child:
-                    Text(item),
+                child: Text(
+                  itemLabel(item),
+                ),
               );
             },
           ).toList(),
@@ -1652,9 +1772,11 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                       ),
               ),
             ),
+
             const SizedBox(
               height: 2,
             ),
+
             Text(
               subtitle,
               style:
@@ -1674,6 +1796,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
     required String label,
     required DateTime? selectedDate,
     required VoidCallback onTap,
+    required String selectDateText,
   }) {
     return Column(
       crossAxisAlignment:
@@ -1726,23 +1849,25 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                   child: Text(
                     selectedDate ==
                             null
-                        ? 'Select date'
+                        ? selectDateText
                         : '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
                     style:
                         TextStyle(
                       fontSize:
                           13,
-                      color: selectedDate ==
-                              null
-                          ? const Color(
-                              0xFF9E9E9E,
-                            )
-                          : const Color(
-                              0xFF212121,
-                            ),
+                      color:
+                          selectedDate ==
+                                  null
+                              ? const Color(
+                                  0xFF9E9E9E,
+                                )
+                              : const Color(
+                                  0xFF212121,
+                                ),
                     ),
                   ),
                 ),
+
                 const Icon(
                   Icons
                       .calendar_today_rounded,
@@ -1779,9 +1904,11 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
             ),
           ),
         ),
+
         const SizedBox(
           width: 10,
         ),
+
         Text(
           value,
           style: TextStyle(
@@ -1804,7 +1931,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // EMPTY IMAGE BOX
   // ============================================================
 
-  Widget _buildEmptyImageUploadBox() {
+  Widget _buildEmptyImageUploadBox(
+    AppLocalizations l10n,
+  ) {
     return Container(
       width: double.infinity,
       height: 160,
@@ -1856,10 +1985,10 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
               height: 10,
             ),
 
-            const Text(
-              'Upload Product Photos',
+            Text(
+              l10n.uploadProductPhotos,
               style:
-                  TextStyle(
+                  const TextStyle(
                 fontSize: 14,
                 fontWeight:
                     FontWeight.bold,
@@ -1872,10 +2001,10 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
               height: 4,
             ),
 
-            const Text(
-              'Add up to 5 photos',
+            Text(
+              l10n.addUpToFivePhotos,
               style:
-                  TextStyle(
+                  const TextStyle(
                 fontSize: 12,
                 color:
                     Colors.grey,
@@ -1891,7 +2020,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
   // IMAGE GRID
   // ============================================================
 
-  Widget _buildProductImagesGrid() {
+  Widget _buildProductImagesGrid(
+    AppLocalizations l10n,
+  ) {
     return Column(
       children: [
         GridView.builder(
@@ -1911,6 +2042,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
               (context, index) {
             return _buildImageItem(
               index,
+              l10n,
             );
           },
         ),
@@ -1938,7 +2070,10 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
               ),
               label:
                   Text(
-                'Add More Photos (${_productImages.length}/$maxImages)',
+                l10n.addMorePhotos(
+                  _productImages.length,
+                  maxImages,
+                ),
                 style:
                     const TextStyle(
                   color:
@@ -1974,6 +2109,7 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
 
   Widget _buildImageItem(
     int index,
+    AppLocalizations l10n,
   ) {
     final XFile image =
         _productImages[index];
@@ -1984,8 +2120,10 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
           child: ClipRRect(
             borderRadius:
                 BorderRadius.circular(12),
-            child: FutureBuilder<Uint8List>(
-              future: image.readAsBytes(),
+            child:
+                FutureBuilder<Uint8List>(
+              future:
+                  image.readAsBytes(),
               builder: (
                 context,
                 snapshot,
@@ -1993,7 +2131,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                 if (!snapshot.hasData) {
                   return Container(
                     color:
-                        const Color(0xFFE8F5E9),
+                        const Color(
+                      0xFFE8F5E9,
+                    ),
                     child:
                         const Center(
                       child:
@@ -2016,7 +2156,9 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                   ) {
                     return Container(
                       color:
-                          const Color(0xFFE8F5E9),
+                          const Color(
+                        0xFFE8F5E9,
+                      ),
                       child:
                           const Icon(
                         Icons
@@ -2037,18 +2179,24 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
           right: 5,
           child: GestureDetector(
             onTap: () =>
-                _removeProductImage(index),
+                _removeProductImage(
+              index,
+            ),
             child: Container(
               width: 26,
               height: 26,
               decoration:
                   const BoxDecoration(
-                color: Colors.black54,
-                shape: BoxShape.circle,
+                color:
+                    Colors.black54,
+                shape:
+                    BoxShape.circle,
               ),
-              child: const Icon(
+              child:
+                  const Icon(
                 Icons.close,
-                color: Colors.white,
+                color:
+                    Colors.white,
                 size: 17,
               ),
             ),
@@ -2061,20 +2209,26 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
             bottom: 5,
             child: Container(
               padding:
-                  const EdgeInsets.symmetric(
+                  const EdgeInsets
+                      .symmetric(
                 horizontal: 7,
                 vertical: 4,
               ),
               decoration:
                   BoxDecoration(
-                color: primaryGreen,
+                color:
+                    primaryGreen,
                 borderRadius:
-                    BorderRadius.circular(6),
+                    BorderRadius.circular(
+                  6,
+                ),
               ),
-              child: const Text(
-                'Main',
-                style: TextStyle(
-                  color: Colors.white,
+              child: Text(
+                l10n.mainPhoto,
+                style:
+                    const TextStyle(
+                  color:
+                      Colors.white,
                   fontSize: 10,
                   fontWeight:
                       FontWeight.bold,
@@ -2084,5 +2238,59 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
           ),
       ],
     );
+  }
+
+  // ============================================================
+  // LOCALIZATION HELPERS
+  // ============================================================
+
+  String _getCategoryLabel(
+    String category,
+    AppLocalizations l10n,
+  ) {
+    switch (category) {
+      case 'Vegetables':
+        return l10n.vegetables;
+
+      case 'Fruits':
+        return l10n.fruits;
+
+      case 'Herbs & Spices':
+        return l10n.herbsAndSpices;
+
+      case 'Rice & Grains':
+        return l10n.riceAndGrains;
+
+      case 'Eggs & Dairy':
+        return l10n.eggsAndDairy;
+
+      default:
+        return category;
+    }
+  }
+
+  String _getLocationLabel(
+    String location,
+    AppLocalizations l10n,
+  ) {
+    switch (location) {
+      case 'Phnom Penh':
+        return l10n.phnomPenh;
+
+      case 'Kandal':
+        return l10n.kandal;
+
+      case 'Battambang':
+        return l10n.battambang;
+
+      case 'Siem Reap':
+        return l10n.siemReap;
+
+      case 'Kampong Cham':
+        return l10n.kampongCham;
+
+      default:
+        return location;
+    }
   }
 }

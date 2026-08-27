@@ -1,80 +1,137 @@
 import 'package:flutter/material.dart';
 
+import 'package:mobile/l10n/app_localizations.dart';
+
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
-  State<NotificationsScreen> createState() => _NotificationsScreenState();
+  State<NotificationsScreen> createState() =>
+      _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
-  static const Color primaryGreen = Color(0xFF1B5E20);
-  static const Color lightGreenIconBg = Color(0xFFB9F6CA);
-  static const Color pageBg = Color(0xFFF7F9F7);
-  static const Color paymentIconBg = Color(0xFFFFE0B2);
-  static const Color deliveryIconBg = Color(0xFFE8EAF6);
+class _NotificationsScreenState
+    extends State<NotificationsScreen> {
+  // ============================================================
+  // COLORS
+  // ============================================================
+
+  static const Color primaryGreen =
+      Color(0xFF1B5E20);
+
+  static const Color lightGreenIconBg =
+      Color(0xFFB9F6CA);
+
+  static const Color pageBg =
+      Color(0xFFF7F9F7);
+
+  static const Color paymentIconBg =
+      Color(0xFFFFE0B2);
+
+  static const Color deliveryIconBg =
+      Color(0xFFE8EAF6);
+
+  // ============================================================
+  // BUILD
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
+    final l10n =
+        AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: pageBg,
+
+      // ========================================================
+      // APP BAR
+      // ========================================================
+
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.black87,
+          ),
           onPressed: () {
             Navigator.maybePop(context);
           },
         ),
-        title: const Text(
-          'Notifications',
-          style: TextStyle(
+
+        title: Text(
+          l10n.notifications,
+          style: const TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
+
         actions: [
           TextButton(
-            onPressed: () {},
-            child: const Text(
-              'Mark all as read',
-              style: TextStyle(
+            onPressed: () {
+              // TODO:
+              // Mark all notifications as read.
+            },
+            child: Text(
+              l10n.markAllAsRead,
+              style: const TextStyle(
                 color: primaryGreen,
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),
             ),
           ),
+
           const SizedBox(width: 8),
         ],
       ),
+
+      // ========================================================
+      // BODY
+      // ========================================================
+
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         children: [
-          // 1. TODAY SECTION
+          // ======================================================
+          // TODAY
+          // ======================================================
+
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment:
+                MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'TODAY',
-                style: TextStyle(
+              Text(
+                l10n.today,
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: Colors.black54,
                   letterSpacing: 1.0,
                 ),
               ),
+
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: primaryGreen,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius:
+                      BorderRadius.circular(12),
                 ),
-                child: const Text(
-                  '3 NEW',
-                  style: TextStyle(
+                child: Text(
+                  l10n.newNotifications(3),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -86,60 +143,114 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
           const SizedBox(height: 12),
 
-          // Card 1: New Order (Unread)
+          // ======================================================
+          // CARD 1
+          // NEW ORDER
+          // ======================================================
+
           _buildNotificationCard(
             isUnread: true,
+
             iconWidget: Container(
-              padding: const EdgeInsets.all(10),
+              padding:
+                  const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: lightGreenIconBg,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius:
+                    BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.storefront, color: primaryGreen, size: 22),
+              child: const Icon(
+                Icons.storefront,
+                color: primaryGreen,
+                size: 22,
+              ),
             ),
-            title: 'New Order #8821',
-            timeAgo: '2m ago',
-            bodyText:
-                'The Bistro Kitchen ordered 40kg of Heirloom Tomatoes.',
+
+            title: l10n.newOrder('8821'),
+
+            timeAgo: l10n.minutesAgo(2),
+
+            bodyText: l10n.orderMessage(
+              'The Bistro Kitchen',
+              '40',
+              'Heirloom Tomatoes',
+            ),
+
             actionWidget: Row(
               children: [
+                // ------------------------------------------------
+                // VIEW ORDER
+                // ------------------------------------------------
+
                 ElevatedButton(
                   onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryGreen,
+
+                  style:
+                      ElevatedButton.styleFrom(
+                    backgroundColor:
+                        primaryGreen,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+
+                    shape:
+                        RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(8),
                     ),
+
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
                   ),
-                  child: const Text(
-                    'View Order',
-                    style: TextStyle(
+
+                  child: Text(
+                    l10n.viewOrder,
+                    style:
+                        const TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                      fontWeight:
+                          FontWeight.bold,
                       fontSize: 13,
                     ),
                   ),
                 ),
+
                 const SizedBox(width: 8),
+
+                // ------------------------------------------------
+                // DECLINE
+                // ------------------------------------------------
+
                 OutlinedButton(
                   onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade200,
+
+                  style:
+                      OutlinedButton.styleFrom(
+                    backgroundColor:
+                        Colors.grey.shade200,
                     side: BorderSide.none,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+
+                    shape:
+                        RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(8),
                     ),
+
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
                   ),
-                  child: const Text(
-                    'Decline',
-                    style: TextStyle(
+
+                  child: Text(
+                    l10n.decline,
+                    style:
+                        const TextStyle(
                       color: Colors.black87,
-                      fontWeight: FontWeight.w600,
+                      fontWeight:
+                          FontWeight.w600,
                       fontSize: 13,
                     ),
                   ),
@@ -148,45 +259,89 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
           ),
 
-          // Card 2: Message from Chef (Unread)
+          // ======================================================
+          // CARD 2
+          // MESSAGE FROM CHEF
+          // ======================================================
+
           _buildNotificationCard(
             isUnread: true,
-            iconWidget: const CircleAvatar(
+
+            iconWidget:
+                const CircleAvatar(
               radius: 22,
-              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+              backgroundImage:
+                  NetworkImage(
+                'https://via.placeholder.com/150',
+              ),
             ),
-            title: 'Message from Chef Marcus',
-            timeAgo: '1h ago',
+
+            title: l10n.messageFromChef(
+              'Marcus',
+            ),
+
+            timeAgo: l10n.hoursAgo(1),
+
             bodyText:
-                '"Can we increase the delivery quantity for Tuesday? I need an extra 20 crates..."',
+                l10n.chefMessage,
+
             actionWidget: Row(
               children: [
+                // ------------------------------------------------
+                // CHAT ICON
+                // ------------------------------------------------
+
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding:
+                      const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(8),
+                    color:
+                        Colors.grey.shade200,
+                    borderRadius:
+                        BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.chat_bubble_outline,
-                      size: 18, color: Colors.black54),
+                  child: const Icon(
+                    Icons.chat_bubble_outline,
+                    size: 18,
+                    color: Colors.black54,
+                  ),
                 ),
+
                 const SizedBox(width: 8),
+
+                // ------------------------------------------------
+                // REPLY
+                // ------------------------------------------------
+
                 ElevatedButton(
                   onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryGreen,
+
+                  style:
+                      ElevatedButton.styleFrom(
+                    backgroundColor:
+                        primaryGreen,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+
+                    shape:
+                        RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(8),
                     ),
+
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
                   ),
-                  child: const Text(
-                    'Reply Now',
-                    style: TextStyle(
+
+                  child: Text(
+                    l10n.replyNow,
+                    style:
+                        const TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                      fontWeight:
+                          FontWeight.bold,
                       fontSize: 13,
                     ),
                   ),
@@ -195,34 +350,59 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
           ),
 
-          // Card 3: Payment Received (Read / No Green Border)
+          // ======================================================
+          // CARD 3
+          // PAYMENT RECEIVED
+          // ======================================================
+
           _buildNotificationCard(
             isUnread: false,
+
             iconWidget: Container(
-              padding: const EdgeInsets.all(10),
+              padding:
+                  const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: paymentIconBg,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius:
+                    BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.account_balance_wallet_outlined,
-                  color: Colors.brown, size: 22),
+              child: const Icon(
+                Icons
+                    .account_balance_wallet_outlined,
+                color: Colors.brown,
+                size: 22,
+              ),
             ),
-            title: 'Payment Received',
-            timeAgo: '4h ago',
+
+            title: l10n.paymentReceived,
+
+            timeAgo: l10n.hoursAgo(4),
+
             bodyText:
-                'Your payment of \$1,240.50 for Oct 1-15 has been processed successfully.',
+                l10n.paymentProcessed(
+              '\$1,240.50',
+              'Oct 1-15',
+            ),
+
             actionWidget: TextButton(
               onPressed: () {},
-              style: TextButton.styleFrom(
+
+              style:
+                  TextButton.styleFrom(
                 padding: EdgeInsets.zero,
-                minimumSize: const Size(50, 30),
-                alignment: Alignment.centerLeft,
+                minimumSize:
+                    const Size(50, 30),
+                alignment:
+                    Alignment.centerLeft,
               ),
-              child: const Text(
-                'Check Balance >',
-                style: TextStyle(
+
+              child: Text(
+                l10n.checkBalance,
+                style:
+                    const TextStyle(
                   color: primaryGreen,
-                  fontWeight: FontWeight.bold,
+                  fontWeight:
+                      FontWeight.bold,
                   fontSize: 13,
                 ),
               ),
@@ -231,10 +411,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
           const SizedBox(height: 16),
 
-          // 2. YESTERDAY SECTION
-          const Text(
-            'YESTERDAY',
-            style: TextStyle(
+          // ======================================================
+          // YESTERDAY
+          // ======================================================
+
+          Text(
+            l10n.yesterday,
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
               color: Colors.black54,
@@ -244,67 +427,114 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
           const SizedBox(height: 12),
 
-          // Card 4: Order Delivered
+          // ======================================================
+          // CARD 4
+          // ORDER DELIVERED
+          // ======================================================
+
           _buildNotificationCard(
             isUnread: false,
+
             iconWidget: Container(
-              padding: const EdgeInsets.all(10),
+              padding:
+                  const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: deliveryIconBg,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius:
+                    BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.local_shipping_outlined,
-                  color: Colors.black87, size: 22),
+              child: const Icon(
+                Icons.local_shipping_outlined,
+                color: Colors.black87,
+                size: 22,
+              ),
             ),
-            title: 'Order Delivered',
+
+            title: l10n.orderDelivered,
+
             timeAgo: 'Oct 24, 4:12 PM',
+
             bodyText:
-                'Order #7749 was successfully delivered to Green Leaf Brasserie.',
-            actionWidget: OutlinedButton(
+                l10n.orderDeliveredMessage(
+              '7749',
+              'Green Leaf Brasserie',
+            ),
+
+            actionWidget:
+                OutlinedButton(
               onPressed: () {},
-              style: OutlinedButton.styleFrom(
-                backgroundColor: Colors.grey.shade200,
+
+              style:
+                  OutlinedButton.styleFrom(
+                backgroundColor:
+                    Colors.grey.shade200,
                 side: BorderSide.none,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+
+                shape:
+                    RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(8),
                 ),
+
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
               ),
-              child: const Text(
-                'View Details',
-                style: TextStyle(
+
+              child: Text(
+                l10n.viewDetails,
+                style:
+                    const TextStyle(
                   color: Colors.black87,
-                  fontWeight: FontWeight.w600,
+                  fontWeight:
+                      FontWeight.w600,
                   fontSize: 13,
                 ),
               ),
             ),
           ),
 
-          // Card 5: System Update
+          // ======================================================
+          // CARD 5
+          // SYSTEM UPDATE
+          // ======================================================
+
           _buildNotificationCard(
             isUnread: false,
+
             iconWidget: Container(
-              padding: const EdgeInsets.all(10),
+              padding:
+                  const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius:
+                    BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.info_outline,
-                  color: Colors.black54, size: 22),
+              child: const Icon(
+                Icons.info_outline,
+                color: Colors.black54,
+                size: 22,
+              ),
             ),
-            title: 'System Update',
+
+            title: l10n.systemUpdate,
+
             timeAgo: 'Oct 24, 10:00 AM',
+
             bodyText:
-                'Verdant system maintenance complete. The new delivery tracking feature is now available!',
+                l10n.systemUpdateMessage,
           ),
         ],
       ),
     );
   }
 
-  // Generic Notification Card Builder
+  // ============================================================
+  // NOTIFICATION CARD
+  // ============================================================
+
   Widget _buildNotificationCard({
     required bool isUnread,
     required Widget iconWidget,
@@ -314,76 +544,142 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     Widget? actionWidget,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin:
+          const EdgeInsets.only(bottom: 12),
+
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+
+        borderRadius:
+            BorderRadius.circular(16),
+
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(
+              alpha: 0.02,
+            ),
             blurRadius: 4,
-            offset: const Offset(0, 2),
+            offset:
+                const Offset(0, 2),
           ),
         ],
       ),
+
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius:
+            BorderRadius.circular(16),
+
         child: IntrinsicHeight(
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment:
+                CrossAxisAlignment.stretch,
+
             children: [
-              // Highlight indicator bar for unread notifications
+              // ==================================================
+              // UNREAD INDICATOR
+              // ==================================================
+
               if (isUnread)
                 Container(
                   width: 4,
                   color: primaryGreen,
                 ),
 
+              // ==================================================
+              // CONTENT
+              // ==================================================
+
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(14.0),
+                  padding:
+                      const EdgeInsets.all(
+                    14,
+                  ),
+
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
+
                     children: [
+                      // ------------------------------------------
+                      // ICON
+                      // ------------------------------------------
+
                       iconWidget,
-                      const SizedBox(width: 12),
+
+                      const SizedBox(
+                        width: 12,
+                      ),
+
+                      // ------------------------------------------
+                      // TEXT
+                      // ------------------------------------------
+
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                              CrossAxisAlignment
+                                  .start,
+
                           children: [
-                            // Header Row: Title & Timestamp
+                            // ====================================
+                            // TITLE + TIME
+                            // ====================================
+
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment:
+                                  MainAxisAlignment
+                                      .spaceBetween,
+
                               children: [
                                 Flexible(
                                   child: Text(
                                     title,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+                                    style:
+                                        const TextStyle(
+                                      fontWeight:
+                                          FontWeight
+                                              .bold,
                                       fontSize: 15,
-                                      color: Colors.black87,
+                                      color:
+                                          Colors.black87,
                                     ),
-                                    overflow: TextOverflow.ellipsis,
+                                    overflow:
+                                        TextOverflow
+                                            .ellipsis,
                                   ),
                                 ),
+
                                 Row(
                                   children: [
                                     Text(
                                       timeAgo,
-                                      style: TextStyle(
+                                      style:
+                                          TextStyle(
                                         fontSize: 11,
-                                        color: Colors.grey.shade600,
+                                        color: Colors
+                                            .grey
+                                            .shade600,
                                       ),
                                     ),
+
                                     if (isUnread) ...[
-                                      const SizedBox(width: 6),
+                                      const SizedBox(
+                                        width: 6,
+                                      ),
+
                                       Container(
                                         width: 6,
                                         height: 12,
-                                        decoration: BoxDecoration(
-                                          color: primaryGreen,
+                                        decoration:
+                                            BoxDecoration(
+                                          color:
+                                              primaryGreen,
                                           borderRadius:
-                                              BorderRadius.circular(2),
+                                              BorderRadius
+                                                  .circular(
+                                            2,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -392,20 +688,36 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               ],
                             ),
 
-                            const SizedBox(height: 6),
+                            const SizedBox(
+                              height: 6,
+                            ),
 
-                            // Body Text
+                            // ====================================
+                            // BODY
+                            // ====================================
+
                             Text(
                               bodyText,
-                              style: TextStyle(
+                              style:
+                                  TextStyle(
                                 fontSize: 13,
-                                color: Colors.grey.shade700,
+                                color: Colors
+                                    .grey
+                                    .shade700,
                                 height: 1.35,
                               ),
                             ),
 
-                            if (actionWidget != null) ...[
-                              const SizedBox(height: 12),
+                            // ====================================
+                            // ACTION
+                            // ====================================
+
+                            if (actionWidget !=
+                                null) ...[
+                              const SizedBox(
+                                height: 12,
+                              ),
+
                               actionWidget,
                             ],
                           ],

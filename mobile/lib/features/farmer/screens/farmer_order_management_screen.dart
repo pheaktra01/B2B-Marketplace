@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/features/farmer/screens/notifications_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class FarmerOrderManagementScreen extends StatefulWidget {
   const FarmerOrderManagementScreen({super.key});
@@ -20,17 +21,24 @@ class _FarmerOrderManagementScreenState
   static const Color pageBg = Color(0xFFF7F9F7);
   static const Color cardBg = Colors.white;
 
-  final List<String> filters = [
-    'All Orders',
-    'Pending',
-    'Accepted',
-    'Preparing'
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final List<String> filters = [
+      l10n.allOrders,
+      l10n.pending,
+      l10n.accepted,
+      l10n.preparing,
+    ];
+
     return Scaffold(
       backgroundColor: pageBg,
+
+      // ==========================================================
+      // APP BAR
+      // ==========================================================
+
       appBar: FarmerAppBar(
         actions: [
           IconButton(
@@ -44,6 +52,7 @@ class _FarmerOrderManagementScreenState
               );
             },
           ),
+
           const Padding(
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
@@ -52,35 +61,46 @@ class _FarmerOrderManagementScreenState
           ),
         ],
       ),
+
+      // ==========================================================
+      // BODY
+      // ==========================================================
+
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
 
-          // 1. Title Bar & Active Badge
+          // ======================================================
+          // TITLE + ACTIVE BADGE
+          // ======================================================
+
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Order Management',
-                  style: TextStyle(
+                Text(
+                  l10n.orderManagement,
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
                 ),
+
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: primaryGreen,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
-                    '24 Active',
-                    style: TextStyle(
+                  child: Text(
+                    '24 ${l10n.active}',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -93,7 +113,10 @@ class _FarmerOrderManagementScreenState
 
           const SizedBox(height: 16),
 
-          // 2. Filter Chips Horizontal List
+          // ======================================================
+          // FILTER CHIPS
+          // ======================================================
+
           SizedBox(
             height: 38,
             child: ListView.builder(
@@ -102,6 +125,7 @@ class _FarmerOrderManagementScreenState
               itemCount: filters.length,
               itemBuilder: (context, index) {
                 final isSelected = _selectedFilterIndex == index;
+
                 return GestureDetector(
                   onTap: () {
                     setState(() {
@@ -111,18 +135,25 @@ class _FarmerOrderManagementScreenState
                   child: Container(
                     margin: const EdgeInsets.only(right: 8),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 8),
+                      horizontal: 18,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: isSelected ? primaryGreen : Colors.grey.shade200,
+                      color: isSelected
+                          ? primaryGreen
+                          : Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       filters[index],
                       style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black87,
+                        color: isSelected
+                            ? Colors.white
+                            : Colors.black87,
                         fontSize: 13,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
                       ),
                     ),
                   ),
@@ -133,21 +164,29 @@ class _FarmerOrderManagementScreenState
 
           const SizedBox(height: 16),
 
-          // 3. Orders List
+          // ======================================================
+          // ORDERS LIST
+          // ======================================================
+
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                // Order 1: Pending
+                // ==================================================
+                // ORDER 1 - PENDING
+                // ==================================================
+
                 _buildOrderCard(
+                  l10n: l10n,
                   customerName: 'The Grand Bistro',
                   orderId: '#VRD-9821',
-                  timeAgo: '5 mins ago',
-                  status: 'Pending',
+                  timeAgo: l10n.fiveMinutesAgo,
+                  status: l10n.pending,
                   statusBgColor: const Color(0xFFA0520D),
-                  itemsText: 'Heirloom Tomatoes, Baby Arugula + 2 more',
-                  itemCountText: '24 Cases',
-                  fulfillmentType: 'Delivery',
+                  itemsText:
+                      '${l10n.heirloomTomatoes}, ${l10n.babyArugula} + 2 ${l10n.more}',
+                  itemCountText: '24 ${l10n.cases}',
+                  fulfillmentType: l10n.delivery,
                   fulfillmentTime: '10:00 AM',
                   price: '\$420.00',
                   actionButtons: Row(
@@ -156,18 +195,28 @@ class _FarmerOrderManagementScreenState
                         child: OutlinedButton(
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: Colors.grey.shade400),
+                            side: BorderSide(
+                              color: Colors.grey.shade400,
+                            ),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                            ),
                           ),
-                          child: const Text('Decline',
-                              style: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.bold)),
+                          child: Text(
+                            l10n.decline,
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
+
                       const SizedBox(width: 12),
+
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {},
@@ -175,30 +224,41 @@ class _FarmerOrderManagementScreenState
                             backgroundColor: accentOrange,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                            ),
                           ),
-                          child: const Text('Accept',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold)),
+                          child: Text(
+                            l10n.accept,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                // Order 2: Accepted
+                // ==================================================
+                // ORDER 2 - ACCEPTED
+                // ==================================================
+
                 _buildOrderCard(
+                  l10n: l10n,
                   customerName: 'Green Plate Kitchen',
                   orderId: '#VRD-9742',
                   timeAgo: 'Oct 27, 2:15 PM',
-                  status: 'Accepted',
+                  status: l10n.accepted,
                   statusBgColor: const Color(0xFFC3D0A8),
                   statusTextColor: const Color(0xFF2E3D12),
-                  itemsText: 'Microgreens Mix, Rainbow Carrots (Bunch)',
-                  itemCountText: '12 Cases',
-                  fulfillmentType: 'Pickup',
+                  itemsText:
+                      '${l10n.microgreensMix}, ${l10n.rainbowCarrots}',
+                  itemCountText: '12 ${l10n.cases}',
+                  fulfillmentType: l10n.pickup,
                   fulfillmentTime: '11:30 AM',
                   price: '\$185.50',
                   actionButtons: SizedBox(
@@ -209,27 +269,38 @@ class _FarmerOrderManagementScreenState
                         backgroundColor: primaryGreen,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
                       ),
-                      child: const Text('Start Preparing',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)),
+                      child: Text(
+                        l10n.startPreparing,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
 
-                // Order 3: Preparing
+                // ==================================================
+                // ORDER 3 - PREPARING
+                // ==================================================
+
                 _buildOrderCard(
+                  l10n: l10n,
                   customerName: 'Azure Fine Dining',
                   orderId: '#VRD-9610',
                   timeAgo: 'Oct 27, 1:40 PM',
-                  status: 'Preparing',
+                  status: l10n.preparing,
                   statusBgColor: const Color(0xFF2E6930),
-                  itemsText: 'Natural Honey, Sourdough Starter Kit + 5 more',
-                  itemCountText: '40 Items',
-                  fulfillmentType: 'Delivery',
+                  itemsText:
+                      '${l10n.naturalHoney}, ${l10n.sourdoughStarterKit} + 5 ${l10n.more}',
+                  itemCountText: '40 ${l10n.items}',
+                  fulfillmentType: l10n.delivery,
                   fulfillmentTime: '09:00 AM',
                   price: '\$1,120.00',
                   actionButtons: SizedBox(
@@ -237,30 +308,44 @@ class _FarmerOrderManagementScreenState
                     child: OutlinedButton(
                       onPressed: () {},
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: primaryGreen, width: 1.5),
+                        side: const BorderSide(
+                          color: primaryGreen,
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
                       ),
-                      child: const Text('Mark as Ready',
-                          style: TextStyle(
-                              color: primaryGreen,
-                              fontWeight: FontWeight.bold)),
+                      child: Text(
+                        l10n.markAsReady,
+                        style: const TextStyle(
+                          color: primaryGreen,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
 
-                // Order 4: Ready (With Green Border Outline)
+                // ==================================================
+                // ORDER 4 - READY
+                // ==================================================
+
                 _buildOrderCard(
+                  l10n: l10n,
                   customerName: 'The Rustic Table',
                   orderId: '#VRD-9588',
                   timeAgo: 'Oct 27, 11:20 AM',
-                  status: 'Ready',
+                  status: l10n.ready,
                   statusBgColor: primaryGreen,
                   isHighlighted: true,
-                  itemsText: 'Butterhead Lettuce (30 heads), Fresh Mint',
-                  itemCountText: '32 Cases',
-                  fulfillmentType: 'Ready for Pickup',
+                  itemsText:
+                      '${l10n.butterheadLettuce}, ${l10n.freshMint}',
+                  itemCountText: '32 ${l10n.cases}',
+                  fulfillmentType: l10n.readyForPickup,
                   fulfillmentTime: '',
                   price: '\$340.25',
                   hasCheckIcon: true,
@@ -272,13 +357,19 @@ class _FarmerOrderManagementScreenState
                         backgroundColor: primaryGreen,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
                       ),
-                      child: const Text('Complete Order',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)),
+                      child: Text(
+                        l10n.completeOrder,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -289,14 +380,23 @@ class _FarmerOrderManagementScreenState
           ),
         ],
       ),
+
+      // ==========================================================
+      // BOTTOM NAVIGATION
+      // ==========================================================
+
       bottomNavigationBar: const FarmerBottomNavBar(
         currentIndex: 1,
       ),
     );
   }
 
-  // Card Reusable Widget
+  // ==========================================================
+  // ORDER CARD
+  // ==========================================================
+
   Widget _buildOrderCard({
+    required AppLocalizations l10n,
     required String customerName,
     required String orderId,
     required String timeAgo,
@@ -319,7 +419,9 @@ class _FarmerOrderManagementScreenState
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isHighlighted ? const Color(0xFF81C784) : Colors.grey.shade200,
+          color: isHighlighted
+              ? const Color(0xFF81C784)
+              : Colors.grey.shade200,
           width: isHighlighted ? 1.5 : 1.0,
         ),
         boxShadow: [
@@ -333,47 +435,63 @@ class _FarmerOrderManagementScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Row 1: Header (Name, ID, Time, Status)
+          // ======================================================
+          // HEADER
+          // ======================================================
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    customerName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black87,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      customerName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Text(
-                        orderId,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: primaryGreen,
-                          fontSize: 13,
+
+                    const SizedBox(height: 2),
+
+                    Row(
+                      children: [
+                        Text(
+                          orderId,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: primaryGreen,
+                            fontSize: 13,
+                          ),
                         ),
-                      ),
-                      Text(
-                        ' • $timeAgo',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 13,
+
+                        Flexible(
+                          child: Text(
+                            ' • $timeAgo',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
+
+              const SizedBox(width: 8),
+
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusBgColor,
                   borderRadius: BorderRadius.circular(12),
@@ -393,16 +511,25 @@ class _FarmerOrderManagementScreenState
 
           const SizedBox(height: 12),
 
-          // Row 2: Items text with Shopping Bag / Check Icon
+          // ======================================================
+          // ITEMS
+          // ======================================================
+
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
-                hasCheckIcon ? Icons.check_circle_outline : Icons.shopping_bag_outlined,
+                hasCheckIcon
+                    ? Icons.check_circle_outline
+                    : Icons.shopping_bag_outlined,
                 size: 18,
-                color: hasCheckIcon ? primaryGreen : Colors.grey.shade600,
+                color: hasCheckIcon
+                    ? primaryGreen
+                    : Colors.grey.shade600,
               ),
+
               const SizedBox(width: 8),
+
               Expanded(
                 child: Text(
                   itemsText,
@@ -418,50 +545,77 @@ class _FarmerOrderManagementScreenState
 
           const SizedBox(height: 8),
 
-          // Row 3: Meta details (Units count, Delivery / Pickup method)
+          // ======================================================
+          // META INFORMATION
+          // ======================================================
+
           Row(
             children: [
               const SizedBox(width: 26),
-              Icon(Icons.inventory_2_outlined, size: 14, color: Colors.grey.shade600),
+
+              Icon(
+                Icons.inventory_2_outlined,
+                size: 14,
+                color: Colors.grey.shade600,
+              ),
+
               const SizedBox(width: 4),
+
               Text(
                 itemCountText,
-                style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 12,
+                ),
               ),
+
               const SizedBox(width: 16),
+
               Icon(
-                fulfillmentType.contains('Pickup')
+                fulfillmentType.contains(l10n.pickup)
                     ? Icons.local_shipping_outlined
                     : Icons.access_time,
                 size: 14,
-                color: fulfillmentType.contains('Ready')
+                color: fulfillmentType.contains(l10n.ready)
                     ? primaryGreen
                     : Colors.grey.shade600,
               ),
+
               const SizedBox(width: 4),
-              Text(
-                fulfillmentTime.isNotEmpty
-                    ? '$fulfillmentType: $fulfillmentTime'
-                    : fulfillmentType,
-                style: TextStyle(
-                  color: fulfillmentType.contains('Ready')
-                      ? primaryGreen
-                      : Colors.grey.shade700,
-                  fontSize: 12,
-                  fontWeight: fulfillmentType.contains('Ready')
-                      ? FontWeight.bold
-                      : FontWeight.normal,
+
+              Expanded(
+                child: Text(
+                  fulfillmentTime.isNotEmpty
+                      ? '$fulfillmentType: $fulfillmentTime'
+                      : fulfillmentType,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: fulfillmentType.contains(l10n.ready)
+                        ? primaryGreen
+                        : Colors.grey.shade700,
+                    fontSize: 12,
+                    fontWeight: fulfillmentType.contains(l10n.ready)
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
                 ),
               ),
             ],
           ),
+
+          // ======================================================
+          // DIVIDER
+          // ======================================================
 
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(height: 1),
           ),
 
-          // Row 4: Price & Action Buttons
+          // ======================================================
+          // PRICE + ACTION
+          // ======================================================
+
           Row(
             children: [
               Text(
@@ -472,8 +626,12 @@ class _FarmerOrderManagementScreenState
                   color: primaryGreen,
                 ),
               ),
+
               const SizedBox(width: 16),
-              Expanded(child: actionButtons),
+
+              Expanded(
+                child: actionButtons,
+              ),
             ],
           ),
         ],

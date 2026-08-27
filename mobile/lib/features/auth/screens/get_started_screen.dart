@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/auth/screens/login_screen.dart';
 import 'package:mobile/features/auth/screens/role_selection_screen.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class GetStartedScreen extends StatelessWidget {
   const GetStartedScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     const primaryGreen = Color(0xFF1B7A32);
     const accentOrange = Color(0xFFFF9800);
     const textDark = Color(0xFF1F2937);
@@ -18,7 +21,10 @@ class GetStartedScreen extends StatelessWidget {
           final isDesktop = constraints.maxWidth >= 900;
           final isTablet =
               constraints.maxWidth >= 600 && constraints.maxWidth < 900;
-          final titleFontSize = isDesktop ? 34.0 : (isTablet ? 30.0 : 28.0);
+
+          final titleFontSize =
+              isDesktop ? 34.0 : (isTablet ? 30.0 : 28.0);
+
           final bodyFontSize = isDesktop ? 17.0 : 15.0;
 
           return Stack(
@@ -31,6 +37,7 @@ class GetStartedScreen extends StatelessWidget {
                   alignment: Alignment.topCenter,
                 ),
               ),
+
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -48,6 +55,8 @@ class GetStartedScreen extends StatelessWidget {
                   ),
                 ),
               ),
+
+              // Logo
               SafeArea(
                 child: Align(
                   alignment: Alignment.topLeft,
@@ -81,6 +90,8 @@ class GetStartedScreen extends StatelessWidget {
                   ),
                 ),
               ),
+
+              // Main content
               Align(
                 alignment: isTablet || isDesktop
                     ? Alignment.center
@@ -125,6 +136,7 @@ class GetStartedScreen extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            // Page indicators
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -135,11 +147,17 @@ class GetStartedScreen extends StatelessWidget {
                                 _buildIndicator(active: false),
                               ],
                             ),
-                            SizedBox(height: isTablet || isDesktop ? 30 : 22),
+
+                            SizedBox(
+                              height: isTablet || isDesktop ? 30 : 22,
+                            ),
+
+                            // Title
                             ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 360),
+                              constraints:
+                                  const BoxConstraints(maxWidth: 360),
                               child: Text(
-                                'Direct from Farm to Your Kitchen',
+                                l10n.getStartedTitle,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: titleFontSize,
@@ -150,11 +168,15 @@ class GetStartedScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
+
                             const SizedBox(height: 14),
+
+                            // Description
                             ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 380),
+                              constraints:
+                                  const BoxConstraints(maxWidth: 380),
                               child: Text(
-                                'Connect with local farmers to get the freshest ingredients for your kitchen.',
+                                l10n.getStartedDescription,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: bodyFontSize,
@@ -163,7 +185,12 @@ class GetStartedScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            SizedBox(height: isTablet || isDesktop ? 34 : 26),
+
+                            SizedBox(
+                              height: isTablet || isDesktop ? 34 : 26,
+                            ),
+
+                            // Get Started button
                             SizedBox(
                               width: double.infinity,
                               height: 56,
@@ -185,14 +212,16 @@ class GetStartedScreen extends StatelessWidget {
                                     alpha: 0.35,
                                   ),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
+                                    borderRadius:
+                                        BorderRadius.circular(18),
                                   ),
                                 ),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.center,
                                   children: [
                                     TextStyleCustom(
-                                      text: 'Get Started',
+                                      text: l10n.getStarted,
                                       fontSize: isDesktop ? 18 : 17,
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
@@ -207,7 +236,10 @@ class GetStartedScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
+
                             const SizedBox(height: 14),
+
+                            // Login button
                             SizedBox(
                               width: double.infinity,
                               height: 56,
@@ -216,41 +248,54 @@ class GetStartedScreen extends StatelessWidget {
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const LoginScreen(),
+                                      builder: (context) =>
+                                          const LoginScreen(),
                                     ),
                                   );
                                 },
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(
+                                  side: const BorderSide(
                                     color: primaryGreen,
                                     width: 2.2,
                                   ),
                                   foregroundColor: primaryGreen,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
+                                    borderRadius:
+                                        BorderRadius.circular(18),
                                   ),
                                 ),
                                 child: TextStyleCustom(
-                                  text: 'Log In',
+                                  text: l10n.login,
                                   fontSize: isDesktop ? 18 : 17,
                                   color: primaryGreen,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
-                            SizedBox(height: isTablet || isDesktop ? 30 : 24),
+
+                            SizedBox(
+                              height: isTablet || isDesktop ? 30 : 24,
+                            ),
+
+                            // Trust section
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                _buildTrustDot(const Color(0xFFE8E7D6)),
+                                _buildTrustDot(
+                                  const Color(0xFFE8E7D6),
+                                ),
                                 const SizedBox(width: 8),
-                                _buildTrustDot(const Color(0xFFC8F4B8)),
+                                _buildTrustDot(
+                                  const Color(0xFFC8F4B8),
+                                ),
                                 const SizedBox(width: 8),
-                                _buildTrustDot(const Color(0xFFF7DDC8)),
+                                _buildTrustDot(
+                                  const Color(0xFFF7DDC8),
+                                ),
                                 const SizedBox(width: 14),
                                 Flexible(
                                   child: Text(
-                                    'Trusted by over 500 top chefs',
+                                    l10n.trustedChefs,
                                     style: TextStyle(
                                       color: Colors.grey.shade600,
                                       fontSize: 13,
@@ -260,9 +305,12 @@ class GetStartedScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
+
                             const SizedBox(height: 18),
+
+                            // Terms and privacy
                             Text(
-                              'By continuing, you agree to our Terms and Privacy Policy',
+                              l10n.termsPrivacy,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 11.5,
@@ -289,7 +337,9 @@ class GetStartedScreen extends StatelessWidget {
       width: active ? 26 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color: active ? const Color(0xFF1B7A32) : Colors.grey.shade300,
+        color: active
+            ? const Color(0xFF1B7A32)
+            : Colors.grey.shade300,
         borderRadius: BorderRadius.circular(4),
       ),
     );
@@ -299,7 +349,10 @@ class GetStartedScreen extends StatelessWidget {
     return Container(
       width: 20,
       height: 20,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
     );
   }
 }

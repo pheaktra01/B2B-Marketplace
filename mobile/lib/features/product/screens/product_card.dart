@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class ProductCard extends StatelessWidget {
   final String imageUrl;
@@ -14,7 +15,6 @@ class ProductCard extends StatelessWidget {
 
   final bool isAvailable;
   final bool isFavorite;
-
   final bool isInCart;
 
   final VoidCallback? onTap;
@@ -27,17 +27,12 @@ class ProductCard extends StatelessWidget {
     required this.productName,
     required this.farmName,
     required this.price,
-
     this.location = 'Kandal',
     this.availableQuantity = '150 kg',
-
     this.isAvailable = true,
     this.isFavorite = false,
-
     this.isInCart = false,
-
     this.localImage,
-
     this.onTap,
     this.onFavoritePressed,
     this.onAddToCart,
@@ -47,6 +42,8 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
@@ -75,7 +72,7 @@ class ProductCard extends StatelessWidget {
               // PRODUCT IMAGE
               // ==================================================
 
-              _buildImageSection(),
+              _buildImageSection(l10n),
 
               // ==================================================
               // PRODUCT INFORMATION
@@ -207,7 +204,7 @@ class ProductCard extends StatelessWidget {
                         ),
 
                         Text(
-                          'Available: ',
+                          l10n.availableLabel,
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey.shade600,
@@ -238,28 +235,19 @@ class ProductCard extends StatelessWidget {
                         child: ElevatedButton.icon(
                           onPressed: !isAvailable
                               ? null
-                              : isInCart
-                                  ? onAddToCart
-                                  : onAddToCart,
+                              : onAddToCart,
 
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                isInCart ? primaryGreen : primaryGreen,
-
+                            backgroundColor: primaryGreen,
                             foregroundColor: Colors.white,
-
                             disabledBackgroundColor:
                                 Colors.grey.shade300,
-
                             disabledForegroundColor:
                                 Colors.grey.shade600,
-
                             elevation: 0,
-
                             padding: const EdgeInsets.symmetric(
                               horizontal: 14,
                             ),
-
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -274,17 +262,16 @@ class ProductCard extends StatelessWidget {
 
                           label: Text(
                             !isAvailable
-                                ? 'Unavailable'
+                                ? l10n.unavailable
                                 : isInCart
-                                    ? 'In Cart'
-                                    : 'Add to Cart',
-
+                                    ? l10n.inCart
+                                    : l10n.addToCart,
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                        )
+                        ),
                       ),
                     ),
                   ],
@@ -301,7 +288,7 @@ class ProductCard extends StatelessWidget {
   // IMAGE SECTION
   // ==========================================================
 
-  Widget _buildImageSection() {
+  Widget _buildImageSection(AppLocalizations l10n) {
     return Stack(
       children: [
         // ======================================================
@@ -382,7 +369,7 @@ class ProductCard extends StatelessWidget {
         ),
 
         // ======================================================
-        // AVAILABLE BADGE - TOP LEFT
+        // AVAILABLE BADGE
         // ======================================================
 
         if (isAvailable)
@@ -414,9 +401,9 @@ class ProductCard extends StatelessWidget {
 
                   const SizedBox(width: 5),
 
-                  const Text(
-                    'Available',
-                    style: TextStyle(
+                  Text(
+                    l10n.available,
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: Colors.green,
@@ -428,7 +415,7 @@ class ProductCard extends StatelessWidget {
           ),
 
         // ======================================================
-        // FAVORITE BUTTON - TOP RIGHT
+        // FAVORITE BUTTON
         // ======================================================
 
         Positioned(

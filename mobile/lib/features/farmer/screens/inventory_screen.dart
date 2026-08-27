@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:mobile/l10n/app_localizations.dart';
 import 'package:mobile/features/farmer/screens/notifications_screen.dart';
 import 'package:mobile/features/farmer/widgets/edit_product_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
@@ -17,25 +18,41 @@ class InventoryScreen extends StatefulWidget {
 }
 
 class _InventoryScreenState extends State<InventoryScreen> {
+  // ============================================================
+  // COLORS
+  // ============================================================
+
   static const Color primaryColor = Color(0xFF1E5631);
+  static const Color accentOrange = Color(0xFFB86A04);
   static const Color backgroundColor = Color(0xFFF7F6E8);
+
+  // ============================================================
+  // FILTER
+  // ============================================================
 
   int _selectedFilterIndex = 0;
 
-  final List<String> _filters = [
-    'All Items',
-    'Vegetables',
-    'Microgreens',
-  ];
+  // ============================================================
+  // SEARCH
+  // ============================================================
 
   final TextEditingController _searchController =
       TextEditingController();
+
+  String _searchQuery = '';
+
+  // ============================================================
+  // PRODUCTS
+  // ============================================================
 
   List<Map<String, dynamic>> _products = [];
 
   bool _isLoading = true;
   String? _error;
-  String _searchQuery = '';
+
+  // ============================================================
+  // INIT / DISPOSE
+  // ============================================================
 
   @override
   void initState() {
@@ -78,6 +95,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       });
 
       debugPrint('========== INVENTORY PRODUCTS ==========');
+      debugPrint('Total products: ${_products.length}');
       debugPrint('Products: $_products');
       debugPrint('========================================');
     } catch (e) {
@@ -93,35 +111,146 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   // ============================================================
+  // VALUE HELPERS
+  // ============================================================
+
+  double _toDouble(dynamic value) {
+    if (value == null) {
+      return 0;
+    }
+
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(
+          value.toString().trim(),
+        ) ??
+        0;
+  }
+
+  bool _toBool(dynamic value) {
+    if (value is bool) {
+      return value;
+    }
+
+    if (value is num) {
+      return value != 0;
+    }
+
+    final stringValue = value?.toString().trim().toLowerCase();
+
+    return stringValue == 'true' ||
+        stringValue == '1' ||
+        stringValue == 'yes';
+  }
+
+  String _productCategory(
+    Map<String, dynamic> product,
+  ) {
+    return product['category']
+            ?.toString()
+            .trim()
+            .toLowerCase() ??
+        '';
+  }
+
+  double _productQuantity(
+    Map<String, dynamic> product,
+  ) {
+    return _toDouble(product['quantity']);
+  }
+
+  bool _productIsAvailable(
+    Map<String, dynamic> product,
+  ) {
+    return _toBool(product['isAvailable']);
+  }
+
+  bool _isLowStock(
+    Map<String, dynamic> product,
+  ) {
+    final quantity = _productQuantity(product);
+
+    return quantity > 0 && quantity <= 20;
+  }
+
+  bool _isOutOfStock(
+    Map<String, dynamic> product,
+  ) {
+    final quantity = _productQuantity(product);
+
+    return quantity <= 0;
+  }
+
+  // ============================================================
+  // LOCALIZED FILTERS
+  // ============================================================
+
+  List<String> _getFilters(AppLocalizations l10n) {
+    return [
+      l10n.allItems,
+      l10n.vegetables,
+      l10n.microgreens,
+      l10n.lowStock,
+      l10n.outOfStock,
+    ];
+  }
+
+  // ============================================================
   // FILTER + SEARCH
   // ============================================================
 
   List<Map<String, dynamic>> get _filteredProducts {
-    return _products.where((product) {
-      // Search
-      final name =
-          product['name']?.toString().toLowerCase() ?? '';
+    final query = _searchQuery.trim().toLowerCase();
 
-      final category =
-          product['category']?.toString().toLowerCase() ?? '';
+    return _products.where((product) {
+      final name =
+          product['name']?.toString().trim().toLowerCase() ?? '';
+
+      final category = _productCategory(product);
+
+      final description =
+          product['description']
+                  ?.toString()
+                  .trim()
+                  .toLowerCase() ??
+              '';
 
       final matchesSearch =
-          name.contains(_searchQuery.toLowerCase()) ||
-          category.contains(_searchQuery.toLowerCase());
+          query.isEmpty ||
+          name.contains(query) ||
+          category.contains(query) ||
+          description.contains(query);
 
       if (!matchesSearch) {
         return false;
       }
 
-      // Category filter
-      if (_selectedFilterIndex == 0) {
-        return true;
+      switch (_selectedFilterIndex) {
+        case 0:
+          // All Items
+          return true;
+
+        case 1:
+          // Vegetables
+          return category == 'vegetables';
+
+        case 2:
+          // Microgreens
+          return category == 'microgreens';
+
+        case 3:
+          // Low Stock
+          return _isLowStock(product);
+
+        case 4:
+          // Out of Stock
+          return _isOutOfStock(product);
+
+        default:
+          return true;
       }
-
-      final selectedCategory =
-          _filters[_selectedFilterIndex].toLowerCase();
-
-      return category == selectedCategory;
     }).toList();
   }
 
@@ -131,26 +260,21 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   int get _activeProducts {
     return _products.where((product) {
-      return product['isAvailable'] == true;
+      return _productIsAvailable(product) &&
+          !_isOutOfStock(product);
     }).length;
   }
 
   int get _lowStockProducts {
     return _products.where((product) {
-      final quantity = _toDouble(product['quantity']);
-
-      return quantity > 0 && quantity <= 20;
+      return _isLowStock(product);
     }).length;
   }
 
-  double _toDouble(dynamic value) {
-    if (value == null) return 0;
-
-    if (value is num) {
-      return value.toDouble();
-    }
-
-    return double.tryParse(value.toString()) ?? 0;
+  int get _outOfStockProducts {
+    return _products.where((product) {
+      return _isOutOfStock(product);
+    }).length;
   }
 
   // ============================================================
@@ -159,50 +283,68 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final filters = _getFilters(l10n);
+
     return Scaffold(
       backgroundColor: backgroundColor,
+
+      // ========================================================
+      // APP BAR
+      // ========================================================
 
       appBar: FarmerAppBar(
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none),
+            icon: const Icon(
+              Icons.notifications_none,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      const NotificationsScreen(),
+                  builder: (_) => const NotificationsScreen(),
                 ),
               );
             },
           ),
-
           const Padding(
-            padding: EdgeInsets.only(right: 16),
+            padding: EdgeInsets.only(
+              right: 16,
+            ),
             child: CircleAvatar(
-              backgroundImage:
-                  AssetImage('assets/profile.png'),
+              backgroundImage: AssetImage(
+                'assets/profile.png',
+              ),
             ),
           ),
         ],
       ),
 
+      // ========================================================
+      // BODY
+      // ========================================================
+
       body: RefreshIndicator(
         onRefresh: _loadProducts,
+        color: primaryColor,
         child: SingleChildScrollView(
-          physics:
-              const AlwaysScrollableScrollPhysics(),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16),
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+          ),
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 8),
 
-              const Text(
-                'My Products',
-                style: TextStyle(
+              // ==================================================
+              // TITLE
+              // ==================================================
+
+              Text(
+                l10n.myProducts,
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
@@ -212,7 +354,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               const SizedBox(height: 4),
 
               Text(
-                'Manage the products you have listed for restaurants.',
+                l10n.manageProductsDescription,
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey[700],
@@ -221,19 +363,35 @@ class _InventoryScreenState extends State<InventoryScreen> {
 
               const SizedBox(height: 16),
 
-              _buildSummaryCards(),
+              // ==================================================
+              // SUMMARY
+              // ==================================================
+
+              _buildSummaryCards(l10n),
 
               const SizedBox(height: 16),
 
-              _buildSearchBar(),
+              // ==================================================
+              // SEARCH
+              // ==================================================
+
+              _buildSearchBar(l10n),
 
               const SizedBox(height: 14),
 
-              _buildFilters(),
+              // ==================================================
+              // FILTERS
+              // ==================================================
+
+              _buildFilters(filters),
 
               const SizedBox(height: 16),
 
-              _buildProductContent(),
+              // ==================================================
+              // PRODUCTS
+              // ==================================================
+
+              _buildProductContent(l10n),
 
               const SizedBox(height: 100),
             ],
@@ -241,42 +399,34 @@ class _InventoryScreenState extends State<InventoryScreen> {
         ),
       ),
 
-      floatingActionButton:
-          FloatingActionButton.extended(
-        onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  const AddProductFlowScreen(),
-            ),
-          );
+      // ========================================================
+      // ADD PRODUCT
+      // ========================================================
 
-          if (!mounted) return;
-
-          await _loadProducts();
-        },
-        backgroundColor:
-            const Color(0xFFB86A04),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openAddProduct,
+        backgroundColor: accentOrange,
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(30),
         ),
         icon: const Icon(
           Icons.add,
           color: Colors.white,
         ),
-        label: const Text(
-          'Add Product',
-          style: TextStyle(
+        label: Text(
+          l10n.addProduct,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
 
-      bottomNavigationBar:
-          const FarmerBottomNavBar(
+      // ========================================================
+      // BOTTOM NAVIGATION
+      // ========================================================
+
+      bottomNavigationBar: const FarmerBottomNavBar(
         currentIndex: 2,
       ),
     );
@@ -286,26 +436,59 @@ class _InventoryScreenState extends State<InventoryScreen> {
   // SUMMARY CARDS
   // ============================================================
 
-  Widget _buildSummaryCards() {
-    return Row(
+  Widget _buildSummaryCards(
+    AppLocalizations l10n,
+  ) {
+    return Column(
       children: [
-        Expanded(
-          child: _buildSummaryCard(
-            title: 'ACTIVE PRODUCTS',
-            value: _activeProducts.toString(),
-            valueColor: primaryColor,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _buildSummaryCard(
+                title: l10n.activeProducts,
+                value: _activeProducts.toString(),
+                valueColor: primaryColor,
+                icon: Icons.check_circle_outline,
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: _buildSummaryCard(
+                title: l10n.lowStock,
+                value: _lowStockProducts.toString(),
+                valueColor: const Color(0xFFB71C1C),
+                icon: Icons.warning_amber_outlined,
+              ),
+            ),
+          ],
         ),
 
-        const SizedBox(width: 12),
+        const SizedBox(height: 12),
 
-        Expanded(
-          child: _buildSummaryCard(
-            title: 'LOW STOCK',
-            value: _lowStockProducts.toString(),
-            valueColor:
-                const Color(0xFFB71C1C),
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _buildSummaryCard(
+                title: l10n.outOfStock,
+                value: _outOfStockProducts.toString(),
+                valueColor: Colors.red.shade700,
+                icon: Icons.inventory_2_outlined,
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: _buildSummaryCard(
+                title: l10n.totalProducts,
+                value: _products.length.toString(),
+                valueColor: Colors.black87,
+                icon: Icons.grid_view_rounded,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -315,43 +498,67 @@ class _InventoryScreenState extends State<InventoryScreen> {
     required String title,
     required String value,
     required Color valueColor,
+    required IconData icon,
   }) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 16,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
         vertical: 12,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Colors.grey.shade300,
         ),
       ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
-              letterSpacing: 0.5,
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: valueColor.withValues(
+                alpha: 0.08,
+              ),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              size: 19,
+              color: valueColor,
             ),
           ),
 
-          const SizedBox(height: 4),
+          const SizedBox(width: 10),
 
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: valueColor,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+
+                const SizedBox(height: 2),
+
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: valueColor,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -360,20 +567,20 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   // ============================================================
-  // SEARCH
+  // SEARCH BAR
   // ============================================================
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(
+    AppLocalizations l10n,
+  ) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: 14,
       ),
       height: 46,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Colors.grey.shade300,
         ),
@@ -396,22 +603,22 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   _searchQuery = value;
                 });
               },
-              decoration:
-                  InputDecoration(
-                hintText:
-                    'Search your products...',
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: l10n.searchYourProducts,
                 hintStyle: TextStyle(
                   color: Colors.grey[400],
                   fontSize: 14,
                 ),
-                border:
-                    InputBorder.none,
+                border: InputBorder.none,
+                isDense: true,
               ),
             ),
           ),
 
           if (_searchQuery.isNotEmpty)
             IconButton(
+              tooltip: l10n.clearSearch,
               icon: const Icon(
                 Icons.clear,
                 size: 18,
@@ -433,53 +640,47 @@ class _InventoryScreenState extends State<InventoryScreen> {
   // FILTERS
   // ============================================================
 
-  Widget _buildFilters() {
+  Widget _buildFilters(
+    List<String> filters,
+  ) {
     return SizedBox(
       height: 38,
       child: ListView.separated(
-        scrollDirection:
-            Axis.horizontal,
-        itemCount: _filters.length,
-        separatorBuilder:
-            (_, _) =>
-                const SizedBox(width: 8),
-        itemBuilder:
-            (context, index) {
+        scrollDirection: Axis.horizontal,
+        itemCount: filters.length,
+        separatorBuilder: (_, _) =>
+            const SizedBox(width: 8),
+        itemBuilder: (context, index) {
           final isSelected =
-              _selectedFilterIndex ==
-                  index;
+              _selectedFilterIndex == index;
 
           return GestureDetector(
             onTap: () {
               setState(() {
-                _selectedFilterIndex =
-                    index;
+                _selectedFilterIndex = index;
               });
             },
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(
+            child: AnimatedContainer(
+              duration: const Duration(
+                milliseconds: 180,
+              ),
+              padding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 8,
               ),
-              decoration:
-                  BoxDecoration(
+              decoration: BoxDecoration(
                 color: isSelected
                     ? primaryColor
                     : Colors.grey[200],
-                borderRadius:
-                    BorderRadius.circular(
-                  20,
-                ),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                _filters[index],
+                filters[index],
                 style: TextStyle(
                   color: isSelected
                       ? Colors.white
                       : Colors.grey[800],
-                  fontWeight:
-                      FontWeight.w600,
+                  fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
               ),
@@ -494,136 +695,236 @@ class _InventoryScreenState extends State<InventoryScreen> {
   // PRODUCT CONTENT
   // ============================================================
 
-  Widget _buildProductContent() {
+  Widget _buildProductContent(
+    AppLocalizations l10n,
+  ) {
+    // ----------------------------------------------------------
+    // LOADING
+    // ----------------------------------------------------------
+
     if (_isLoading) {
       return const Padding(
-        padding:
-            EdgeInsets.only(top: 80),
+        padding: EdgeInsets.only(
+          top: 80,
+        ),
         child: Center(
-          child:
-              CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+            color: primaryColor,
+          ),
         ),
       );
     }
 
+    // ----------------------------------------------------------
+    // ERROR
+    // ----------------------------------------------------------
+
     if (_error != null) {
-      return _buildErrorState();
+      return _buildErrorState(l10n);
     }
 
-    final products =
-        _filteredProducts;
+    // ----------------------------------------------------------
+    // FILTERED PRODUCTS
+    // ----------------------------------------------------------
+
+    final products = _filteredProducts;
+
+    // ----------------------------------------------------------
+    // EMPTY
+    // ----------------------------------------------------------
 
     if (products.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(l10n);
     }
+
+    // ----------------------------------------------------------
+    // LIST
+    // ----------------------------------------------------------
 
     return Column(
       children: products.map((product) {
         final id = product['id']?.toString();
 
-        return FarmerProductCard(
-          product: product,
+        return Padding(
+          padding: const EdgeInsets.only(
+            bottom: 14,
+          ),
+          child: FarmerProductCard(
+            product: product,
 
-          // View details
-          onTap: () {
-            if (id == null) return;
+            // ==================================================
+            // VIEW DETAILS
+            // ==================================================
 
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    FarmerProductDetailScreen(
-                  product: product,
+            onTap: () async {
+              if (id == null) {
+                return;
+              }
+
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      FarmerProductDetailScreen(
+                    product: product,
+                  ),
                 ),
-              ),
-            );
-          },
+              );
 
-          // Edit
-          onEdit: () async {
-            if (id == null) return;
+              if (!mounted) {
+                return;
+              }
 
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    EditProductScreen(
-                  product: product,
+              await _loadProducts();
+            },
+
+            // ==================================================
+            // EDIT
+            // ==================================================
+
+            onEdit: () async {
+              if (id == null) {
+                return;
+              }
+
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      EditProductScreen(
+                    product: product,
+                  ),
                 ),
-              ),
-            );
+              );
 
-            if (!mounted) return;
+              if (!mounted) {
+                return;
+              }
 
-            await _loadProducts();
-          },
+              await _loadProducts();
+            },
 
-          // Delete
-          onDelete: () {
-            _confirmDelete(product);
-          },
+            // ==================================================
+            // DELETE
+            // ==================================================
 
-          // Available toggle
-          onAvailabilityChanged: (value) {
-            _toggleAvailability(
-              product,
-              value,
-            );
-          },
+            onDelete: () {
+              _confirmDelete(
+                product,
+                l10n,
+              );
+            },
+
+            // ==================================================
+            // AVAILABILITY
+            // ==================================================
+
+            onAvailabilityChanged: (value) {
+              _toggleAvailability(
+                product,
+                value,
+                l10n,
+              );
+            },
+          ),
         );
       }).toList(),
     );
   }
 
+  // ============================================================
+  // ADD PRODUCT
+  // ============================================================
 
+  Future<void> _openAddProduct() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AddProductFlowScreen(),
+      ),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    await _loadProducts();
+  }
 
   // ============================================================
-  // TOGGLE AVAILABLE
+  // TOGGLE AVAILABILITY
   // ============================================================
 
   Future<void> _toggleAvailability(
     Map<String, dynamic> product,
     bool value,
+    AppLocalizations l10n,
   ) async {
-    final id =
-        product['id']?.toString();
+    final id = product['id']?.toString();
 
-    if (id == null) return;
+    if (id == null || id.isEmpty) {
+      return;
+    }
+
+    final oldValue = _productIsAvailable(product);
+
+    // ----------------------------------------------------------
+    // OPTIMISTIC UPDATE
+    // ----------------------------------------------------------
+
+    setState(() {
+      product['isAvailable'] = value;
+    });
 
     try {
-      await ProductService
-          .updateProduct(
+      await ProductService.updateProduct(
         productId: id,
         data: {
           'isAvailable': value,
         },
       );
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
-      setState(() {
-        product['isAvailable'] =
-            value;
-      });
+      ScaffoldMessenger.of(context)
+          .hideCurrentSnackBar();
 
       ScaffoldMessenger.of(context)
           .showSnackBar(
         SnackBar(
+          behavior: SnackBarBehavior.floating,
           content: Text(
             value
-                ? 'Product is now available'
-                : 'Product is now unavailable',
+                ? l10n.productIsNowAvailable
+                : l10n.productIsNowUnavailable,
           ),
         ),
       );
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
+
+      // --------------------------------------------------------
+      // ROLLBACK
+      // --------------------------------------------------------
+
+      setState(() {
+        product['isAvailable'] = oldValue;
+      });
+
+      ScaffoldMessenger.of(context)
+          .hideCurrentSnackBar();
 
       ScaffoldMessenger.of(context)
           .showSnackBar(
         SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red.shade700,
           content: Text(
-            'Failed to update product: $e',
+            'Failed to update availability: $e',
           ),
         ),
       );
@@ -631,32 +932,59 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   // ============================================================
-  // DELETE
+  // DELETE PRODUCT
   // ============================================================
 
   Future<void> _confirmDelete(
     Map<String, dynamic> product,
+    AppLocalizations l10n,
   ) async {
-    final id =
-        product['id']?.toString();
+    final id = product['id']?.toString();
 
-    if (id == null) return;
+    if (id == null || id.isEmpty) {
+      return;
+    }
 
     final name =
-        product['name']?.toString() ??
-            'this product';
+        product['name']
+                    ?.toString()
+                    .trim()
+                    .isNotEmpty ==
+                true
+            ? product['name'].toString().trim()
+            : 'this product';
 
-    final confirmed =
-        await showDialog<bool>(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text(
-            'Delete Product?',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
+
+          // ----------------------------------------------------
+          // TITLE
+          // ----------------------------------------------------
+
+          title: Text(
+            l10n.deleteProduct,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          // ----------------------------------------------------
+          // CONFIRMATION
+          // ----------------------------------------------------
+
           content: Text(
-            'Are you sure you want to delete "$name"? This action cannot be undone.',
+            l10n.deleteProductConfirmation(name),
           ),
+
+          // ----------------------------------------------------
+          // ACTIONS
+          // ----------------------------------------------------
+
           actions: [
             TextButton(
               onPressed: () {
@@ -665,17 +993,19 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   false,
                 );
               },
-              child: const Text(
-                'Cancel',
+              child: Text(
+                l10n.cancel,
               ),
             ),
+
             ElevatedButton(
-              style:
-                  ElevatedButton.styleFrom(
-                backgroundColor:
-                    Colors.red,
-                foregroundColor:
-                    Colors.white,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               onPressed: () {
                 Navigator.pop(
@@ -683,8 +1013,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   true,
                 );
               },
-              child: const Text(
-                'Delete',
+              child: Text(
+                l10n.delete,
               ),
             ),
           ],
@@ -696,12 +1026,18 @@ class _InventoryScreenState extends State<InventoryScreen> {
       return;
     }
 
+    // ----------------------------------------------------------
+    // DELETE FROM BACKEND
+    // ----------------------------------------------------------
+
     try {
       await ProductService.deleteProduct(
         productId: id,
       );
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         _products.removeWhere(
@@ -711,19 +1047,30 @@ class _InventoryScreenState extends State<InventoryScreen> {
       });
 
       ScaffoldMessenger.of(context)
-          .showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Product deleted successfully',
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
+          .hideCurrentSnackBar();
 
       ScaffoldMessenger.of(context)
           .showSnackBar(
         SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            l10n.productDeletedSuccessfully,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context)
+          .hideCurrentSnackBar();
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red.shade700,
           content: Text(
             'Failed to delete product: $e',
           ),
@@ -731,84 +1078,127 @@ class _InventoryScreenState extends State<InventoryScreen> {
       );
     }
   }
-  
+
   // ============================================================
-  // EMPTY
+  // EMPTY STATE
   // ============================================================
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(
+    AppLocalizations l10n,
+  ) {
+    final hasFilters =
+        _searchQuery.isNotEmpty ||
+        _selectedFilterIndex != 0;
+
     return Padding(
-      padding:
-          const EdgeInsets.only(
-        top: 80,
+      padding: const EdgeInsets.only(
+        top: 70,
       ),
       child: Center(
         child: Column(
           children: [
-            Icon(
-              Icons
-                  .inventory_2_outlined,
-              size: 70,
-              color: Colors.grey[400],
-            ),
-
-            const SizedBox(
-              height: 16,
-            ),
-
-            const Text(
-              'No products listed yet',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight:
-                    FontWeight.bold,
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(
+                  alpha: 0.08,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                hasFilters
+                    ? Icons.search_off
+                    : Icons.inventory_2_outlined,
+                size: 45,
+                color: primaryColor.withValues(
+                  alpha: 0.65,
+                ),
               ),
             ),
 
-            const SizedBox(
-              height: 6,
-            ),
+            const SizedBox(height: 18),
+
+            // --------------------------------------------------
+            // EMPTY TITLE
+            // --------------------------------------------------
 
             Text(
-              'Add your first product to start selling to restaurants.',
-              textAlign:
-                  TextAlign.center,
+              hasFilters
+                  ? l10n.noMatchingProducts
+                  : l10n.noProductsListedYet,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            // --------------------------------------------------
+            // EMPTY DESCRIPTION
+            // --------------------------------------------------
+
+            Text(
+              hasFilters
+                  ? l10n.tryChangingSearchFilter
+                  : l10n.addFirstProductDescription,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.grey[600],
+                fontSize: 13,
               ),
             ),
 
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
 
-            ElevatedButton.icon(
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        const AddProductFlowScreen(),
+            // --------------------------------------------------
+            // CLEAR FILTERS
+            // --------------------------------------------------
+
+            if (hasFilters)
+              OutlinedButton.icon(
+                onPressed: () {
+                  _searchController.clear();
+
+                  setState(() {
+                    _searchQuery = '';
+                    _selectedFilterIndex = 0;
+                  });
+                },
+                icon: const Icon(
+                  Icons.clear,
+                ),
+                label: Text(
+                  l10n.clearFilters,
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primaryColor,
+                  side: const BorderSide(
+                    color: primaryColor,
                   ),
-                );
+                ),
+              )
 
-                if (!mounted) return;
+            // --------------------------------------------------
+            // ADD PRODUCT
+            // --------------------------------------------------
 
-                await _loadProducts();
-              },
-              icon:
-                  const Icon(Icons.add),
-              label: const Text(
-                'Add Product',
+            else
+              ElevatedButton.icon(
+                onPressed: _openAddProduct,
+                icon: const Icon(
+                  Icons.add,
+                ),
+                label: Text(
+                  l10n.addProduct,
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                ),
               ),
-              style:
-                  ElevatedButton.styleFrom(
-                backgroundColor:
-                    primaryColor,
-                foregroundColor:
-                    Colors.white,
-              ),
-            ),
           ],
         ),
       ),
@@ -816,349 +1206,87 @@ class _InventoryScreenState extends State<InventoryScreen> {
   }
 
   // ============================================================
-  // ERROR
+  // ERROR STATE
   // ============================================================
 
-  Widget _buildErrorState() {
+  Widget _buildErrorState(
+    AppLocalizations l10n,
+  ) {
     return Padding(
-      padding:
-          const EdgeInsets.only(
+      padding: const EdgeInsets.only(
         top: 60,
       ),
       child: Center(
         child: Column(
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 60,
-              color: Colors.red,
-            ),
-
-            const SizedBox(
-              height: 12,
-            ),
-
-            const Text(
-              'Unable to load products',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight:
-                    FontWeight.bold,
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(
+                  alpha: 0.08,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline,
+                size: 45,
+                color: Colors.red,
               ),
             ),
 
-            const SizedBox(
-              height: 8,
-            ),
+            const SizedBox(height: 16),
+
+            // --------------------------------------------------
+            // ERROR TITLE
+            // --------------------------------------------------
 
             Text(
-              _error ?? 'Unknown error',
-              textAlign:
-                  TextAlign.center,
+              l10n.unableToLoadProducts,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // --------------------------------------------------
+            // ERROR MESSAGE
+            // --------------------------------------------------
+
+            Text(
+              _error ?? l10n.unknownErrorOccurred,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.grey[700],
                 fontSize: 13,
               ),
             ),
 
-            const SizedBox(
-              height: 16,
-            ),
+            const SizedBox(height: 18),
 
-            ElevatedButton(
-              onPressed:
-                  _loadProducts,
-              child: const Text(
-                'Try Again',
+            // --------------------------------------------------
+            // TRY AGAIN
+            // --------------------------------------------------
+
+            ElevatedButton.icon(
+              onPressed: _loadProducts,
+              icon: const Icon(
+                Icons.refresh,
+              ),
+              label: Text(
+                l10n.tryAgain,
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                elevation: 0,
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-// ================================================================
-// EDIT PRODUCT DIALOG
-// ================================================================
-
-class _EditProductDialog extends StatefulWidget {
-  final Map<String, dynamic> product;
-
-  final Future<void> Function({
-    required String name,
-    required double price,
-    required double quantity,
-    required String description,
-  }) onSave;
-
-  const _EditProductDialog({
-    required this.product,
-    required this.onSave,
-  });
-
-  @override
-  State<_EditProductDialog> createState() =>
-      _EditProductDialogState();
-}
-
-class _EditProductDialogState
-    extends State<_EditProductDialog> {
-  late final TextEditingController
-      _nameController;
-
-  late final TextEditingController
-      _priceController;
-
-  late final TextEditingController
-      _quantityController;
-
-  late final TextEditingController
-      _descriptionController;
-
-  bool _isSaving = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _nameController =
-        TextEditingController(
-      text:
-          widget.product['name']
-                  ?.toString() ??
-              '',
-    );
-
-    _priceController =
-        TextEditingController(
-      text:
-          widget.product['price']
-                  ?.toString() ??
-              '',
-    );
-
-    _quantityController =
-        TextEditingController(
-      text:
-          widget.product['quantity']
-                  ?.toString() ??
-              '',
-    );
-
-    _descriptionController =
-        TextEditingController(
-      text:
-          widget.product['description']
-                  ?.toString() ??
-              '',
-    );
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _priceController.dispose();
-    _quantityController.dispose();
-    _descriptionController.dispose();
-
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    final name =
-        _nameController.text.trim();
-
-    final price = double.tryParse(
-      _priceController.text.trim(),
-    );
-
-    final quantity = double.tryParse(
-      _quantityController.text.trim(),
-    );
-
-    final description =
-        _descriptionController.text.trim();
-
-    if (name.isEmpty ||
-        price == null ||
-        quantity == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please enter valid product information.',
-          ),
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _isSaving = true;
-    });
-
-    try {
-      await widget.onSave(
-        name: name,
-        price: price,
-        quantity: quantity,
-        description: description,
-      );
-
-      if (!mounted) return;
-
-      Navigator.pop(
-        context,
-        true,
-      );
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        _isSaving = false;
-      });
-
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to update product: $e',
-          ),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title:
-          const Text('Edit Product'),
-
-      content:
-          SingleChildScrollView(
-        child: Column(
-          mainAxisSize:
-              MainAxisSize.min,
-          children: [
-            TextField(
-              controller:
-                  _nameController,
-              decoration:
-                  const InputDecoration(
-                labelText:
-                    'Product Name',
-                border:
-                    OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(
-              height: 12,
-            ),
-
-            TextField(
-              controller:
-                  _priceController,
-              keyboardType:
-                  const TextInputType
-                      .numberWithOptions(
-                decimal: true,
-              ),
-              decoration:
-                  const InputDecoration(
-                labelText: 'Price',
-                prefixText: '\$ ',
-                border:
-                    OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(
-              height: 12,
-            ),
-
-            TextField(
-              controller:
-                  _quantityController,
-              keyboardType:
-                  const TextInputType
-                      .numberWithOptions(
-                decimal: true,
-              ),
-              decoration:
-                  const InputDecoration(
-                labelText:
-                    'Quantity',
-                suffixText: ' kg',
-                border:
-                    OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(
-              height: 12,
-            ),
-
-            TextField(
-              controller:
-                  _descriptionController,
-              maxLines: 3,
-              decoration:
-                  const InputDecoration(
-                labelText:
-                    'Description',
-                border:
-                    OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-      ),
-
-      actions: [
-        TextButton(
-          onPressed: _isSaving
-              ? null
-              : () {
-                  Navigator.pop(
-                    context,
-                    false,
-                  );
-                },
-          child:
-              const Text('Cancel'),
-        ),
-
-        ElevatedButton(
-          style:
-              ElevatedButton.styleFrom(
-            backgroundColor:
-                _InventoryScreenState
-                    .primaryColor,
-            foregroundColor:
-                Colors.white,
-          ),
-          onPressed:
-              _isSaving ? null : _save,
-          child: _isSaving
-              ? const SizedBox(
-                  height: 18,
-                  width: 18,
-                  child:
-                      CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color:
-                        Colors.white,
-                  ),
-                )
-              : const Text(
-                  'Save Changes',
-                ),
-        ),
-      ],
     );
   }
 }

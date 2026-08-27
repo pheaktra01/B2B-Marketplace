@@ -4,6 +4,7 @@ import 'package:mobile/features/auth/screens/forgot_password_screen.dart';
 import 'package:mobile/features/auth/screens/get_started_screen.dart';
 import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
 import 'package:mobile/features/restaurant/screens/home_screen.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -31,7 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Shared Brand Design Tokens
+    final l10n = AppLocalizations.of(context)!;
+
     const primaryGreen = Color(0xFF156D27);
     const textDark = Color(0xFF0F172A);
     const textMuted = Color(0xFF475569);
@@ -43,7 +45,6 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // Screen Breakpoint Checks
             final isDesktopOrTablet = constraints.maxWidth > 600;
 
             return Center(
@@ -68,30 +69,41 @@ class _LoginScreenState extends State<LoginScreen> {
                                   offset: const Offset(0, 10),
                                 ),
                               ],
-                              border: Border.all(color: borderColor, width: 0.5),
+                              border: Border.all(
+                                color: borderColor,
+                                width: 0.5,
+                              ),
                             )
                           : null,
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(isDesktopOrTablet ? 24 : 0),
+                        borderRadius: BorderRadius.circular(
+                          isDesktopOrTablet ? 24 : 0,
+                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Header + Form Content
                             Padding(
-                              padding: EdgeInsets.all(isDesktopOrTablet ? 32.0 : 24.0),
+                              padding: EdgeInsets.all(
+                                isDesktopOrTablet ? 32.0 : 24.0,
+                              ),
                               child: Form(
                                 key: _formKey,
-                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                   children: [
-                                    // --- Navigation Back Button ---
+                                    // Back button
                                     Row(
                                       children: [
                                         Material(
-                                          color: isDesktopOrTablet ? bgLight : Colors.white,
+                                          color: isDesktopOrTablet
+                                              ? bgLight
+                                              : Colors.white,
                                           shape: const CircleBorder(),
-                                          elevation: isDesktopOrTablet ? 0 : 2,
+                                          elevation:
+                                              isDesktopOrTablet ? 0 : 2,
                                           child: IconButton(
                                             icon: const Icon(
                                               Icons.arrow_back_ios_new,
@@ -102,7 +114,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                               Navigator.pushReplacement(
                                                 context,
                                                 MaterialPageRoute(
-                                                  builder: (context) => const GetStartedScreen(),
+                                                  builder: (context) =>
+                                                      const GetStartedScreen(),
                                                 ),
                                               );
                                             },
@@ -113,19 +126,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                     const SizedBox(height: 16),
 
-                                    // --- Logo & Brand Identity ---
+                                    // Logo & Brand
                                     Center(
                                       child: Column(
                                         children: [
                                           CircleAvatar(
                                             radius: 60,
-                                            backgroundColor: primaryGreen.withValues(alpha: 0.1),
-                                            backgroundImage: const AssetImage('assets/logo01.png'),
+                                            backgroundColor:
+                                                primaryGreen.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                            backgroundImage:
+                                                const AssetImage(
+                                              'assets/logo01.png',
+                                            ),
                                           ),
                                           const SizedBox(height: 12),
-                                          const Text(
-                                            'Farmers Market',
-                                            style: TextStyle(
+                                          Text(
+                                            l10n.farmersMarket,
+                                            style: const TextStyle(
                                               fontSize: 30,
                                               fontWeight: FontWeight.bold,
                                               color: primaryGreen,
@@ -133,12 +152,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                             ),
                                           ),
                                           const SizedBox(height: 8),
-                                          const Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0,
+                                            ),
                                             child: Text(
-                                              'Fresh agricultural products marketplace for professional chefs.',
+                                              l10n.farmersMarketDescription,
                                               textAlign: TextAlign.center,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                 fontSize: 14,
                                                 color: textMuted,
                                                 height: 1.3,
@@ -148,70 +169,96 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ],
                                       ),
                                     ),
+
                                     const SizedBox(height: 28),
 
-                                    // --- Section Heading ---
-                                    const Center(
+                                    // Welcome Back
+                                    Center(
                                       child: Text(
-                                        'Welcome Back',
-                                        style: TextStyle(
+                                        l10n.welcomeBack,
+                                        style: const TextStyle(
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold,
                                           color: textDark,
                                         ),
                                       ),
                                     ),
+
                                     const SizedBox(height: 24),
 
-                                    // --- Phone Number Input Field ---
-                                    const Text(
-                                      'Phone Number',
-                                      style: TextStyle(
+                                    // Phone Number
+                                    Text(
+                                      l10n.phoneNumber,
+                                      style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                         color: textDark,
                                       ),
                                     ),
+
                                     const SizedBox(height: 8),
+
                                     TextFormField(
                                       controller: _phoneController,
                                       keyboardType: TextInputType.phone,
                                       validator: (value) {
-                                        if (value == null || value.trim().isEmpty) {
-                                          return 'Please enter phone number';
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return l10n
+                                              .pleaseEnterPhoneNumber;
                                         }
 
-                                        if (!RegExp(r'^(0|\+855)\d{8,9}$').hasMatch(value.trim())) {
-                                          return 'Invalid phone number';
+                                        if (!RegExp(
+                                          r'^(0|\+855)\d{8,9}$',
+                                        ).hasMatch(value.trim())) {
+                                          return l10n.invalidPhoneNumber;
                                         }
 
                                         return null;
                                       },
                                       decoration: InputDecoration(
                                         hintText: '+855123456789',
-                                        hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                        hintStyle: const TextStyle(
+                                          color: Color(0xFF94A3B8),
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 16,
+                                        ),
                                         filled: true,
-                                        fillColor: isDesktopOrTablet ? bgLight : Colors.white,
+                                        fillColor: isDesktopOrTablet
+                                            ? bgLight
+                                            : Colors.white,
                                         enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(color: borderColor, width: 1),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                            color: borderColor,
+                                            width: 1,
+                                          ),
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(color: primaryGreen, width: 1.5),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                            color: primaryGreen,
+                                            width: 1.5,
+                                          ),
                                         ),
                                       ),
                                     ),
+
                                     const SizedBox(height: 20),
 
-                                    // --- Password Label with Forgot Action ---
+                                    // Password + Forgot Password
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        const Text(
-                                          'Password',
-                                          style: TextStyle(
+                                        Text(
+                                          l10n.password,
+                                          style: const TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
                                             color: textDark,
@@ -222,13 +269,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                             Navigator.pushReplacement(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => const ForgotPasswordScreen(),
+                                                builder: (context) =>
+                                                    const ForgotPasswordScreen(),
                                               ),
                                             );
                                           },
-                                          child: const Text(
-                                            'Forgot Password?',
-                                            style: TextStyle(
+                                          child: Text(
+                                            l10n.forgotPassword,
+                                            style: const TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
                                               color: primaryGreen,
@@ -237,106 +285,163 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                       ],
                                     ),
+
                                     const SizedBox(height: 8),
 
-                                    // --- Password Input Field ---
+                                    // Password
                                     TextFormField(
                                       controller: _passwordController,
                                       obscureText: _obscurePassword,
                                       validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter password';
+                                        if (value == null ||
+                                            value.isEmpty) {
+                                          return l10n.pleaseEnterPassword;
                                         }
 
                                         if (value.length < 6) {
-                                          return 'Password must be at least 6 characters';
+                                          return l10n.passwordMinLength;
                                         }
 
                                         return null;
                                       },
                                       decoration: InputDecoration(
                                         hintText: '••••••••',
-                                        hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                        hintStyle: const TextStyle(
+                                          color: Color(0xFF94A3B8),
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 16,
+                                        ),
                                         filled: true,
-                                        fillColor: isDesktopOrTablet ? bgLight : Colors.white,
-                                        prefixIcon: const Icon(Icons.lock_outline, color: textMuted, size: 20),
+                                        fillColor: isDesktopOrTablet
+                                            ? bgLight
+                                            : Colors.white,
+                                        prefixIcon: const Icon(
+                                          Icons.lock_outline,
+                                          color: textMuted,
+                                          size: 20,
+                                        ),
                                         suffixIcon: IconButton(
                                           icon: Icon(
-                                            _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                            _obscurePassword
+                                                ? Icons.visibility_outlined
+                                                : Icons
+                                                    .visibility_off_outlined,
                                             color: textMuted,
                                             size: 20,
                                           ),
                                           onPressed: () {
                                             setState(() {
-                                              _obscurePassword = !_obscurePassword;
+                                              _obscurePassword =
+                                                  !_obscurePassword;
                                             });
                                           },
                                         ),
                                         enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(color: borderColor, width: 1),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                            color: borderColor,
+                                            width: 1,
+                                          ),
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(color: primaryGreen, width: 1.5),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                            color: primaryGreen,
+                                            width: 1.5,
+                                          ),
                                         ),
                                       ),
                                     ),
+
                                     const SizedBox(height: 24),
 
-                                    // --- Login Button ---
+                                    // Login Button
                                     SizedBox(
                                       width: double.infinity,
                                       height: 52,
                                       child: ElevatedButton(
-                                        onPressed: _isLoading ? null : _handleLogin,
+                                        onPressed: _isLoading
+                                            ? null
+                                            : _handleLogin,
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: primaryGreen,
                                           foregroundColor: Colors.white,
                                           elevation: 0,
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
                                           ),
                                         ),
-                                        child: const Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              'Log In',
-                                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                              l10n.login,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                            SizedBox(width: 6),
-                                            Icon(Icons.chevron_right, size: 20),
+                                            const SizedBox(width: 6),
+                                            const Icon(
+                                              Icons.chevron_right,
+                                              size: 20,
+                                            ),
                                           ],
                                         ),
                                       ),
                                     ),
+
                                     const SizedBox(height: 28),
 
-                                    // --- Custom "Or continue with" Divider ---
-                                    const Row(
+                                    // Divider
+                                    Row(
                                       children: [
-                                        Expanded(child: Divider(color: borderColor, thickness: 1)),
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 16.0),
-                                          child: Text(
-                                            'Or continue with',
-                                            style: TextStyle(color: textMuted, fontSize: 13),
+                                        const Expanded(
+                                          child: Divider(
+                                            color: borderColor,
+                                            thickness: 1,
                                           ),
                                         ),
-                                        Expanded(child: Divider(color: borderColor, thickness: 1)),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.symmetric(
+                                            horizontal: 16.0,
+                                          ),
+                                          child: Text(
+                                            l10n.orContinueWith,
+                                            style: const TextStyle(
+                                              color: textMuted,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                        const Expanded(
+                                          child: Divider(
+                                            color: borderColor,
+                                            thickness: 1,
+                                          ),
+                                        ),
                                       ],
                                     ),
+
                                     const SizedBox(height: 20),
 
-                                    // --- Social Sign-In Row ---
+                                    // Social Sign-In placeholder
                                     Row(
                                       children: [
                                         Expanded(
                                           child: ConstrainedBox(
-                                            constraints: const BoxConstraints(minHeight: 50),
-                                            // Add social sign-in buttons here if needed
+                                            constraints:
+                                                const BoxConstraints(
+                                              minHeight: 50,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -365,6 +470,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+
+    final l10n = AppLocalizations.of(context)!;
 
     setState(() {
       _isLoading = true;
@@ -419,8 +526,8 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Unknown user role'),
+            SnackBar(
+              content: Text(l10n.unknownUserRole),
             ),
           );
         }
@@ -430,7 +537,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              data['message']?.toString() ?? 'Login failed',
+              data['message']?.toString() ?? l10n.loginFailed,
             ),
           ),
         );
@@ -442,7 +549,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Unable to login: $error'),
+          content: Text(
+            '${l10n.unableToLogin}: $error',
+          ),
         ),
       );
     } finally {

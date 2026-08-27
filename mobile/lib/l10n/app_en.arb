@@ -5,5 +5,429 @@
   "language": "Language",
   "chooseLanguage": "Choose Your Language",
   "selectLanguageDescription": "Select your language to use\nPsarKasekor",
-  "continueButton": "Continue"
+  "continueButton": "Continue",
+
+  "getStartedTitle": "Direct from Farm to Your Kitchen",
+  "getStartedDescription": "Connect with local farmers to get the freshest ingredients for your kitchen.",
+  "getStarted": "Get Started",
+  "trustedChefs": "Trusted by over 500 top chefs",
+  "termsPrivacy": "By continuing, you agree to our Terms and Privacy Policy",
+
+  "farmersMarket": "Farmers Market",
+  "farmersMarketDescription": "Fresh agricultural products marketplace for professional chefs.",
+  "welcomeBack": "Welcome Back",
+  "phoneNumber": "Phone Number",
+  "pleaseEnterPhoneNumber": "Please enter phone number",
+  "invalidPhoneNumber": "Invalid phone number",
+  "password": "Password",
+  "forgotPassword": "Forgot Password?",
+  "pleaseEnterPassword": "Please enter password",
+  "passwordMinLength": "Password must be at least 6 characters",
+  "loginFailed": "Login failed",
+  "unknownUserRole": "Unknown user role",
+  "unableToLogin": "Unable to login",
+  "orContinueWith": "Or continue with",
+
+  "goodMorning": "Good Morning, {name}",
+  "@goodMorning": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "dashboardDescription": "Connecting your harvest to 14 restaurant partners today.",
+  "totalSales": "Total Sales",
+  "activeOrders": "Active Orders",
+  "productsListed": "Products Listed",
+  "monthlyGrowth": "Monthly Growth",
+  "quickActions": "Quick Actions",
+  "addProduct": "Add Product",
+  "orders": "Orders",
+  "insights": "Insights",
+  "messages": "Messages",
+  "inventoryAlert": "Inventory Alert",
+  "organicTomatoAlmostSoldOut": "Organic Tomato is almost sold out (Only 12 kg left).",
+  "restock": "Restock",
+  "marketOpportunities": "Market Opportunities",
+  "viewAll": "View All",
+  "highDemand": "High Demand",
+  "goodPrice": "Good Price",
+  "demandIncreasing": "Demand Increasing",
+  "recommended": "Recommended",
+  "viewMarketInsights": "View Market Insights",
+  "salesOverview": "Sales Overview",
+  "thisWeeksRevenue": "This Week's Revenue",
+  "growth": "+18% Growth",
+  "mon": "Mon",
+  "tue": "Tue",
+  "wed": "Wed",
+  "thu": "Thu",
+  "fri": "Fri",
+  "sat": "Sat",
+  "sun": "Sun",
+  "manageOrders": "Manage Orders",
+  "pending": "Pending",
+  "approved": "Approved",
+  "myProducts": "My Products",
+  "lowStock": "Low Stock",
+  "inStock": "In Stock",
+  "kgLeft": "{quantity} kg left",
+  "@kgLeft": {
+    "placeholders": {
+      "quantity": {}
+    }
+  },
+
+  "dashboard": "Dashboard",
+  "orders": "Orders",
+  "inventory": "Inventory",
+  "chat": "Chat",
+  "profile": "Profile",
+
+  "addProduct": "Add Product",
+  "priceAndInventory": "Price & Inventory",
+  "deliveryAndReview": "Delivery & Review",
+
+  "stepOf": "Step {step} of {total}",
+  "@stepOf": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+
+  "percentCompleted": "{percent}% Completed",
+  "@percentCompleted": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+
+  "productPhotos": "PRODUCT PHOTOS",
+  "photosCount": "{count}/{max} photos",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+
+  "productName": "Product Name",
+  "productNameHint": "e.g. Fresh Organic Bok Choy",
+
+  "category": "Category",
+  "vegetables": "Vegetables",
+  "fruits": "Fruits",
+  "herbsAndSpices": "Herbs & Spices",
+  "riceAndGrains": "Rice & Grains",
+  "eggsAndDairy": "Eggs & Dairy",
+
+  "productCondition": "Product Condition",
+  "fresh": "Fresh",
+  "standardProduce": "Standard produce",
+  "organic": "Organic",
+  "chemicalFree": "Chemical-free",
+
+  "description": "Description",
+  "descriptionHint": "Describe quality, taste, or harvest details...",
+
+  "sellingPricePerKg": "Selling Price per kg",
+  "perKg": "$ / kg",
+  "availableQuantity": "Available Quantity",
+  "minimumOrder": "Minimum Order",
+  "harvestDate": "Harvest Date",
+  "availableUntil": "Available Until",
+  "selectDate": "Select date",
+
+  "marketRecommendation": "Market Recommendation",
+  "currentRestaurantDemand": "Current restaurant demand",
+  "highDemand": "High 🔥",
+  "typicalMarketPrice": "Typical market price",
+  "recommendedPrice": "Recommended price",
+
+  "useRecommendedPrice": "Use Recommended Price ({price})",
+  "@useRecommendedPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+
+  "locationFarmOrigin": "Location / Farm Origin",
+
+  "phnomPenh": "Phnom Penh",
+  "kandal": "Kandal",
+  "battambang": "Battambang",
+  "siemReap": "Siem Reap",
+  "kampongCham": "Kampong Cham",
+
+  "deliveryMethod": "Delivery Method",
+  "farmerDelivery": "Farmer Delivery",
+  "deliverToBuyer": "Deliver to buyer",
+  "buyerPickup": "Buyer Pickup",
+  "pickupAtFarm": "Pickup at farm",
+  "deliveryFee": "Delivery Fee",
+
+  "productPreview": "PRODUCT PREVIEW",
+  "freshProduce": "Fresh Produce",
+  "yourFarm": "Your Farm",
+
+  "publishProduct": "Publish Product",
+  "nextStep": "Next Step",
+
+  "productPublished": "Product Published!",
+  "productPublishedDescription": "Your product is now available for restaurants in Cambodia to discover and order.",
+  "viewProductListing": "View Product Listing",
+  "backToDashboard": "Back to Dashboard",
+
+  "uploadProductPhotos": "Upload Product Photos",
+  "addUpToFivePhotos": "Add up to 5 photos",
+
+  "addMorePhotos": "Add More Photos ({count}/{max})",
+  "@addMorePhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+
+  "mainPhoto": "Main",
+
+  "uploadAtLeastOnePhoto": "Please upload at least one product photo",
+  "enterProductName": "Please enter a product name",
+  "enterProductDescription": "Please enter a product description",
+  "enterValidSellingPrice": "Please enter a valid selling price",
+  "enterValidQuantity": "Please enter a valid available quantity",
+  "enterValidMinimumOrder": "Please enter a valid minimum order",
+
+  "minimumOrderGreaterThanQuantity": "Minimum order cannot be greater than available quantity",
+  "availableUntilBeforeHarvest": "Available Until cannot be before Harvest Date",
+
+  "enterValidDeliveryFee": "Please enter a valid delivery fee",
+  "failedToSelectImages": "Failed to select images",
+  "failedToPublishProduct": "Failed to publish product",
+
+  "maximumImages": "You can upload a maximum of {max} images",
+  "@maximumImages": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+
+  "onlyMoreImages": "Only {remaining} more image(s) can be added. Maximum is {max}.",
+  "@onlyMoreImages": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+
+  "availableLabel": "Available: ",
+  "available": "Available",
+  "unavailable": "Unavailable",
+  "inCart": "In Cart",
+  "addToCart": "Add to Cart",
+
+  "allOrders": "All Orders",
+  "pending": "Pending",
+  "accepted": "Accepted",
+  "preparing": "Preparing",
+  "active": "Active",
+  "orderManagement": "Order Management",
+  "fiveMinutesAgo": "5 mins ago",
+
+  "heirloomTomatoes": "Heirloom Tomatoes",
+  "babyArugula": "Baby Arugula",
+  "microgreensMix": "Microgreens Mix",
+  "rainbowCarrots": "Rainbow Carrots (Bunch)",
+  "naturalHoney": "Natural Honey",
+  "sourdoughStarterKit": "Sourdough Starter Kit",
+  "butterheadLettuce": "Butterhead Lettuce (30 heads)",
+  "freshMint": "Fresh Mint",
+
+  "more": "more",
+  "cases": "Cases",
+  "items": "Items",
+
+  "delivery": "Delivery",
+  "pickup": "Pickup",
+  "readyForPickup": "Ready for Pickup",
+
+  "decline": "Decline",
+  "accept": "Accept",
+  "startPreparing": "Start Preparing",
+  "markAsReady": "Mark as Ready",
+  "completeOrder": "Complete Order",
+  "ready": "Ready",
+
+  "myProducts": "My Products",
+  "manageProductsDescription": "Manage the products you have listed for restaurants.",
+  "activeProducts": "ACTIVE PRODUCTS",
+  "lowStock": "LOW STOCK",
+  "outOfStock": "OUT OF STOCK",
+  "totalProducts": "TOTAL PRODUCTS",
+  "allItems": "All Items",
+  "vegetables": "Vegetables",
+  "microgreens": "Microgreens",
+  "searchYourProducts": "Search your products...",
+  "clearSearch": "Clear search",
+  "noMatchingProducts": "No matching products",
+  "noProductsListedYet": "No products listed yet",
+  "tryChangingSearchFilter": "Try changing your search or filter.",
+  "addFirstProductDescription": "Add your first product to start selling to restaurants.",
+  "clearFilters": "Clear Filters",
+  "unableToLoadProducts": "Unable to load products",
+  "unknownErrorOccurred": "Unknown error occurred.",
+  "tryAgain": "Try Again",
+  "deleteProduct": "Delete Product?",
+  "deleteProductConfirmation": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+  "@deleteProductConfirmation": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "productDeletedSuccessfully": "Product deleted successfully.",
+  "productIsNowAvailable": "Product is now available.",
+  "productIsNowUnavailable": "Product is now unavailable.",
+  "failedToUpdateAvailability": "Failed to update availability: {error}",
+  "@failedToUpdateAvailability": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "failedToDeleteProduct": "Failed to delete product: {error}",
+  "@failedToDeleteProduct": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+
+  "notifications": "Notifications",
+  "markAllAsRead": "Mark all as read",
+  "today": "TODAY",
+  "newNotifications": "{count} NEW",
+  "newOrder": "New Order #{orderNumber}",
+  "orderMessage": "{restaurantName} ordered {quantity}kg of {productName}.",
+  "viewOrder": "View Order",
+  "decline": "Decline",
+  "messageFromChef": "Message from Chef {chefName}",
+  "chefMessage": "\"Can we increase the delivery quantity for Tuesday? I need an extra 20 crates...\"",
+  "replyNow": "Reply Now",
+  "paymentReceived": "Payment Received",
+  "paymentProcessed": "Your payment of {amount} for {period} has been processed successfully.",
+  "checkBalance": "Check Balance >",
+  "yesterday": "YESTERDAY",
+  "orderDelivered": "Order Delivered",
+  "orderDeliveredMessage": "Order #{orderNumber} was successfully delivered to {restaurantName}.",
+  "viewDetails": "View Details",
+  "systemUpdate": "System Update",
+  "systemUpdateMessage": "Verdant system maintenance complete. The new delivery tracking feature is now available!",
+  "minutesAgo": "{minutes}m ago",
+  "hoursAgo": "{hours}h ago",
+  "orderNumber": "Order #{number}",
+
+  "allMessages": "All Messages",
+  "restaurants": "Restaurants",
+  "deliveries": "Deliveries",
+  "support": "Support",
+  "searchConversations": "Search conversations...",
+
+  "editProfileInfo": "Edit Profile Info",
+  "farmProducerName": "Farm / Producer Name",
+  "location": "Location",
+  "sustainabilityStoryBio": "Sustainability Story / Bio",
+  "cancel": "Cancel",
+  "save": "Save",
+  "profileInformationUpdated": "Profile information updated!",
+  "viewPhoto": "View Photo",
+  "changePhoto": "Change Photo",
+  "avatarUpdated": "Avatar updated!",
+  "coverPhotoUpdated": "Cover photo updated!",
+  "coverPhotoOptions": "Cover Photo Options",
+  "avatarOptions": "Avatar Options",
+  "verifiedProducer": "Verified Producer",
+  "promote": "Promote",
+  "promoteActionTriggered": "Promote Action Triggered",
+  "editProfile": "Edit Profile",
+  "orders": "Orders",
+  "rating": "Rating",
+  "since": "Since",
+  "revenue": "Revenue",
+  "dashboard": "Dashboard",
+  "manageInventory": "Manage Inventory",
+  "viewOrders": "View Orders",
+  "salesAnalytics": "Sales Analytics",
+  "paymentSettings": "Payment Settings",
+  "ourSustainabilityStory": "Our Sustainability Story",
+  "certifiedOrganic": "Certified Organic",
+  "rainwaterIrrigationSystem": "Rainwater Irrigation System",
+  "sameDayLocalDelivery": "Same-Day Local Delivery",
+  "sustainabilityReport": "Sustainability Report",
+  "pesticideFree": "Pesticide Free",
+  "renewableEnergy": "Renewable Energy",
+  "currentOfferings": "Current Offerings",
+  "freshFromOurLocalFarm": "Fresh from our local farm",
+  "allProduce": "All Produce",
+  "vegetables": "Vegetables",
+  "herbsSpices": "Herbs & Spices",
+  "leafyGreens": "Leafy Greens",
+  "inStock": "In Stock",
+  "organic": "Organic",
+  "freshHarvest": "Fresh Harvest",
+
+  "settings": "Settings",
+  "account": "Account",
+  "editProfile": "Edit Profile",
+  "namePhoneNumberLocation": "Name, Phone Number, Location",
+  "security": "Security",
+  "changePassword": "Change Password",
+
+  "preferences": "Preferences",
+  "language": "Language",
+  "khmer": "Khmer",
+  "english": "English",
+
+  "notifications": "Notifications",
+  "receiveMarketAlerts": "Receive market alerts",
+
+  "smsAlerts": "SMS Alerts",
+  "receiveUpdatesViaSms": "Receive updates via SMS",
+
+  "darkMode": "Dark Mode",
+  "switchAppTheme": "Switch app theme",
+
+  "supportAndInfo": "Support & Info",
+  "helpCenter": "Help Center",
+  "privacyPolicy": "Privacy Policy",
+  "aboutApp": "About App",
+  "version210": "Version 2.1.0",
+
+  "logOut": "Log Out",
+  "logoutConfirmation": "Are you sure you want to log out of the app?",
+  "logoutFailed": "Logout failed",
+  "logoutError": "Logout error",
+  "selectLanguage": "Select Language",
+  "cancel": "Cancel"
 }

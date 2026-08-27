@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/l10n/app_localizations.dart';
+
 import 'package:mobile/features/farmer/screens/chat_list_screen.dart';
 import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
 import 'package:mobile/features/farmer/screens/farmer_order_management_screen.dart';
@@ -15,6 +17,8 @@ class FarmerBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       backgroundColor: Colors.white,
@@ -31,53 +35,64 @@ class FarmerBottomNavBar extends StatelessWidget {
           case 0:
             screen = const FarmerDashboardScreen();
             break;
+
           case 1:
             screen = const FarmerOrderManagementScreen();
             break;
+
           case 2:
             screen = const InventoryScreen();
             break;
+
           case 3:
             screen = const ChatListScreen();
             break;
+
           case 4:
             screen = const FarmerProfileScreen();
             break;
+
           default:
             return;
         }
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => screen),
+          MaterialPageRoute(
+            builder: (_) => screen,
+          ),
         );
       },
 
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.storefront_outlined),
-          activeIcon: Icon(Icons.storefront),
-          label: 'Dashboard',
+          icon: const Icon(Icons.storefront_outlined),
+          activeIcon: const Icon(Icons.storefront),
+          label: l10n.dashboard,
         ),
+
         BottomNavigationBarItem(
-          icon: Icon(Icons.assignment_outlined),
-          activeIcon: Icon(Icons.assignment),
-          label: 'Orders',
+          icon: const Icon(Icons.assignment_outlined),
+          activeIcon: const Icon(Icons.assignment),
+          label: l10n.orders,
         ),
+
         BottomNavigationBarItem(
-          icon: Icon(Icons.inventory_2_outlined),
-          activeIcon: Icon(Icons.inventory_2),
-          label: 'Inventory',
+          icon: const Icon(Icons.inventory_2_outlined),
+          activeIcon: const Icon(Icons.inventory_2),
+          label: l10n.inventory,
         ),
+
         BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline),
-          activeIcon: Icon(Icons.chat_bubble),
-          label: 'Chat',
+          icon: const Icon(Icons.chat_bubble_outline),
+          activeIcon: const Icon(Icons.chat_bubble),
+          label: l10n.chat,
         ),
+
         BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          activeIcon: Icon(Icons.person),
-          label: 'Profile',
+          icon: const Icon(Icons.person_outline),
+          activeIcon: const Icon(Icons.person),
+          label: l10n.profile,
         ),
       ],
     );

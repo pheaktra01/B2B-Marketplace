@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/notification/screens/notifications_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/features/product/screens/add_product_screen.dart';
@@ -9,8 +8,7 @@ class FarmerDashboardScreen extends StatefulWidget {
   const FarmerDashboardScreen({super.key});
 
   @override
-  State<FarmerDashboardScreen> createState() =>
-      _FarmerDashboardScreenState();
+  State<FarmerDashboardScreen> createState() => _FarmerDashboardScreenState();
 }
 
 class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
@@ -34,31 +32,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
       // -----------------------------------------------------------------------
       // APP BAR
       // -----------------------------------------------------------------------
-      appBar: FarmerAppBar(
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.notifications_none_rounded,
-              size: 26,
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const NotificationsScreen(),
-                ),
-              );
-            },
-          ),
-          const Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundImage: AssetImage('assets/profile.png'),
-            ),
-          ),
-        ],
-      ),
+      appBar: const FarmerAppBar(),
 
       // -----------------------------------------------------------------------
       // FLOATING ACTION BUTTON
@@ -67,21 +41,13 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => const AddProductFlowScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const AddProductFlowScreen()),
           );
         },
         backgroundColor: accentOrange,
         elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-        icon: const Icon(
-          Icons.add_rounded,
-          color: Colors.white,
-          size: 24,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        icon: const Icon(Icons.add_rounded, color: Colors.white, size: 24),
         label: Text(
           l10n.addProduct,
           style: const TextStyle(
@@ -95,9 +61,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
       // -----------------------------------------------------------------------
       // BOTTOM NAVIGATION
       // -----------------------------------------------------------------------
-      bottomNavigationBar: const FarmerBottomNavBar(
-        currentIndex: 0,
-      ),
+      bottomNavigationBar: const FarmerBottomNavBar(currentIndex: 0),
 
       // -----------------------------------------------------------------------
       // BODY
@@ -105,15 +69,10 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 900,
-              ),
+              constraints: const BoxConstraints(maxWidth: 900),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -235,9 +194,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           decoration: BoxDecoration(
             color: cardBgColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.grey.shade200,
-            ),
+            border: Border.all(color: Colors.grey.shade200),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.03),
@@ -302,10 +259,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
   // 3. QUICK ACTIONS
   // ===========================================================================
 
-  Widget _buildQuickActions(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildQuickActions(BuildContext context, AppLocalizations l10n) {
     final List<Map<String, dynamic>> actions = [
       {
         'label': l10n.addProduct,
@@ -314,9 +268,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         'action': () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => const AddProductFlowScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const AddProductFlowScreen()),
           );
         },
       },
@@ -364,9 +316,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
                   decoration: BoxDecoration(
                     color: cardBgColor,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                    ),
+                    border: Border.all(color: Colors.grey.shade200),
                   ),
                   child: Column(
                     children: [
@@ -406,9 +356,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFFFFF3E0),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFFFE0B2),
-        ),
+        border: Border.all(color: const Color(0xFFFFE0B2)),
       ),
       child: Row(
         children: [
@@ -440,10 +388,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
                 const SizedBox(height: 2),
                 Text(
                   'Organic Tomato is almost sold out (Only 12 kg left).',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[800],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[800]),
                 ),
               ],
             ),
@@ -552,9 +497,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
                 decoration: BoxDecoration(
                   color: cardBgColor,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.grey.shade200,
-                  ),
+                  border: Border.all(color: Colors.grey.shade200),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.02),
@@ -581,8 +524,9 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: (opp['badgeColor'] as Color)
-                                .withValues(alpha: 0.12),
+                            color: (opp['badgeColor'] as Color).withValues(
+                              alpha: 0.12,
+                            ),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -635,10 +579,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           child: OutlinedButton.icon(
             onPressed: () {},
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(
-                color: primaryGreen,
-                width: 1.5,
-              ),
+              side: const BorderSide(color: primaryGreen, width: 1.5),
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -668,25 +609,9 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
   // ===========================================================================
 
   Widget _buildSalesOverviewChart(AppLocalizations l10n) {
-    final List<double> barValues = [
-      50,
-      90,
-      70,
-      130,
-      100,
-      150,
-      120,
-    ];
+    final List<double> barValues = [50, 90, 70, 130, 100, 150, 120];
 
-    final List<String> days = [
-      'Mon',
-      'Tue',
-      'Wed',
-      'Thu',
-      'Fri',
-      'Sat',
-      'Sun',
-    ];
+    final List<String> days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     const double maxDataValue = 150.0;
 
@@ -695,9 +620,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
       decoration: BoxDecoration(
         color: cardBgColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.shade200,
-        ),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -718,10 +641,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
                   ),
                   Text(
                     l10n.thisWeeksRevenue,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
@@ -748,10 +668,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           const SizedBox(height: 20),
           Container(
             height: 180,
-            padding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 8,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             decoration: BoxDecoration(
               color: const Color(0xFFF9FAFB),
               borderRadius: BorderRadius.circular(12),
@@ -759,44 +676,39 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: List.generate(
-                7,
-                (index) {
-                  final isSelected = index == 5;
+              children: List.generate(7, (index) {
+                final isSelected = index == 5;
 
-                  final double barHeight =
-                      (barValues[index] / maxDataValue) * 110;
+                final double barHeight =
+                    (barValues[index] / maxDataValue) * 110;
 
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        width: 22,
-                        height: barHeight,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? primaryGreen
-                              : primaryGreen.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      width: 22,
+                      height: barHeight,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? primaryGreen
+                            : primaryGreen.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        days[index],
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          color: isSelected
-                              ? primaryGreen
-                              : Colors.grey[600],
-                        ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      days[index],
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: isSelected ? primaryGreen : Colors.grey[600],
                       ),
-                    ],
-                  );
-                },
-              ),
+                    ),
+                  ],
+                );
+              }),
             ),
           ),
         ],
@@ -872,9 +784,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
               decoration: BoxDecoration(
                 color: cardBgColor,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.grey.shade200,
-                ),
+                border: Border.all(color: Colors.grey.shade200),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1014,9 +924,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
               decoration: BoxDecoration(
                 color: cardBgColor,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.grey.shade200,
-                ),
+                border: Border.all(color: Colors.grey.shade200),
               ),
               child: Row(
                 children: [
@@ -1069,10 +977,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
                     children: [
                       Text(
                         prod['qty'] as String,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 4),
                       Text(

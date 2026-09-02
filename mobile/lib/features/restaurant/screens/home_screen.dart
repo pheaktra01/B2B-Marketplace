@@ -191,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
               backgroundImage:
-                  AssetImage('assets/profile.png'),
+                  AssetImage('assets/mokoto.jpg'),
             ),
           ),
         ],

@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/constants/api_constants.dart';
-import 'package:mobile/features/cart/screens/cart_screen.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
+import 'package:mobile/features/chat/screens/chat_screen.dart';
+import 'package:mobile/features/chat/services/chat_service.dart';
+import 'package:mobile/features/profile/services/user_service.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Map<String, dynamic> product;
 
-  const ProductDetailScreen({
-    super.key,
-    required this.product,
-  });
+  const ProductDetailScreen({super.key, required this.product});
 
   @override
-  State<ProductDetailScreen> createState() =>
-      _ProductDetailScreenState();
+  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
 }
 
-class _ProductDetailScreenState
-    extends State<ProductDetailScreen> {
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
   static const Color primaryGreen = Color(0xFF135A27);
   static const Color lightGreenBg = Color(0xFFE2F0E5);
   static const Color pageBgColor = Color(0xFFF7F9F8);
@@ -31,25 +28,29 @@ class _ProductDetailScreenState
   bool _isFavorite = false;
 
   final CartService _cartService = CartService();
+  final ChatService _chatService = ChatService();
+  final UserService _userService = UserService();
+
+  String? _publisherName;
+  String? _publisherAvatarUrl;
 
   bool _isAddingToCart = false;
   bool _isAddedToCart = false;
 
   bool _isInCart = false;
   bool _isCheckingCart = true;
+  bool _isContactingFarmer = false;
 
   // ==========================================================
   // PRODUCT DATA
   // ==========================================================
 
   String get _productName {
-    return widget.product['name']?.toString() ??
-        'Unnamed Product';
+    return widget.product['name']?.toString() ?? 'Unnamed Product';
   }
 
   String get _description {
-    final value =
-        widget.product['description']?.toString();
+    final value = widget.product['description']?.toString();
 
     if (value == null || value.trim().isEmpty) {
       return 'No description available.';
@@ -67,6 +68,11 @@ class _ProductDetailScreenState
   }
 
   String get _farmName {
+    final publisher = widget.product['publisher'];
+    if (publisher is Map && publisher['name'] != null) {
+      return publisher['name'].toString();
+    }
+
     return widget.product['farmerName']?.toString() ??
         widget.product['farmName']?.toString() ??
         widget.product['farmer']?['name']?.toString() ??
@@ -92,10 +98,7 @@ class _ProductDetailScreenState
       return value.toDouble();
     }
 
-    return double.tryParse(
-          value?.toString() ?? '',
-        ) ??
-        0;
+    return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 
   // ==========================================================
@@ -109,10 +112,7 @@ class _ProductDetailScreenState
       return value.toDouble();
     }
 
-    return double.tryParse(
-          value?.toString() ?? '',
-        ) ??
-        0;
+    return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 
   // ==========================================================
@@ -126,10 +126,7 @@ class _ProductDetailScreenState
       return value.toDouble();
     }
 
-    return double.tryParse(
-          value?.toString() ?? '',
-        ) ??
-        1;
+    return double.tryParse(value?.toString() ?? '') ?? 1;
   }
 
   // ==========================================================
@@ -143,10 +140,7 @@ class _ProductDetailScreenState
       return value.toDouble();
     }
 
-    return double.tryParse(
-          value?.toString() ?? '',
-        ) ??
-        0;
+    return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 
   // ==========================================================
@@ -163,6 +157,12 @@ class _ProductDetailScreenState
     return _availableQuantity > 0;
   }
 
+  String? get _farmerId {
+    final value = widget.product['farmerId'];
+    if (value == null || value.toString().isEmpty) return null;
+    return value.toString();
+  }
+
   // ==========================================================
   // DATES
   // ==========================================================
@@ -172,9 +172,7 @@ class _ProductDetailScreenState
       return '';
     }
 
-    final date = DateTime.tryParse(
-      value.toString(),
-    );
+    final date = DateTime.tryParse(value.toString());
 
     if (date == null) {
       return value.toString();
@@ -186,15 +184,11 @@ class _ProductDetailScreenState
   }
 
   String get _harvestDate {
-    return _formatDate(
-      widget.product['harvestDate'],
-    );
+    return _formatDate(widget.product['harvestDate']);
   }
 
   String get _availableUntil {
-    return _formatDate(
-      widget.product['availableUntil'],
-    );
+    return _formatDate(widget.product['availableUntil']);
   }
 
   // ==========================================================
@@ -208,22 +202,16 @@ class _ProductDetailScreenState
       return images
           .map((image) => image.toString().trim())
           .where((image) => image.isNotEmpty)
-          .map(
-            (image) => ApiConstants.imageUrl(image),
-          )
+          .map((image) => ApiConstants.imageUrl(image))
           .toList();
     }
 
     // Support imageUrl too, in case your backend returns
     // a single image instead of imageUrls.
-    final singleImage =
-        widget.product['imageUrl']?.toString().trim();
+    final singleImage = widget.product['imageUrl']?.toString().trim();
 
-    if (singleImage != null &&
-        singleImage.isNotEmpty) {
-      return [
-        ApiConstants.imageUrl(singleImage),
-      ];
+    if (singleImage != null && singleImage.isNotEmpty) {
+      return [ApiConstants.imageUrl(singleImage)];
     }
 
     return [];
@@ -241,6 +229,42 @@ class _ProductDetailScreenState
     _orderQuantity = _minOrder > 0 ? _minOrder : 1;
 
     _checkIfProductIsInCart();
+    _loadPublisherProfile();
+  }
+
+  Future<void> _loadPublisherProfile() async {
+    final publisher = widget.product['publisher'];
+    if (publisher is Map) {
+      final avatar = publisher['avatarUrl']?.toString();
+      if (mounted) {
+        setState(() {
+          _publisherName = publisher['name']?.toString();
+          _publisherAvatarUrl = avatar == null || avatar.isEmpty
+              ? null
+              : ApiConstants.imageUrl(avatar);
+        });
+      }
+      return;
+    }
+
+    final farmerId = _farmerId;
+    if (farmerId == null) return;
+
+    try {
+      final result = await _userService.getUserById(farmerId);
+      final data = result['data'];
+      if (!mounted || data is! Map) return;
+
+      final avatar = data['avatarUrl']?.toString();
+      setState(() {
+        _publisherName = data['name']?.toString();
+        _publisherAvatarUrl = avatar == null || avatar.isEmpty
+            ? null
+            : ApiConstants.imageUrl(avatar);
+      });
+    } catch (error) {
+      debugPrint('Failed to load publisher profile: $error');
+    }
   }
 
   // ==========================================================
@@ -257,10 +281,7 @@ class _ProductDetailScreenState
         elevation: 0,
 
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.black87,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () {
             Navigator.maybePop(context);
           },
@@ -281,29 +302,20 @@ class _ProductDetailScreenState
 
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.share_outlined,
-              color: Colors.black87,
-            ),
+            icon: const Icon(Icons.share_outlined, color: Colors.black87),
             onPressed: () {},
           ),
         ],
       ),
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             // ==================================================
             // IMAGE
             // ==================================================
-
             _buildMainImageView(),
 
             const SizedBox(height: 12),
@@ -315,7 +327,6 @@ class _ProductDetailScreenState
             // ==================================================
             // PRODUCT TITLE
             // ==================================================
-
             Text(
               _productName,
               style: const TextStyle(
@@ -333,16 +344,10 @@ class _ProductDetailScreenState
               runSpacing: 8,
               children: [
                 if (_category.isNotEmpty)
-                  _buildTagChip(
-                    _category,
-                    icon: Icons.category_outlined,
-                  ),
+                  _buildTagChip(_category, icon: Icons.category_outlined),
 
                 if (_condition.isNotEmpty)
-                  _buildTagChip(
-                    _condition,
-                    icon: Icons.verified_outlined,
-                  ),
+                  _buildTagChip(_condition, icon: Icons.verified_outlined),
               ],
             ),
 
@@ -351,7 +356,6 @@ class _ProductDetailScreenState
             // ==================================================
             // PRICE
             // ==================================================
-
             _buildPriceSection(),
 
             const SizedBox(height: 20),
@@ -359,7 +363,6 @@ class _ProductDetailScreenState
             // ==================================================
             // STOCK / MIN ORDER
             // ==================================================
-
             _buildOrderInformation(),
 
             const SizedBox(height: 20),
@@ -367,7 +370,6 @@ class _ProductDetailScreenState
             // ==================================================
             // PRODUCT INFORMATION
             // ==================================================
-
             _buildProductInformation(),
 
             const SizedBox(height: 20),
@@ -375,7 +377,6 @@ class _ProductDetailScreenState
             // ==================================================
             // DESCRIPTION
             // ==================================================
-
             _buildProductDescription(),
 
             const SizedBox(height: 20),
@@ -383,7 +384,6 @@ class _ProductDetailScreenState
             // ==================================================
             // DELIVERY INFORMATION
             // ==================================================
-
             _buildDeliveryInformation(),
 
             const SizedBox(height: 20),
@@ -391,7 +391,6 @@ class _ProductDetailScreenState
             // ==================================================
             // FARMER
             // ==================================================
-
             _buildFarmerCard(),
 
             const SizedBox(height: 30),
@@ -402,7 +401,6 @@ class _ProductDetailScreenState
       // ========================================================
       // BOTTOM CART
       // ========================================================
-
       bottomNavigationBar: _buildBottomCartBar(),
     );
   }
@@ -413,33 +411,22 @@ class _ProductDetailScreenState
 
   Widget _buildMainImageView() {
     if (_productImages.isEmpty) {
-      return _buildImagePlaceholder(
-        height: 320,
-      );
+      return _buildImagePlaceholder(height: 320);
     }
 
-    if (_selectedImageIndex >=
-        _productImages.length) {
+    if (_selectedImageIndex >= _productImages.length) {
       _selectedImageIndex = 0;
     }
 
     return Stack(
       children: [
         ClipRRect(
-          borderRadius:
-              BorderRadius.circular(20),
-          child: _buildImage(
-            _productImages[_selectedImageIndex],
-            height: 320,
-          ),
+          borderRadius: BorderRadius.circular(20),
+          child: _buildImage(_productImages[_selectedImageIndex], height: 320),
         ),
 
         // Availability badge
-        Positioned(
-          top: 12,
-          left: 12,
-          child: _buildAvailabilityBadge(),
-        ),
+        Positioned(top: 12, left: 12, child: _buildAvailabilityBadge()),
 
         // Favorite
         Positioned(
@@ -452,20 +439,14 @@ class _ProductDetailScreenState
               });
             },
             child: Container(
-              padding:
-                  const EdgeInsets.all(9),
-              decoration:
-                  const BoxDecoration(
+              padding: const EdgeInsets.all(9),
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                _isFavorite
-                    ? Icons.favorite
-                    : Icons.favorite_border,
-                color: _isFavorite
-                    ? Colors.red
-                    : primaryGreen,
+                _isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: _isFavorite ? Colors.red : primaryGreen,
                 size: 22,
               ),
             ),
@@ -481,42 +462,28 @@ class _ProductDetailScreenState
 
   Widget _buildAvailabilityBadge() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 7,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
-        color: _isAvailable
-            ? Colors.green.shade50
-            : Colors.red.shade50,
-        borderRadius:
-            BorderRadius.circular(20),
+        color: _isAvailable ? Colors.green.shade50 : Colors.red.shade50,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            _isAvailable
-                ? Icons.check_circle
-                : Icons.cancel,
+            _isAvailable ? Icons.check_circle : Icons.cancel,
             size: 14,
-            color: _isAvailable
-                ? primaryGreen
-                : Colors.red,
+            color: _isAvailable ? primaryGreen : Colors.red,
           ),
 
           const SizedBox(width: 5),
 
           Text(
-            _isAvailable
-                ? 'Available'
-                : 'Unavailable',
+            _isAvailable ? 'Available' : 'Unavailable',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: _isAvailable
-                  ? primaryGreen
-                  : Colors.red,
+              color: _isAvailable ? primaryGreen : Colors.red,
             ),
           ),
         ],
@@ -528,21 +495,14 @@ class _ProductDetailScreenState
   // IMAGE
   // ==========================================================
 
-  Widget _buildImage(
-    String image, {
-    required double height,
-  }) {
+  Widget _buildImage(String image, {required double height}) {
     return Image.network(
       image,
       height: height,
       width: double.infinity,
       fit: BoxFit.cover,
 
-      loadingBuilder: (
-        context,
-        child,
-        loadingProgress,
-      ) {
+      loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) {
           return child;
         }
@@ -560,38 +520,23 @@ class _ProductDetailScreenState
         );
       },
 
-      errorBuilder: (
-        context,
-        error,
-        stackTrace,
-      ) {
-        debugPrint(
-          'Product image failed: $image',
-        );
+      errorBuilder: (context, error, stackTrace) {
+        debugPrint('Product image failed: $image');
 
-        return _buildImagePlaceholder(
-          height: height,
-        );
+        return _buildImagePlaceholder(height: height);
       },
     );
   }
 
-  Widget _buildImagePlaceholder({
-    required double height,
-  }) {
+  Widget _buildImagePlaceholder({required double height}) {
     return Container(
       height: height,
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
-        borderRadius:
-            BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: const Icon(
-        Icons.eco_rounded,
-        size: 60,
-        color: primaryGreen,
-      ),
+      child: const Icon(Icons.eco_rounded, size: 60, color: primaryGreen),
     );
   }
 
@@ -609,11 +554,9 @@ class _ProductDetailScreenState
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _productImages.length,
-        separatorBuilder: (_, _) =>
-            const SizedBox(width: 10),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          final selected =
-              index == _selectedImageIndex;
+          final selected = index == _selectedImageIndex;
 
           return GestureDetector(
             onTap: () {
@@ -624,30 +567,21 @@ class _ProductDetailScreenState
             child: Container(
               width: 70,
               decoration: BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: selected
-                      ? primaryGreen
-                      : Colors.transparent,
+                  color: selected ? primaryGreen : Colors.transparent,
                   width: 2.5,
                 ),
               ),
               child: ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(10),
                 child: Image.network(
                   _productImages[index],
                   fit: BoxFit.cover,
-                  errorBuilder:
-                      (_, __, ___) {
+                  errorBuilder: (_, __, ___) {
                     return Container(
-                      color:
-                          Colors.grey.shade200,
-                      child: const Icon(
-                        Icons.eco,
-                        color: primaryGreen,
-                      ),
+                      color: Colors.grey.shade200,
+                      child: const Icon(Icons.eco, color: primaryGreen),
                     );
                   },
                 ),
@@ -668,22 +602,17 @@ class _ProductDetailScreenState
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: lightGreenBg,
-        borderRadius:
-            BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Price',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                 ),
 
                 const SizedBox(height: 3),
@@ -699,24 +628,17 @@ class _ProductDetailScreenState
 
                 Text(
                   'per kg',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
               ],
             ),
           ),
 
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 8,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius:
-                  BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               children: [
@@ -750,15 +672,11 @@ class _ProductDetailScreenState
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.shade200,
-        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'ORDER INFORMATION',
@@ -776,11 +694,9 @@ class _ProductDetailScreenState
             children: [
               Expanded(
                 child: _buildInfoBox(
-                  icon:
-                      Icons.inventory_2_outlined,
+                  icon: Icons.inventory_2_outlined,
                   title: 'Available',
-                  value:
-                      '${_availableQuantity.toStringAsFixed(1)} kg',
+                  value: '${_availableQuantity.toStringAsFixed(1)} kg',
                 ),
               ),
 
@@ -790,8 +706,7 @@ class _ProductDetailScreenState
                 child: _buildInfoBox(
                   icon: Icons.shopping_basket_outlined,
                   title: 'Minimum Order',
-                  value:
-                      '${_minOrder.toStringAsFixed(1)} kg',
+                  value: '${_minOrder.toStringAsFixed(1)} kg',
                 ),
               ),
             ],
@@ -810,30 +725,21 @@ class _ProductDetailScreenState
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: pageBgColor,
-        borderRadius:
-            BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 22,
-            color: primaryGreen,
-          ),
+          Icon(icon, size: 22, color: primaryGreen),
 
           const SizedBox(width: 9),
 
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
                 ),
 
                 const SizedBox(height: 3),
@@ -862,38 +768,23 @@ class _ProductDetailScreenState
     final items = <Map<String, String>>[];
 
     if (_category.isNotEmpty) {
-      items.add({
-        'label': 'Category',
-        'value': _category,
-      });
+      items.add({'label': 'Category', 'value': _category});
     }
 
     if (_condition.isNotEmpty) {
-      items.add({
-        'label': 'Condition',
-        'value': _condition,
-      });
+      items.add({'label': 'Condition', 'value': _condition});
     }
 
     if (_location.isNotEmpty) {
-      items.add({
-        'label': 'Location',
-        'value': _location,
-      });
+      items.add({'label': 'Location', 'value': _location});
     }
 
     if (_harvestDate.isNotEmpty) {
-      items.add({
-        'label': 'Harvest Date',
-        'value': _harvestDate,
-      });
+      items.add({'label': 'Harvest Date', 'value': _harvestDate});
     }
 
     if (_availableUntil.isNotEmpty) {
-      items.add({
-        'label': 'Available Until',
-        'value': _availableUntil,
-      });
+      items.add({'label': 'Available Until', 'value': _availableUntil});
     }
 
     if (items.isEmpty) {
@@ -909,18 +800,13 @@ class _ProductDetailScreenState
           return Column(
             children: [
               _buildInformationRow(
-                icon: _getInformationIcon(
-                  item['label']!,
-                ),
+                icon: _getInformationIcon(item['label']!),
                 label: item['label']!,
                 value: item['value']!,
               ),
 
               if (index != items.length - 1)
-                Divider(
-                  height: 20,
-                  color: Colors.grey.shade200,
-                ),
+                Divider(height: 20, color: Colors.grey.shade200),
             ],
           );
         }).toList(),
@@ -928,9 +814,7 @@ class _ProductDetailScreenState
     );
   }
 
-  IconData _getInformationIcon(
-    String label,
-  ) {
+  IconData _getInformationIcon(String label) {
     switch (label) {
       case 'Category':
         return Icons.category_outlined;
@@ -963,14 +847,9 @@ class _ProductDetailScreenState
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: lightGreenBg,
-            borderRadius:
-                BorderRadius.circular(9),
+            borderRadius: BorderRadius.circular(9),
           ),
-          child: Icon(
-            icon,
-            size: 18,
-            color: primaryGreen,
-          ),
+          child: Icon(icon, size: 18, color: primaryGreen),
         ),
 
         const SizedBox(width: 12),
@@ -978,10 +857,7 @@ class _ProductDetailScreenState
         Expanded(
           child: Text(
             label,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
           ),
         ),
 
@@ -1024,9 +900,7 @@ class _ProductDetailScreenState
 
   Widget _buildDeliveryInformation() {
     final hasDelivery =
-        _deliveryMethod.isNotEmpty ||
-        _location.isNotEmpty ||
-        _deliveryFee > 0;
+        _deliveryMethod.isNotEmpty || _location.isNotEmpty || _deliveryFee > 0;
 
     if (!hasDelivery) {
       return const SizedBox.shrink();
@@ -1038,8 +912,7 @@ class _ProductDetailScreenState
         children: [
           if (_deliveryMethod.isNotEmpty)
             _buildInformationRow(
-              icon:
-                  Icons.local_shipping_outlined,
+              icon: Icons.local_shipping_outlined,
               label: 'Delivery Method',
               value: _deliveryMethod,
             ),
@@ -1047,8 +920,7 @@ class _ProductDetailScreenState
           if (_location.isNotEmpty) ...[
             const SizedBox(height: 14),
             _buildInformationRow(
-              icon:
-                  Icons.location_on_outlined,
+              icon: Icons.location_on_outlined,
               label: 'Location',
               value: _location,
             ),
@@ -1072,6 +944,55 @@ class _ProductDetailScreenState
   // FARMER
   // ==========================================================
 
+  Future<void> _contactFarmer() async {
+    final farmerId = _farmerId;
+    if (farmerId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Farmer information is unavailable')),
+      );
+      return;
+    }
+
+    setState(() => _isContactingFarmer = true);
+    try {
+      final conversation = await _chatService.createConversation(farmerId);
+      final conversationId = conversation['id']?.toString();
+      if (conversationId == null || conversationId.isEmpty) {
+        throw Exception('Conversation ID was not returned');
+      }
+
+      if (!mounted) return;
+      final participant = conversation['participant'];
+      final participantName = participant is Map
+          ? participant['name']?.toString()
+          : null;
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChatScreen(
+            conversationId: conversationId,
+            participantName: participantName?.isNotEmpty == true
+                ? participantName!
+                : _farmName,
+            isOnline: false,
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Unable to open chat: ${error.toString().replaceFirst('Exception: ', '')}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isContactingFarmer = false);
+    }
+  }
+
   Widget _buildFarmerCard() {
     return _buildSectionCard(
       title: 'SELLER',
@@ -1079,28 +1000,31 @@ class _ProductDetailScreenState
         children: [
           Row(
             children: [
-              const CircleAvatar(
-                radius: 25,
-                backgroundColor: lightGreenBg,
-                child: Icon(
-                  Icons.agriculture,
-                  color: primaryGreen,
-                ),
-              ),
+              _publisherAvatarUrl == null
+                  ? const CircleAvatar(
+                      radius: 25,
+                      backgroundColor: lightGreenBg,
+                      child: Icon(Icons.agriculture, color: primaryGreen),
+                    )
+                  : CircleAvatar(
+                      radius: 25,
+                      backgroundImage: NetworkImage(_publisherAvatarUrl!),
+                      onBackgroundImageError: (_, _) {},
+                    ),
 
               const SizedBox(width: 12),
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _farmName,
+                      _publisherName?.isNotEmpty == true
+                          ? _publisherName!
+                          : _farmName,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight:
-                            FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
 
@@ -1120,8 +1044,7 @@ class _ProductDetailScreenState
                           'Verified Farmer',
                           style: TextStyle(
                             fontSize: 12,
-                            color:
-                                Colors.grey.shade600,
+                            color: Colors.grey.shade600,
                           ),
                         ),
                       ],
@@ -1131,26 +1054,27 @@ class _ProductDetailScreenState
               ),
 
               OutlinedButton(
-                onPressed: () {},
-                style:
-                    OutlinedButton.styleFrom(
-                  side: const BorderSide(
-                    color: primaryGreen,
-                  ),
-                  shape:
-                      RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(10),
+                onPressed: _isContactingFarmer ? null : _contactFarmer,
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: primaryGreen),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  'Contact',
-                  style: TextStyle(
-                    color: primaryGreen,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: _isContactingFarmer
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        'Contact',
+                        style: TextStyle(
+                          color: primaryGreen,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ],
           ),
@@ -1161,17 +1085,11 @@ class _ProductDetailScreenState
             spacing: 8,
             runSpacing: 8,
             children: [
-              if (_category.isNotEmpty)
-                _buildTagChip(_category),
+              if (_category.isNotEmpty) _buildTagChip(_category),
 
-              if (_deliveryMethod.isNotEmpty)
-                _buildTagChip(
-                  _deliveryMethod,
-                ),
+              if (_deliveryMethod.isNotEmpty) _buildTagChip(_deliveryMethod),
 
-              _buildTagChip(
-                'Wholesale',
-              ),
+              _buildTagChip('Wholesale'),
             ],
           ),
         ],
@@ -1183,24 +1101,17 @@ class _ProductDetailScreenState
   // SECTION CARD
   // ==========================================================
 
-  Widget _buildSectionCard({
-    required String title,
-    required Widget child,
-  }) {
+  Widget _buildSectionCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.shade200,
-        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
@@ -1224,29 +1135,18 @@ class _ProductDetailScreenState
   // TAG
   // ==========================================================
 
-  Widget _buildTagChip(
-    String label, {
-    IconData? icon,
-  }) {
+  Widget _buildTagChip(String label, {IconData? icon}) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 7,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
-        borderRadius:
-            BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(
-              icon,
-              size: 14,
-              color: primaryGreen,
-            ),
+            Icon(icon, size: 14, color: primaryGreen),
             const SizedBox(width: 5),
           ],
           Text(
@@ -1267,8 +1167,7 @@ class _ProductDetailScreenState
   // ==========================================================
 
   Widget _buildBottomCartBar() {
-    final total =
-        _pricePerKg * _orderQuantity;
+    final total = _pricePerKg * _orderQuantity;
 
     final canAdd =
         _isAvailable &&
@@ -1276,17 +1175,10 @@ class _ProductDetailScreenState
         _orderQuantity <= _availableQuantity;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(
-            color: Colors.grey.shade200,
-          ),
-        ),
+        border: Border(top: BorderSide(color: Colors.grey.shade200)),
       ),
       child: SafeArea(
         child: Row(
@@ -1295,47 +1187,35 @@ class _ProductDetailScreenState
             Container(
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
-                borderRadius:
-                    BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
                   IconButton(
-                    onPressed: _orderQuantity >
-                            _minOrder
+                    onPressed: _orderQuantity > _minOrder
                         ? () {
                             setState(() {
                               _orderQuantity--;
                             });
                           }
                         : null,
-                    icon: const Icon(
-                      Icons.remove,
-                      size: 18,
-                    ),
+                    icon: const Icon(Icons.remove, size: 18),
                   ),
 
                   Text(
                     '${_orderQuantity.toStringAsFixed(0)} kg',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
 
                   IconButton(
-                    onPressed:
-                        _orderQuantity <
-                                _availableQuantity
-                            ? () {
-                                setState(() {
-                                  _orderQuantity++;
-                                });
-                              }
-                            : null,
-                    icon: const Icon(
-                      Icons.add,
-                      size: 18,
-                    ),
+                    onPressed: _orderQuantity < _availableQuantity
+                        ? () {
+                            setState(() {
+                              _orderQuantity++;
+                            });
+                          }
+                        : null,
+                    icon: const Icon(Icons.add, size: 18),
                   ),
                 ],
               ),
@@ -1345,22 +1225,15 @@ class _ProductDetailScreenState
 
             Expanded(
               child: ElevatedButton(
-              onPressed: canAdd &&
-                      !_isAddingToCart &&
-                      !_isInCart &&
-                      !_isCheckingCart
-                  ? _addToCart
-                  : null,
+                onPressed:
+                    canAdd && !_isAddingToCart && !_isInCart && !_isCheckingCart
+                    ? _addToCart
+                    : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _isAddedToCart
-                      ? primaryGreen
-                      : buttonOrange,
-                  disabledBackgroundColor:
-                      Colors.grey.shade300,
+                  backgroundColor: _isAddedToCart ? primaryGreen : buttonOrange,
+                  disabledBackgroundColor: Colors.grey.shade300,
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 13,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -1375,40 +1248,40 @@ class _ProductDetailScreenState
                         ),
                       )
                     : _isAddingToCart
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _isInCart
+                                ? 'Added to Cart'
+                                : canAdd
+                                ? 'Add to Cart'
+                                : 'Unavailable',
+                            style: const TextStyle(
                               color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
                             ),
-                          )
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _isInCart
-                                    ? 'Added to Cart'
-                                    : canAdd
-                                        ? 'Add to Cart'
-                                        : 'Unavailable',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-
-                              if (canAdd && !_isInCart)
-                                Text(
-                                  '\$${total.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                            ],
                           ),
+
+                          if (canAdd && !_isInCart)
+                            Text(
+                              '\$${total.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                              ),
+                            ),
+                        ],
+                      ),
               ),
             ),
           ],
@@ -1420,8 +1293,7 @@ class _ProductDetailScreenState
   Future<void> _addToCart() async {
     if (_isAddingToCart || _isInCart) return;
 
-    final productId =
-        widget.product['id']?.toString();
+    final productId = widget.product['id']?.toString();
 
     if (productId == null || productId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1461,12 +1333,7 @@ class _ProductDetailScreenState
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            e.toString().replaceFirst(
-              'Exception: ',
-              '',
-            ),
-          ),
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
           backgroundColor: Colors.red,
         ),
       );
@@ -1495,9 +1362,7 @@ class _ProductDetailScreenState
     try {
       final cart = await _cartService.getCart();
 
-      final found = cart.items.any(
-        (item) => item.productId == productId,
-      );
+      final found = cart.items.any((item) => item.productId == productId);
 
       if (!mounted) return;
 

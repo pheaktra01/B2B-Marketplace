@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/notification/screens/notifications_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/l10n/app_localizations.dart';
@@ -38,34 +37,11 @@ class _FarmerOrderManagementScreenState
       // ==========================================================
       // APP BAR
       // ==========================================================
-
-      appBar: FarmerAppBar(
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const NotificationsScreen(),
-                ),
-              );
-            },
-          ),
-
-          const Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              backgroundImage: AssetImage('assets/profile.png'),
-            ),
-          ),
-        ],
-      ),
+      appBar: const FarmerAppBar(),
 
       // ==========================================================
       // BODY
       // ==========================================================
-
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -74,7 +50,6 @@ class _FarmerOrderManagementScreenState
           // ======================================================
           // TITLE + ACTIVE BADGE
           // ======================================================
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -116,7 +91,6 @@ class _FarmerOrderManagementScreenState
           // ======================================================
           // FILTER CHIPS
           // ======================================================
-
           SizedBox(
             height: 38,
             child: ListView.builder(
@@ -139,17 +113,13 @@ class _FarmerOrderManagementScreenState
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? primaryGreen
-                          : Colors.grey.shade200,
+                      color: isSelected ? primaryGreen : Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       filters[index],
                       style: TextStyle(
-                        color: isSelected
-                            ? Colors.white
-                            : Colors.black87,
+                        color: isSelected ? Colors.white : Colors.black87,
                         fontSize: 13,
                         fontWeight: isSelected
                             ? FontWeight.bold
@@ -167,7 +137,6 @@ class _FarmerOrderManagementScreenState
           // ======================================================
           // ORDERS LIST
           // ======================================================
-
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -175,7 +144,6 @@ class _FarmerOrderManagementScreenState
                 // ==================================================
                 // ORDER 1 - PENDING
                 // ==================================================
-
                 _buildOrderCard(
                   l10n: l10n,
                   customerName: 'The Grand Bistro',
@@ -195,15 +163,11 @@ class _FarmerOrderManagementScreenState
                         child: OutlinedButton(
                           onPressed: () {},
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: Colors.grey.shade400,
-                            ),
+                            side: BorderSide(color: Colors.grey.shade400),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           child: Text(
                             l10n.decline,
@@ -226,9 +190,7 @@ class _FarmerOrderManagementScreenState
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           child: Text(
                             l10n.accept,
@@ -246,7 +208,6 @@ class _FarmerOrderManagementScreenState
                 // ==================================================
                 // ORDER 2 - ACCEPTED
                 // ==================================================
-
                 _buildOrderCard(
                   l10n: l10n,
                   customerName: 'Green Plate Kitchen',
@@ -255,8 +216,7 @@ class _FarmerOrderManagementScreenState
                   status: l10n.accepted,
                   statusBgColor: const Color(0xFFC3D0A8),
                   statusTextColor: const Color(0xFF2E3D12),
-                  itemsText:
-                      '${l10n.microgreensMix}, ${l10n.rainbowCarrots}',
+                  itemsText: '${l10n.microgreensMix}, ${l10n.rainbowCarrots}',
                   itemCountText: '12 ${l10n.cases}',
                   fulfillmentType: l10n.pickup,
                   fulfillmentTime: '11:30 AM',
@@ -271,9 +231,7 @@ class _FarmerOrderManagementScreenState
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: Text(
                         l10n.startPreparing,
@@ -289,7 +247,6 @@ class _FarmerOrderManagementScreenState
                 // ==================================================
                 // ORDER 3 - PREPARING
                 // ==================================================
-
                 _buildOrderCard(
                   l10n: l10n,
                   customerName: 'Azure Fine Dining',
@@ -308,16 +265,11 @@ class _FarmerOrderManagementScreenState
                     child: OutlinedButton(
                       onPressed: () {},
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                          color: primaryGreen,
-                          width: 1.5,
-                        ),
+                        side: const BorderSide(color: primaryGreen, width: 1.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: Text(
                         l10n.markAsReady,
@@ -333,7 +285,6 @@ class _FarmerOrderManagementScreenState
                 // ==================================================
                 // ORDER 4 - READY
                 // ==================================================
-
                 _buildOrderCard(
                   l10n: l10n,
                   customerName: 'The Rustic Table',
@@ -342,8 +293,7 @@ class _FarmerOrderManagementScreenState
                   status: l10n.ready,
                   statusBgColor: primaryGreen,
                   isHighlighted: true,
-                  itemsText:
-                      '${l10n.butterheadLettuce}, ${l10n.freshMint}',
+                  itemsText: '${l10n.butterheadLettuce}, ${l10n.freshMint}',
                   itemCountText: '32 ${l10n.cases}',
                   fulfillmentType: l10n.readyForPickup,
                   fulfillmentTime: '',
@@ -359,9 +309,7 @@ class _FarmerOrderManagementScreenState
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: Text(
                         l10n.completeOrder,
@@ -384,10 +332,7 @@ class _FarmerOrderManagementScreenState
       // ==========================================================
       // BOTTOM NAVIGATION
       // ==========================================================
-
-      bottomNavigationBar: const FarmerBottomNavBar(
-        currentIndex: 1,
-      ),
+      bottomNavigationBar: const FarmerBottomNavBar(currentIndex: 1),
     );
   }
 
@@ -419,9 +364,7 @@ class _FarmerOrderManagementScreenState
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isHighlighted
-              ? const Color(0xFF81C784)
-              : Colors.grey.shade200,
+          color: isHighlighted ? const Color(0xFF81C784) : Colors.grey.shade200,
           width: isHighlighted ? 1.5 : 1.0,
         ),
         boxShadow: [
@@ -438,7 +381,6 @@ class _FarmerOrderManagementScreenState
           // ======================================================
           // HEADER
           // ======================================================
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -514,7 +456,6 @@ class _FarmerOrderManagementScreenState
           // ======================================================
           // ITEMS
           // ======================================================
-
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -523,9 +464,7 @@ class _FarmerOrderManagementScreenState
                     ? Icons.check_circle_outline
                     : Icons.shopping_bag_outlined,
                 size: 18,
-                color: hasCheckIcon
-                    ? primaryGreen
-                    : Colors.grey.shade600,
+                color: hasCheckIcon ? primaryGreen : Colors.grey.shade600,
               ),
 
               const SizedBox(width: 8),
@@ -548,7 +487,6 @@ class _FarmerOrderManagementScreenState
           // ======================================================
           // META INFORMATION
           // ======================================================
-
           Row(
             children: [
               const SizedBox(width: 26),
@@ -563,10 +501,7 @@ class _FarmerOrderManagementScreenState
 
               Text(
                 itemCountText,
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
               ),
 
               const SizedBox(width: 16),
@@ -606,7 +541,6 @@ class _FarmerOrderManagementScreenState
           // ======================================================
           // DIVIDER
           // ======================================================
-
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(height: 1),
@@ -615,7 +549,6 @@ class _FarmerOrderManagementScreenState
           // ======================================================
           // PRICE + ACTION
           // ======================================================
-
           Row(
             children: [
               Text(
@@ -629,9 +562,7 @@ class _FarmerOrderManagementScreenState
 
               const SizedBox(width: 16),
 
-              Expanded(
-                child: actionButtons,
-              ),
+              Expanded(child: actionButtons),
             ],
           ),
         ],

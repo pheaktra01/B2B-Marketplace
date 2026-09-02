@@ -1,4 +1,4 @@
-import '../models/conversation_model.dart';
+import '../../chat/models/conversation_model.dart';
 
 final List<Conversation> mockConversations = [
   Conversation(

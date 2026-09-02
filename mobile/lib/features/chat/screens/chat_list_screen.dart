@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:mobile/l10n/app_localizations.dart';
 import 'package:mobile/features/farmer/data/mock_conversations.dart';
-import 'package:mobile/features/farmer/models/conversation_model.dart';
+import 'package:mobile/features/chat/models/conversation_model.dart';
 import 'package:mobile/features/notification/screens/notifications_screen.dart';
 import 'package:mobile/features/chat/widgets/conversation_card.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';

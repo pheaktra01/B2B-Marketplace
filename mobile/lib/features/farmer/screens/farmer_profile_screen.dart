@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,6 +6,8 @@ import 'package:mobile/l10n/app_localizations.dart';
 import 'package:mobile/features/farmer/screens/farmer_settings_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
+import 'package:mobile/features/profile/services/user_service.dart';
+import 'package:mobile/core/constants/api_constants.dart';
 
 // ------------------------------------------------------------
 // DATA MODELS
@@ -40,42 +40,33 @@ class Product {
 class FarmerProfileScreen extends StatefulWidget {
   final String? userId;
 
-  const FarmerProfileScreen({
-    super.key,
-    this.userId,
-  });
+  const FarmerProfileScreen({super.key, this.userId});
 
   @override
-  State<FarmerProfileScreen> createState() =>
-      _FarmerProfileScreenState();
+  State<FarmerProfileScreen> createState() => _FarmerProfileScreenState();
 }
 
-class _FarmerProfileScreenState
-    extends State<FarmerProfileScreen> {
+class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
   // ------------------------------------------------------------
   // THEME COLORS
   // ------------------------------------------------------------
 
-  static const Color primaryGreen =
-      Color(0xFF135A27);
+  static const Color primaryGreen = Color(0xFF135A27);
 
-  static const Color pageBgColor =
-      Color(0xFFF4F6F4);
+  static const Color pageBgColor = Color(0xFFF4F6F4);
 
-  static const Color cardBgColor =
-      Color(0xFFF7F8F7);
+  static const Color cardBgColor = Color(0xFFF7F8F7);
 
-  static const Color badgeBgColor =
-      Color(0xFFEDF2EE);
+  static const Color badgeBgColor = Color(0xFFEDF2EE);
 
   // ------------------------------------------------------------
   // FALLBACK / INITIAL PROFILE DATA
   // ------------------------------------------------------------
 
   String _displayName = 'Pheaktra';
+  String _phone = '';
 
-  String _location =
-      'Dambae, Tboung Khmum, Cambodia';
+  String _location = 'Dambae, Tboung Khmum, Cambodia';
 
   String _description =
       'At Green Valley Organics, we believe professional kitchens deserve the highest quality produce without compromising soil health. We use advanced regenerative farming techniques, including carbon sequestration and bio-composting, to ensure every leaf and root is packed with flavor.';
@@ -87,8 +78,11 @@ class _FarmerProfileScreenState
   final String _defaultCoverUrl =
       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGo2z3rQrSISUbvCJO0kZFrymxlPHjG6lkT0EkFKM8ntPy1Ug9ZWrQzA8&s=10';
 
-  final String _defaultAvatarUrl =
-      'assets/profile.png';
+  final String _defaultAvatarUrl = 'assets/profile.png';
+
+  String? _avatarUrl;
+  String? _coverUrl;
+  final UserService _userService = UserService();
 
   Uint8List? _localCoverBytes;
   Uint8List? _localAvatarBytes;
@@ -101,8 +95,7 @@ class _FarmerProfileScreenState
 
   late final List<Product> _products;
 
-  final ImagePicker _picker =
-      ImagePicker();
+  final ImagePicker _picker = ImagePicker();
 
   // ------------------------------------------------------------
   // INIT
@@ -112,6 +105,29 @@ class _FarmerProfileScreenState
   void initState() {
     super.initState();
     _initializeProducts();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final result = await _userService.getProfile();
+      final data = result['data'];
+      if (!mounted || data is! Map) return;
+
+      setState(() {
+        _displayName = data['name']?.toString() ?? _displayName;
+        _phone = data['phone']?.toString() ?? '';
+        _avatarUrl = _toImageUrl(data['avatarUrl']?.toString());
+        _coverUrl = _toImageUrl(data['coverUrl']?.toString());
+      });
+    } catch (error) {
+      debugPrint('Failed to load profile: $error');
+    }
+  }
+
+  String? _toImageUrl(String? url) {
+    if (url == null || url.isEmpty) return null;
+    return ApiConstants.imageUrl(url);
   }
 
   void _initializeProducts() {
@@ -150,9 +166,7 @@ class _FarmerProfileScreenState
   // LOCALIZED CATEGORIES
   // ------------------------------------------------------------
 
-  List<String> _getCategories(
-    AppLocalizations l10n,
-  ) {
+  List<String> _getCategories(AppLocalizations l10n) {
     return [
       l10n.allProduce,
       l10n.vegetables,
@@ -165,20 +179,15 @@ class _FarmerProfileScreenState
   // FILTER PRODUCTS
   // ------------------------------------------------------------
 
-  List<Product> _filteredProducts(
-    AppLocalizations l10n,
-  ) {
+  List<Product> _filteredProducts(AppLocalizations l10n) {
     if (_selectedCategoryIndex == 0) {
       return _products;
     }
 
-    final categoryName =
-        _getCategories(l10n)[
-            _selectedCategoryIndex];
+    final categoryName = _getCategories(l10n)[_selectedCategoryIndex];
 
     return _products.where((product) {
-      return product.category ==
-          categoryName;
+      return product.category == categoryName;
     }).toList();
   }
 
@@ -187,84 +196,60 @@ class _FarmerProfileScreenState
   // ------------------------------------------------------------
 
   void _showEditProfileInfoDialog() {
-    final l10n =
-        AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
 
-    final nameController =
-        TextEditingController(
-      text: _displayName,
-    );
+    final nameController = TextEditingController(text: _displayName);
 
-    final locationController =
-        TextEditingController(
-      text: _location,
-    );
+    final phoneController = TextEditingController(text: _phone);
 
-    final descriptionController =
-        TextEditingController(
-      text: _description,
-    );
+    final locationController = TextEditingController(text: _location);
+
+    final descriptionController = TextEditingController(text: _description);
 
     showDialog(
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          shape:
-              RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
 
           title: Text(
             l10n.editProfileInfo,
-            style: const TextStyle(
-              fontWeight:
-                  FontWeight.bold,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
 
-          content:
-              SingleChildScrollView(
+          content: SingleChildScrollView(
             child: Column(
-              mainAxisSize:
-                  MainAxisSize.min,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  controller:
-                      nameController,
-                  decoration:
-                      InputDecoration(
-                    labelText:
-                        l10n.farmProducerName,
-                  ),
+                  controller: nameController,
+                  decoration: InputDecoration(labelText: l10n.farmProducerName),
                 ),
 
-                const SizedBox(
-                  height: 12,
-                ),
+                const SizedBox(height: 12),
 
                 TextField(
-                  controller:
-                      locationController,
-                  decoration:
-                      InputDecoration(
-                    labelText:
-                        l10n.location,
-                  ),
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(labelText: 'Phone'),
                 ),
 
-                const SizedBox(
-                  height: 12,
-                ),
+                const SizedBox(height: 12),
 
                 TextField(
-                  controller:
-                      descriptionController,
+                  controller: locationController,
+                  decoration: InputDecoration(labelText: l10n.location),
+                ),
+
+                const SizedBox(height: 12),
+
+                TextField(
+                  controller: descriptionController,
                   maxLines: 3,
-                  decoration:
-                      InputDecoration(
-                    labelText:
-                        l10n.sustainabilityStoryBio,
+                  decoration: InputDecoration(
+                    labelText: l10n.sustainabilityStoryBio,
                   ),
                 ),
               ],
@@ -273,63 +258,52 @@ class _FarmerProfileScreenState
 
           actions: [
             TextButton(
-              onPressed: () =>
-                  Navigator.pop(ctx),
+              onPressed: () => Navigator.pop(ctx),
 
               child: Text(
                 l10n.cancel,
-                style:
-                    const TextStyle(
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(color: Colors.grey),
               ),
             ),
 
             ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _displayName =
-                      nameController.text
-                          .trim();
+              onPressed: () async {
+                final name = nameController.text.trim();
+                final phone = phoneController.text.trim();
+                if (name.isEmpty) return;
 
-                  _location =
-                      locationController.text
-                          .trim();
-
-                  _description =
-                      descriptionController
-                          .text
-                          .trim();
-                });
-
-                Navigator.pop(ctx);
-
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      l10n
-                          .profileInformationUpdated,
+                try {
+                  await _userService.updateProfile({
+                    'name': name,
+                    'phone': phone,
+                  });
+                  if (!mounted) return;
+                  setState(() {
+                    _displayName = name;
+                    _phone = phone;
+                    _location = locationController.text.trim();
+                    _description = descriptionController.text.trim();
+                  });
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.profileInformationUpdated),
+                      backgroundColor: primaryGreen,
                     ),
-                    backgroundColor:
-                        primaryGreen,
-                  ),
-                );
+                  );
+                } catch (error) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to update profile: $error')),
+                  );
+                }
               },
 
-              style:
-                  ElevatedButton.styleFrom(
-                backgroundColor:
-                    primaryGreen,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: primaryGreen),
 
               child: Text(
                 l10n.save,
-                style:
-                    const TextStyle(
-                  color: Colors.white,
-                ),
+                style: const TextStyle(color: Colors.white),
               ),
             ),
           ],
@@ -347,18 +321,13 @@ class _FarmerProfileScreenState
     required String title,
     required bool isAvatar,
   }) {
-    final l10n =
-        AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
 
     showModalBottomSheet(
       context: context,
 
-      shape:
-          const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
 
       builder: (ctx) {
@@ -366,67 +335,43 @@ class _FarmerProfileScreenState
           child: Wrap(
             children: [
               Padding(
-                padding:
-                    const EdgeInsets
-                        .symmetric(
+                padding: const EdgeInsets.symmetric(
                   vertical: 12,
                   horizontal: 16,
                 ),
 
                 child: Text(
                   title,
-                  style:
-                      const TextStyle(
-                    fontWeight:
-                        FontWeight.bold,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
               ),
 
-              const Divider(
-                height: 1,
-              ),
+              const Divider(height: 1),
 
               ListTile(
-                leading:
-                    const Icon(
-                  Icons.visibility,
-                  color:
-                      primaryGreen,
-                ),
+                leading: const Icon(Icons.visibility, color: primaryGreen),
 
-                title: Text(
-                  l10n.viewPhoto,
-                ),
+                title: Text(l10n.viewPhoto),
 
                 onTap: () {
                   Navigator.pop(ctx);
 
-                  _viewPhotoFullScreen(
-                    isAvatar: isAvatar,
-                  );
+                  _viewPhotoFullScreen(isAvatar: isAvatar);
                 },
               ),
 
               ListTile(
-                leading:
-                    const Icon(
-                  Icons.photo_camera,
-                  color:
-                      primaryGreen,
-                ),
+                leading: const Icon(Icons.photo_camera, color: primaryGreen),
 
-                title: Text(
-                  l10n.changePhoto,
-                ),
+                title: Text(l10n.changePhoto),
 
                 onTap: () {
                   Navigator.pop(ctx);
 
-                  _pickAndSavePhoto(
-                    isAvatar: isAvatar,
-                  );
+                  _pickAndSavePhoto(isAvatar: isAvatar);
                 },
               ),
             ],
@@ -440,44 +385,32 @@ class _FarmerProfileScreenState
   // VIEW PHOTO
   // ------------------------------------------------------------
 
-  void _viewPhotoFullScreen({
-    required bool isAvatar,
-  }) {
-    final Uint8List? localBytes =
-        isAvatar
-            ? _localAvatarBytes
-            : _localCoverBytes;
+  void _viewPhotoFullScreen({required bool isAvatar}) {
+    final Uint8List? localBytes = isAvatar
+        ? _localAvatarBytes
+        : _localCoverBytes;
 
     showDialog(
       context: context,
 
       builder: (ctx) {
         return Dialog(
-          backgroundColor:
-              Colors.black,
+          backgroundColor: Colors.black,
 
-          insetPadding:
-              EdgeInsets.zero,
+          insetPadding: EdgeInsets.zero,
 
           child: Stack(
-            alignment:
-                Alignment.center,
+            alignment: Alignment.center,
 
             children: [
               InteractiveViewer(
-                child: localBytes !=
-                        null
-                    ? Image.memory(
-                        localBytes,
-                        fit: BoxFit
-                            .contain,
-                      )
+                child: localBytes != null
+                    ? Image.memory(localBytes, fit: BoxFit.contain)
                     : Image.network(
                         isAvatar
-                            ? _defaultAvatarUrl
-                            : _defaultCoverUrl,
-                        fit: BoxFit
-                            .contain,
+                            ? (_avatarUrl ?? _defaultAvatarUrl)
+                            : (_coverUrl ?? _defaultCoverUrl),
+                        fit: BoxFit.contain,
                       ),
               ),
 
@@ -486,16 +419,9 @@ class _FarmerProfileScreenState
                 right: 16,
 
                 child: IconButton(
-                  icon:
-                      const Icon(
-                    Icons.close,
-                    color:
-                        Colors.white,
-                    size: 28,
-                  ),
+                  icon: const Icon(Icons.close, color: Colors.white, size: 28),
 
-                  onPressed: () =>
-                      Navigator.pop(ctx),
+                  onPressed: () => Navigator.pop(ctx),
                 ),
               ),
             ],
@@ -509,17 +435,12 @@ class _FarmerProfileScreenState
   // PICK PHOTO
   // ------------------------------------------------------------
 
-  Future<void> _pickAndSavePhoto({
-    required bool isAvatar,
-  }) async {
-    final l10n =
-        AppLocalizations.of(context)!;
+  Future<void> _pickAndSavePhoto({required bool isAvatar}) async {
+    final l10n = AppLocalizations.of(context)!;
 
     try {
-      final XFile? pickedFile =
-          await _picker.pickImage(
-        source:
-            ImageSource.gallery,
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
         imageQuality: 90,
       );
 
@@ -527,16 +448,25 @@ class _FarmerProfileScreenState
         return;
       }
 
-      final Uint8List imageBytes =
-          await pickedFile.readAsBytes();
+      final Uint8List imageBytes = await pickedFile.readAsBytes();
+
+      final result = isAvatar
+          ? await _userService.uploadAvatar(pickedFile.path)
+          : await _userService.uploadCover(pickedFile.path);
+      final data = result['data'];
+      final uploadedUrl = _toImageUrl(
+        data is Map
+            ? data[isAvatar ? 'avatarUrl' : 'coverUrl']?.toString()
+            : null,
+      );
 
       setState(() {
         if (isAvatar) {
-          _localAvatarBytes =
-              imageBytes;
+          _localAvatarBytes = imageBytes;
+          _avatarUrl = uploadedUrl;
         } else {
-          _localCoverBytes =
-              imageBytes;
+          _localCoverBytes = imageBytes;
+          _coverUrl = uploadedUrl;
         }
       });
 
@@ -544,23 +474,14 @@ class _FarmerProfileScreenState
         return;
       }
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            isAvatar
-                ? l10n.avatarUpdated
-                : l10n.coverPhotoUpdated,
-          ),
-          backgroundColor:
-              primaryGreen,
+          content: Text(isAvatar ? l10n.avatarUpdated : l10n.coverPhotoUpdated),
+          backgroundColor: primaryGreen,
         ),
       );
     } catch (e) {
-      debugPrint(
-        'Error picking image: $e',
-      );
+      debugPrint('Error picking image: $e');
     }
   }
 
@@ -569,15 +490,11 @@ class _FarmerProfileScreenState
   // ------------------------------------------------------------
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
-    final l10n =
-        AppLocalizations.of(context)!;
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor:
-          pageBgColor,
+      backgroundColor: pageBgColor,
 
       appBar: FarmerAppBar(
         isProfileScreen: true,
@@ -587,108 +504,61 @@ class _FarmerProfileScreenState
             context,
 
             MaterialPageRoute(
-              builder: (context) =>
-                  const FarmerSettingsScreen(),
+              builder: (context) => const FarmerSettingsScreen(),
             ),
           );
         },
       ),
 
-      body:
-          SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
 
           children: [
-            _buildProfileHeader(
-              l10n,
-            ),
+            _buildProfileHeader(l10n),
 
-            const SizedBox(
-              height: 12,
-            ),
+            const SizedBox(height: 12),
 
-            _buildProfileInfo(
-              l10n,
-            ),
+            _buildProfileInfo(l10n),
 
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
 
-            _buildMetricsBar(
-              l10n,
-            ),
+            _buildMetricsBar(l10n),
 
-            const SizedBox(
-              height: 24,
-            ),
+            const SizedBox(height: 24),
 
-            _buildSectionTitle(
-              l10n.dashboard,
-            ),
+            _buildSectionTitle(l10n.dashboard),
 
-            const SizedBox(
-              height: 12,
-            ),
+            const SizedBox(height: 12),
 
-            _buildDashboardGrid(
-              l10n,
-            ),
+            _buildDashboardGrid(l10n),
 
-            const SizedBox(
-              height: 28,
-            ),
+            const SizedBox(height: 28),
 
-            _buildSectionTitle(
-              l10n
-                  .ourSustainabilityStory,
-            ),
+            _buildSectionTitle(l10n.ourSustainabilityStory),
 
-            const SizedBox(
-              height: 12,
-            ),
+            const SizedBox(height: 12),
 
-            _buildStorySection(
-              l10n,
-            ),
+            _buildStorySection(l10n),
 
-            const SizedBox(
-              height: 28,
-            ),
+            const SizedBox(height: 28),
 
-            _buildOfferingsHeader(
-              l10n,
-            ),
+            _buildOfferingsHeader(l10n),
 
-            const SizedBox(
-              height: 14,
-            ),
+            const SizedBox(height: 14),
 
-            _buildCategoryChips(
-              l10n,
-            ),
+            _buildCategoryChips(l10n),
 
-            const SizedBox(
-              height: 16,
-            ),
+            const SizedBox(height: 16),
 
-            _buildProductGrid(
-              l10n,
-            ),
+            _buildProductGrid(l10n),
 
-            const SizedBox(
-              height: 32,
-            ),
+            const SizedBox(height: 32),
           ],
         ),
       ),
 
-      bottomNavigationBar:
-          const FarmerBottomNavBar(
-        currentIndex: 4,
-      ),
+      bottomNavigationBar: const FarmerBottomNavBar(currentIndex: 4),
     );
   }
 
@@ -696,49 +566,36 @@ class _FarmerProfileScreenState
   // PROFILE HEADER
   // ------------------------------------------------------------
 
-  Widget _buildProfileHeader(
-    AppLocalizations l10n,
-  ) {
+  Widget _buildProfileHeader(AppLocalizations l10n) {
     ImageProvider coverImageProvider;
 
     if (_localCoverBytes != null) {
-      coverImageProvider =
-          MemoryImage(
-        _localCoverBytes!,
-      );
+      coverImageProvider = MemoryImage(_localCoverBytes!);
+    } else if (_coverUrl != null) {
+      coverImageProvider = NetworkImage(_coverUrl!);
     } else {
-      coverImageProvider =
-          NetworkImage(
-        _defaultCoverUrl,
-      );
+      coverImageProvider = NetworkImage(_defaultCoverUrl);
     }
 
     ImageProvider avatarImageProvider;
 
     if (_localAvatarBytes != null) {
-      avatarImageProvider =
-          MemoryImage(
-        _localAvatarBytes!,
-      );
+      avatarImageProvider = MemoryImage(_localAvatarBytes!);
+    } else if (_avatarUrl != null) {
+      avatarImageProvider = NetworkImage(_avatarUrl!);
     } else {
-      avatarImageProvider =
-          AssetImage(
-        _defaultAvatarUrl,
-      );
+      avatarImageProvider = AssetImage(_defaultAvatarUrl);
     }
 
     return Stack(
       clipBehavior: Clip.none,
-      alignment:
-          Alignment.bottomCenter,
+      alignment: Alignment.bottomCenter,
 
       children: [
         GestureDetector(
-          onTap: () =>
-              _showImageOptionsBottomSheet(
+          onTap: () => _showImageOptionsBottomSheet(
             context: context,
-            title:
-                l10n.coverPhotoOptions,
+            title: l10n.coverPhotoOptions,
             isAvatar: false,
           ),
 
@@ -746,40 +603,27 @@ class _FarmerProfileScreenState
             height: 190,
             width: double.infinity,
 
-            decoration:
-                BoxDecoration(
-              image:
-                  DecorationImage(
-                image:
-                    coverImageProvider,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: coverImageProvider,
                 fit: BoxFit.cover,
               ),
             ),
 
             child: Container(
-              decoration:
-                  BoxDecoration(
-                gradient:
-                    LinearGradient(
-                  begin: Alignment
-                      .topCenter,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
 
-                  end: Alignment
-                      .bottomCenter,
+                  end: Alignment.bottomCenter,
 
                   colors: [
                     Colors.transparent,
-                    pageBgColor.withValues(
-                      alpha: 0.8,
-                    ),
+                    pageBgColor.withValues(alpha: 0.8),
                     pageBgColor,
                   ],
 
-                  stops: const [
-                    0.5,
-                    0.85,
-                    1.0,
-                  ],
+                  stops: const [0.5, 0.85, 1.0],
                 ),
               ),
             ),
@@ -789,43 +633,32 @@ class _FarmerProfileScreenState
         // --------------------------------------------------------
         // AVATAR
         // --------------------------------------------------------
-
         Positioned(
           bottom: -35,
 
           child: Stack(
-            alignment:
-                Alignment.bottomRight,
+            alignment: Alignment.bottomRight,
 
             children: [
               GestureDetector(
-                onTap: () =>
-                    _showImageOptionsBottomSheet(
+                onTap: () => _showImageOptionsBottomSheet(
                   context: context,
-                  title:
-                      l10n.avatarOptions,
+                  title: l10n.avatarOptions,
                   isAvatar: true,
                 ),
 
                 child: Container(
-                  padding:
-                      const EdgeInsets.all(
-                    3,
-                  ),
+                  padding: const EdgeInsets.all(3),
 
-                  decoration:
-                      const BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.white,
-                    shape:
-                        BoxShape.circle,
+                    shape: BoxShape.circle,
                   ),
 
                   child: CircleAvatar(
                     radius: 46,
-                    backgroundColor:
-                        Colors.grey.shade200,
-                    backgroundImage:
-                        avatarImageProvider,
+                    backgroundColor: Colors.grey.shade200,
+                    backgroundImage: avatarImageProvider,
                   ),
                 ),
               ),
@@ -835,40 +668,24 @@ class _FarmerProfileScreenState
                 right: 2,
 
                 child: GestureDetector(
-                  onTap: () =>
-                      _showImageOptionsBottomSheet(
+                  onTap: () => _showImageOptionsBottomSheet(
                     context: context,
-                    title:
-                        l10n.avatarOptions,
+                    title: l10n.avatarOptions,
                     isAvatar: true,
                   ),
 
                   child: Container(
-                    padding:
-                        const EdgeInsets
-                            .all(
-                      6,
+                    padding: const EdgeInsets.all(6),
+
+                    decoration: BoxDecoration(
+                      color: primaryGreen,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
                     ),
 
-                    decoration:
-                        BoxDecoration(
-                      color:
-                          primaryGreen,
-                      shape:
-                          BoxShape.circle,
-                      border:
-                          Border.all(
-                        color:
-                            Colors.white,
-                        width: 2,
-                      ),
-                    ),
-
-                    child:
-                        const Icon(
+                    child: const Icon(
                       Icons.camera_alt,
-                      color:
-                          Colors.white,
+                      color: Colors.white,
                       size: 12,
                     ),
                   ),
@@ -885,51 +702,35 @@ class _FarmerProfileScreenState
   // PROFILE INFO
   // ------------------------------------------------------------
 
-  Widget _buildProfileInfo(
-    AppLocalizations l10n,
-  ) {
+  Widget _buildProfileInfo(AppLocalizations l10n) {
     return Column(
       children: [
-        const SizedBox(
-          height: 32,
-        ),
+        const SizedBox(height: 32),
 
         Row(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
             Text(
               _displayName,
 
-              style:
-                  const TextStyle(
+              style: const TextStyle(
                 fontSize: 22,
-                fontWeight:
-                    FontWeight.bold,
+                fontWeight: FontWeight.bold,
                 letterSpacing: -0.5,
               ),
             ),
 
-            const SizedBox(
-              width: 6,
-            ),
+            const SizedBox(width: 6),
 
-            const Icon(
-              Icons.check_circle,
-              color: primaryGreen,
-              size: 20,
-            ),
+            const Icon(Icons.check_circle, color: primaryGreen, size: 20),
           ],
         ),
 
-        const SizedBox(
-          height: 6,
-        ),
+        const SizedBox(height: 6),
 
         Row(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
             const Icon(
@@ -938,68 +739,46 @@ class _FarmerProfileScreenState
               color: Colors.grey,
             ),
 
-            const SizedBox(
-              width: 2,
-            ),
+            const SizedBox(width: 2),
 
             Flexible(
               child: Text(
                 '$_location  •  ',
 
-                style:
-                    const TextStyle(
+                style: const TextStyle(
                   color: Colors.grey,
                   fontSize: 13,
-                  fontWeight:
-                      FontWeight.w500,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
 
-            const Icon(
-              Icons.verified,
-              size: 15,
-              color: primaryGreen,
-            ),
+            const Icon(Icons.verified, size: 15, color: primaryGreen),
 
-            const SizedBox(
-              width: 3,
-            ),
+            const SizedBox(width: 3),
 
             Text(
               l10n.verifiedProducer,
 
-              style:
-                  const TextStyle(
+              style: const TextStyle(
                 color: primaryGreen,
                 fontSize: 13,
-                fontWeight:
-                    FontWeight.bold,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
 
-        const SizedBox(
-          height: 16,
-        ),
+        const SizedBox(height: 16),
 
         Row(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
             ElevatedButton.icon(
               onPressed: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      l10n
-                          .promoteActionTriggered,
-                    ),
-                  ),
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.promoteActionTriggered)),
                 );
               },
 
@@ -1012,43 +791,30 @@ class _FarmerProfileScreenState
               label: Text(
                 l10n.promote,
 
-                style:
-                    const TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
-                  fontWeight:
-                      FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
 
-              style:
-                  ElevatedButton.styleFrom(
-                backgroundColor:
-                    primaryGreen,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryGreen,
 
-                shape:
-                    RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(
-                    24,
-                  ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
                 ),
 
-                padding:
-                    const EdgeInsets
-                        .symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 28,
                   vertical: 12,
                 ),
               ),
             ),
 
-            const SizedBox(
-              width: 12,
-            ),
+            const SizedBox(width: 12),
 
             OutlinedButton.icon(
-              onPressed:
-                  _showEditProfileInfoDialog,
+              onPressed: _showEditProfileInfoDialog,
 
               icon: const Icon(
                 Icons.edit_outlined,
@@ -1059,36 +825,22 @@ class _FarmerProfileScreenState
               label: Text(
                 l10n.editProfile,
 
-                style:
-                    const TextStyle(
+                style: const TextStyle(
                   color: primaryGreen,
-                  fontWeight:
-                      FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
 
-              style:
-                  OutlinedButton.styleFrom(
-                backgroundColor:
-                    Colors.white,
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
 
-                side:
-                    const BorderSide(
-                  color: primaryGreen,
-                  width: 1.2,
+                side: const BorderSide(color: primaryGreen, width: 1.2),
+
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
                 ),
 
-                shape:
-                    RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(
-                    24,
-                  ),
-                ),
-
-                padding:
-                    const EdgeInsets
-                        .symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 28,
                   vertical: 12,
                 ),
@@ -1104,91 +856,57 @@ class _FarmerProfileScreenState
   // METRICS
   // ------------------------------------------------------------
 
-  Widget _buildMetricsBar(
-    AppLocalizations l10n,
-  ) {
+  Widget _buildMetricsBar(AppLocalizations l10n) {
     return Container(
-      margin:
-          const EdgeInsets.symmetric(
-        horizontal: 16,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
 
-      padding:
-          const EdgeInsets.symmetric(
-        vertical: 16,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 16),
 
-      decoration:
-          BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16),
       ),
 
       child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 
         children: [
-          _StatTile(
-            value: '120+',
-            label: l10n.orders,
-          ),
+          _StatTile(value: '120+', label: l10n.orders),
 
           _buildDivider(),
 
-          _StatTile(
-            value: '4.9 ★',
-            label: l10n.rating,
-          ),
+          _StatTile(value: '4.9 ★', label: l10n.rating),
 
           _buildDivider(),
 
-          _StatTile(
-            value: '2018',
-            label: l10n.since,
-          ),
+          _StatTile(value: '2018', label: l10n.since),
 
           _buildDivider(),
 
-          _StatTile(
-            value: '\$4.2k',
-            label: l10n.revenue,
-          ),
+          _StatTile(value: '\$4.2k', label: l10n.revenue),
         ],
       ),
     );
   }
 
   Widget _buildDivider() {
-    return Container(
-      height: 24,
-      width: 1,
-      color: Colors.grey.shade200,
-    );
+    return Container(height: 24, width: 1, color: Colors.grey.shade200);
   }
 
   // ------------------------------------------------------------
   // SECTION TITLE
   // ------------------------------------------------------------
 
-  Widget _buildSectionTitle(
-    String title,
-  ) {
+  Widget _buildSectionTitle(String title) {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
 
       child: Text(
         title,
 
-        style:
-            const TextStyle(
+        style: const TextStyle(
           fontSize: 18,
-          fontWeight:
-              FontWeight.bold,
+          fontWeight: FontWeight.bold,
           color: Colors.black87,
         ),
       ),
@@ -1199,20 +917,14 @@ class _FarmerProfileScreenState
   // DASHBOARD
   // ------------------------------------------------------------
 
-  Widget _buildDashboardGrid(
-    AppLocalizations l10n,
-  ) {
+  Widget _buildDashboardGrid(AppLocalizations l10n) {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
 
       child: GridView.count(
         shrinkWrap: true,
 
-        physics:
-            const NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
 
         crossAxisCount: 2,
 
@@ -1223,34 +935,26 @@ class _FarmerProfileScreenState
 
         children: [
           _DashboardCard(
-            icon:
-                Icons.inventory_2_outlined,
-            label:
-                l10n.manageInventory,
+            icon: Icons.inventory_2_outlined,
+            label: l10n.manageInventory,
             onTap: () {},
           ),
 
           _DashboardCard(
-            icon:
-                Icons.shopping_cart_outlined,
-            label:
-                l10n.viewOrders,
+            icon: Icons.shopping_cart_outlined,
+            label: l10n.viewOrders,
             onTap: () {},
           ),
 
           _DashboardCard(
-            icon:
-                Icons.insert_chart_outlined,
-            label:
-                l10n.salesAnalytics,
+            icon: Icons.insert_chart_outlined,
+            label: l10n.salesAnalytics,
             onTap: () {},
           ),
 
           _DashboardCard(
-            icon:
-                Icons.credit_card_outlined,
-            label:
-                l10n.paymentSettings,
+            icon: Icons.credit_card_outlined,
+            label: l10n.paymentSettings,
             onTap: () {},
           ),
         ],
@@ -1262,117 +966,77 @@ class _FarmerProfileScreenState
   // SUSTAINABILITY STORY
   // ------------------------------------------------------------
 
-  Widget _buildStorySection(
-    AppLocalizations l10n,
-  ) {
+  Widget _buildStorySection(AppLocalizations l10n) {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
 
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
           Text(
             _description,
 
             style: TextStyle(
-              color:
-                  Colors.grey.shade800,
+              color: Colors.grey.shade800,
               height: 1.4,
               fontSize: 13,
             ),
           ),
 
-          const SizedBox(
-            height: 14,
+          const SizedBox(height: 14),
+
+          _FeatureTile(icon: Icons.eco_outlined, text: l10n.certifiedOrganic),
+
+          _FeatureTile(
+            icon: Icons.water_drop_outlined,
+            text: l10n.rainwaterIrrigationSystem,
           ),
 
           _FeatureTile(
-            icon:
-                Icons.eco_outlined,
-            text:
-                l10n.certifiedOrganic,
+            icon: Icons.local_shipping_outlined,
+            text: l10n.sameDayLocalDelivery,
           ),
 
-          _FeatureTile(
-            icon:
-                Icons.water_drop_outlined,
-            text:
-                l10n.rainwaterIrrigationSystem,
-          ),
-
-          _FeatureTile(
-            icon:
-                Icons.local_shipping_outlined,
-            text:
-                l10n.sameDayLocalDelivery,
-          ),
-
-          const SizedBox(
-            height: 16,
-          ),
+          const SizedBox(height: 16),
 
           Container(
-            padding:
-                const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
 
-            decoration:
-                BoxDecoration(
-              color:
-                  cardBgColor,
-              borderRadius:
-                  BorderRadius.circular(
-                16,
-              ),
+            decoration: BoxDecoration(
+              color: cardBgColor,
+              borderRadius: BorderRadius.circular(16),
             ),
 
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
 
               children: [
                 Text(
-                  l10n
-                      .sustainabilityReport
-                      .toUpperCase(),
+                  l10n.sustainabilityReport.toUpperCase(),
 
-                  style:
-                      const TextStyle(
+                  style: const TextStyle(
                     fontSize: 10,
-                    fontWeight:
-                        FontWeight.bold,
-                    color:
-                        primaryGreen,
+                    fontWeight: FontWeight.bold,
+                    color: primaryGreen,
                     letterSpacing: 0.8,
                   ),
                 ),
 
-                const SizedBox(
-                  height: 14,
-                ),
+                const SizedBox(height: 14),
 
                 _ProgressRow(
-                  label:
-                      l10n.pesticideFree,
+                  label: l10n.pesticideFree,
                   progress: 1.0,
-                  percentageText:
-                      '100%',
+                  percentageText: '100%',
                 ),
 
-                const SizedBox(
-                  height: 12,
-                ),
+                const SizedBox(height: 12),
 
                 _ProgressRow(
-                  label:
-                      l10n.renewableEnergy,
+                  label: l10n.renewableEnergy,
                   progress: 0.85,
-                  percentageText:
-                      '85%',
+                  percentageText: '85%',
                 ),
               ],
             ),
@@ -1386,45 +1050,30 @@ class _FarmerProfileScreenState
   // OFFERINGS HEADER
   // ------------------------------------------------------------
 
-  Widget _buildOfferingsHeader(
-    AppLocalizations l10n,
-  ) {
+  Widget _buildOfferingsHeader(AppLocalizations l10n) {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
 
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
           Text(
             l10n.currentOfferings,
 
-            style:
-                const TextStyle(
+            style: const TextStyle(
               fontSize: 18,
-              fontWeight:
-                  FontWeight.bold,
-              color:
-                  Colors.black87,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
             ),
           ),
 
-          const SizedBox(
-            height: 2,
-          ),
+          const SizedBox(height: 2),
 
           Text(
             l10n.freshFromOurLocalFarm,
 
-            style:
-                const TextStyle(
-              color: Colors.grey,
-              fontSize: 13,
-            ),
+            style: const TextStyle(color: Colors.grey, fontSize: 13),
           ),
         ],
       ),
@@ -1435,72 +1084,48 @@ class _FarmerProfileScreenState
   // CATEGORY CHIPS
   // ------------------------------------------------------------
 
-  Widget _buildCategoryChips(
-    AppLocalizations l10n,
-  ) {
-    final categories =
-        _getCategories(l10n);
+  Widget _buildCategoryChips(AppLocalizations l10n) {
+    final categories = _getCategories(l10n);
 
     return SizedBox(
       height: 36,
 
       child: ListView.builder(
-        scrollDirection:
-            Axis.horizontal,
+        scrollDirection: Axis.horizontal,
 
-        padding:
-            const EdgeInsets.symmetric(
-          horizontal: 16,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
 
-        itemCount:
-            categories.length,
+        itemCount: categories.length,
 
-        itemBuilder:
-            (context, index) {
-          final isSelected =
-              _selectedCategoryIndex ==
-                  index;
+        itemBuilder: (context, index) {
+          final isSelected = _selectedCategoryIndex == index;
 
           return Padding(
-            padding:
-                const EdgeInsets.only(
-              right: 8,
-            ),
+            padding: const EdgeInsets.only(right: 8),
 
             child: ChoiceChip(
               label: Text(
                 categories[index],
 
                 style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : Colors.black87,
+                  color: isSelected ? Colors.white : Colors.black87,
 
                   fontSize: 12,
 
-                  fontWeight:
-                      isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
 
-              selected:
-                  isSelected,
+              selected: isSelected,
 
-              selectedColor:
-                  primaryGreen,
+              selectedColor: primaryGreen,
 
-              backgroundColor:
-                  cardBgColor,
+              backgroundColor: cardBgColor,
 
-              onSelected:
-                  (selected) {
+              onSelected: (selected) {
                 if (selected) {
                   setState(() {
-                    _selectedCategoryIndex =
-                        index;
+                    _selectedCategoryIndex = index;
                   });
                 }
               },
@@ -1515,41 +1140,28 @@ class _FarmerProfileScreenState
   // PRODUCT GRID
   // ------------------------------------------------------------
 
-  Widget _buildProductGrid(
-    AppLocalizations l10n,
-  ) {
-    final products =
-        _filteredProducts(l10n);
+  Widget _buildProductGrid(AppLocalizations l10n) {
+    final products = _filteredProducts(l10n);
 
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
 
       child: GridView.builder(
         shrinkWrap: true,
 
-        physics:
-            const NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
 
-        itemCount:
-            products.length,
+        itemCount: products.length,
 
-        gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 0.8,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
 
-        itemBuilder:
-            (context, index) {
-          return _ProductCard(
-            product:
-                products[index],
-          );
+        itemBuilder: (context, index) {
+          return _ProductCard(product: products[index]);
         },
       ),
     );
@@ -1560,49 +1172,35 @@ class _FarmerProfileScreenState
 // STAT TILE
 // ============================================================
 
-class _StatTile
-    extends StatelessWidget {
+class _StatTile extends StatelessWidget {
   final String value;
   final String label;
 
-  const _StatTile({
-    required this.value,
-    required this.label,
-  });
+  const _StatTile({required this.value, required this.label});
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Text(
           value,
 
-          style:
-              const TextStyle(
-            fontWeight:
-                FontWeight.bold,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
             fontSize: 18,
-            color:
-                _FarmerProfileScreenState
-                    .primaryGreen,
+            color: _FarmerProfileScreenState.primaryGreen,
           ),
         ),
 
-        const SizedBox(
-          height: 4,
-        ),
+        const SizedBox(height: 4),
 
         Text(
           label,
 
           style: TextStyle(
-            color:
-                Colors.grey.shade600,
+            color: Colors.grey.shade600,
             fontSize: 10,
-            fontWeight:
-                FontWeight.w600,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -1614,8 +1212,7 @@ class _StatTile
 // DASHBOARD CARD
 // ============================================================
 
-class _DashboardCard
-    extends StatelessWidget {
+class _DashboardCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -1627,76 +1224,51 @@ class _DashboardCard
   });
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
 
-      borderRadius:
-          BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(14),
 
       child: Container(
-        decoration:
-            BoxDecoration(
-          color:
-              _FarmerProfileScreenState
-                  .cardBgColor,
+        decoration: BoxDecoration(
+          color: _FarmerProfileScreenState.cardBgColor,
 
-          borderRadius:
-              BorderRadius.circular(
-            14,
-          ),
+          borderRadius: BorderRadius.circular(14),
         ),
 
         child: Row(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
             Container(
-              padding:
-                  const EdgeInsets.all(
-                6,
-              ),
+              padding: const EdgeInsets.all(6),
 
-              decoration:
-                  BoxDecoration(
-                color:
-                    Colors.white,
+              decoration: BoxDecoration(
+                color: Colors.white,
 
-                borderRadius:
-                    BorderRadius.circular(
-                  8,
-                ),
+                borderRadius: BorderRadius.circular(8),
               ),
 
               child: Icon(
                 icon,
-                color:
-                    _FarmerProfileScreenState
-                        .primaryGreen,
+                color: _FarmerProfileScreenState.primaryGreen,
                 size: 20,
               ),
             ),
 
-            const SizedBox(
-              width: 10,
-            ),
+            const SizedBox(width: 10),
 
             Flexible(
               child: Text(
                 label,
 
-                style:
-                    const TextStyle(
-                  fontWeight:
-                      FontWeight.w600,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
 
-                overflow:
-                    TextOverflow.ellipsis,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -1710,49 +1282,27 @@ class _DashboardCard
 // FEATURE TILE
 // ============================================================
 
-class _FeatureTile
-    extends StatelessWidget {
+class _FeatureTile extends StatelessWidget {
   final IconData icon;
   final String text;
 
-  const _FeatureTile({
-    required this.icon,
-    required this.text,
-  });
+  const _FeatureTile({required this.icon, required this.text});
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return Padding(
-      padding:
-          const EdgeInsets.only(
-        bottom: 8,
-      ),
+      padding: const EdgeInsets.only(bottom: 8),
 
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 18,
-            color:
-                _FarmerProfileScreenState
-                    .primaryGreen,
-          ),
+          Icon(icon, size: 18, color: _FarmerProfileScreenState.primaryGreen),
 
-          const SizedBox(
-            width: 8,
-          ),
+          const SizedBox(width: 8),
 
           Text(
             text,
 
-            style:
-                const TextStyle(
-              fontSize: 13,
-              fontWeight:
-                  FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -1764,8 +1314,7 @@ class _FeatureTile
 // PROGRESS ROW
 // ============================================================
 
-class _ProgressRow
-    extends StatelessWidget {
+class _ProgressRow extends StatelessWidget {
   final String label;
   final double progress;
   final String percentageText;
@@ -1777,65 +1326,45 @@ class _ProgressRow
   });
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
 
       children: [
         Row(
-          mainAxisAlignment:
-              MainAxisAlignment
-                  .spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
           children: [
             Text(
               label,
 
-              style:
-                  const TextStyle(
-                fontSize: 12,
-                fontWeight:
-                    FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
 
             Text(
               percentageText,
 
-              style:
-                  const TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
-                fontWeight:
-                    FontWeight.bold,
-                color:
-                    _FarmerProfileScreenState
-                        .primaryGreen,
+                fontWeight: FontWeight.bold,
+                color: _FarmerProfileScreenState.primaryGreen,
               ),
             ),
           ],
         ),
 
-        const SizedBox(
-          height: 6,
-        ),
+        const SizedBox(height: 6),
 
         LinearProgressIndicator(
           value: progress,
 
-          backgroundColor:
-              Colors.grey.shade300,
+          backgroundColor: Colors.grey.shade300,
 
-          color:
-              _FarmerProfileScreenState
-                  .primaryGreen,
+          color: _FarmerProfileScreenState.primaryGreen,
 
           minHeight: 6,
 
-          borderRadius:
-              BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(4),
         ),
       ],
     );
@@ -1846,20 +1375,14 @@ class _ProgressRow
 // PRODUCT CARD
 // ============================================================
 
-class _ProductCard
-    extends StatelessWidget {
+class _ProductCard extends StatelessWidget {
   final Product product;
 
-  const _ProductCard({
-    required this.product,
-  });
+  const _ProductCard({required this.product});
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
-    final l10n =
-        AppLocalizations.of(context)!;
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
 
     // Localized product tags.
     // The product category/name itself stays as
@@ -1881,109 +1404,77 @@ class _ProductCard
         break;
 
       default:
-        localizedTag =
-            product.tag;
+        localizedTag = product.tag;
     }
 
     return Container(
-      decoration:
-          BoxDecoration(
-        color:
-            _FarmerProfileScreenState
-                .cardBgColor,
+      decoration: BoxDecoration(
+        color: _FarmerProfileScreenState.cardBgColor,
 
-        borderRadius:
-            BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14),
       ),
 
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius:
-                  const BorderRadius
-                      .vertical(
-                top:
-                    Radius.circular(
-                  14,
-                ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(14),
               ),
 
               child: Image.network(
                 product.imageUrl,
 
-                width:
-                    double.infinity,
+                width: double.infinity,
 
-                fit:
-                    BoxFit.cover,
+                fit: BoxFit.cover,
               ),
             ),
           ),
 
           Padding(
-            padding:
-                const EdgeInsets.all(
-              10,
-            ),
+            padding: const EdgeInsets.all(10),
 
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
 
               children: [
                 Text(
                   product.name,
 
-                  style:
-                      const TextStyle(
-                    fontWeight:
-                        FontWeight.bold,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
 
                   maxLines: 1,
 
-                  overflow:
-                      TextOverflow.ellipsis,
+                  overflow: TextOverflow.ellipsis,
                 ),
 
-                const SizedBox(
-                  height: 4,
-                ),
+                const SizedBox(height: 4),
 
                 Container(
-                  padding:
-                      const EdgeInsets
-                          .symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 6,
                     vertical: 2,
                   ),
 
-                  decoration:
-                      BoxDecoration(
-                    color:
-                        _FarmerProfileScreenState
-                            .badgeBgColor,
+                  decoration: BoxDecoration(
+                    color: _FarmerProfileScreenState.badgeBgColor,
 
-                    borderRadius:
-                        BorderRadius.circular(
-                      4,
-                    ),
+                    borderRadius: BorderRadius.circular(4),
                   ),
 
                   child: Text(
                     localizedTag,
 
                     style: TextStyle(
-                      color:
-                          product.tagColor,
+                      color: product.tagColor,
                       fontSize: 10,
-                      fontWeight:
-                          FontWeight.bold,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),

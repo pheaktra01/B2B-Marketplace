@@ -6,10 +6,7 @@ import 'package:mobile/features/restaurant/screens/search_market_screen.dart';
 import 'package:mobile/features/restaurant/screens/user_profile_screen.dart';
 
 class RestaurantBottomNavBar extends StatelessWidget {
-  const RestaurantBottomNavBar({
-    super.key,
-    required this.currentIndex,
-  });
+  const RestaurantBottomNavBar({super.key, required this.currentIndex});
 
   final int currentIndex;
 
@@ -31,9 +28,7 @@ class RestaurantBottomNavBar extends StatelessWidget {
           case 0:
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                builder: (_) => const HomeScreen(),
-              ),
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
             );
             break;
 
@@ -54,7 +49,9 @@ class RestaurantBottomNavBar extends StatelessWidget {
           case 3:
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const ChatListScreen()),
+              MaterialPageRoute(
+                builder: (_) => const ChatListScreen(isRestaurant: true),
+              ),
             );
             break;
 
@@ -72,10 +69,7 @@ class RestaurantBottomNavBar extends StatelessWidget {
 
         return BottomNavigationBarItem(
           icon: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
               color: selected
                   ? primaryColor.withValues(alpha: 0.15)

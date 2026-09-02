@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
-import 'package:mobile/features/farmer/screens/chat_list_screen.dart';
+import 'package:mobile/features/chat/screens/chat_list_screen.dart';
 import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
 import 'package:mobile/features/farmer/screens/farmer_order_management_screen.dart';
 import 'package:mobile/features/farmer/screens/farmer_profile_screen.dart';

@@ -9,12 +9,15 @@ import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './enterties/product.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepo: Repository<Product>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
   ) {}
 
   // ============================================================
@@ -82,11 +85,13 @@ export class ProductsService {
   // ============================================================
 
   async findAll() {
-    return this.productRepo.find({
+    const products = await this.productRepo.find({
       order: {
         createdAt: 'DESC',
       },
     });
+
+    return Promise.all(products.map((product) => this.withPublisher(product)));
   }
 
   // ============================================================
@@ -96,7 +101,7 @@ export class ProductsService {
   async findMyProducts(
     farmerId: string,
   ) {
-    return this.productRepo.find({
+    const products = await this.productRepo.find({
       where: {
         farmerId,
       },
@@ -104,6 +109,8 @@ export class ProductsService {
         createdAt: 'DESC',
       },
     });
+
+    return Promise.all(products.map((product) => this.withPublisher(product)));
   }
 
   // ============================================================
@@ -124,7 +131,31 @@ export class ProductsService {
       );
     }
 
-    return product;
+    return this.withPublisher(product);
+  }
+
+  private async withPublisher(product: Product) {
+    const publisher = await this.userRepo.findOne({
+      where: { id: product.farmerId },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        avatarUrl: true,
+      },
+    });
+
+    return {
+      ...product,
+      publisher: publisher
+        ? {
+            id: publisher.id,
+            name: publisher.name,
+            role: publisher.role,
+            avatarUrl: publisher.avatarUrl,
+          }
+        : null,
+    };
   }
 
   // ============================================================

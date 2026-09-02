@@ -30,6 +30,27 @@ export class UsersService {
     return rest as Partial<User>;
   }
 
+  async getUserById(userId: string) {
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const {
+      password,
+      refreshToken,
+      phone,
+      otp,
+      otpExpiresAt,
+      ...publicUser
+    } = user as any;
+
+    return publicUser as Partial<User>;
+  }
+
   async updateProfile(
     userId: string,
     dto: UpdateUserDto,

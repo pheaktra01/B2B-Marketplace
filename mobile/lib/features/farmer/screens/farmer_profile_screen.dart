@@ -78,7 +78,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
   final String _defaultCoverUrl =
       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGo2z3rQrSISUbvCJO0kZFrymxlPHjG6lkT0EkFKM8ntPy1Ug9ZWrQzA8&s=10';
 
-  final String _defaultAvatarUrl = 'assets/profile.png';
+  final String _defaultAvatarUrl = 'assets/mokoto.jpg';
 
   String? _avatarUrl;
   String? _coverUrl;

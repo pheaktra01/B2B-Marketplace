@@ -16,9 +16,7 @@ class UserService {
     final token = prefs.getString('accessToken');
 
     if (token == null || token.isEmpty) {
-      throw Exception(
-        'Authentication token not found. Please login again.',
-      );
+      throw Exception('Authentication token not found. Please login again.');
     }
 
     return token;
@@ -28,9 +26,7 @@ class UserService {
   Future<Map<String, String>> _authHeaders() async {
     final token = await _getToken();
 
-    return {
-      'Authorization': 'Bearer $token',
-    };
+    return {'Authorization': 'Bearer $token'};
   }
 
   /// Get current logged-in user's profile
@@ -38,9 +34,19 @@ class UserService {
     final headers = await _authHeaders();
 
     final response = await http.get(
-      Uri.parse(
-        '${ApiConstants.baseUrl}/users/profile',
-      ),
+      Uri.parse('${ApiConstants.baseUrl}/users/profile'),
+      headers: headers,
+    );
+
+    return _parseResponse(response);
+  }
+
+  /// Get a public user profile by ID.
+  Future<Map<String, dynamic>> getUserById(String userId) async {
+    final headers = await _authHeaders();
+
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}/users/$userId'),
       headers: headers,
     );
 
@@ -48,19 +54,12 @@ class UserService {
   }
 
   /// Update current logged-in user's profile
-  Future<Map<String, dynamic>> updateProfile(
-    Map<String, dynamic> data,
-  ) async {
+  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data) async {
     final headers = await _authHeaders();
 
     final response = await http.patch(
-      Uri.parse(
-        '${ApiConstants.baseUrl}/users/profile',
-      ),
-      headers: {
-        ...headers,
-        'Content-Type': 'application/json',
-      },
+      Uri.parse('${ApiConstants.baseUrl}/users/profile'),
+      headers: {...headers, 'Content-Type': 'application/json'},
       body: jsonEncode(data),
     );
 
@@ -72,9 +71,7 @@ class UserService {
   // ============================================================
 
   /// Upload profile/avatar image
-  Future<Map<String, dynamic>> uploadAvatar(
-    String imagePath,
-  ) async {
+  Future<Map<String, dynamic>> uploadAvatar(String imagePath) async {
     return _uploadImage(
       endpoint: '/users/profile/avatar',
       imagePath: imagePath,
@@ -82,13 +79,8 @@ class UserService {
   }
 
   /// Upload cover image
-  Future<Map<String, dynamic>> uploadCover(
-    String imagePath,
-  ) async {
-    return _uploadImage(
-      endpoint: '/users/profile/cover',
-      imagePath: imagePath,
-    );
+  Future<Map<String, dynamic>> uploadCover(String imagePath) async {
+    return _uploadImage(endpoint: '/users/profile/cover', imagePath: imagePath);
   }
 
   /// Generic multipart image upload
@@ -102,24 +94,17 @@ class UserService {
       final file = File(imagePath);
 
       if (!await file.exists()) {
-        throw Exception(
-          'Image file does not exist: $imagePath',
-        );
+        throw Exception('Image file does not exist: $imagePath');
       }
 
       final int fileLength = await file.length();
 
       if (fileLength == 0) {
-        throw Exception(
-          'Image file is empty.',
-        );
+        throw Exception('Image file is empty.');
       }
 
       // Detect image type
-      final extension = imagePath
-          .split('.')
-          .last
-          .toLowerCase();
+      final extension = imagePath.split('.').last.toLowerCase();
 
       String mimeType;
 
@@ -180,25 +165,19 @@ class UserService {
 
       return _parseResponse(response);
     } catch (e) {
-      debugPrint(
-        'Multipart image upload error: $e',
-      );
+      debugPrint('Multipart image upload error: $e');
 
       rethrow;
     }
   }
 
   /// Parse HTTP response
-  Map<String, dynamic> _parseResponse(
-    http.Response response,
-  ) {
+  Map<String, dynamic> _parseResponse(http.Response response) {
     dynamic responseData;
 
     try {
       if (response.body.isNotEmpty) {
-        responseData = jsonDecode(
-          response.body,
-        );
+        responseData = jsonDecode(response.body);
       } else {
         responseData = null;
       }
@@ -207,28 +186,20 @@ class UserService {
     }
 
     // Success
-    if (response.statusCode >= 200 &&
-        response.statusCode < 300) {
-      return {
-        'statusCode': response.statusCode,
-        'data': responseData,
-      };
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return {'statusCode': response.statusCode, 'data': responseData};
     }
 
     // Error
     String errorMessage;
 
     if (responseData is Map<String, dynamic>) {
-      final message =
-          responseData['message'];
+      final message = responseData['message'];
 
       if (message is List) {
-        errorMessage =
-            message.join(', ');
+        errorMessage = message.join(', ');
       } else {
-        errorMessage =
-            message?.toString() ??
-                response.body;
+        errorMessage = message?.toString() ?? response.body;
       }
     } else {
       errorMessage = response.body;

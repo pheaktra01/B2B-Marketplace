@@ -8,6 +8,8 @@ import { User } from './users/entities/user.entity';
 import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
+import { ChatModule } from './chat/chat.module';
+import { NotificationModule } from './notification/notification.module';
 // Debug env values for DB connection troubleshooting (masked)
 try {
   const pwd = process.env.DB_PASSWORD;
@@ -41,6 +43,8 @@ try {
     ProductsModule,
     CartModule,
     OrderModule, 
+    ChatModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

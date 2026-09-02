@@ -5,10 +5,13 @@ import 'package:mobile/features/chat/models/conversation_model.dart';
 import 'package:mobile/features/chat/widgets/conversation_card.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
+import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 import 'package:mobile/features/chat/services/chat_service.dart';
 
 class ChatListScreen extends StatefulWidget {
-  const ChatListScreen({super.key});
+  final bool isRestaurant;
+
+  const ChatListScreen({super.key, this.isRestaurant = false});
 
   @override
   State<ChatListScreen> createState() => _ChatListScreenState();
@@ -247,7 +250,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
       // ========================================================
       // BOTTOM NAVIGATION
       // ========================================================
-      bottomNavigationBar: const FarmerBottomNavBar(currentIndex: 3),
+      bottomNavigationBar: widget.isRestaurant
+          ? const RestaurantBottomNavBar(currentIndex: 3)
+          : const FarmerBottomNavBar(currentIndex: 3),
     );
   }
 }

@@ -62,6 +62,7 @@ class ConversationCard extends StatelessWidget {
                     builder: (context) => ChatScreen(
                       conversationId: conversationId,
                       participantName: name,
+                      participantAvatarUrl: avatarUrl,
                       isOnline: isOnline,
                     ),
                   ),

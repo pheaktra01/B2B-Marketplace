@@ -974,6 +974,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             participantName: participantName?.isNotEmpty == true
                 ? participantName!
                 : _farmName,
+            participantAvatarUrl: _publisherAvatarUrl,
             isOnline: false,
           ),
         ),

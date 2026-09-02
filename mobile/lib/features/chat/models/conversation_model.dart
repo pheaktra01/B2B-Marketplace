@@ -1,3 +1,5 @@
+import 'package:mobile/core/constants/api_constants.dart';
+
 class Conversation {
   final String id;
   final String participantId;
@@ -38,7 +40,11 @@ class Conversation {
       updatedAt: updatedAt,
       unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
       isOnline: participant['isOnline'] == true,
-      avatarUrl: participant['avatarUrl']?.toString() ?? 'assets/profile.png',
+      avatarUrl:
+          participant['avatarUrl'] == null ||
+              participant['avatarUrl'].toString().isEmpty
+          ? 'assets/mokoto.jpg'
+          : ApiConstants.imageUrl(participant['avatarUrl'].toString()),
     );
   }
 

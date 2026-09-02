@@ -281,7 +281,7 @@ class _CartScreenState extends State<CartScreen> {
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
               backgroundImage:
-                  AssetImage('assets/profile.png'),
+                  AssetImage('assets/mokoto.jpg'),
             ),
           ),
         ],

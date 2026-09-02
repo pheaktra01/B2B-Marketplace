@@ -185,6 +185,7 @@ export class ChatService {
           id: otherParticipant.user.id,
           name: otherParticipant.user.name,
           role: otherParticipant.user.role,
+          avatarUrl: otherParticipant.user.avatarUrl,
         },
 
         lastMessage: lastMessage
@@ -243,6 +244,7 @@ export class ChatService {
             id: otherParticipant.user.id,
             name: otherParticipant.user.name,
             role: otherParticipant.user.role,
+            avatarUrl: otherParticipant.user.avatarUrl,
           }
         : null,
 

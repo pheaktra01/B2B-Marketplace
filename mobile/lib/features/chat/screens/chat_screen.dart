@@ -24,7 +24,7 @@ class LegacyStaticChatScreen extends StatelessWidget {
               children: [
                 const CircleAvatar(
                   radius: 20,
-                  backgroundImage: AssetImage('assets/profile.png'),
+                  backgroundImage: AssetImage('assets/mokoto.jpg'),
                 ),
                 Positioned(
                   right: 0,
@@ -167,12 +167,14 @@ class LegacyStaticChatScreen extends StatelessWidget {
 class ChatScreen extends StatefulWidget {
   final String conversationId;
   final String participantName;
+  final String? participantAvatarUrl;
   final bool isOnline;
 
   const ChatScreen({
     super.key,
     required this.conversationId,
     required this.participantName,
+    this.participantAvatarUrl,
     required this.isOnline,
   });
 
@@ -249,10 +251,7 @@ class _ChatScreenState extends State<ChatScreen> {
         titleSpacing: 0,
         title: Row(
           children: [
-            const CircleAvatar(
-              radius: 20,
-              backgroundImage: AssetImage('assets/profile.png'),
-            ),
+            _buildParticipantAvatar(),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,6 +319,26 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildParticipantAvatar() {
+    final avatarUrl = widget.participantAvatarUrl;
+    if (avatarUrl == null || avatarUrl.isEmpty) {
+      return const CircleAvatar(
+        radius: 20,
+        backgroundImage: AssetImage('assets/mokoto.jpg'),
+      );
+    }
+
+    if (avatarUrl.startsWith('http')) {
+      return CircleAvatar(
+        radius: 20,
+        backgroundImage: NetworkImage(avatarUrl),
+        onBackgroundImageError: (_, _) {},
+      );
+    }
+
+    return CircleAvatar(radius: 20, backgroundImage: AssetImage(avatarUrl));
   }
 }
 

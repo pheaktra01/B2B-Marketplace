@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/farmer/screens/farmer_profile_screen.dart';
-import 'package:mobile/features/farmer/screens/notifications_screen.dart';
+import 'package:mobile/features/notification/screens/notifications_screen.dart';
 
 class FarmerAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;

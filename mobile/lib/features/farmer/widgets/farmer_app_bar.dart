@@ -189,7 +189,7 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
                         child: ClipOval(
                           child: _avatarUrl == null
                               ? Image.asset(
-                                  'assets/profile.png',
+                                  'assets/mokoto.jpg',
                                   width: 36,
                                   height: 36,
                                   fit: BoxFit.cover,
@@ -201,7 +201,7 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
                                       Image.asset(
-                                        'assets/profile.png',
+                                        'assets/mokoto.jpg',
                                         width: 36,
                                         height: 36,
                                         fit: BoxFit.cover,

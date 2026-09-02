@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'package:mobile/l10n/app_localizations.dart';
-import 'package:mobile/features/farmer/data/mock_conversations.dart';
 import 'package:mobile/features/chat/models/conversation_model.dart';
 import 'package:mobile/features/notification/screens/notifications_screen.dart';
 import 'package:mobile/features/chat/widgets/conversation_card.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
+import 'package:mobile/features/chat/services/chat_service.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -21,6 +21,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
   // ============================================================
 
   int _selectedCategoryIndex = 0;
+  final ChatService _chatService = ChatService();
+  late Future<List<Conversation>> _conversationsFuture;
+  String _searchQuery = '';
 
   // ============================================================
   // COLORS
@@ -33,7 +36,22 @@ class _ChatListScreenState extends State<ChatListScreen> {
   // CONVERSATIONS
   // ============================================================
 
-  final List<Conversation> conversations = mockConversations;
+  @override
+  void initState() {
+    super.initState();
+    _loadConversations();
+  }
+
+  void _loadConversations() {
+    _conversationsFuture = _chatService.getConversations().then(
+      (items) => items
+          .map(
+            (item) =>
+                Conversation.fromJson(Map<String, dynamic>.from(item as Map)),
+          )
+          .toList(),
+    );
+  }
 
   // ============================================================
   // BUILD
@@ -57,33 +75,22 @@ class _ChatListScreenState extends State<ChatListScreen> {
       // ========================================================
       // APP BAR
       // ========================================================
-
       appBar: FarmerAppBar(
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.notifications_none,
-            ),
+            icon: const Icon(Icons.notifications_none),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const NotificationsScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const NotificationsScreen()),
               );
             },
           ),
 
           const Padding(
-            padding: EdgeInsets.only(
-              right: 16,
-            ),
+            padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
-              backgroundImage:
-                  AssetImage(
-                'assets/profile.png',
-              ),
+              backgroundImage: AssetImage('assets/profile.png'),
             ),
           ),
         ],
@@ -92,7 +99,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
       // ========================================================
       // BODY
       // ========================================================
-
       body: Column(
         children: [
           const SizedBox(height: 12),
@@ -100,66 +106,33 @@ class _ChatListScreenState extends State<ChatListScreen> {
           // ======================================================
           // SEARCH BAR
           // ======================================================
-
           Padding(
-            padding:
-                const EdgeInsets.symmetric(
-              horizontal: 16,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: TextField(
-              decoration:
-                  InputDecoration(
-                hintText:
-                    l10n.searchConversations,
+              onChanged: (value) => setState(() {
+                _searchQuery = value.trim().toLowerCase();
+              }),
+              decoration: InputDecoration(
+                hintText: l10n.searchConversations,
 
-                hintStyle:
-                    TextStyle(
-                  color:
-                      Colors.grey.shade600,
-                  fontSize: 14,
-                ),
+                hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
 
-                prefixIcon:
-                    const Icon(
-                  Icons.search,
-                  color: Colors.grey,
-                ),
+                prefixIcon: const Icon(Icons.search, color: Colors.grey),
 
                 filled: true,
 
-                fillColor:
-                    Colors.white,
+                fillColor: Colors.white,
 
-                contentPadding:
-                    const EdgeInsets
-                        .symmetric(
-                  vertical: 0,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
 
-                enabledBorder:
-                    OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(
-                    12,
-                  ),
-                  borderSide:
-                      BorderSide(
-                    color:
-                        Colors.grey.shade300,
-                  ),
-                ),
-
-                focusedBorder:
-                    OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(
-                    12,
-                  ),
-                  borderSide:
-                      const BorderSide(
-                    color:
-                        primaryGreen,
-                  ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: primaryGreen),
                 ),
               ),
             ),
@@ -170,65 +143,41 @@ class _ChatListScreenState extends State<ChatListScreen> {
           // ======================================================
           // CATEGORY FILTERS
           // ======================================================
-
           SizedBox(
             height: 36,
 
             child: ListView.builder(
-              scrollDirection:
-                  Axis.horizontal,
+              scrollDirection: Axis.horizontal,
 
-              padding:
-                  const EdgeInsets.symmetric(
-                horizontal: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
 
-              itemCount:
-                  categories.length,
+              itemCount: categories.length,
 
-              itemBuilder:
-                  (context, index) {
-                final isSelected =
-                    _selectedCategoryIndex ==
-                        index;
+              itemBuilder: (context, index) {
+                final isSelected = _selectedCategoryIndex == index;
 
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedCategoryIndex =
-                          index;
+                      _selectedCategoryIndex = index;
                     });
                   },
 
                   child: Container(
-                    margin:
-                        const EdgeInsets.only(
-                      right: 8,
-                    ),
+                    margin: const EdgeInsets.only(right: 8),
 
-                    padding:
-                        const EdgeInsets
-                            .symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 8,
                     ),
 
-                    decoration:
-                        BoxDecoration(
-                      color: isSelected
-                          ? primaryGreen
-                          : Colors.white,
+                    decoration: BoxDecoration(
+                      color: isSelected ? primaryGreen : Colors.white,
 
-                      borderRadius:
-                          BorderRadius
-                              .circular(20),
+                      borderRadius: BorderRadius.circular(20),
 
-                      border:
-                          Border.all(
-                        color: isSelected
-                            ? primaryGreen
-                            : Colors.grey
-                                .shade300,
+                      border: Border.all(
+                        color: isSelected ? primaryGreen : Colors.grey.shade300,
                       ),
                     ),
 
@@ -236,16 +185,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       categories[index],
 
                       style: TextStyle(
-                        color: isSelected
-                            ? Colors.white
-                            : primaryGreen,
+                        color: isSelected ? Colors.white : primaryGreen,
 
                         fontSize: 13,
 
-                        fontWeight:
-                            isSelected
-                                ? FontWeight.bold
-                                : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
                       ),
                     ),
                   ),
@@ -259,34 +205,58 @@ class _ChatListScreenState extends State<ChatListScreen> {
           // ======================================================
           // CONVERSATION LIST
           // ======================================================
-
           Expanded(
-            child:
-                ListView.builder(
-              padding:
-                  const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
-              ),
+            child: FutureBuilder<List<Conversation>>(
+              future: _conversationsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              itemCount:
-                  conversations.length,
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Unable to load conversations'),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () => setState(_loadConversations),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
 
-              itemBuilder:
-                  (context, index) {
-                final item =
-                    conversations[index];
+                final conversations = (snapshot.data ?? []).where((item) {
+                  if (_searchQuery.isEmpty) return true;
+                  return item.name.toLowerCase().contains(_searchQuery) ||
+                      item.message.toLowerCase().contains(_searchQuery);
+                }).toList();
 
-                return ConversationCard(
-                  name: item.name,
-                  message: item.message,
-                  time: item.time,
-                  avatarUrl:
-                      item.avatarUrl,
-                  unreadCount:
-                      item.unreadCount,
-                  isOnline:
-                      item.isOnline,
+                if (conversations.isEmpty) {
+                  return const Center(child: Text('No conversations yet'));
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  itemCount: conversations.length,
+                  itemBuilder: (context, index) {
+                    final item = conversations[index];
+                    return ConversationCard(
+                      conversationId: item.id,
+                      name: item.name,
+                      message: item.message,
+                      time: item.time,
+                      avatarUrl: item.avatarUrl,
+                      unreadCount: item.unreadCount,
+                      isOnline: item.isOnline,
+                    );
+                  },
                 );
               },
             ),
@@ -297,11 +267,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       // ========================================================
       // BOTTOM NAVIGATION
       // ========================================================
-
-      bottomNavigationBar:
-          const FarmerBottomNavBar(
-        currentIndex: 3,
-      ),
+      bottomNavigationBar: const FarmerBottomNavBar(currentIndex: 3),
     );
   }
 }

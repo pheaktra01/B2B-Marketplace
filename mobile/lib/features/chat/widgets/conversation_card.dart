@@ -4,16 +4,19 @@ import 'package:mobile/features/chat/screens/chat_screen.dart';
 // import 'path/to/chat_screen.dart';
 
 class ConversationCard extends StatelessWidget {
+  final String conversationId;
   final String name;
   final String message;
   final String time;
   final String avatarUrl;
   final int unreadCount;
   final bool isOnline;
-  final VoidCallback? onTap; // Optional callback if you want custom tap handling
+  final VoidCallback?
+  onTap; // Optional callback if you want custom tap handling
 
   const ConversationCard({
     super.key,
+    required this.conversationId,
     required this.name,
     required this.message,
     required this.time,
@@ -49,13 +52,18 @@ class ConversationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: onTap ??
+          onTap:
+              onTap ??
               () {
                 // Navigate to ChatScreen
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ChatScreen(), // Replace with your ChatScreen widget
+                    builder: (context) => ChatScreen(
+                      conversationId: conversationId,
+                      participantName: name,
+                      isOnline: isOnline,
+                    ),
                   ),
                 );
               },
@@ -83,10 +91,7 @@ class ConversationCard extends StatelessWidget {
                               ? onlineDotGreen
                               : Colors.grey.shade400,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 2,
-                          ),
+                          border: Border.all(color: Colors.white, width: 2),
                         ),
                       ),
                     ),

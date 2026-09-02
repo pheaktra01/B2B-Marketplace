@@ -33,6 +33,14 @@ export class UsersController {
     );
   }
 
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  async getUserById(
+    @Param('id', ParseUUIDPipe) userId: string,
+  ) {
+    return this.usersService.getUserById(userId);
+  }
+
   @Patch('profile')
   @UseGuards(JwtAuthGuard)
   async updateProfile(

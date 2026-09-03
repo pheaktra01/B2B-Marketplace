@@ -19,6 +19,7 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { MarkReadDto } from './dto/mark-read.dto';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationType } from 'src/notification/entities/notification.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ChatService {
@@ -33,6 +34,7 @@ export class ChatService {
     private readonly messageRepository: Repository<Message>,
 
     private readonly notificationService: NotificationService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // =========================================================
@@ -321,6 +323,17 @@ export class ChatService {
 
     const savedMessage =
         await this.messageRepository.save(message);
+
+    this.eventEmitter.emit('chat.message.created', {
+      id: savedMessage.id,
+      conversationId: savedMessage.conversationId,
+      senderId: savedMessage.senderId,
+      content: savedMessage.content,
+      messageType: savedMessage.messageType,
+      status: savedMessage.status,
+      createdAt: savedMessage.createdAt,
+      updatedAt: savedMessage.updatedAt,
+    });
 
     // Find the other participant
     const participants =

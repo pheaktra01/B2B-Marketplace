@@ -53,6 +53,18 @@ class UserService {
     return _parseResponse(response);
   }
 
+  Future<List<Map<String, dynamic>>> getRecommendedFarmers() async {
+    final headers = await _authHeaders();
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}/users/recommended/farmers'),
+      headers: headers,
+    );
+    final result = _parseResponse(response);
+    final data = result['data'];
+    if (data is! List) return [];
+    return data.map((item) => Map<String, dynamic>.from(item as Map)).toList();
+  }
+
   /// Update current logged-in user's profile
   Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data) async {
     final headers = await _authHeaders();

@@ -11,6 +11,7 @@ class OrderModel {
   final double deliveryFee;
   final double total;
   final DateTime? createdAt;
+  final List<OrderItemModel> items;
 
   OrderModel({
     required this.id,
@@ -25,6 +26,7 @@ class OrderModel {
     required this.deliveryFee,
     required this.total,
     this.createdAt,
+    this.items = const [],
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,11 @@ class OrderModel {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
+      items: (json['items'] as List<dynamic>? ?? [])
+          .map((item) => OrderItemModel.fromJson(
+                Map<String, dynamic>.from(item as Map),
+              ))
+          .toList(),
     );
   }
 
@@ -54,5 +61,25 @@ class OrderModel {
     }
 
     return double.tryParse(value.toString()) ?? 0;
+  }
+}
+
+class OrderItemModel {
+  final String productName;
+  final double quantity;
+  final double subtotal;
+
+  const OrderItemModel({
+    required this.productName,
+    required this.quantity,
+    required this.subtotal,
+  });
+
+  factory OrderItemModel.fromJson(Map<String, dynamic> json) {
+    return OrderItemModel(
+      productName: json['productName']?.toString() ?? 'Product',
+      quantity: OrderModel._toDouble(json['quantity']),
+      subtotal: OrderModel._toDouble(json['subtotal']),
+    );
   }
 }

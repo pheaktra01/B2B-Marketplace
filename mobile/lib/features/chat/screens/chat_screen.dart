@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/features/chat/models/conversation_model.dart';
 import 'package:mobile/features/chat/services/chat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class LegacyStaticChatScreen extends StatelessWidget {
   const LegacyStaticChatScreen({super.key});
@@ -185,13 +186,35 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final ChatService _chatService = ChatService();
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _messagesScrollController = ScrollController();
   late Future<List<ChatMessage>> _messagesFuture;
   String? _currentUserId;
+  io.Socket? _socket;
+  List<ChatMessage> _messages = [];
 
   @override
   void initState() {
     super.initState();
     _messagesFuture = _loadMessages();
+    _connectRealtime();
+  }
+
+  Future<void> _connectRealtime() async {
+    try {
+      _socket = await _chatService.connectToConversation(
+        widget.conversationId,
+        (data) {
+          final message = ChatMessage.fromJson(data);
+          if (!mounted || _messages.any((item) => item.id == message.id)) {
+            return;
+          }
+          setState(() => _messages = [..._messages, message]);
+          _scrollToBottom();
+        },
+      );
+    } catch (error) {
+      debugPrint('Realtime chat unavailable: $error');
+    }
   }
 
   Future<List<ChatMessage>> _loadMessages() async {
@@ -204,6 +227,9 @@ class _ChatScreenState extends State<ChatScreen> {
               ChatMessage.fromJson(Map<String, dynamic>.from(item as Map)),
         )
         .toList();
+
+    _messages = messages;
+    _scrollToBottom();
 
     if (messages.isNotEmpty && mounted) {
       final latest = messages.last;
@@ -221,7 +247,13 @@ class _ChatScreenState extends State<ChatScreen> {
     _messageController.clear();
     try {
       await _chatService.sendMessage(widget.conversationId, content);
-      if (mounted) setState(() => _messagesFuture = _loadMessages());
+      final refreshedMessages = await _loadMessages();
+      if (!mounted) return;
+      setState(() {
+        _messages = refreshedMessages;
+        _messagesFuture = Future.value(refreshedMessages);
+      });
+      _scrollToBottom();
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -233,7 +265,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _socket?.disconnect();
+    _socket?.dispose();
     _messageController.dispose();
+    _messagesScrollController.dispose();
     super.dispose();
   }
 
@@ -293,11 +328,14 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: Text('Unable to load messages: ${snapshot.error}'),
                   );
                 }
-                final messages = snapshot.data ?? [];
+                final messages = _messages.isNotEmpty
+                    ? _messages
+                    : (snapshot.data ?? []);
                 if (messages.isEmpty) {
                   return const Center(child: Text('Start the conversation'));
                 }
                 return ListView.builder(
+                  controller: _messagesScrollController,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
@@ -339,6 +377,18 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     return CircleAvatar(radius: 20, backgroundImage: AssetImage(avatarUrl));
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_messagesScrollController.hasClients) return;
+
+      _messagesScrollController.animateTo(
+        _messagesScrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    });
   }
 }
 

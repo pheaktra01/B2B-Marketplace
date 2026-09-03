@@ -425,6 +425,46 @@ export class OrderService {
     return orders;
   }
 
+  async getFarmerOrders(farmerId: string) {
+    return this.orderRepository.find({
+      where: { farmerId },
+      relations: { items: true },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async updateOrderStatus(
+    farmerId: string,
+    orderId: string,
+    status: OrderStatus,
+  ) {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId, farmerId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    const allowed: Record<OrderStatus, OrderStatus[]> = {
+      [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+      [OrderStatus.CONFIRMED]: [OrderStatus.PROCESSING, OrderStatus.CANCELLED],
+      [OrderStatus.PROCESSING]: [OrderStatus.SHIPPED],
+      [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
+      [OrderStatus.DELIVERED]: [],
+      [OrderStatus.CANCELLED]: [],
+    };
+
+    if (!allowed[order.status].includes(status)) {
+      throw new BadRequestException(
+        `Cannot change order status from ${order.status} to ${status}`,
+      );
+    }
+
+    order.status = status;
+    return this.orderRepository.save(order);
+  }
+
   // ==========================================
   // GET ORDER BY ID
   // ==========================================

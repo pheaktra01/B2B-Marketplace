@@ -5,6 +5,7 @@ import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/screens/product_detail_screen.dart';
 import 'package:mobile/features/product/services/product_service.dart';
+import 'package:mobile/features/profile/services/user_service.dart';
 import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,32 +24,33 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _errorMessage;
 
   final CartService _cartService = CartService();
+  final UserService _userService = UserService();
 
   List<Map<String, dynamic>> _products = [];
+  List<Map<String, dynamic>> _recommendedFarmers = [];
 
   final List<Map<String, dynamic>> _categories = [
-    {
-      'name': 'All',
-      'icon': Icons.grid_view_rounded,
-    },
-    {
-      'name': 'Vegetables',
-      'icon': Icons.eco_outlined,
-    },
-    {
-      'name': 'Fruits',
-      'icon': Icons.apple_outlined,
-    },
-    {
-      'name': 'Seafood',
-      'icon': Icons.set_meal_outlined,
-    },
+    {'name': 'All', 'icon': Icons.grid_view_rounded},
+    {'name': 'Vegetables', 'icon': Icons.eco_outlined},
+    {'name': 'Fruits', 'icon': Icons.apple_outlined},
+    {'name': 'Seafood', 'icon': Icons.set_meal_outlined},
   ];
 
   @override
   void initState() {
     super.initState();
     _loadProducts();
+    _loadRecommendedFarmers();
+  }
+
+  Future<void> _loadRecommendedFarmers() async {
+    try {
+      final farmers = await _userService.getRecommendedFarmers();
+      if (!mounted) return;
+      setState(() => _recommendedFarmers = farmers);
+    } catch (error) {
+      debugPrint('Failed to load recommended farmers: $error');
+    }
   }
 
   // ==========================================================
@@ -68,9 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       setState(() {
         _products = products
-            .map(
-              (product) => Map<String, dynamic>.from(product),
-            )
+            .map((product) => Map<String, dynamic>.from(product))
             .toList();
 
         _isLoading = false;
@@ -103,17 +103,15 @@ class _HomeScreenState extends State<HomeScreen> {
   // ==========================================================
 
   List<Map<String, dynamic>> get _filteredProducts {
-    final selectedCategory =
-        _categories[_selectedCategoryIndex]['name']
-            .toString();
+    final selectedCategory = _categories[_selectedCategoryIndex]['name']
+        .toString();
 
     if (selectedCategory == 'All') {
       return _products;
     }
 
     return _products.where((product) {
-      final category =
-          product['category']?.toString().toLowerCase() ?? '';
+      final category = product['category']?.toString().toLowerCase() ?? '';
 
       return category == selectedCategory.toLowerCase();
     }).toList();
@@ -129,9 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (value is num) {
       price = value.toDouble();
     } else {
-      price = double.tryParse(
-        value?.toString() ?? '',
-      );
+      price = double.tryParse(value?.toString() ?? '');
     }
 
     if (price == null) {
@@ -177,21 +173,17 @@ class _HomeScreenState extends State<HomeScreen> {
       // ======================================================
       // APP BAR
       // ======================================================
-
       appBar: FarmerAppBar(
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.notifications_none,
-            ),
+            icon: const Icon(Icons.notifications_none),
             onPressed: () {},
           ),
 
           const Padding(
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
-              backgroundImage:
-                  AssetImage('assets/mokoto.jpg'),
+              backgroundImage: AssetImage('assets/mokoto.jpg'),
             ),
           ),
         ],
@@ -200,25 +192,19 @@ class _HomeScreenState extends State<HomeScreen> {
       // ======================================================
       // BODY
       // ======================================================
-
       body: RefreshIndicator(
         onRefresh: _loadProducts,
         child: SingleChildScrollView(
-          physics:
-              const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-          ),
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 12),
 
               // ==================================================
               // GREETING
               // ==================================================
-
               const Text(
                 'Hello, Green Kitchen',
                 style: TextStyle(
@@ -232,10 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               Text(
                 'Your fresh ingredients are waiting.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
 
               const SizedBox(height: 16),
@@ -243,52 +226,34 @@ class _HomeScreenState extends State<HomeScreen> {
               // ==================================================
               // SEARCH
               // ==================================================
-
               Container(
-                padding:
-                    const EdgeInsets.symmetric(
-                  horizontal: 12,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 height: 48,
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
-                  borderRadius:
-                      BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.search,
-                      color: Colors.grey[600],
-                    ),
+                    Icon(Icons.search, color: Colors.grey[600]),
 
                     const SizedBox(width: 8),
 
                     const Expanded(
                       child: TextField(
-                        decoration:
-                            InputDecoration(
-                          hintText:
-                              'Search for fresh produce...',
+                        decoration: InputDecoration(
+                          hintText: 'Search for fresh produce...',
                           border: InputBorder.none,
                         ),
                       ),
                     ),
 
                     Container(
-                      padding:
-                          const EdgeInsets.all(6),
-                      decoration:
-                          BoxDecoration(
-                        color:
-                            primaryColor.withValues(
-                          alpha: 0.15,
-                        ),
-                        borderRadius:
-                            BorderRadius.circular(8),
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: primaryColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
                         Icons.tune,
@@ -305,7 +270,6 @@ class _HomeScreenState extends State<HomeScreen> {
               // ==================================================
               // CATEGORIES
               // ==================================================
-
               const Text(
                 'CATEGORIES',
                 style: TextStyle(
@@ -321,73 +285,47 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(
                 height: 40,
                 child: ListView.separated(
-                  scrollDirection:
-                      Axis.horizontal,
-                  itemCount:
-                      _categories.length,
-                  separatorBuilder:
-                      (_, _) =>
-                          const SizedBox(width: 8),
-                  itemBuilder:
-                      (context, index) {
-                    final isSelected =
-                        _selectedCategoryIndex ==
-                            index;
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _categories.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final isSelected = _selectedCategoryIndex == index;
 
                     return GestureDetector(
                       onTap: () {
                         setState(() {
-                          _selectedCategoryIndex =
-                              index;
+                          _selectedCategoryIndex = index;
                         });
                       },
                       child: Container(
-                        padding:
-                            const EdgeInsets
-                                .symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 8,
                         ),
-                        decoration:
-                            BoxDecoration(
-                          color: isSelected
-                              ? primaryColor
-                              : Colors.white,
-                          borderRadius:
-                              BorderRadius.circular(
-                            20,
-                          ),
+                        decoration: BoxDecoration(
+                          color: isSelected ? primaryColor : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: isSelected
                                 ? primaryColor
-                                : Colors.grey
-                                    .shade300,
+                                : Colors.grey.shade300,
                           ),
                         ),
                         child: Row(
                           children: [
                             Icon(
-                              _categories[index]
-                                  ['icon'],
+                              _categories[index]['icon'],
                               size: 18,
-                              color: isSelected
-                                  ? Colors.white
-                                  : primaryColor,
+                              color: isSelected ? Colors.white : primaryColor,
                             ),
 
-                            const SizedBox(
-                              width: 6,
-                            ),
+                            const SizedBox(width: 6),
 
                             Text(
-                              _categories[index]
-                                  ['name'],
+                              _categories[index]['name'],
                               style: TextStyle(
-                                color: isSelected
-                                    ? Colors.white
-                                    : primaryColor,
-                                fontWeight:
-                                    FontWeight.w600,
+                                color: isSelected ? Colors.white : primaryColor,
+                                fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
                             ),
@@ -404,27 +342,19 @@ class _HomeScreenState extends State<HomeScreen> {
               // ==================================================
               // FEATURED PRODUCTS
               // ==================================================
-
               Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'Featured Products',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight:
-                          FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
 
                   TextButton(
                     onPressed: () {},
                     child: const Text(
                       'View all',
-                      style: TextStyle(
-                        color: primaryColor,
-                      ),
+                      style: TextStyle(color: primaryColor),
                     ),
                   ),
                 ],
@@ -435,122 +365,86 @@ class _HomeScreenState extends State<HomeScreen> {
               // ==================================================
               // LOADING
               // ==================================================
-
               if (_isLoading)
                 const Padding(
-                  padding:
-                      EdgeInsets.symmetric(
-                    vertical: 50,
-                  ),
+                  padding: EdgeInsets.symmetric(vertical: 50),
                   child: Center(
-                    child:
-                        CircularProgressIndicator(
-                      color: primaryColor,
-                    ),
+                    child: CircularProgressIndicator(color: primaryColor),
                   ),
                 )
-
               // ==================================================
               // ERROR
               // ==================================================
-
               else if (_errorMessage != null)
                 _buildErrorState()
-
               // ==================================================
               // EMPTY
               // ==================================================
-
               else if (_filteredProducts.isEmpty)
                 _buildEmptyProductsState()
-
               // ==================================================
               // REAL PRODUCTS
               // ==================================================
-
               else
-                ..._filteredProducts.map(
-                  (product) {
-                    return Padding(
-                      padding:
-                          const EdgeInsets.only(
-                        bottom: 16,
-                      ),
+                ..._filteredProducts.map((product) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
 
-                      child: ProductCard(
-                        imageUrl: _getProductImage(product),
+                    child: ProductCard(
+                      imageUrl: _getProductImage(product),
 
-                        productName:
-                            product['name']?.toString() ??
-                            'Unnamed Product',
+                      productName:
+                          product['name']?.toString() ?? 'Unnamed Product',
 
-                        farmName:
-                            _getFarmerName(product),
+                      farmName: _getFarmerName(product),
 
-                        price:
-                            _formatPrice(product['price']),
+                      price: _formatPrice(product['price']),
 
-                        location:
-                            product['location']?.toString() ??
-                            'Unknown',
+                      location: product['location']?.toString() ?? 'Unknown',
 
-                        availableQuantity:
-                            _formatQuantity(product['quantity']),
+                      availableQuantity: _formatQuantity(product['quantity']),
 
-                        isAvailable:
-                            product['isAvailable'] ?? true,
+                      isAvailable: product['isAvailable'] ?? true,
 
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ProductDetailScreen(
-                                product: product,
-                              ),
-                            ),
-                          );
-                        },
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ProductDetailScreen(product: product),
+                          ),
+                        );
+                      },
 
-                        onFavoritePressed: () {
-                          debugPrint(
-                            'Favorite: ${product['name']}',
-                          );
-                        },
+                      onFavoritePressed: () {
+                        debugPrint('Favorite: ${product['name']}');
+                      },
 
-                        onAddToCart: () {
-                          _addToCart(product);
-                        },
-                      ),
-                    );
-                  },
-                ),
+                      onAddToCart: () {
+                        _addToCart(product);
+                      },
+                    ),
+                  );
+                }),
 
               const SizedBox(height: 8),
 
               // ==================================================
               // RECOMMENDED FARMERS
               // ==================================================
-
               Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'Recommended Farmers',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight:
-                          FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
 
                   TextButton(
                     onPressed: () {},
                     child: const Text(
                       'See list',
-                      style: TextStyle(
-                        color: primaryColor,
-                      ),
+                      style: TextStyle(color: primaryColor),
                     ),
                   ),
                 ],
@@ -558,23 +452,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 8),
 
-              _buildFarmerCard(
-                imageUrl:
-                    'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=200',
-                name: 'Green Acres Farm',
-                rating: '4.9',
-                ordersCount: '120+',
-              ),
-
-              const SizedBox(height: 12),
-
-              _buildFarmerCard(
-                imageUrl:
-                    'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=200',
-                name: 'Hydro Harvests',
-                rating: '4.7',
-                ordersCount: '85+',
-              ),
+              if (_recommendedFarmers.isEmpty)
+                Text(
+                  'No recommended farmers yet',
+                  style: TextStyle(color: Colors.grey.shade600),
+                )
+              else
+                ..._recommendedFarmers.map(
+                  (farmer) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildFarmerCard(
+                      imageUrl: farmer['avatarUrl'] == null
+                          ? ''
+                          : ApiConstants.imageUrl(
+                              farmer['avatarUrl'].toString(),
+                            ),
+                      name: farmer['name']?.toString() ?? 'Farmer',
+                      rating: '',
+                      ordersCount: '${farmer['orderCount'] ?? 0}',
+                    ),
+                  ),
+                ),
 
               const SizedBox(height: 20),
             ],
@@ -585,11 +483,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // ========================================================
       // BOTTOM NAVIGATION
       // ========================================================
-
-      bottomNavigationBar:
-          const RestaurantBottomNavBar(
-        currentIndex: 0,
-      ),
+      bottomNavigationBar: const RestaurantBottomNavBar(currentIndex: 0),
     );
   }
 
@@ -600,24 +494,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildErrorState() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        vertical: 40,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 40),
       child: Column(
         children: [
-          Icon(
-            Icons.cloud_off_outlined,
-            size: 50,
-            color: Colors.grey.shade400,
-          ),
+          Icon(Icons.cloud_off_outlined, size: 50, color: Colors.grey.shade400),
 
           const SizedBox(height: 12),
 
           const Text(
             'Unable to load products',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 6),
@@ -625,10 +511,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             _errorMessage ?? '',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey.shade600,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
           ),
 
           const SizedBox(height: 16),
@@ -653,9 +536,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildEmptyProductsState() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        vertical: 40,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 40),
       child: Column(
         children: [
           Icon(
@@ -668,9 +549,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           Text(
             'No products available',
-            style: TextStyle(
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(color: Colors.grey.shade600),
           ),
         ],
       ),
@@ -691,32 +570,24 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.shade200,
-        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Row(
         children: [
           ClipRRect(
-            borderRadius:
-                BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12),
             child: Image.network(
               imageUrl,
               width: 56,
               height: 56,
               fit: BoxFit.cover,
-              errorBuilder:
-                  (_, __, ___) {
+              errorBuilder: (_, __, ___) {
                 return Container(
                   width: 56,
                   height: 56,
                   color: Colors.grey.shade200,
-                  child: const Icon(
-                    Icons.agriculture,
-                    color: primaryColor,
-                  ),
+                  child: const Icon(Icons.agriculture, color: primaryColor),
                 );
               },
             ),
@@ -726,14 +597,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   name,
                   style: const TextStyle(
-                    fontWeight:
-                        FontWeight.bold,
+                    fontWeight: FontWeight.bold,
                     fontSize: 15,
                   ),
                 ),
@@ -742,20 +611,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 Row(
                   children: [
-                    const Icon(
-                      Icons.star,
-                      color: Colors.amber,
-                      size: 16,
-                    ),
+                    const Icon(Icons.star, color: Colors.amber, size: 16),
 
                     const SizedBox(width: 4),
 
                     Text(
-                      '$rating ($ordersCount orders)',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 13,
-                      ),
+                      rating.isEmpty
+                          ? '$ordersCount orders'
+                          : '$rating ($ordersCount orders)',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
                     ),
                   ],
                 ),
@@ -764,15 +628,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           Container(
-            padding:
-                const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: primaryColor.withValues(
-                  alpha: 0.5,
-                ),
-              ),
+              border: Border.all(color: primaryColor.withValues(alpha: 0.5)),
             ),
             child: const Icon(
               Icons.arrow_forward,
@@ -790,9 +649,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return '0 kg';
     }
 
-    final quantity = double.tryParse(
-      value.toString(),
-    );
+    final quantity = double.tryParse(value.toString());
 
     if (quantity == null) {
       return '0 kg';
@@ -805,9 +662,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return '${quantity.toStringAsFixed(1)} kg';
   }
 
-  Future<void> _addToCart(
-    Map<String, dynamic> product,
-  ) async {
+  Future<void> _addToCart(Map<String, dynamic> product) async {
     try {
       await _cartService.addToCart(
         productId: product['id'].toString(),
@@ -818,9 +673,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            '${product['name']} added to cart',
-          ),
+          content: Text('${product['name']} added to cart'),
           backgroundColor: primaryColor,
         ),
       );
@@ -829,9 +682,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Failed to add ${product['name']} to cart',
-          ),
+          content: Text('Failed to add ${product['name']} to cart'),
           backgroundColor: Colors.red,
         ),
       );

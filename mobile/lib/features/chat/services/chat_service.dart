@@ -52,6 +52,28 @@ class ChatService {
     return socket;
   }
 
+  Future<io.Socket> connectToConversationList(
+    void Function() onConversationUpdated,
+  ) async {
+    final token = await _getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception('Authentication token not found');
+    }
+
+    final socket = io.io(
+      baseUrl,
+      io.OptionBuilder()
+          .setTransports(['websocket'])
+          .setAuth({'token': token})
+          .disableAutoConnect()
+          .build(),
+    );
+    socket.onConnect((_) => socket.emit('join_notifications'));
+    socket.on('conversation_updated', (_) => onConversationUpdated());
+    socket.connect();
+    return socket;
+  }
+
   // Get all conversations
   Future<List<dynamic>> getConversations() async {
     final response = await http.get(

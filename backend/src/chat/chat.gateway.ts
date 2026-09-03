@@ -71,10 +71,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @OnEvent('chat.message.created')
-  handleMessageCreated(message: Record<string, unknown>) {
+  async handleMessageCreated(message: Record<string, unknown>) {
     const conversationId = message.conversationId?.toString();
     if (!conversationId) return;
     this.server.to(this.room(conversationId)).emit('message_created', message);
+
+    const participants = await this.participantRepository.find({
+      where: { conversationId },
+    });
+    for (const participant of participants) {
+      this.server
+        .to(this.userRoom(participant.userId))
+        .emit('conversation_updated', { conversationId });
+    }
   }
 
   @OnEvent('notification.created')

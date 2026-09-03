@@ -1,10 +1,40 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../../../core/constants/api_constants.dart';
 
 class NotificationService {
   static String get baseUrl => ApiConstants.baseUrl;
+
+  Future<io.Socket> connectToNotifications(
+    void Function(Map<String, dynamic>) onNotification,
+  ) async {
+    final token = await _getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception('Authentication token not found');
+    }
+
+    final socket = io.io(
+      baseUrl,
+      io.OptionBuilder()
+          .setTransports(['websocket'])
+          .setAuth({'token': token})
+          .disableAutoConnect()
+          .build(),
+    );
+
+    socket.onConnect((_) {
+      socket.emit('join_notifications');
+    });
+    socket.on('notification_created', (data) {
+      if (data is Map) {
+        onNotification(Map<String, dynamic>.from(data));
+      }
+    });
+    socket.connect();
+    return socket;
+  }
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();

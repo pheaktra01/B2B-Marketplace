@@ -8,12 +8,15 @@ import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Order, OrderStatus } from '../order/entities/order.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(Order)
+    private readonly orderRepo: Repository<Order>,
   ) {}
 
   async getProfile(userId: string) {
@@ -49,6 +52,37 @@ export class UsersService {
     } = user as any;
 
     return publicUser as Partial<User>;
+  }
+
+  async getRecommendedFarmers(limit = 5) {
+    const rows = await this.orderRepo
+      .createQueryBuilder('order')
+      .select('order.farmerId', 'farmerId')
+      .addSelect('COUNT(order.id)', 'orderCount')
+      .where('order.status != :cancelled', {
+        cancelled: OrderStatus.CANCELLED,
+      })
+      .groupBy('order.farmerId')
+      .orderBy('COUNT(order.id)', 'DESC')
+      .limit(Math.min(Math.max(limit, 1), 20))
+      .getRawMany();
+
+    const farmers = await Promise.all(
+      rows.map(async (row) => {
+        const farmer = await this.userRepo.findOne({
+          where: { id: row.farmerId, role: 'farmer' as any },
+        });
+        if (!farmer) return null;
+        return {
+          id: farmer.id,
+          name: farmer.name,
+          avatarUrl: farmer.avatarUrl,
+          orderCount: Number(row.orderCount),
+        };
+      }),
+    );
+
+    return farmers.filter(Boolean);
   }
 
   async updateProfile(

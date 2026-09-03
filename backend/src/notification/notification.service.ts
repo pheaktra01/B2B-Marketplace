@@ -12,12 +12,14 @@ import {
 } from './entities/notification.entity';
 
 import { CreateNotificationDto } from './dto/create-notification.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class NotificationService {
   constructor(
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // =========================================================
@@ -38,7 +40,9 @@ export class NotificationService {
         isRead: false,
       });
 
-    return this.notificationRepository.save(notification);
+    const savedNotification = await this.notificationRepository.save(notification);
+    this.eventEmitter.emit('notification.created', savedNotification);
+    return savedNotification;
   }
 
   // =========================================================

@@ -7,6 +7,7 @@ import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 import 'package:mobile/features/chat/services/chat_service.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class ChatListScreen extends StatefulWidget {
   final bool isRestaurant;
@@ -26,6 +27,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   final ChatService _chatService = ChatService();
   late Future<List<Conversation>> _conversationsFuture;
   String _searchQuery = '';
+  io.Socket? _socket;
 
   // ============================================================
   // COLORS
@@ -42,6 +44,26 @@ class _ChatListScreenState extends State<ChatListScreen> {
   void initState() {
     super.initState();
     _loadConversations();
+    _connectRealtime();
+  }
+
+  Future<void> _connectRealtime() async {
+    try {
+      _socket = await _chatService.connectToConversationList(() {
+        if (mounted) {
+          setState(_loadConversations);
+        }
+      });
+    } catch (error) {
+      debugPrint('Realtime conversation list unavailable: $error');
+    }
+  }
+
+  @override
+  void dispose() {
+    _socket?.disconnect();
+    _socket?.dispose();
+    super.dispose();
   }
 
   void _loadConversations() {

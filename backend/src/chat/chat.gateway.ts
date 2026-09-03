@@ -63,6 +63,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     socket.emit('conversation_joined', { conversationId });
   }
 
+  @SubscribeMessage('join_notifications')
+  async joinNotifications(@ConnectedSocket() socket: Socket) {
+    if (!socket.data.userId) return;
+    await socket.join(this.userRoom(socket.data.userId));
+    socket.emit('notifications_joined', { userId: socket.data.userId });
+  }
+
   @OnEvent('chat.message.created')
   handleMessageCreated(message: Record<string, unknown>) {
     const conversationId = message.conversationId?.toString();
@@ -70,8 +77,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(this.room(conversationId)).emit('message_created', message);
   }
 
+  @OnEvent('notification.created')
+  handleNotificationCreated(notification: Record<string, unknown>) {
+    const userId = notification.userId?.toString();
+    if (!userId) return;
+    this.server.to(this.userRoom(userId)).emit('notification_created', notification);
+  }
+
   private room(conversationId: string) {
     return `conversation:${conversationId}`;
+  }
+
+  private userRoom(userId: string) {
+    return `user:${userId}:notifications`;
   }
 
   private getToken(socket: Socket): string | undefined {

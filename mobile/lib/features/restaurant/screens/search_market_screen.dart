@@ -4,14 +4,14 @@ import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/screens/product_detail_screen.dart';
 import 'package:mobile/features/product/services/product_service.dart';
+import 'package:mobile/features/restaurant/services/search_service.dart';
 import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 
 class SearchMarketScreen extends StatefulWidget {
   const SearchMarketScreen({super.key});
 
   @override
-  State<SearchMarketScreen> createState() =>
-      _SearchMarketScreenState();
+  State<SearchMarketScreen> createState() => _SearchMarketScreenState();
 }
 
 class _SearchMarketScreenState extends State<SearchMarketScreen> {
@@ -23,9 +23,9 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   int _selectedTabIndex = 0;
 
   final CartService _cartService = CartService();
+  final SearchService _searchService = SearchService();
 
-  final TextEditingController _searchController =
-      TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   List<Map<String, dynamic>> _products = [];
 
@@ -33,18 +33,19 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   String? _errorMessage;
 
   String _selectedCategory = 'All';
-
+  final List<String> _recentSearches = [];
+  bool _onlyAvailable = false;
+  String _sortBy = 'relevance';
 
   @override
   void initState() {
     super.initState();
 
     _loadProducts();
-
-    _searchController.addListener(() {
-      setState(() {});
-    });
+    _searchController.addListener(_onSearchChanged);
   }
+
+  void _onSearchChanged() => setState(() {});
 
   @override
   void dispose() {
@@ -69,9 +70,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
       setState(() {
         _products = data
-            .map(
-              (item) => Map<String, dynamic>.from(item),
-            )
+            .map((item) => Map<String, dynamic>.from(item))
             .toList();
 
         _isLoading = false;
@@ -97,55 +96,93 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // ==========================================================
 
   List<Map<String, dynamic>> get _filteredProducts {
-    final searchText =
-        _searchController.text.trim().toLowerCase();
+    final filtered = _searchService.filterProducts(
+      products: _products,
+      query: _searchController.text,
+      category: _selectedCategory,
+      tabIndex: _selectedTabIndex,
+    );
 
-    return _products.where((product) {
-      // ------------------------------------------------------
-      // Category filter
-      // ------------------------------------------------------
+    final result = _onlyAvailable
+        ? filtered.where((product) => product['isAvailable'] == true).toList()
+        : filtered;
+    if (_sortBy == 'price_low') {
+      result.sort(
+        (a, b) => _toNumber(a['price']).compareTo(_toNumber(b['price'])),
+      );
+    } else if (_sortBy == 'price_high') {
+      result.sort(
+        (a, b) => _toNumber(b['price']).compareTo(_toNumber(a['price'])),
+      );
+    }
+    return result;
+  }
 
-      final category =
-          product['category']?.toString() ?? '';
+  double _toNumber(dynamic value) => double.tryParse(value.toString()) ?? 0;
 
-      final categoryMatches =
-          _selectedCategory == 'All' ||
-          category.toLowerCase() ==
-              _selectedCategory.toLowerCase();
+  void _addRecentSearch(String value) {
+    final query = value.trim();
+    if (query.isEmpty) return;
+    setState(() {
+      _recentSearches.remove(query);
+      _recentSearches.insert(0, query);
+      if (_recentSearches.length > 5) _recentSearches.removeLast();
+    });
+  }
 
-      if (!categoryMatches) {
-        return false;
-      }
-
-      // ------------------------------------------------------
-      // Search filter
-      // ------------------------------------------------------
-
-      if (searchText.isEmpty) {
-        return true;
-      }
-
-      final name =
-          product['name']?.toString().toLowerCase() ?? '';
-
-      final farmerName =
-          product['farmerName']?.toString().toLowerCase() ?? '';
-
-      final farmName =
-          product['farmName']?.toString().toLowerCase() ?? '';
-
-      final productCategory =
-          product['category']?.toString().toLowerCase() ?? '';
-
-      final description =
-          product['description']?.toString().toLowerCase() ?? '';
-
-      return name.contains(searchText) ||
-          farmerName.contains(searchText) ||
-          farmName.contains(searchText) ||
-          productCategory.contains(searchText) ||
-          description.contains(searchText);
-    }).toList();
+  void _showFilters() {
+    showModalBottomSheet(
+      context: context,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setSheetState) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Filters',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Available products only'),
+                  value: _onlyAvailable,
+                  onChanged: (value) {
+                    setSheetState(() => _onlyAvailable = value);
+                    setState(() {});
+                  },
+                ),
+                DropdownButtonFormField<String>(
+                  initialValue: _sortBy,
+                  decoration: const InputDecoration(labelText: 'Sort by'),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'relevance',
+                      child: Text('Relevance'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'price_low',
+                      child: Text('Price: low to high'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'price_high',
+                      child: Text('Price: high to low'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setSheetState(() => _sortBy = value);
+                    setState(() {});
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   // ==========================================================
@@ -158,9 +195,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     if (value is num) {
       price = value.toDouble();
     } else {
-      price = double.tryParse(
-        value?.toString() ?? '',
-      );
+      price = double.tryParse(value?.toString() ?? '');
     }
 
     if (price == null) {
@@ -174,9 +209,11 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // FARMER NAME
   // ==========================================================
 
-  String _getFarmerName(
-    Map<String, dynamic> product,
-  ) {
+  String _getFarmerName(Map<String, dynamic> product) {
+    final publisher = product['publisher'];
+    if (publisher is Map && publisher['name'] != null) {
+      return publisher['name'].toString();
+    }
     return product['farmerName']?.toString() ??
         product['farmName']?.toString() ??
         product['farmer']?['name']?.toString() ??
@@ -197,13 +234,9 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
           onRefresh: _loadProducts,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // SEARCH
                 _buildSearchBar(),
@@ -245,10 +278,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
         ),
       ),
 
-      bottomNavigationBar:
-          const RestaurantBottomNavBar(
-        currentIndex: 1,
-      ),
+      bottomNavigationBar: const RestaurantBottomNavBar(currentIndex: 1),
     );
   }
 
@@ -262,40 +292,30 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
         Expanded(
           child: Container(
             height: 46,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: inputBg,
-              borderRadius:
-                  BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(24),
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.search,
-                  color: Colors.grey.shade600,
-                  size: 20,
-                ),
+                Icon(Icons.search, color: Colors.grey.shade600, size: 20),
 
                 const SizedBox(width: 8),
 
                 Expanded(
                   child: TextField(
                     controller: _searchController,
-                    decoration:
-                        InputDecoration(
-                      hintText:
-                          'Search products or farmers...',
+                    onSubmitted: _addRecentSearch,
+                    decoration: InputDecoration(
+                      hintText: 'Search products or farmers...',
                       hintStyle: TextStyle(
                         fontSize: 13,
-                        color:
-                            Colors.grey.shade600,
+                        color: Colors.grey.shade600,
                       ),
-                      border:
-                          InputBorder.none,
+                      border: InputBorder.none,
                       isDense: true,
-                      contentPadding:
-                          EdgeInsets.zero,
+                      contentPadding: EdgeInsets.zero,
                     ),
                   ),
                 ),
@@ -307,8 +327,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
                     },
                     child: Icon(
                       Icons.cancel,
-                      color:
-                          Colors.grey.shade500,
+                      color: Colors.grey.shade500,
                       size: 18,
                     ),
                   ),
@@ -319,18 +338,20 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
         const SizedBox(width: 10),
 
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: primaryGreen,
-            borderRadius:
-                BorderRadius.circular(14),
-          ),
-          child: const Icon(
-            Icons.tune_rounded,
-            color: Colors.white,
-            size: 20,
+        GestureDetector(
+          onTap: _showFilters,
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: primaryGreen,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.tune_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
         ),
       ],
@@ -343,12 +364,10 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
   Widget _buildRecentSearchesSection() {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment:
-              MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
               'Recent Searches',
@@ -360,7 +379,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
             ),
 
             GestureDetector(
-              onTap: () {},
+              onTap: () => setState(_recentSearches.clear),
               child: const Text(
                 'Clear All',
                 style: TextStyle(
@@ -375,20 +394,22 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
         const SizedBox(height: 10),
 
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _buildChipTag(
-              'Tomatoes',
-              hasCloseIcon: true,
-            ),
-            _buildChipTag(
-              'Organic Kale',
-              hasCloseIcon: true,
-            ),
-          ],
-        ),
+        if (_recentSearches.isEmpty)
+          Text(
+            'No recent searches',
+            style: TextStyle(color: Colors.grey.shade600),
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _recentSearches.map((search) {
+              return GestureDetector(
+                onTap: () => setState(() => _searchController.text = search),
+                child: _buildChipTag(search, hasCloseIcon: true),
+              );
+            }).toList(),
+          ),
       ],
     );
   }
@@ -399,8 +420,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
   Widget _buildPopularSearchesSection() {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           'Popular Searches',
@@ -417,15 +437,9 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            _buildOutlinedChip(
-              'Fresh Vegetables',
-            ),
-            _buildOutlinedChip(
-              'Fruits',
-            ),
-            _buildOutlinedChip(
-              'Local Farmers',
-            ),
+            _buildOutlinedChip('Fresh Vegetables'),
+            _buildOutlinedChip('Fruits'),
+            _buildOutlinedChip('Local Farmers'),
           ],
         ),
       ],
@@ -438,12 +452,10 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
   Widget _buildBrowseCategoriesSection() {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment:
-              MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
               'Browse Categories',
@@ -479,28 +491,22 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
             _buildCategoryTile(
               title: 'Vegetables',
               icon: Icons.eco_rounded,
-              bgColor:
-                  const Color(0xFFEAF5EA),
-              accentColor:
-                  const Color(0xFF2D6A4F),
+              bgColor: const Color(0xFFEAF5EA),
+              accentColor: const Color(0xFF2D6A4F),
             ),
 
             _buildCategoryTile(
               title: 'Fruits',
               icon: Icons.apple_rounded,
-              bgColor:
-                  const Color(0xFFFFF3E0),
-              accentColor:
-                  const Color(0xFFE65100),
+              bgColor: const Color(0xFFFFF3E0),
+              accentColor: const Color(0xFFE65100),
             ),
 
             _buildCategoryTile(
               title: 'Meat',
               icon: Icons.set_meal_rounded,
-              bgColor:
-                  const Color(0xFFFFEBEE),
-              accentColor:
-                  const Color(0xFFC62828),
+              bgColor: const Color(0xFFFFEBEE),
+              accentColor: const Color(0xFFC62828),
             ),
           ],
         ),
@@ -514,66 +520,40 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     required Color bgColor,
     required Color accentColor,
   }) {
-    final selected =
-        _selectedCategory.toLowerCase() ==
-            title.toLowerCase();
+    final selected = _selectedCategory.toLowerCase() == title.toLowerCase();
 
     return Expanded(
       child: Padding(
-        padding:
-            const EdgeInsets.symmetric(
-          horizontal: 4,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius:
-                BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16),
             onTap: () {
               setState(() {
                 _selectedCategory = title;
               });
             },
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(
-                vertical: 12,
-                horizontal: 8,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
               decoration: BoxDecoration(
-                color: selected
-                    ? accentColor.withValues(
-                        alpha: 0.18,
-                      )
-                    : bgColor,
-                borderRadius:
-                    BorderRadius.circular(16),
+                color: selected ? accentColor.withValues(alpha: 0.18) : bgColor,
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: selected
                       ? accentColor
-                      : accentColor.withValues(
-                          alpha: 0.12,
-                        ),
+                      : accentColor.withValues(alpha: 0.12),
                 ),
               ),
               child: Column(
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.all(10),
-                    decoration:
-                        BoxDecoration(
-                      color: Colors.white
-                          .withValues(
-                        alpha: 0.85,
-                      ),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.85),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      icon,
-                      color: accentColor,
-                      size: 24,
-                    ),
+                    child: Icon(icon, color: accentColor, size: 24),
                   ),
 
                   const SizedBox(height: 8),
@@ -581,16 +561,11 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
                   Text(
                     title,
                     maxLines: 1,
-                    overflow:
-                        TextOverflow.ellipsis,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight:
-                          FontWeight.w700,
-                      color:
-                          Colors.black.withValues(
-                        alpha: 0.8,
-                      ),
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -611,8 +586,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: inputBg,
-        borderRadius:
-            BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
@@ -624,12 +598,8 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     );
   }
 
-  Widget _buildTabItem(
-    int index,
-    String label,
-  ) {
-    final isSelected =
-        _selectedTabIndex == index;
+  Widget _buildTabItem(int index, String label) {
+    final isSelected = _selectedTabIndex == index;
 
     return Expanded(
       child: GestureDetector(
@@ -639,28 +609,18 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
           });
         },
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(
-            vertical: 8,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected
-                ? primaryGreen
-                : Colors.transparent,
-            borderRadius:
-                BorderRadius.circular(8),
+            color: isSelected ? primaryGreen : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
-              fontWeight: isSelected
-                  ? FontWeight.bold
-                  : FontWeight.w500,
-              color: isSelected
-                  ? Colors.white
-                  : Colors.grey.shade700,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              color: isSelected ? Colors.white : Colors.grey.shade700,
             ),
           ),
         ),
@@ -674,8 +634,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
   Widget _buildResultHeader() {
     return Row(
-      mainAxisAlignment:
-          MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           '${_filteredProducts.length} items found',
@@ -697,11 +656,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               ),
             ),
             SizedBox(width: 2),
-            Icon(
-              Icons.keyboard_arrow_down,
-              color: primaryGreen,
-              size: 18,
-            ),
+            Icon(Icons.keyboard_arrow_down, color: primaryGreen, size: 18),
           ],
         ),
       ],
@@ -716,15 +671,8 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     // Loading
     if (_isLoading) {
       return const Padding(
-        padding:
-            EdgeInsets.symmetric(
-          vertical: 60,
-        ),
-        child: Center(
-          child: CircularProgressIndicator(
-            color: primaryGreen,
-          ),
-        ),
+        padding: EdgeInsets.symmetric(vertical: 60),
+        child: Center(child: CircularProgressIndicator(color: primaryGreen)),
       );
     }
 
@@ -732,29 +680,20 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     if (_errorMessage != null) {
       return Container(
         width: double.infinity,
-        padding:
-            const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius:
-              BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           children: [
-            const Icon(
-              Icons.error_outline,
-              color: Colors.redAccent,
-              size: 45,
-            ),
+            const Icon(Icons.error_outline, color: Colors.redAccent, size: 45),
 
             const SizedBox(height: 12),
 
             const Text(
               'Unable to load products',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
 
             const SizedBox(height: 6),
@@ -762,27 +701,17 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
             Text(
               _errorMessage!,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color:
-                    Colors.grey.shade600,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
 
             const SizedBox(height: 16),
 
             ElevatedButton(
               onPressed: _loadProducts,
-              style:
-                  ElevatedButton.styleFrom(
-                backgroundColor:
-                    primaryGreen,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: primaryGreen),
               child: const Text(
                 'Try Again',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
+                style: TextStyle(color: Colors.white),
               ),
             ),
           ],
@@ -794,10 +723,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     if (_filteredProducts.isEmpty) {
       return Container(
         width: double.infinity,
-        padding:
-            const EdgeInsets.symmetric(
-          vertical: 50,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 50),
         child: Column(
           children: [
             Icon(
@@ -810,23 +736,49 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
             const Text(
               'No products found',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 4),
 
             Text(
               'Try another search or category.',
-              style: TextStyle(
-                color:
-                    Colors.grey.shade600,
-                fontSize: 13,
-              ),
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
             ),
           ],
         ),
+      );
+    }
+
+    if (_selectedTabIndex == 2) {
+      final farmers = <String, Map<String, dynamic>>{};
+      for (final product in _filteredProducts) {
+        final publisher = product['publisher'];
+        final id = product['farmerId']?.toString() ?? '';
+        if (id.isEmpty) continue;
+        farmers.putIfAbsent(
+          id,
+          () => {
+            'name': _getFarmerName(product),
+            'avatarUrl': publisher is Map ? publisher['avatarUrl'] : null,
+          },
+        );
+      }
+      return Column(
+        children: farmers.values.map((farmer) {
+          final avatar = farmer['avatarUrl']?.toString();
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildFarmerCard(
+              imageUrl: avatar == null || avatar.isEmpty
+                  ? ''
+                  : ApiConstants.imageUrl(avatar),
+              name: farmer['name']?.toString() ?? 'Farmer',
+              rating: '',
+              ordersCount: 'Publisher',
+            ),
+          );
+        }).toList(),
       );
     }
 
@@ -835,62 +787,116 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     // --------------------------------------------------------
 
     return Column(
-      children: _filteredProducts.map(
-        (product) {
-          _getFarmerName(product);
+      children: _filteredProducts.map((product) {
+        _getFarmerName(product);
 
-          return Padding(
-            padding:
-                const EdgeInsets.only(
-              bottom: 14,
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: ProductCard(
+            imageUrl: _getProductImage(product),
+
+            productName: product['name']?.toString() ?? 'Unnamed Product',
+
+            farmName: _getFarmerName(product),
+
+            price: _formatPrice(product['price']),
+
+            location: product['location']?.toString() ?? 'Unknown',
+
+            availableQuantity: _formatQuantity(product['quantity']),
+
+            isAvailable: product['isAvailable'] ?? true,
+
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProductDetailScreen(product: product),
+                ),
+              );
+            },
+
+            onFavoritePressed: () {
+              debugPrint('Favorite: ${product['name']}');
+            },
+
+            onAddToCart: () {
+              _addToCart(product);
+            },
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildFarmerCard({
+    required String imageUrl,
+    required String name,
+    required String rating,
+    required String ordersCount,
+  }) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: imageUrl.isEmpty
+                  ? Container(
+                      width: 56,
+                      height: 56,
+                      color: Colors.grey.shade200,
+                      child: const Icon(Icons.agriculture, color: primaryGreen),
+                    )
+                  : Image.network(
+                      imageUrl,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        width: 56,
+                        height: 56,
+                        color: Colors.grey.shade200,
+                        child: const Icon(
+                          Icons.agriculture,
+                          color: primaryGreen,
+                        ),
+                      ),
+                    ),
             ),
-            child: ProductCard(
-              imageUrl: _getProductImage(product),
-
-              productName:
-                  product['name']?.toString() ??
-                  'Unnamed Product',
-
-              farmName:
-                  _getFarmerName(product),
-
-              price:
-                  _formatPrice(product['price']),
-
-              location:
-                  product['location']?.toString() ??
-                  'Unknown',
-
-              availableQuantity:
-                  _formatQuantity(product['quantity']),
-
-              isAvailable:
-                  product['isAvailable'] ?? true,
-
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ProductDetailScreen(
-                      product: product,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
                     ),
                   ),
-                );
-              },
-
-              onFavoritePressed: () {
-                debugPrint(
-                  'Favorite: ${product['name']}',
-                );
-              },
-
-              onAddToCart: () {
-                _addToCart(product);
-              },
+                  const SizedBox(height: 4),
+                  Text(
+                    rating.isEmpty
+                        ? '$ordersCount orders'
+                        : '$rating ($ordersCount orders)',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  ),
+                ],
+              ),
             ),
-          );
-        },
-      ).toList(),
+            const Icon(Icons.arrow_forward, color: primaryGreen),
+          ],
+        ),
+      ),
     );
   }
 
@@ -898,43 +904,28 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // CHIP
   // ==========================================================
 
-  Widget _buildChipTag(
-    String label, {
-    bool hasCloseIcon = false,
-  }) {
+  Widget _buildChipTag(String label, {bool hasCloseIcon = false}) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: tagBg,
-        borderRadius:
-            BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
-        mainAxisSize:
-            MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
             style: const TextStyle(
               fontSize: 12,
-              fontWeight:
-                  FontWeight.w600,
+              fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
           ),
 
           if (hasCloseIcon) ...[
             const SizedBox(width: 6),
-            Icon(
-              Icons.close,
-              size: 14,
-              color:
-                  Colors.grey.shade700,
-            ),
+            Icon(Icons.close, size: 14, color: Colors.grey.shade700),
           ],
         ],
       ),
@@ -945,37 +936,24 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // OUTLINED CHIP
   // ==========================================================
 
-  Widget _buildOutlinedChip(
-    String label,
-  ) {
+  Widget _buildOutlinedChip(String label) {
     return GestureDetector(
       onTap: () {
-        _searchController.text =
-            label;
+        _searchController.text = label;
       },
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 6,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: Colors.transparent,
-          borderRadius:
-              BorderRadius.circular(20),
-          border: Border.all(
-            color:
-                Colors.grey.shade300,
-          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade300),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            fontWeight:
-                FontWeight.w500,
-            color:
-                Colors.grey.shade800,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade800,
           ),
         ),
       ),
@@ -1001,9 +979,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
       return '0 kg';
     }
 
-    final quantity = double.tryParse(
-      value.toString(),
-    );
+    final quantity = double.tryParse(value.toString());
 
     if (quantity == null) {
       return '0 kg';
@@ -1016,9 +992,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     return '${quantity.toStringAsFixed(1)} kg';
   }
 
-  Future<void> _addToCart(
-    Map<String, dynamic> product,
-  ) async {
+  Future<void> _addToCart(Map<String, dynamic> product) async {
     try {
       await _cartService.addToCart(
         productId: product['id'].toString(),
@@ -1029,9 +1003,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            '${product['name']} added to cart',
-          ),
+          content: Text('${product['name']} added to cart'),
           backgroundColor: primaryGreen,
         ),
       );
@@ -1040,9 +1012,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Failed to add ${product['name']} to cart',
-          ),
+          content: Text('Failed to add ${product['name']} to cart'),
           backgroundColor: Colors.red,
         ),
       );

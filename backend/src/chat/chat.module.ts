@@ -8,6 +8,8 @@ import { Conversation } from './entities/conversation.entity';
 import { ConversationParticipant } from './entities/conversation-participant.entity';
 import { Message } from './entities/message.entity';
 import { NotificationModule } from 'src/notification/notification.module';
+import { AuthModule } from 'src/auth/auth.module';
+import { ChatGateway } from './chat.gateway';
 
 @Module({
   imports: [
@@ -18,6 +20,7 @@ import { NotificationModule } from 'src/notification/notification.module';
     ]),
 
     NotificationModule,
+    AuthModule,
   ],
 
   controllers: [
@@ -26,6 +29,7 @@ import { NotificationModule } from 'src/notification/notification.module';
 
   providers: [
     ChatService,
+    ChatGateway,
   ],
 
   exports: [

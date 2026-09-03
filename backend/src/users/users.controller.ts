@@ -33,6 +33,12 @@ export class UsersController {
     );
   }
 
+  @Get('recommended/farmers')
+  @UseGuards(JwtAuthGuard)
+  async getRecommendedFarmers() {
+    return this.usersService.getRecommendedFarmers();
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   async getUserById(

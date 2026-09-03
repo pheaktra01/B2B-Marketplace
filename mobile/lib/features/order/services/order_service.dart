@@ -6,6 +6,47 @@ import 'package:mobile/features/order/models/order_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderService {
+  Future<Map<String, String>> _headers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+    if (token == null || token.isEmpty) {
+      throw Exception('Authentication token not found');
+    }
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
+
+  Future<List<OrderModel>> getFarmerOrders() async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}/orders/farmer'),
+      headers: await _headers(),
+    );
+    final data = response.body.isEmpty ? [] : jsonDecode(response.body);
+    if (response.statusCode != 200) {
+      throw Exception(data is Map ? data['message'] : 'Failed to load orders');
+    }
+    return (data as List)
+        .map((item) => OrderModel.fromJson(Map<String, dynamic>.from(item as Map)))
+        .toList();
+  }
+
+  Future<OrderModel> updateOrderStatus({
+    required String orderId,
+    required String status,
+  }) async {
+    final response = await http.patch(
+      Uri.parse('${ApiConstants.baseUrl}/orders/$orderId/status'),
+      headers: await _headers(),
+      body: jsonEncode({'status': status}),
+    );
+    final data = jsonDecode(response.body);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(data is Map ? data['message'] : 'Failed to update order');
+    }
+    return OrderModel.fromJson(Map<String, dynamic>.from(data as Map));
+  }
   // =========================================================
   // CHECKOUT
   // =========================================================

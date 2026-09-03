@@ -3,6 +3,7 @@ import 'package:mobile/features/chat/screens/chat_screen.dart';
 import 'package:mobile/features/notification/models/notification_model.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:mobile/l10n/app_localizations.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -17,11 +18,37 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   final NotificationService _service = NotificationService();
   late Future<List<NotificationModel>> _notificationsFuture;
+  io.Socket? _socket;
 
   @override
   void initState() {
     super.initState();
     _refresh();
+    _connectRealtime();
+  }
+
+  Future<void> _connectRealtime() async {
+    try {
+      _socket = await _service.connectToNotifications((data) {
+        final notification = NotificationModel.fromJson(data);
+        if (!mounted) return;
+        setState(() {
+          _notificationsFuture = _notificationsFuture.then((items) {
+            if (items.any((item) => item.id == notification.id)) return items;
+            return [notification, ...items];
+          });
+        });
+      });
+    } catch (error) {
+      debugPrint('Realtime notifications unavailable: $error');
+    }
+  }
+
+  @override
+  void dispose() {
+    _socket?.disconnect();
+    _socket?.dispose();
+    super.dispose();
   }
 
   void _refresh() {

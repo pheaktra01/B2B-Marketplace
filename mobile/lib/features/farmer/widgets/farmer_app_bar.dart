@@ -4,6 +4,7 @@ import 'package:mobile/features/farmer/screens/farmer_profile_screen.dart';
 import 'package:mobile/features/notification/screens/notifications_screen.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class FarmerAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -31,6 +32,7 @@ class FarmerAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _FarmerAppBarState extends State<FarmerAppBar> {
   String? _avatarUrl;
   int _unreadNotificationCount = 0;
+  io.Socket? _notificationSocket;
 
   final UserService _userService = UserService();
   final NotificationService _notificationService = NotificationService();
@@ -39,6 +41,21 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
   void initState() {
     super.initState();
     _loadAppBarData();
+    _connectNotificationUpdates();
+  }
+
+  Future<void> _connectNotificationUpdates() async {
+    try {
+      _notificationSocket = await _notificationService.connectToNotifications(
+        (_) {
+          if (mounted) {
+            setState(() => _unreadNotificationCount++);
+          }
+        },
+      );
+    } catch (error) {
+      debugPrint('Failed to connect app bar notifications: $error');
+    }
   }
 
   Future<void> _loadAppBarData() async {
@@ -75,6 +92,13 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
       MaterialPageRoute(builder: (context) => const FarmerProfileScreen()),
     );
     _loadAppBarData();
+  }
+
+  @override
+  void dispose() {
+    _notificationSocket?.disconnect();
+    _notificationSocket?.dispose();
+    super.dispose();
   }
 
   @override

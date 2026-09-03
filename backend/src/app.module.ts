@@ -10,6 +10,7 @@ import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { ChatModule } from './chat/chat.module';
 import { NotificationModule } from './notification/notification.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 // Debug env values for DB connection troubleshooting (masked)
 try {
   const pwd = process.env.DB_PASSWORD;
@@ -27,6 +28,7 @@ try {
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     TypeOrmModule.forRoot({
       type:'postgres',
       host:process.env.DB_HOST,

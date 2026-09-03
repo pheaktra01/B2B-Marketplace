@@ -64,19 +64,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   double get _orderTotal =>
       _subtotal + _tax + _deliveryFee;
-
-  // ==========================================================
-  // PAYMENT METHOD NAME
-  // ==========================================================
-
-  String get _paymentMethod {
-    if (_selectedPaymentMethod == 0) {
-      return 'CARD';
-    }
-
-    return 'KHQR';
-  }
-
+      
   // ==========================================================
   // BUILD
   // ==========================================================

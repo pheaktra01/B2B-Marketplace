@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../../../core/constants/api_constants.dart';
 
 class ChatService {
@@ -19,6 +20,36 @@ class ChatService {
       'Accept': 'application/json',
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
+  }
+
+  Future<io.Socket> connectToConversation(
+    String conversationId,
+    void Function(Map<String, dynamic>) onMessage,
+  ) async {
+    final token = await _getToken();
+    if (token == null || token.isEmpty) {
+      throw Exception('Authentication token not found');
+    }
+
+    final socket = io.io(
+      baseUrl,
+      io.OptionBuilder()
+          .setTransports(['websocket'])
+          .setAuth({'token': token})
+          .disableAutoConnect()
+          .build(),
+    );
+
+    socket.onConnect((_) {
+      socket.emit('join_conversation', {'conversationId': conversationId});
+    });
+    socket.on('message_created', (data) {
+      if (data is Map) {
+        onMessage(Map<String, dynamic>.from(data));
+      }
+    });
+    socket.connect();
+    return socket;
   }
 
   // Get all conversations

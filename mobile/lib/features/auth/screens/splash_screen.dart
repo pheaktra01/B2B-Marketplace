@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mobile/features/auth/screens/language_selection_screen.dart';
+import 'package:mobile/features/auth/services/auth_service.dart';
+import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
+import 'package:mobile/features/restaurant/screens/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,13 +16,43 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LanguageSelectionScreen()),
-      );
-    });
+    _checkAutoLogin();
+  }
+
+  Future<void> _checkAutoLogin() async {
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+
+    final isValid = await AuthService.isTokenValid();
+    final role = await AuthService.getUserRole();
+
+    print('SPLASH AUTO-LOGIN CHECK: isValid=$isValid, role=$role');
+
+    if (!mounted) return;
+
+    if (isValid && role != null && role.isNotEmpty) {
+      if (role == 'farmer') {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const FarmerDashboardScreen()),
+        );
+        return;
+      } else if (role == 'restaurant') {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+        return;
+      }
+    }
+
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LanguageSelectionScreen()),
+    );
   }
 
   @override

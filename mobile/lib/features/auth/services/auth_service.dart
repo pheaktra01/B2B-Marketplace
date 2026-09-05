@@ -24,6 +24,39 @@ class AuthService {
     };
   }
 
+  static Future<bool> isTokenValid() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+    final expiry = prefs.getInt('tokenExpiry');
+
+    if (token == null || token.isEmpty || expiry == null) {
+      return false;
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now >= expiry) {
+      print('Token expired after 7 days. Clearing local auth.');
+      await clearAuth();
+      return false;
+    }
+
+    return true;
+  }
+
+  static Future<String?> getUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userRole');
+  }
+
+  static Future<void> clearAuth() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('accessToken');
+    await prefs.remove('userId');
+    await prefs.remove('userRole');
+    await prefs.remove('tokenExpiry');
+    print('Local authentication data cleared');
+  }
+
   Future<Map<String, dynamic>> login({
     required String phone,
     required String password,
@@ -55,7 +88,6 @@ class AuthService {
         );
 
         final userId = data['user']?['id'] ?? data['id'];
-
         if (userId != null) {
           await prefs.setString(
             'userId',
@@ -63,14 +95,30 @@ class AuthService {
           );
         }
 
+        final role = data['user']?['role'] ?? data['role'];
+        if (role != null) {
+          await prefs.setString(
+            'userRole',
+            role.toString(),
+          );
+        }
+
+        // Set token expiration to 7 days from now
+        final sevenDaysExpiry = DateTime.now()
+            .add(const Duration(days: 7))
+            .millisecondsSinceEpoch;
+        await prefs.setInt('tokenExpiry', sevenDaysExpiry);
+
         final savedToken = prefs.getString('accessToken');
         final savedUserId = prefs.getString('userId');
+        final savedRole = prefs.getString('userRole');
 
-        print('========== AUTH DATA SAVED ==========');
+        print('========== AUTH DATA SAVED (7 DAYS) ==========');
         print('User ID: $savedUserId');
+        print('User Role: $savedRole');
         print('Token exists: ${savedToken != null}');
-        print('Token length: ${savedToken?.length ?? 0}');
-        print('=====================================');
+        print('Token Expiry: ${DateTime.fromMillisecondsSinceEpoch(sevenDaysExpiry)}');
+        print('=============================================');
       }
     }
 
@@ -148,11 +196,9 @@ class AuthService {
       print('Logout status: ${response.statusCode}');
       print('Logout response: $decodedBody');
 
-      // Always clear local authentication
-      await prefs.remove('accessToken');
-      await prefs.remove('userId');
+      // Clear local credentials
+      await clearAuth();
 
-      print('Local authentication data cleared');
       print('============================');
 
       return {
@@ -163,8 +209,7 @@ class AuthService {
       print('Logout error: $e');
 
       // Even if backend fails, remove local credentials
-      await prefs.remove('accessToken');
-      await prefs.remove('userId');
+      await clearAuth();
 
       return {
         'statusCode': 0,

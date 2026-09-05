@@ -186,6 +186,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final ChatService _chatService = ChatService();
   final TextEditingController _messageController = TextEditingController();
+  final FocusNode _messageFocusNode = FocusNode();
   final ScrollController _messagesScrollController = ScrollController();
   late Future<List<ChatMessage>> _messagesFuture;
   String? _currentUserId;
@@ -195,6 +196,11 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _messageFocusNode.addListener(() {
+      if (_messageFocusNode.hasFocus) {
+        _scrollToBottom();
+      }
+    });
     _messagesFuture = _loadMessages();
     _connectRealtime();
   }
@@ -229,7 +235,7 @@ class _ChatScreenState extends State<ChatScreen> {
         .toList();
 
     _messages = messages;
-    _scrollToBottom();
+    _scrollToBottom(animate: false);
 
     if (messages.isNotEmpty && mounted) {
       final latest = messages.last;
@@ -244,18 +250,45 @@ class _ChatScreenState extends State<ChatScreen> {
     final content = _messageController.text.trim();
     if (content.isEmpty) return;
 
+    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
+    final tempMsg = ChatMessage(
+      id: tempId,
+      senderId: _currentUserId ?? '',
+      content: content,
+      messageType: 'text',
+      createdAt: DateTime.now(),
+    );
+
     _messageController.clear();
+
+    // Optimistically add message locally so it displays at the bottom instantly
+    setState(() {
+      _messages = [..._messages, tempMsg];
+      _messagesFuture = Future.value(_messages);
+    });
+    _scrollToBottom();
+
     try {
-      await _chatService.sendMessage(widget.conversationId, content);
-      final refreshedMessages = await _loadMessages();
+      final response = await _chatService.sendMessage(widget.conversationId, content);
+      final realMsg = ChatMessage.fromJson(Map<String, dynamic>.from(response as Map));
+
       if (!mounted) return;
       setState(() {
-        _messages = refreshedMessages;
-        _messagesFuture = Future.value(refreshedMessages);
+        final index = _messages.indexWhere((m) => m.id == tempId);
+        if (index != -1) {
+          _messages[index] = realMsg;
+        } else if (!_messages.any((m) => m.id == realMsg.id)) {
+          _messages.add(realMsg);
+        }
+        _messagesFuture = Future.value(_messages);
       });
       _scrollToBottom();
     } catch (error) {
       if (mounted) {
+        setState(() {
+          _messages.removeWhere((m) => m.id == tempId);
+          _messagesFuture = Future.value(_messages);
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Unable to send message: $error')),
         );
@@ -268,6 +301,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _socket?.disconnect();
     _socket?.dispose();
     _messageController.dispose();
+    _messageFocusNode.dispose();
     _messagesScrollController.dispose();
     super.dispose();
   }
@@ -353,7 +387,11 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          ChatInputBar(controller: _messageController, onSend: _sendMessage),
+          ChatInputBar(
+            controller: _messageController,
+            focusNode: _messageFocusNode,
+            onSend: _sendMessage,
+          ),
         ],
       ),
     );
@@ -379,15 +417,37 @@ class _ChatScreenState extends State<ChatScreen> {
     return CircleAvatar(radius: 20, backgroundImage: AssetImage(avatarUrl));
   }
 
-  void _scrollToBottom() {
+  void _scrollToBottom({bool animate = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_messagesScrollController.hasClients) return;
 
-      _messagesScrollController.animateTo(
-        _messagesScrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-      );
+      final maxExtent = _messagesScrollController.position.maxScrollExtent;
+      if (animate) {
+        _messagesScrollController.animateTo(
+          maxExtent,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+        );
+      } else {
+        _messagesScrollController.jumpTo(maxExtent);
+      }
+    });
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!mounted || !_messagesScrollController.hasClients) return;
+
+      final maxExtent = _messagesScrollController.position.maxScrollExtent;
+      if (_messagesScrollController.offset < maxExtent) {
+        if (animate) {
+          _messagesScrollController.animateTo(
+            maxExtent,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+          );
+        } else {
+          _messagesScrollController.jumpTo(maxExtent);
+        }
+      }
     });
   }
 }
@@ -643,9 +703,15 @@ class ProductMessageCard extends StatelessWidget {
 // Bottom Input Bar Component
 class ChatInputBar extends StatelessWidget {
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final VoidCallback? onSend;
 
-  const ChatInputBar({super.key, this.controller, this.onSend});
+  const ChatInputBar({
+    super.key,
+    this.controller,
+    this.focusNode,
+    this.onSend,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -671,6 +737,7 @@ class ChatInputBar extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: controller,
+                focusNode: focusNode,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => onSend?.call(),
                 decoration: InputDecoration(

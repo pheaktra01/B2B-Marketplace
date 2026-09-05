@@ -24,6 +24,10 @@ import { CheckoutDto } from './dto/checkout.dto';
 import { Cart } from '../cart/entities/cart.entity';
 import { CartItem } from '../cart/entities/cart-item.entity';
 import { Product } from 'src/products/enterties/product.entity';
+import {
+  Notification,
+  NotificationType,
+} from '../notification/entities/notification.entity';
 
 @Injectable()
 export class OrderService {
@@ -42,6 +46,9 @@ export class OrderService {
 
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+
+    @InjectRepository(Notification)
+    private readonly notificationRepository: Repository<Notification>,
 
     private readonly dataSource: DataSource,
   ) {}
@@ -330,6 +337,28 @@ export class OrderService {
             );
           }
 
+          // ------------------------------------
+          // Notify Farmer of new order
+          // ------------------------------------
+
+          const farmerNotification = manager.create(
+            Notification,
+            {
+              userId: farmerId,
+              type: NotificationType.ORDER_CREATED,
+              title: 'New Order Received',
+              message: `You received a new order #${savedOrder.id.slice(0, 8)} totaling $${savedOrder.total} from buyer.`,
+              referenceId: savedOrder.id,
+              referenceType: 'order',
+              isRead: false,
+            },
+          );
+
+          await manager.save(
+            Notification,
+            farmerNotification,
+          );
+
           createdOrders.push(
             savedOrder,
           );
@@ -462,7 +491,25 @@ export class OrderService {
     }
 
     order.status = status;
-    return this.orderRepository.save(order);
+    const updatedOrder = await this.orderRepository.save(order);
+
+    // Notify buyer (restaurant) of status change
+    try {
+      const buyerNotification = this.notificationRepository.create({
+        userId: order.restaurantId,
+        type: NotificationType.ORDER_STATUS_CHANGED,
+        title: 'Order Status Updated',
+        message: `Your order #${order.id.slice(0, 8)} status changed to ${status}.`,
+        referenceId: order.id,
+        referenceType: 'order',
+        isRead: false,
+      });
+      await this.notificationRepository.save(buyerNotification);
+    } catch (e) {
+      console.error('Failed to create buyer notification:', e);
+    }
+
+    return updatedOrder;
   }
 
   // ==========================================

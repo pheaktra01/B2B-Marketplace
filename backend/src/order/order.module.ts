@@ -10,6 +10,7 @@ import { OrderItem } from './entities/order-item.entity';
 import { Cart } from '../cart/entities/cart.entity';
 import { CartItem } from '../cart/entities/cart-item.entity';
 import { Product } from 'src/products/enterties/product.entity';
+import { Notification } from '../notification/entities/notification.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { Product } from 'src/products/enterties/product.entity';
       Cart,
       CartItem,
       Product,
+      Notification,
     ]),
   ],
 

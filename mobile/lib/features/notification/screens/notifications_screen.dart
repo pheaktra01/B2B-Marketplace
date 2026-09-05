@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/chat/screens/chat_screen.dart';
+import 'package:mobile/features/farmer/screens/farmer_order_management_screen.dart';
 import 'package:mobile/features/notification/models/notification_model.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:mobile/l10n/app_localizations.dart';
@@ -93,21 +94,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   void _openReference(NotificationModel notification) {
-    if (notification.referenceType != 'conversation' ||
-        notification.referenceId == null) {
-      return;
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ChatScreen(
-          conversationId: notification.referenceId!,
-          participantName: notification.title,
-          isOnline: false,
+    if (notification.referenceType == 'conversation' &&
+        notification.referenceId != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChatScreen(
+            conversationId: notification.referenceId!,
+            participantName: notification.title,
+            isOnline: false,
+          ),
         ),
-      ),
-    );
+      );
+    } else if (notification.referenceType == 'order' ||
+        notification.type.startsWith('order')) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const FarmerOrderManagementScreen(),
+        ),
+      );
+    }
   }
 
   String _dateLabel(DateTime? date, AppLocalizations l10n) {

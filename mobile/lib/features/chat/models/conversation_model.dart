@@ -62,6 +62,7 @@ class ChatMessage {
   final String senderId;
   final String content;
   final String messageType;
+  final String status;
   final DateTime? createdAt;
 
   const ChatMessage({
@@ -69,16 +70,36 @@ class ChatMessage {
     required this.senderId,
     required this.content,
     required this.messageType,
+    this.status = 'sent',
     required this.createdAt,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
       id: json['id'].toString(),
-      senderId: json['senderId'].toString(),
+      senderId: json['senderId']?.toString() ?? '',
       content: json['content']?.toString() ?? '',
       messageType: json['messageType']?.toString() ?? 'text',
+      status: json['status']?.toString() ?? 'sent',
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? ''),
+    );
+  }
+
+  ChatMessage copyWith({
+    String? id,
+    String? senderId,
+    String? content,
+    String? messageType,
+    String? status,
+    DateTime? createdAt,
+  }) {
+    return ChatMessage(
+      id: id ?? this.id,
+      senderId: senderId ?? this.senderId,
+      content: content ?? this.content,
+      messageType: messageType ?? this.messageType,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

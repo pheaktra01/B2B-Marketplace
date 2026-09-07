@@ -266,13 +266,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
           ),
         ],
       ),
-
-      // ========================================================
-      // BOTTOM NAVIGATION
-      // ========================================================
-      bottomNavigationBar: widget.isRestaurant
-          ? const RestaurantBottomNavBar(currentIndex: 3)
-          : const FarmerBottomNavBar(currentIndex: 3),
     );
   }
 }

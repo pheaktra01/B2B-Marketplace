@@ -192,6 +192,7 @@ class _ChatScreenState extends State<ChatScreen> {
   String? _currentUserId;
   io.Socket? _socket;
   List<ChatMessage> _messages = [];
+  bool _isSending = false;
 
   @override
   void initState() {
@@ -211,10 +212,34 @@ class _ChatScreenState extends State<ChatScreen> {
         widget.conversationId,
         (data) {
           final message = ChatMessage.fromJson(data);
-          if (!mounted || _messages.any((item) => item.id == message.id)) {
-            return;
-          }
-          setState(() => _messages = [..._messages, message]);
+          if (!mounted) return;
+
+          setState(() {
+            // 1. If message already exists by ID, do not add again
+            if (_messages.any((item) => item.id == message.id)) {
+              return;
+            }
+
+            // 2. If this message was sent by current user, replace any matching pending temporary message
+            final tempIndex = _messages.indexWhere(
+              (item) =>
+                  item.id.startsWith('temp_') &&
+                  (item.senderId == message.senderId ||
+                      item.senderId == _currentUserId) &&
+                  item.content == message.content,
+            );
+
+            if (tempIndex != -1) {
+              _messages[tempIndex] = message;
+            } else {
+              _messages.add(message);
+            }
+
+            // 3. Deduplicate by message ID
+            final seen = <String>{};
+            _messages = _messages.where((item) => seen.add(item.id)).toList();
+            _messagesFuture = Future.value(_messages);
+          });
           _scrollToBottom();
         },
       );
@@ -234,22 +259,25 @@ class _ChatScreenState extends State<ChatScreen> {
         )
         .toList();
 
-    _messages = messages;
+    final seen = <String>{};
+    _messages = messages.where((item) => seen.add(item.id)).toList();
     _scrollToBottom(animate: false);
 
-    if (messages.isNotEmpty && mounted) {
-      final latest = messages.last;
+    if (_messages.isNotEmpty && mounted) {
+      final latest = _messages.last;
       if (latest.senderId != _currentUserId) {
         await _chatService.markAsRead(widget.conversationId, latest.id);
       }
     }
-    return messages;
+    return _messages;
   }
 
   Future<void> _sendMessage() async {
+    if (_isSending) return;
     final content = _messageController.text.trim();
     if (content.isEmpty) return;
 
+    _isSending = true;
     final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     final tempMsg = ChatMessage(
       id: tempId,
@@ -269,17 +297,32 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollToBottom();
 
     try {
-      final response = await _chatService.sendMessage(widget.conversationId, content);
-      final realMsg = ChatMessage.fromJson(Map<String, dynamic>.from(response as Map));
+      final response =
+          await _chatService.sendMessage(widget.conversationId, content);
+      final realMsg =
+          ChatMessage.fromJson(Map<String, dynamic>.from(response as Map));
 
       if (!mounted) return;
       setState(() {
-        final index = _messages.indexWhere((m) => m.id == tempId);
-        if (index != -1) {
-          _messages[index] = realMsg;
-        } else if (!_messages.any((m) => m.id == realMsg.id)) {
+        final existingRealIndex =
+            _messages.indexWhere((m) => m.id == realMsg.id);
+        final tempIndex = _messages.indexWhere((m) => m.id == tempId);
+
+        if (existingRealIndex != -1) {
+          // The socket message already arrived and added realMsg.
+          // Remove the temporary message if it is still in the list.
+          if (tempIndex != -1) {
+            _messages.removeAt(tempIndex);
+          }
+        } else if (tempIndex != -1) {
+          // Socket hasn't arrived yet or hasn't matched; replace the temp message
+          _messages[tempIndex] = realMsg;
+        } else {
           _messages.add(realMsg);
         }
+
+        final seen = <String>{};
+        _messages = _messages.where((item) => seen.add(item.id)).toList();
         _messagesFuture = Future.value(_messages);
       });
       _scrollToBottom();
@@ -293,6 +336,8 @@ class _ChatScreenState extends State<ChatScreen> {
           SnackBar(content: Text('Unable to send message: $error')),
         );
       }
+    } finally {
+      _isSending = false;
     }
   }
 

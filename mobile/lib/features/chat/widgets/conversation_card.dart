@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/chat/screens/chat_screen.dart';
-// Import your ChatScreen file here:
-// import 'path/to/chat_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/core/routing/route_args.dart';
 
 class ConversationCard extends StatelessWidget {
   final String conversationId;
@@ -56,15 +56,13 @@ class ConversationCard extends StatelessWidget {
               onTap ??
               () {
                 // Navigate to ChatScreen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatScreen(
-                      conversationId: conversationId,
-                      participantName: name,
-                      participantAvatarUrl: avatarUrl,
-                      isOnline: isOnline,
-                    ),
+                context.push(
+                  AppRoutes.chatConversation,
+                  extra: ChatConversationArgs(
+                    conversationId: conversationId,
+                    participantName: name,
+                    participantAvatarUrl: avatarUrl,
+                    isOnline: isOnline,
                   ),
                 );
               },

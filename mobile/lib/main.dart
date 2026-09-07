@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/app_locale.dart';
-import 'package:mobile/features/auth/screens/splash_screen.dart';
+import 'package:mobile/core/routing/app_router.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
 Future<void> main() async {
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return ValueListenableBuilder<Locale>(
       valueListenable: AppLocale.notifier,
       builder: (context, locale, _) {
-        return MaterialApp(
+        return MaterialApp.router(
           title: 'PsarKasekor',
           debugShowCheckedModeBanner: false,
 
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
           localizationsDelegates:
               AppLocalizations.localizationsDelegates,
 
-          home: const SplashScreen(),
+          routerConfig: AppRouter.router,
         );
       },
     );

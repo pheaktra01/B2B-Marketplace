@@ -2,8 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/l10n/app_localizations.dart';
-import 'package:mobile/features/farmer/screens/farmer_settings_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
@@ -500,13 +501,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
         isProfileScreen: true,
 
         onSettingsTap: () {
-          Navigator.push(
-            context,
-
-            MaterialPageRoute(
-              builder: (context) => const FarmerSettingsScreen(),
-            ),
-          );
+          context.push(AppRoutes.farmerSettings);
         },
       ),
 

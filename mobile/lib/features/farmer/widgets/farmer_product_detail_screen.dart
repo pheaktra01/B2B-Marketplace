@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
-import 'package:mobile/features/farmer/widgets/edit_product_screen.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 
 class FarmerProductDetailScreen
@@ -488,14 +489,9 @@ class _FarmerProductDetailScreenState
 
     if (id == null) return;
 
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            EditProductScreen(
-          product: product,
-        ),
-      ),
+    await context.push(
+      AppRoutes.farmerEditProduct,
+      extra: product,
     );
 
     // Refresh the product after editing

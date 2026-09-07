@@ -1,71 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/chat/screens/chat_list_screen.dart';
-import 'package:mobile/features/restaurant/screens/home_screen.dart';
-import 'package:mobile/features/cart/screens/cart_screen.dart';
-import 'package:mobile/features/restaurant/screens/search_market_screen.dart';
-import 'package:mobile/features/restaurant/screens/user_profile_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class RestaurantBottomNavBar extends StatelessWidget {
-  const RestaurantBottomNavBar({super.key, required this.currentIndex});
+  const RestaurantBottomNavBar({
+    super.key,
+    required this.navigationShell,
+  });
 
-  final int currentIndex;
+  final StatefulNavigationShell navigationShell;
 
   static const Color primaryColor = Color(0xFF0F5A27);
 
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      currentIndex: currentIndex,
+      currentIndex: navigationShell.currentIndex,
       type: BottomNavigationBarType.fixed,
       selectedItemColor: primaryColor,
       unselectedItemColor: Colors.grey[600],
       showUnselectedLabels: true,
-
       onTap: (index) {
-        if (index == currentIndex) return;
-
-        switch (index) {
-          case 0:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-            );
-            break;
-
-          case 1:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const SearchMarketScreen()),
-            );
-            break;
-
-          case 2:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const CartScreen()),
-            );
-            break;
-
-          case 3:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ChatListScreen(isRestaurant: true),
-              ),
-            );
-            break;
-
-          case 4:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const UserProfileScreen()),
-            );
-            break;
-        }
+        navigationShell.goBranch(
+          index,
+          initialLocation: index == navigationShell.currentIndex,
+        );
       },
-
       items: List.generate(5, (index) {
-        final bool selected = currentIndex == index;
+        final bool selected = navigationShell.currentIndex == index;
 
         return BottomNavigationBarItem(
           icon: Container(

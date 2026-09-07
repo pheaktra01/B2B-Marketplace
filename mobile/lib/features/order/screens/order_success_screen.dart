@@ -1,8 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/order/models/order_model.dart';
-import 'package:mobile/features/restaurant/screens/home_screen.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
   final List<OrderModel> orders;
@@ -918,16 +919,7 @@ class OrderSuccessScreen extends StatelessWidget {
           child:
               OutlinedButton.icon(
             onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const HomeScreen(),
-                ),
-
-                (route) => false,
-              );
+              context.go(AppRoutes.restaurantHome);
             },
 
             icon:

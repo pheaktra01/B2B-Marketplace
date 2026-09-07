@@ -29,6 +29,7 @@ import 'package:mobile/features/farmer/screens/farmer_profile_screen.dart';
 import 'package:mobile/features/farmer/screens/farmer_settings_screen.dart';
 import 'package:mobile/features/farmer/screens/inventory_screen.dart';
 import 'package:mobile/features/farmer/widgets/edit_product_screen.dart';
+import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_product_detail_screen.dart';
 
 // Notification
@@ -48,6 +49,7 @@ import 'package:mobile/features/product/screens/product_detail_screen.dart';
 import 'package:mobile/features/restaurant/screens/home_screen.dart';
 import 'package:mobile/features/restaurant/screens/search_market_screen.dart';
 import 'package:mobile/features/restaurant/screens/user_profile_screen.dart';
+import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 
 class AppRouter {
   static final GlobalKey<NavigatorState> rootNavigatorKey =
@@ -142,24 +144,83 @@ class AppRouter {
         },
       ),
 
-      // Farmer routes
-      GoRoute(
-        path: AppRoutes.farmerDashboard,
-        builder: (context, state) => const FarmerDashboardScreen(),
+      // ======================================================
+      // FARMER SHELL (Tabs with IndexedStack - No Transition)
+      // ======================================================
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return Scaffold(
+            body: navigationShell,
+            bottomNavigationBar: FarmerBottomNavBar(
+              navigationShell: navigationShell,
+            ),
+          );
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.farmerDashboard,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: FarmerDashboardScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.farmerOrders,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: FarmerOrderManagementScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.farmerInventory,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: InventoryScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.farmerChat,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: ChatListScreen(isRestaurant: false),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.farmerProfile,
+                pageBuilder: (context, state) {
+                  final userId = state.extra as String?;
+                  return NoTransitionPage(
+                    child: FarmerProfileScreen(userId: userId),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
       ),
+
+      // Farmer Detail Routes (Fullscreen over root navigator)
       GoRoute(
-        path: AppRoutes.farmerOrders,
-        builder: (context, state) => const FarmerOrderManagementScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.farmerInventory,
-        builder: (context, state) => const InventoryScreen(),
-      ),
-      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.farmerAddProduct,
         builder: (context, state) => const AddProductFlowScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.farmerProductDetail,
         builder: (context, state) {
           final product = state.extra as Map<String, dynamic>;
@@ -167,6 +228,7 @@ class AppRouter {
         },
       ),
       GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.farmerEditProduct,
         builder: (context, state) {
           final product = state.extra as Map<String, dynamic>;
@@ -174,35 +236,80 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: AppRoutes.farmerChat,
-        builder: (context, state) => const ChatListScreen(isRestaurant: false),
-      ),
-      GoRoute(
-        path: AppRoutes.farmerProfile,
-        builder: (context, state) {
-          final userId = state.extra as String?;
-          return FarmerProfileScreen(userId: userId);
-        },
-      ),
-      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.farmerSettings,
         builder: (context, state) => const FarmerSettingsScreen(),
       ),
 
-      // Restaurant routes
-      GoRoute(
-        path: AppRoutes.restaurantHome,
-        builder: (context, state) => const HomeScreen(),
+      // ======================================================
+      // RESTAURANT SHELL (Tabs with IndexedStack - No Transition)
+      // ======================================================
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return Scaffold(
+            body: navigationShell,
+            bottomNavigationBar: RestaurantBottomNavBar(
+              navigationShell: navigationShell,
+            ),
+          );
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.restaurantHome,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: HomeScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.restaurantSearch,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: SearchMarketScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.restaurantCart,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: CartScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.restaurantChat,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: ChatListScreen(isRestaurant: true),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.restaurantProfile,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: UserProfileScreen(),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
+
+      // Restaurant Detail Routes (Fullscreen over root navigator)
       GoRoute(
-        path: AppRoutes.restaurantSearch,
-        builder: (context, state) => const SearchMarketScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.restaurantCart,
-        builder: (context, state) => const CartScreen(),
-      ),
-      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.restaurantCheckout,
         builder: (context, state) {
           final args = state.extra as CheckoutArgs;
@@ -214,6 +321,7 @@ class AppRouter {
         },
       ),
       GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.restaurantPaymentMethod,
         builder: (context, state) {
           final args = state.extra as PaymentMethodArgs;
@@ -224,6 +332,7 @@ class AppRouter {
         },
       ),
       GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.restaurantOrderSuccess,
         builder: (context, state) {
           final orders = state.extra is List<OrderModel>
@@ -232,17 +341,10 @@ class AppRouter {
           return OrderSuccessScreen(orders: orders);
         },
       ),
-      GoRoute(
-        path: AppRoutes.restaurantChat,
-        builder: (context, state) => const ChatListScreen(isRestaurant: true),
-      ),
-      GoRoute(
-        path: AppRoutes.restaurantProfile,
-        builder: (context, state) => const UserProfileScreen(),
-      ),
 
-      // Shared / Details
+      // Shared / Details (Fullscreen over root navigator)
       GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.productDetail,
         builder: (context, state) {
           final product = state.extra as Map<String, dynamic>;
@@ -250,6 +352,7 @@ class AppRouter {
         },
       ),
       GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.chatConversation,
         builder: (context, state) {
           final args = state.extra as ChatConversationArgs;
@@ -262,6 +365,7 @@ class AppRouter {
         },
       ),
       GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.notifications,
         builder: (context, state) => const NotificationsScreen(),
       ),

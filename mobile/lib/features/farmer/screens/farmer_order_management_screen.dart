@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
-import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
 
@@ -248,7 +247,6 @@ class _FarmerOrderManagementScreenState
           );
         },
       ),
-      bottomNavigationBar: const FarmerBottomNavBar(currentIndex: 1),
     );
   }
 

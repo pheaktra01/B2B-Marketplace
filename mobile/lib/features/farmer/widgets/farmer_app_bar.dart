@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
-import 'package:mobile/features/farmer/screens/farmer_profile_screen.dart';
-import 'package:mobile/features/notification/screens/notifications_screen.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
@@ -79,18 +79,12 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
   }
 
   Future<void> _openNotifications(BuildContext context) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const NotificationsScreen()),
-    );
+    await context.push(AppRoutes.notifications);
     _loadAppBarData();
   }
 
   Future<void> _openProfile(BuildContext context) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FarmerProfileScreen()),
-    );
+    await context.push(AppRoutes.farmerProfile);
     _loadAppBarData();
   }
 

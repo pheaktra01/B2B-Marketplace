@@ -1,13 +1,13 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/core/constants/api_constants.dart';
-import 'package:mobile/features/auth/screens/get_started_screen.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
-import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -177,7 +177,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+            onPressed: () {
+              context.push(AppRoutes.notifications);
+            },
           ),
           const Padding(
             padding: EdgeInsets.only(right: 16),
@@ -277,9 +279,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ],
         ),
       ),
-
-      // 6. Bottom Navigation Bar
-      bottomNavigationBar: const RestaurantBottomNavBar(currentIndex: 4),
     );
   }
 
@@ -566,11 +565,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
       if (!mounted) return;
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const GetStartedScreen()),
-        (route) => false,
-      );
+      context.go(AppRoutes.getStarted);
     } catch (e) {
       debugPrint('Logout error: $e');
 
@@ -578,11 +573,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
       // AuthService already clears local authentication
       // even when the backend request fails.
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const GetStartedScreen()),
-        (route) => false,
-      );
+      context.go(AppRoutes.getStarted);
     }
   }
 }

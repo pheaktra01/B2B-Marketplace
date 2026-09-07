@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/order/models/order_model.dart';
-import 'package:mobile/features/order/screens/order_success_screen.dart';
 
 class KhqrPaymentModal extends StatefulWidget {
   final List<OrderModel> orders;
@@ -141,13 +142,9 @@ class _KhqrPaymentModalState
       return;
     }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => OrderSuccessScreen(
-          orders: widget.orders,
-        ),
-      ),
+    context.go(
+      AppRoutes.restaurantOrderSuccess,
+      extra: widget.orders,
     );
   }
 

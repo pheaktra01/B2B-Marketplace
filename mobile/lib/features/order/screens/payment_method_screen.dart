@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/cart/models/cart_model.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
-import 'package:mobile/features/order/screens/order_success_screen.dart';
 
 class PaymentMethodScreen extends StatefulWidget {
   final Cart cart;
@@ -933,15 +934,9 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       // ORDER SUCCESS
       // ======================================================
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              const OrderSuccessScreen(
-            orders: [],
-          ),
-        ),
-        (route) => false,
+      context.go(
+        AppRoutes.restaurantOrderSuccess,
+        extra: const [],
       );
     } catch (e) {
       debugPrint(

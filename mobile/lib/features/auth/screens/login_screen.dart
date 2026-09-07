@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
-import 'package:mobile/features/auth/screens/forgot_password_screen.dart';
-import 'package:mobile/features/auth/screens/get_started_screen.dart';
-import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
-import 'package:mobile/features/restaurant/screens/home_screen.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -111,13 +109,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                               color: textDark,
                                             ),
                                             onPressed: () {
-                                              Navigator.pushReplacement(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      const GetStartedScreen(),
-                                                ),
-                                              );
+                                              if (context.canPop()) {
+                                                context.pop();
+                                              } else {
+                                                context.go(AppRoutes.getStarted);
+                                              }
                                             },
                                           ),
                                         ),
@@ -266,13 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                         GestureDetector(
                                           onTap: () {
-                                            Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const ForgotPasswordScreen(),
-                                              ),
-                                            );
+                                            context.push(AppRoutes.forgotPassword);
                                           },
                                           child: Text(
                                             l10n.forgotPassword,
@@ -511,19 +501,9 @@ class _LoginScreenState extends State<LoginScreen> {
         if (!mounted) return;
 
         if (role == 'farmer') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const FarmerDashboardScreen(),
-            ),
-          );
+          context.go(AppRoutes.farmerDashboard);
         } else if (role == 'restaurant') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const HomeScreen(),
-            ),
-          );
+          context.go(AppRoutes.restaurantHome);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

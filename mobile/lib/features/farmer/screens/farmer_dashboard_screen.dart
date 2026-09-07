@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
-import 'package:mobile/features/farmer/screens/farmer_order_management_screen.dart';
-import 'package:mobile/features/farmer/screens/inventory_screen.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
-import 'package:mobile/features/product/screens/add_product_screen.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
 import 'package:mobile/l10n/app_localizations.dart';
@@ -113,10 +112,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
       // -----------------------------------------------------------------------
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddProductFlowScreen()),
-          );
+          await context.push(AppRoutes.farmerAddProduct);
           _loadDashboardData();
         },
         backgroundColor: accentOrange,
@@ -407,10 +403,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         'icon': Icons.add_box_rounded,
         'color': primaryGreen,
         'action': () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddProductFlowScreen()),
-          );
+          await context.push(AppRoutes.farmerAddProduct);
           _loadDashboardData();
         },
       },
@@ -419,12 +412,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         'icon': Icons.receipt_long_rounded,
         'color': const Color(0xFF1976D2),
         'action': () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const FarmerOrderManagementScreen(),
-            ),
-          );
+          await context.push(AppRoutes.farmerOrders);
           _loadDashboardData();
         },
       },
@@ -433,10 +421,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         'icon': Icons.insights_rounded,
         'color': const Color(0xFFE65100),
         'action': () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const InventoryScreen()),
-          );
+          await context.push(AppRoutes.farmerInventory);
           _loadDashboardData();
         },
       },
@@ -572,10 +557,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           ),
           TextButton(
             onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const InventoryScreen()),
-              );
+              await context.push(AppRoutes.farmerInventory);
               _loadDashboardData();
             },
             child: Text(
@@ -779,10 +761,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const InventoryScreen()),
-              );
+              await context.push(AppRoutes.farmerInventory);
               _loadDashboardData();
             },
             style: OutlinedButton.styleFrom(
@@ -963,12 +942,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
             ),
             TextButton(
               onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const FarmerOrderManagementScreen(),
-                  ),
-                );
+                await context.push(AppRoutes.farmerOrders);
                 _loadDashboardData();
               },
               child: Text(
@@ -1134,10 +1108,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
             ),
             TextButton(
               onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const InventoryScreen()),
-                );
+                await context.push(AppRoutes.farmerInventory);
                 _loadDashboardData();
               },
               child: Text(

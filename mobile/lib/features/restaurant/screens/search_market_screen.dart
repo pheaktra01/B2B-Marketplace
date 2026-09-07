@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
-import 'package:mobile/features/product/screens/product_detail_screen.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/restaurant/services/search_service.dart';
-import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 
 class SearchMarketScreen extends StatefulWidget {
   const SearchMarketScreen({super.key});
@@ -277,8 +277,6 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
           ),
         ),
       ),
-
-      bottomNavigationBar: const RestaurantBottomNavBar(currentIndex: 1),
     );
   }
 
@@ -808,11 +806,9 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
             isAvailable: product['isAvailable'] ?? true,
 
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProductDetailScreen(product: product),
-                ),
+              context.push(
+                AppRoutes.productDetail,
+                extra: product,
               );
             },
 

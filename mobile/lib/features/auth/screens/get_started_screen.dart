@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/auth/screens/login_screen.dart';
-import 'package:mobile/features/auth/screens/role_selection_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
 class GetStartedScreen extends StatelessWidget {
@@ -196,13 +196,7 @@ class GetStartedScreen extends StatelessWidget {
                               height: 56,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const RoleSelectionScreen(),
-                                    ),
-                                  );
+                                  context.push(AppRoutes.roleSelection);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: accentOrange,
@@ -245,13 +239,7 @@ class GetStartedScreen extends StatelessWidget {
                               height: 56,
                               child: OutlinedButton(
                                 onPressed: () {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LoginScreen(),
-                                    ),
-                                  );
+                                  context.push(AppRoutes.login);
                                 },
                                 style: OutlinedButton.styleFrom(
                                   side: const BorderSide(

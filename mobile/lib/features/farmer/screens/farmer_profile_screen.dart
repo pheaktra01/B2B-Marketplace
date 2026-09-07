@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
-import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 

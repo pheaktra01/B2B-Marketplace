@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:mobile/features/auth/screens/language_selection_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
-import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
-import 'package:mobile/features/restaurant/screens/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -33,26 +32,17 @@ class _SplashScreenState extends State<SplashScreen> {
     if (isValid && role != null && role.isNotEmpty) {
       if (role == 'farmer') {
         if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const FarmerDashboardScreen()),
-        );
+        context.go(AppRoutes.farmerDashboard);
         return;
       } else if (role == 'restaurant') {
         if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
+        context.go(AppRoutes.restaurantHome);
         return;
       }
     }
 
     if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const LanguageSelectionScreen()),
-    );
+    context.go(AppRoutes.language);
   }
 
   @override

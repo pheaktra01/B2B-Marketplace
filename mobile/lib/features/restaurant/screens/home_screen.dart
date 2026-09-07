@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
-import 'package:mobile/features/product/screens/product_detail_screen.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
-import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -177,13 +177,18 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+            onPressed: () {
+              context.push(AppRoutes.notifications);
+            },
           ),
 
-          const Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              backgroundImage: AssetImage('assets/mokoto.jpg'),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: GestureDetector(
+              onTap: () => context.go(AppRoutes.restaurantProfile),
+              child: const CircleAvatar(
+                backgroundImage: AssetImage('assets/mokoto.jpg'),
+              ),
             ),
           ),
         ],
@@ -407,12 +412,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       isAvailable: product['isAvailable'] ?? true,
 
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                ProductDetailScreen(product: product),
-                          ),
+                        context.push(
+                          AppRoutes.productDetail,
+                          extra: product,
                         );
                       },
 
@@ -479,11 +481,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-
-      // ========================================================
-      // BOTTOM NAVIGATION
-      // ========================================================
-      bottomNavigationBar: const RestaurantBottomNavBar(currentIndex: 0),
     );
   }
 

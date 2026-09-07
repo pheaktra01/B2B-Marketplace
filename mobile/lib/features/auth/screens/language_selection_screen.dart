@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile/core/app_locale.dart';
-import 'package:mobile/features/auth/screens/get_started_screen.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
@@ -94,15 +95,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                             ),
                           ),
                           onPressed: () async {
-                            final navigator = Navigator.of(context);
                             final locale = selectedIndex == 0 ? const Locale('km') : const Locale('en');
                             await AppLocale.setLocale(locale);
                             if (!mounted) return;
-                            navigator.pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => const GetStartedScreen(),
-                              ),
-                            );
+                            context.go(AppRoutes.getStarted);
                           },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,

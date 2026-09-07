@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
-import 'package:mobile/features/auth/screens/login_screen.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -217,7 +219,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                             return;
                                           }
 
-                                          final navigator = Navigator.of(context);
+                                          Navigator.of(context);
                                           final messenger = ScaffoldMessenger.of(context);
 
                                           setState(() {
@@ -226,7 +228,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                                           try {
                                             final response = await _authService.forgotPassword(
-                                              phone: phone.trim(),
+                                              phone: _identifierController.text.trim(),
                                             );
                                             final data = response['data'] as Map<String, dynamic>;
 
@@ -236,13 +238,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                                 return;
                                               }
 
-                                              navigator.pushReplacement(
-                                                MaterialPageRoute(
-                                                  builder: (_) => VerifyPhoneScreen(
-                                                    type: VerificationType.forgotPassword,
-                                                    phoneNumber: phone.trim(),
-                                                    initialOtp: data['otp']?.toString(),
-                                                  ),
+                                              context.push(
+                                                AppRoutes.verifyPhone,
+                                                extra: VerifyPhoneArgs(
+                                                  type: VerificationType.forgotPassword,
+                                                  phoneNumber: _identifierController.text.trim(),
+                                                  initialOtp: data['otp']?.toString(),
                                                 ),
                                               );
                                             } else {
@@ -303,12 +304,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       Center(
                         child: TextButton.icon(
                           onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const LoginScreen(),
-                              ),
-                            );
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.go(AppRoutes.login);
+                            }
                           },
                           icon: const Icon(
                             Icons.arrow_back,

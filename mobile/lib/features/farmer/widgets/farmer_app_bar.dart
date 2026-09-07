@@ -83,9 +83,8 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
     _loadAppBarData();
   }
 
-  Future<void> _openProfile(BuildContext context) async {
-    await context.push(AppRoutes.farmerProfile);
-    _loadAppBarData();
+  void _openProfile(BuildContext context) {
+    context.go(AppRoutes.farmerProfile);
   }
 
   @override

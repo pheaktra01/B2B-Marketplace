@@ -405,18 +405,16 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         'label': l10n.orders,
         'icon': Icons.receipt_long_rounded,
         'color': const Color(0xFF1976D2),
-        'action': () async {
-          await context.push(AppRoutes.farmerOrders);
-          _loadDashboardData();
+        'action': () {
+          context.go(AppRoutes.farmerOrders);
         },
       },
       {
         'label': l10n.insights,
         'icon': Icons.insights_rounded,
         'color': const Color(0xFFE65100),
-        'action': () async {
-          await context.push(AppRoutes.farmerInventory);
-          _loadDashboardData();
+        'action': () {
+          context.go(AppRoutes.farmerInventory);
         },
       },
       {
@@ -424,9 +422,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         'icon': Icons.chat_bubble_outline_rounded,
         'color': const Color(0xFF388E3C),
         'action': () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Messages module open')),
-          );
+          context.go(AppRoutes.farmerChat);
         },
       },
     ];
@@ -550,9 +546,8 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
             ),
           ),
           TextButton(
-            onPressed: () async {
-              await context.push(AppRoutes.farmerInventory);
-              _loadDashboardData();
+            onPressed: () {
+              context.go(AppRoutes.farmerInventory);
             },
             child: Text(
               hasAlert ? l10n.restock : 'Manage',
@@ -754,9 +749,8 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
-            onPressed: () async {
-              await context.push(AppRoutes.farmerInventory);
-              _loadDashboardData();
+            onPressed: () {
+              context.go(AppRoutes.farmerInventory);
             },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: primaryGreen, width: 1.5),
@@ -935,9 +929,8 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
               ),
             ),
             TextButton(
-              onPressed: () async {
-                await context.push(AppRoutes.farmerOrders);
-                _loadDashboardData();
+              onPressed: () {
+                context.go(AppRoutes.farmerOrders);
               },
               child: Text(
                 l10n.manageOrders,
@@ -1101,9 +1094,8 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
               ),
             ),
             TextButton(
-              onPressed: () async {
-                await context.push(AppRoutes.farmerInventory);
-                _loadDashboardData();
+              onPressed: () {
+                context.go(AppRoutes.farmerInventory);
               },
               child: Text(
                 l10n.viewAll,

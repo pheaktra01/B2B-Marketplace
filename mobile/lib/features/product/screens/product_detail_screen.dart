@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
+import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
-import 'package:mobile/features/chat/screens/chat_screen.dart';
 import 'package:mobile/features/chat/services/chat_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
 
@@ -966,17 +968,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       final participantName = participant is Map
           ? participant['name']?.toString()
           : null;
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ChatScreen(
-            conversationId: conversationId,
-            participantName: participantName?.isNotEmpty == true
-                ? participantName!
-                : _farmName,
-            participantAvatarUrl: _publisherAvatarUrl,
-            isOnline: false,
-          ),
+      await context.push(
+        AppRoutes.chatConversation,
+        extra: ChatConversationArgs(
+          conversationId: conversationId,
+          participantName: participantName?.isNotEmpty == true
+              ? participantName!
+              : _farmName,
+          participantAvatarUrl: _publisherAvatarUrl,
+          isOnline: false,
         ),
       );
     } catch (error) {

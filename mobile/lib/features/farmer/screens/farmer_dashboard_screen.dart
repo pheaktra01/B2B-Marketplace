@@ -129,11 +129,6 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
       ),
 
       // -----------------------------------------------------------------------
-      // BOTTOM NAVIGATION
-      // -----------------------------------------------------------------------
-      bottomNavigationBar: const FarmerBottomNavBar(currentIndex: 0),
-
-      // -----------------------------------------------------------------------
       // BODY
       // -----------------------------------------------------------------------
       body: SafeArea(

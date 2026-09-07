@@ -2,9 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/l10n/app_localizations.dart';
-
-import 'package:mobile/features/farmer/screens/inventory_screen.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 
@@ -1328,14 +1328,11 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) =>
-                                const InventoryScreen(),
-                      ),
-                    );
+                    if (context.canPop()) {
+                      context.pop(true);
+                    } else {
+                      context.go(AppRoutes.farmerInventory);
+                    }
                   },
                   style:
                       ElevatedButton.styleFrom(

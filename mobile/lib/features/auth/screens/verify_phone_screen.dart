@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
-import 'package:mobile/features/auth/screens/reset_password_screen.dart';
-import 'package:mobile/features/farmer/screens/farmer_dashboard_screen.dart';
-import 'package:mobile/features/restaurant/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class VerifyPhoneScreen extends StatefulWidget {
@@ -127,7 +127,11 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                 color: brandGreen,
                               ),
                               onPressed: () {
-                                Navigator.pop(context);
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  context.go(AppRoutes.login);
+                                }
                               },
                             ),
                           ),
@@ -259,7 +263,6 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                             return;
                                           }
 
-                                          final navigator = Navigator.of(context);
                                           final messenger = ScaffoldMessenger.of(context);
 
                                           setState(() {
@@ -270,24 +273,9 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                             switch (widget.type) {
                                               case VerificationType.login:
                                                 if (widget.selectedRole == 'farmer') {
-                                                  navigator.pushReplacement(
-                                                    MaterialPageRoute(
-                                                      builder: (_) => const FarmerDashboardScreen(),
-                                                    ),
-                                                  );
-                                                } else if (widget.selectedRole == 'restaurant') {
-                                                  navigator.pushReplacement(
-                                                    MaterialPageRoute(
-                                                      builder: (_) => const HomeScreen(),
-                                                    ),
-                                                  );
+                                                  context.go(AppRoutes.farmerDashboard);
                                                 } else {
-                                                  // Fallback: default to farmer dashboard
-                                                  navigator.pushReplacement(
-                                                    MaterialPageRoute(
-                                                      builder: (_) => const FarmerDashboardScreen(),
-                                                    ),
-                                                  );
+                                                  context.go(AppRoutes.restaurantHome);
                                                 }
                                                 break;
 
@@ -328,62 +316,38 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                                       await prefs.setString('userId', loggedInUserId);
                                                     }
 
+                                                    if (!mounted) return;
                                                     if (role == 'farmer') {
-                                                      navigator.pushReplacement(
-                                                        MaterialPageRoute(
-                                                          builder: (_) => const FarmerDashboardScreen(),
-                                                        ),
-                                                      );
+                                                      context.go(AppRoutes.farmerDashboard);
                                                     } else {
-                                                      navigator.pushReplacement(
-                                                        MaterialPageRoute(
-                                                          builder: (_) => const HomeScreen(),
-                                                        ),
-                                                      );
+                                                      context.go(AppRoutes.restaurantHome);
                                                     }
                                                   } else {
                                                     // If login failed, still navigate based on selectedRole to continue UX flow
+                                                    if (!mounted) return;
                                                     if (widget.selectedRole == 'farmer') {
-                                                      navigator.pushReplacement(
-                                                        MaterialPageRoute(
-                                                          builder: (_) => const FarmerDashboardScreen(),
-                                                        ),
-                                                      );
+                                                      context.go(AppRoutes.farmerDashboard);
                                                     } else {
-                                                      navigator.pushReplacement(
-                                                        MaterialPageRoute(
-                                                          builder: (_) => const HomeScreen(),
-                                                        ),
-                                                      );
+                                                      context.go(AppRoutes.restaurantHome);
                                                     }
                                                   }
                                                 } else {
                                                   // No password provided: just route by selectedRole
+                                                  if (!mounted) return;
                                                   if (widget.selectedRole == 'farmer') {
-                                                    navigator.pushReplacement(
-                                                      MaterialPageRoute(
-                                                        builder: (_) => const FarmerDashboardScreen(),
-                                                      ),
-                                                    );
+                                                    context.go(AppRoutes.farmerDashboard);
                                                   } else {
-                                                    navigator.pushReplacement(
-                                                      MaterialPageRoute(
-                                                        builder: (_) => const HomeScreen(),
-                                                      ),
-                                                    );
+                                                    context.go(AppRoutes.restaurantHome);
                                                   }
                                                 }
                                                 break;
 
                                               case VerificationType.forgotPassword:
-                                                navigator.push(
-                                                  MaterialPageRoute(
-                                                    builder: (_) => ResetPasswordScreen(
-                                                      phoneNumber: widget.phoneNumber,
-                                                      otp: _currentOtpCode,
-                                                    ),
-                                                  ),
-                                                );
+                                                if (!mounted) return;
+                                                context.push(AppRoutes.resetPassword, extra: ResetPasswordArgs(
+                                                  phoneNumber: widget.phoneNumber,
+                                                  otp: _currentOtpCode,
+                                                ));
                                                 break;
                                             }
                                           } catch (error) {
@@ -458,7 +422,11 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                 const SizedBox(height: 8),
                                 GestureDetector(
                                   onTap: () {
-                                    Navigator.pop(context);
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.go(AppRoutes.login);
+                                    }
                                   },
                                   child: const Text(
                                     'លេខទូរស័ព្ទមិនត្រឹមត្រូវ? ផ្លាស់ប្តូរលេខ',

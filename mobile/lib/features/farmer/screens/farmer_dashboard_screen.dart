@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
-import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
 import 'package:mobile/features/product/services/product_service.dart';

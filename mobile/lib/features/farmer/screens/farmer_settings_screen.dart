@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile/core/app_locale.dart';
-import 'package:mobile/features/auth/screens/get_started_screen.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
@@ -498,13 +499,7 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
 
       if (result['statusCode'] >= 200 &&
           result['statusCode'] < 300) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const GetStartedScreen(),
-          ),
-          (route) => false,
-        );
+        context.go(AppRoutes.getStarted);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

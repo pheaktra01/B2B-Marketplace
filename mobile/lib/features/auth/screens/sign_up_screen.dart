@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
-import 'package:mobile/features/auth/screens/role_selection_screen.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -111,12 +113,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             color: brandGreen,
                                           ),
                                           onPressed: () {
-                                            Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => const RoleSelectionScreen(),
-                                              ),
-                                            );
+                                            if (context.canPop()) {
+                                              context.pop();
+                                            } else {
+                                              context.go(AppRoutes.roleSelection);
+                                            }
                                           },
                                         ),
                                       ),
@@ -502,7 +503,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   return;
                                                 }
 
-                                                final navigator = Navigator.of(context);
+                                                Navigator.of(context);
                                                 final messenger = ScaffoldMessenger.of(context);
 
                                                 setState(() {
@@ -523,16 +524,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                       return;
                                                     }
 
-                                                    navigator.pushReplacement(
-                                                      MaterialPageRoute(
-                                                        builder: (_) => VerifyPhoneScreen(
-                                                          type: VerificationType.signup,
-                                                          phoneNumber: _phoneController.text.trim(),
-                                                          selectedRole: widget.selectedRole,
-                                                          userId: data['userId']?.toString(),
-                                                          initialOtp: data['otp']?.toString(),
-                                                          password: _passwordController.text,
-                                                        ),
+                                                    context.push(
+                                                      AppRoutes.verifyPhone,
+                                                      extra: VerifyPhoneArgs(
+                                                        type: VerificationType.signup,
+                                                        phoneNumber: _phoneController.text.trim(),
+                                                        selectedRole: widget.selectedRole,
+                                                        userId: data['userId']?.toString(),
+                                                        initialOtp: data['otp']?.toString(),
+                                                        password: _passwordController.text,
                                                       ),
                                                     );
                                                   } else {

@@ -4,6 +4,7 @@ import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/notification/models/notification_model.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
+import 'package:mobile/features/notification/widgets/notification_card.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
@@ -94,6 +95,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     });
   }
 
+  Future<void> _deleteNotification(NotificationModel notification) async {
+    try {
+      await _service.deleteNotification(notification.id);
+      if (!mounted) return;
+      setState(() {
+        _notificationsFuture = _notificationsFuture.then(
+          (items) =>
+              items.where((item) => item.id != notification.id).toList(),
+        );
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Notification removed'),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (error) {
+      debugPrint('Failed to delete notification: $error');
+    }
+  }
+
   void _openReference(NotificationModel notification) {
     if (notification.referenceType == 'conversation' &&
         notification.referenceId != null) {
@@ -164,7 +187,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         future: _notificationsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: primaryGreen),
+            );
           }
           if (snapshot.hasError) {
             return Center(
@@ -183,12 +208,52 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
           final notifications = snapshot.data ?? [];
           if (notifications.isEmpty) {
-            return const Center(child: Text('No notifications yet'));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: primaryGreen.withValues(alpha: 0.08),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.notifications_none_rounded,
+                        size: 36,
+                        color: primaryGreen,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No notifications yet',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF111827),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'You will receive updates here for new orders, messages, and activities.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
 
-          final unreadCount = notifications
-              .where((item) => !item.isRead)
-              .length;
+          final unreadCount =
+              notifications.where((item) => !item.isRead).length;
           final groups = <String, List<NotificationModel>>{};
           for (final notification in notifications) {
             groups
@@ -196,157 +261,74 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 .add(notification);
           }
 
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.notifications,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  if (unreadCount > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: primaryGreen,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        l10n.newNotifications(unreadCount),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              for (final entry in groups.entries) ...[
-                Text(
-                  entry.key,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                for (final notification in entry.value)
-                  _NotificationCard(
-                    notification: notification,
-                    onTap: () async {
-                      await _markAsRead(notification);
-                      if (mounted) _openReference(notification);
-                    },
-                  ),
-                const SizedBox(height: 8),
-              ],
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _NotificationCard extends StatelessWidget {
-  final NotificationModel notification;
-  final VoidCallback onTap;
-
-  const _NotificationCard({required this.notification, required this.onTap});
-
-  IconData _iconForType(String type) {
-    if (type == 'message') return Icons.chat_bubble_outline;
-    if (type.startsWith('order')) return Icons.storefront;
-    if (type == 'payment_received') {
-      return Icons.account_balance_wallet_outlined;
-    }
-    if (type == 'product') return Icons.inventory_2_outlined;
-    return Icons.info_outline;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: notification.isRead
-                      ? Colors.grey.shade200
-                      : const Color(0xFFB9F6CA),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _iconForType(notification.type),
-                  color: notification.isRead
-                      ? Colors.black54
-                      : const Color(0xFF1B5E20),
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          return RefreshIndicator(
+            onRefresh: () async => setState(_refresh),
+            color: primaryGreen,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            notification.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
-                        if (!notification.isRead)
-                          Container(
-                            width: 7,
-                            height: 12,
-                            color: const Color(0xFF1B5E20),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
                     Text(
-                      notification.message,
+                      l10n.notifications.toUpperCase(),
                       style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade700,
-                        height: 1.35,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey.shade600,
+                        letterSpacing: 0.8,
                       ),
                     ),
+                    if (unreadCount > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: primaryGreen,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          l10n.newNotifications(unreadCount),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(height: 12),
+                for (final entry in groups.entries) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 8, top: 4),
+                    child: Text(
+                      entry.key,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+                  for (final notification in entry.value)
+                    NotificationCard(
+                      notification: notification,
+                      onTap: () async {
+                        await _markAsRead(notification);
+                        if (mounted) _openReference(notification);
+                      },
+                      onDelete: () => _deleteNotification(notification),
+                    ),
+                  const SizedBox(height: 8),
+                ],
+              ],
+            ),
+          );
+        },
       ),
     );
   }

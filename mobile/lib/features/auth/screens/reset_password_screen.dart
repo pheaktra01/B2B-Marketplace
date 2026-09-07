@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
-import 'package:mobile/features/auth/screens/login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String phoneNumber;
@@ -282,7 +283,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                               return;
                                             }
 
-                                            final navigator = Navigator.of(context);
                                             final messenger = ScaffoldMessenger.of(context);
 
                                             setState(() {
@@ -303,12 +303,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                                   return;
                                                 }
 
-                                                navigator.pushAndRemoveUntil(
-                                                  MaterialPageRoute(
-                                                    builder: (_) => const LoginScreen(),
-                                                  ),
-                                                  (route) => false,
-                                                );
+                                                context.go(AppRoutes.login);
                                               } else {
                                                 if (!mounted) {
                                                   return;
@@ -364,7 +359,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   alignment: Alignment.center,
                                   child: TextButton(
                                     onPressed: () {
-                                      Navigator.pop(context);
+                                      if (context.canPop()) {
+                                        context.pop();
+                                      } else {
+                                        context.go(AppRoutes.login);
+                                      }
                                     },
                                     child: const Text(
                                       'បោះបង់ ហើយត្រឡប់ទៅទំព័រចូល',

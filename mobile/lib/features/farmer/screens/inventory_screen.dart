@@ -348,11 +348,6 @@ class _InventoryScreenState extends State<InventoryScreen> {
           ),
         ),
       ),
-
-      // ========================================================
-      // BOTTOM NAVIGATION
-      // ========================================================
-      bottomNavigationBar: const FarmerBottomNavBar(currentIndex: 2),
     );
   }
 

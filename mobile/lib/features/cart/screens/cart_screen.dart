@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
+import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/cart/models/cart_model.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
-import 'package:mobile/features/order/screens/checkout_screen.dart';
-import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -274,14 +275,19 @@ class _CartScreenState extends State<CartScreen> {
             icon: const Icon(
               Icons.notifications_none,
             ),
-            onPressed: () {},
+            onPressed: () {
+              context.push(AppRoutes.notifications);
+            },
           ),
 
-          const Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              backgroundImage:
-                  AssetImage('assets/mokoto.jpg'),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: GestureDetector(
+              onTap: () => context.go(AppRoutes.restaurantProfile),
+              child: const CircleAvatar(
+                backgroundImage:
+                    AssetImage('assets/mokoto.jpg'),
+              ),
             ),
           ),
         ],
@@ -294,15 +300,6 @@ class _CartScreenState extends State<CartScreen> {
       body: RefreshIndicator(
         onRefresh: _loadCart,
         child: _buildBody(),
-      ),
-
-      // ======================================================
-      // BOTTOM NAV
-      // ======================================================
-
-      bottomNavigationBar:
-          const RestaurantBottomNavBar(
-        currentIndex: 2,
       ),
     );
   }
@@ -900,14 +897,12 @@ class _CartScreenState extends State<CartScreen> {
                       : () {
                           FocusScope.of(context).unfocus();
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CheckoutScreen(
-                                cart: _cart!,
-                                deliveryNotes:
-                                    _notesController.text.trim(), deliveryAddress: '<ADDRESS>',
-                              ),
+                          context.push(
+                            AppRoutes.restaurantCheckout,
+                            extra: CheckoutArgs(
+                              cart: _cart!,
+                              deliveryNotes: _notesController.text.trim(),
+                              deliveryAddress: '<ADDRESS>',
                             ),
                           );
                         },

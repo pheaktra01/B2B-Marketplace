@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/l10n/app_localizations.dart';
-import 'package:mobile/features/farmer/widgets/edit_product_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
 import 'package:mobile/features/farmer/widgets/farmer_product_card.dart';
-import 'package:mobile/features/farmer/widgets/farmer_product_detail_screen.dart';
-import 'package:mobile/features/product/screens/add_product_screen.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 
 class InventoryScreen extends StatefulWidget {
@@ -634,11 +633,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 return;
               }
 
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => FarmerProductDetailScreen(product: product),
-                ),
+              await context.push(
+                AppRoutes.farmerProductDetail,
+                extra: product,
               );
 
               if (!mounted) {
@@ -656,11 +653,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 return;
               }
 
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditProductScreen(product: product),
-                ),
+              await context.push(
+                AppRoutes.farmerEditProduct,
+                extra: product,
               );
 
               if (!mounted) {
@@ -694,10 +689,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
   // ============================================================
 
   Future<void> _openAddProduct() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const AddProductFlowScreen()),
-    );
+    await context.push(AppRoutes.farmerAddProduct);
 
     if (!mounted) {
       return;

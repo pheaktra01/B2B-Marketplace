@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/cart/models/cart_model.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/order/models/order_model.dart';
-import 'package:mobile/features/order/screens/order_success_screen.dart';
 import 'package:mobile/features/order/services/order_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -947,14 +948,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       // Pass the REAL backend orders.
       // ======================================================
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => OrderSuccessScreen(
-            orders: orders,
-          ),
-        ),
-        (route) => false,
+      context.go(
+        AppRoutes.restaurantOrderSuccess,
+        extra: orders,
       );
     } catch (e) {
       if (!mounted) return;

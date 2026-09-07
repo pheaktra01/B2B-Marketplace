@@ -551,8 +551,6 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
           ],
         ),
       ),
-
-      bottomNavigationBar: const FarmerBottomNavBar(currentIndex: 4),
     );
   }
 

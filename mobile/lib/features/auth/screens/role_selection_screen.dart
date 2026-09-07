@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/auth/screens/get_started_screen.dart';
-import 'package:mobile/features/auth/screens/login_screen.dart';
-import 'package:mobile/features/auth/screens/sign_up_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
 
 class RoleSelectionScreen extends StatefulWidget {
   const RoleSelectionScreen({super.key});
@@ -62,12 +61,11 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                               color: textDark,
                             ),
                             onPressed: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const GetStartedScreen(),
-                                ),
-                              );
+                              if (context.canPop()) {
+                                context.pop();
+                              } else {
+                                context.go(AppRoutes.getStarted);
+                              }
                             },
                           ),
                         ),
@@ -195,13 +193,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                           onPressed: _selectedRole == null
                               ? null
                               : () {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => SignUpScreen(
-                                        selectedRole: _selectedRole!,
-                                      ),
-                                    ),
+                                  context.push(
+                                    AppRoutes.signUp,
+                                    extra: _selectedRole!,
                                   );
                                 },
                           style: ElevatedButton.styleFrom(
@@ -243,12 +237,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginScreen(),
-                                ),
-                              );
+                              context.push(AppRoutes.login);
                             },
                             child: const Text(
                               'ចូលប្រព័ន្ធ',

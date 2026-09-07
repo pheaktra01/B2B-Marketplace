@@ -107,7 +107,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       );
     } else if (notification.referenceType == 'order' ||
         notification.type.startsWith('order')) {
-      context.push(AppRoutes.farmerOrders);
+      context.go(AppRoutes.farmerOrders);
     }
   }
 

@@ -381,4 +381,46 @@ class ProductService {
       );
     }
   }
+
+  // ============================================================
+  // GET RELATED / FARMER PRODUCTS
+  // ============================================================
+
+  static Future<List<Map<String, dynamic>>> getRelatedProducts({
+    String? category,
+    String? farmerId,
+    String? excludeProductId,
+  }) async {
+    try {
+      final all = await getAllProducts();
+      return all
+          .where((p) {
+            final id = p['id']?.toString() ?? '';
+            if (excludeProductId != null && id == excludeProductId) {
+              return false;
+            }
+            if (farmerId != null && farmerId.isNotEmpty) {
+              final pFarmerId = p['farmerId']?.toString() ??
+                  (p['publisher'] is Map
+                      ? p['publisher']['id']?.toString()
+                      : null) ??
+                  p['publisherId']?.toString();
+              if (pFarmerId != null && pFarmerId == farmerId) {
+                return true;
+              }
+            }
+            if (category != null &&
+                category.isNotEmpty &&
+                p['category']?.toString().toLowerCase() ==
+                    category.toLowerCase()) {
+              return true;
+            }
+            return false;
+          })
+          .map((p) => Map<String, dynamic>.from(p))
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
 }

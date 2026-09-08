@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
@@ -861,11 +862,17 @@ class OrderSuccessScreen extends StatelessWidget {
           child:
               ElevatedButton.icon(
             onPressed: () {
-              /*
-               * Later:
-               * Navigator.push(...)
-               * to OrderTrackingScreen
-               */
+              if (orders.isNotEmpty) {
+                context.push(
+                  AppRoutes.restaurantOrderTracking,
+                  extra: OrderTrackingArgs(
+                    orderId: orders.first.id,
+                    order: orders.first,
+                  ),
+                );
+              } else {
+                context.push(AppRoutes.restaurantOrders);
+              }
             },
 
             icon:

@@ -5,6 +5,7 @@ import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
+import 'package:mobile/features/product/services/favorites_service.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
 
@@ -28,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Map<String, dynamic>> _products = [];
   List<Map<String, dynamic>> _recommendedFarmers = [];
+  Set<String> _favoriteIds = {};
 
   final List<Map<String, dynamic>> _categories = [
     {'name': 'All', 'icon': Icons.grid_view_rounded},
@@ -65,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       final products = await ProductService.getAllProducts();
+      final favIds = await FavoritesService.getFavoriteIds();
 
       if (!mounted) return;
 
@@ -72,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _products = products
             .map((product) => Map<String, dynamic>.from(product))
             .toList();
-
+        _favoriteIds = favIds.toSet();
         _isLoading = false;
       });
 
@@ -411,15 +414,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       isAvailable: product['isAvailable'] ?? true,
 
+                      isFavorite:
+                          _favoriteIds.contains(product['id']?.toString()),
+
                       onTap: () {
-                        context.push(
+                        context
+                            .push(
                           AppRoutes.productDetail,
                           extra: product,
-                        );
+                        )
+                            .then((_) async {
+                          final favIds = await FavoritesService.getFavoriteIds();
+                          if (mounted) {
+                            setState(() => _favoriteIds = favIds.toSet());
+                          }
+                        });
                       },
 
-                      onFavoritePressed: () {
-                        debugPrint('Favorite: ${product['name']}');
+                      onFavoritePressed: () async {
+                        final pid = product['id']?.toString() ?? '';
+                        if (pid.isNotEmpty) {
+                          final isFav =
+                              await FavoritesService.toggleFavorite(pid);
+                          if (mounted) {
+                            setState(() {
+                              if (isFav) {
+                                _favoriteIds.add(pid);
+                              } else {
+                                _favoriteIds.remove(pid);
+                              }
+                            });
+                          }
+                        }
                       },
 
                       onAddToCart: () {

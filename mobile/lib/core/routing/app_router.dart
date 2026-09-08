@@ -38,11 +38,14 @@ import 'package:mobile/features/notification/screens/notifications_screen.dart';
 // Order
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/screens/checkout_screen.dart';
+import 'package:mobile/features/order/screens/order_detail_tracking_screen.dart';
 import 'package:mobile/features/order/screens/order_success_screen.dart';
 import 'package:mobile/features/order/screens/payment_method_screen.dart';
+import 'package:mobile/features/order/screens/restaurant_orders_screen.dart';
 
 // Product
 import 'package:mobile/features/product/screens/add_product_screen.dart';
+import 'package:mobile/features/product/screens/favorite_products_screen.dart';
 import 'package:mobile/features/product/screens/product_detail_screen.dart';
 
 // Restaurant
@@ -340,6 +343,53 @@ class AppRouter {
               : const <OrderModel>[];
           return OrderSuccessScreen(orders: orders);
         },
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: AppRoutes.restaurantOrders,
+        builder: (context, state) => const RestaurantOrdersScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: AppRoutes.restaurantOrderTracking,
+        builder: (context, state) {
+          final args = state.extra;
+          String? orderId;
+          OrderModel? initialOrder;
+
+          if (args is OrderTrackingArgs) {
+            orderId = args.orderId;
+            if (args.order is OrderModel) {
+              initialOrder = args.order as OrderModel;
+            }
+          } else if (args is OrderModel) {
+            orderId = args.id;
+            initialOrder = args;
+          } else if (args is String && args.isNotEmpty) {
+            orderId = args;
+          } else if (args is Map) {
+            orderId = args['orderId']?.toString() ?? args['id']?.toString();
+          }
+
+          // Check query parameters: /restaurant/orders/tracking?orderId=...
+          orderId ??= state.uri.queryParameters['orderId'] ??
+              state.uri.queryParameters['id'];
+
+          if (orderId != null && orderId.isNotEmpty) {
+            return OrderDetailTrackingScreen(
+              orderId: orderId,
+              initialOrder: initialOrder,
+            );
+          }
+
+          // Fallback if no specific order was specified: show the orders list
+          return const RestaurantOrdersScreen();
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: AppRoutes.restaurantFavorites,
+        builder: (context, state) => const FavoriteProductsScreen(),
       ),
 
       // Shared / Details (Fullscreen over root navigator)

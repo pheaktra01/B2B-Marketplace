@@ -32,6 +32,9 @@ class AppRoutes {
   static const String restaurantOrderSuccess = '/restaurant/order-success';
   static const String restaurantChat = '/restaurant/chat';
   static const String restaurantProfile = '/restaurant/profile';
+  static const String restaurantOrders = '/restaurant/orders';
+  static const String restaurantOrderTracking = '/restaurant/orders/tracking';
+  static const String restaurantFavorites = '/restaurant/favorites';
 
   // Shared / Details
   static const String productDetail = '/product/detail';

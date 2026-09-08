@@ -64,3 +64,13 @@ class PaymentMethodArgs {
     this.deliveryNotes = '',
   });
 }
+
+class OrderTrackingArgs {
+  final String orderId;
+  final dynamic order;
+
+  const OrderTrackingArgs({
+    required this.orderId,
+    this.order,
+  });
+}

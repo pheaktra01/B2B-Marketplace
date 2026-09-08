@@ -16,6 +16,8 @@ class ProductCard extends StatelessWidget {
   final bool isAvailable;
   final bool isFavorite;
   final bool isInCart;
+  final String? minOrder;
+  final String? condition;
 
   final VoidCallback? onTap;
   final VoidCallback? onFavoritePressed;
@@ -32,6 +34,8 @@ class ProductCard extends StatelessWidget {
     this.isAvailable = true,
     this.isFavorite = false,
     this.isInCart = false,
+    this.minOrder,
+    this.condition,
     this.localImage,
     this.onTap,
     this.onFavoritePressed,
@@ -211,12 +215,16 @@ class ProductCard extends StatelessWidget {
                           ),
                         ),
 
-                        Text(
-                          availableQuantity,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                        Flexible(
+                          child: Text(
+                            availableQuantity,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                         ),
                       ],
@@ -372,44 +380,92 @@ class ProductCard extends StatelessWidget {
         // AVAILABLE BADGE
         // ======================================================
 
-        if (isAvailable)
+        Positioned(
+          top: 10,
+          left: 10,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isAvailable)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(
+                      alpha: 0.94,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        l10n.available,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (condition != null && condition!.isNotEmpty) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: primaryGreen.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    condition!,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+
+        if (minOrder != null && minOrder!.isNotEmpty)
           Positioned(
-            top: 10,
+            bottom: 10,
             left: 10,
             child: Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 9,
-                vertical: 5,
+                horizontal: 8,
+                vertical: 4,
               ),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(
-                  alpha: 0.94,
-                ),
-                borderRadius: BorderRadius.circular(20),
+                color: Colors.black.withValues(alpha: 0.65),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-
-                  const SizedBox(width: 5),
-
-                  Text(
-                    l10n.available,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.green,
-                    ),
-                  ),
-                ],
+              child: Text(
+                'Min: $minOrder',
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),

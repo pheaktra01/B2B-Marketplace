@@ -4,6 +4,7 @@ import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
+import 'package:mobile/features/product/services/favorites_service.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/restaurant/services/search_service.dart';
 
@@ -28,6 +29,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   List<Map<String, dynamic>> _products = [];
+  Set<String> _favoriteIds = {};
 
   bool _isLoading = true;
   String? _errorMessage;
@@ -65,6 +67,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
     try {
       final data = await ProductService.getAllProducts();
+      final favIds = await FavoritesService.getFavoriteIds();
 
       if (!mounted) return;
 
@@ -72,7 +75,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
         _products = data
             .map((item) => Map<String, dynamic>.from(item))
             .toList();
-
+        _favoriteIds = favIds.toSet();
         _isLoading = false;
       });
 
@@ -805,15 +808,37 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
             isAvailable: product['isAvailable'] ?? true,
 
+            isFavorite:
+                _favoriteIds.contains(product['id']?.toString()),
+
             onTap: () {
-              context.push(
+              context
+                  .push(
                 AppRoutes.productDetail,
                 extra: product,
-              );
+              )
+                  .then((_) async {
+                final favIds = await FavoritesService.getFavoriteIds();
+                if (mounted) {
+                  setState(() => _favoriteIds = favIds.toSet());
+                }
+              });
             },
 
-            onFavoritePressed: () {
-              debugPrint('Favorite: ${product['name']}');
+            onFavoritePressed: () async {
+              final pid = product['id']?.toString() ?? '';
+              if (pid.isNotEmpty) {
+                final isFav = await FavoritesService.toggleFavorite(pid);
+                if (mounted) {
+                  setState(() {
+                    if (isFav) {
+                      _favoriteIds.add(pid);
+                    } else {
+                      _favoriteIds.remove(pid);
+                    }
+                  });
+                }
+              }
             },
 
             onAddToCart: () {

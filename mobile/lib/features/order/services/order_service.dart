@@ -32,6 +32,40 @@ class OrderService {
         .toList();
   }
 
+  // =========================================================
+  // GET RESTAURANT ORDERS (BUYER ORDER HISTORY)
+  // =========================================================
+
+  Future<List<OrderModel>> getRestaurantOrders() async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}/orders'),
+      headers: await _headers(),
+    );
+    final data = response.body.isEmpty ? [] : jsonDecode(response.body);
+    if (response.statusCode != 200) {
+      throw Exception(data is Map ? data['message'] : 'Failed to load restaurant orders');
+    }
+    return (data as List)
+        .map((item) => OrderModel.fromJson(Map<String, dynamic>.from(item as Map)))
+        .toList();
+  }
+
+  // =========================================================
+  // GET ORDER BY ID
+  // =========================================================
+
+  Future<OrderModel> getOrderById(String orderId) async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}/orders/$orderId'),
+      headers: await _headers(),
+    );
+    final data = jsonDecode(response.body);
+    if (response.statusCode != 200) {
+      throw Exception(data is Map ? data['message'] : 'Failed to load order');
+    }
+    return OrderModel.fromJson(Map<String, dynamic>.from(data as Map));
+  }
+
   Future<OrderModel> updateOrderStatus({
     required String orderId,
     required String status,

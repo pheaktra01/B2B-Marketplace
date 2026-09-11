@@ -16,8 +16,66 @@ class NotificationCard extends StatelessWidget {
   static const Color primaryGreen = Color(0xFF1B5E20);
 
   _NotificationStyle _getStyle(String type) {
-    final lowerType = type.toLowerCase();
-    if (lowerType.contains('order')) {
+    final lower = type.toLowerCase();
+
+    // 1. Order Notifications
+    if (lower == 'order_placed') {
+      return const _NotificationStyle(
+        icon: Icons.shopping_cart_outlined,
+        color: Color(0xFF0284C7),
+        bgColor: Color(0xFFF0F9FF),
+        tag: 'Order Placed',
+      );
+    }
+    if (lower == 'order_created') {
+      return const _NotificationStyle(
+        icon: Icons.add_shopping_cart_rounded,
+        color: Color(0xFFEA580C),
+        bgColor: Color(0xFFFFF7ED),
+        tag: 'New Order',
+      );
+    }
+    if (lower == 'order_accepted') {
+      return const _NotificationStyle(
+        icon: Icons.check_circle_outline_rounded,
+        color: Color(0xFF16A34A),
+        bgColor: Color(0xFFF0FDF4),
+        tag: 'Accepted',
+      );
+    }
+    if (lower == 'order_rejected') {
+      return const _NotificationStyle(
+        icon: Icons.highlight_off_rounded,
+        color: Color(0xFFDC2626),
+        bgColor: Color(0xFFFEF2F2),
+        tag: 'Rejected',
+      );
+    }
+    if (lower == 'order_ready') {
+      return const _NotificationStyle(
+        icon: Icons.inventory_rounded,
+        color: Color(0xFF4F46E5),
+        bgColor: Color(0xFFEEF2FF),
+        tag: 'Ready',
+      );
+    }
+    if (lower == 'order_completed') {
+      return const _NotificationStyle(
+        icon: Icons.task_alt_rounded,
+        color: Color(0xFF059669),
+        bgColor: Color(0xFFECFDF5),
+        tag: 'Completed',
+      );
+    }
+    if (lower == 'order_cancelled') {
+      return const _NotificationStyle(
+        icon: Icons.cancel_outlined,
+        color: Color(0xFFDC2626),
+        bgColor: Color(0xFFFEF2F2),
+        tag: 'Cancelled',
+      );
+    }
+    if (lower.contains('order')) {
       return const _NotificationStyle(
         icon: Icons.local_shipping_outlined,
         color: Color(0xFFEA580C),
@@ -25,15 +83,25 @@ class NotificationCard extends StatelessWidget {
         tag: 'Order',
       );
     }
-    if (lowerType.contains('payment')) {
+
+    // 2. Chat Notifications
+    if (lower == 'chat_image') {
       return const _NotificationStyle(
-        icon: Icons.account_balance_wallet_outlined,
-        color: Color(0xFF059669),
-        bgColor: Color(0xFFECFDF5),
-        tag: 'Payment',
+        icon: Icons.image_outlined,
+        color: Color(0xFF2563EB),
+        bgColor: Color(0xFFEFF6FF),
+        tag: 'Photo',
       );
     }
-    if (lowerType.contains('message') || lowerType.contains('chat')) {
+    if (lower == 'chat_order') {
+      return const _NotificationStyle(
+        icon: Icons.forum_outlined,
+        color: Color(0xFF7C3AED),
+        bgColor: Color(0xFFF5F3FF),
+        tag: 'Order Chat',
+      );
+    }
+    if (lower.contains('message') || lower.contains('chat')) {
       return const _NotificationStyle(
         icon: Icons.chat_bubble_outline_rounded,
         color: Color(0xFF2563EB),
@@ -41,7 +109,67 @@ class NotificationCard extends StatelessWidget {
         tag: 'Chat',
       );
     }
-    if (lowerType.contains('product') || lowerType.contains('inventory')) {
+
+    // 3. Payment Notifications
+    if (lower == 'payment_failed') {
+      return const _NotificationStyle(
+        icon: Icons.error_outline_rounded,
+        color: Color(0xFFDC2626),
+        bgColor: Color(0xFFFEF2F2),
+        tag: 'Payment Failed',
+      );
+    }
+    if (lower == 'payment_success' || lower == 'payment_completed') {
+      return const _NotificationStyle(
+        icon: Icons.check_circle_outline_rounded,
+        color: Color(0xFF059669),
+        bgColor: Color(0xFFECFDF5),
+        tag: 'Payment Done',
+      );
+    }
+    if (lower.contains('payment')) {
+      return const _NotificationStyle(
+        icon: Icons.account_balance_wallet_outlined,
+        color: Color(0xFF059669),
+        bgColor: Color(0xFFECFDF5),
+        tag: 'Payment',
+      );
+    }
+
+    // 4. Product & Stock Notifications
+    if (lower == 'product_out_of_stock' || lower.contains('out_of_stock')) {
+      return const _NotificationStyle(
+        icon: Icons.remove_shopping_cart_outlined,
+        color: Color(0xFFDC2626),
+        bgColor: Color(0xFFFEF2F2),
+        tag: 'Out of Stock',
+      );
+    }
+    if (lower == 'product_low_stock' || lower.contains('low_stock')) {
+      return const _NotificationStyle(
+        icon: Icons.warning_amber_rounded,
+        color: Color(0xFFD97706),
+        bgColor: Color(0xFFFFFBEB),
+        tag: 'Low Stock',
+      );
+    }
+    if (lower == 'product_published') {
+      return const _NotificationStyle(
+        icon: Icons.storefront_outlined,
+        color: Color(0xFF059669),
+        bgColor: Color(0xFFECFDF5),
+        tag: 'Published',
+      );
+    }
+    if (lower == 'product_updated') {
+      return const _NotificationStyle(
+        icon: Icons.edit_note_rounded,
+        color: Color(0xFF9333EA),
+        bgColor: Color(0xFFFAF5FF),
+        tag: 'Updated',
+      );
+    }
+    if (lower.contains('product') || lower.contains('inventory') || lower.contains('stock')) {
       return const _NotificationStyle(
         icon: Icons.inventory_2_outlined,
         color: Color(0xFF9333EA),
@@ -49,6 +177,91 @@ class NotificationCard extends StatelessWidget {
         tag: 'Inventory',
       );
     }
+
+    // 5. Account & Security Notifications
+    if (lower == 'account_security_alert') {
+      return const _NotificationStyle(
+        icon: Icons.security_rounded,
+        color: Color(0xFFDC2626),
+        bgColor: Color(0xFFFEF2F2),
+        tag: 'Security Alert',
+      );
+    }
+    if (lower == 'account_login') {
+      return const _NotificationStyle(
+        icon: Icons.devices_rounded,
+        color: Color(0xFF0284C7),
+        bgColor: Color(0xFFF0F9FF),
+        tag: 'Device Login',
+      );
+    }
+    if (lower == 'account_password_changed') {
+      return const _NotificationStyle(
+        icon: Icons.vpn_key_outlined,
+        color: Color(0xFF0D9488),
+        bgColor: Color(0xFFF0FDFA),
+        tag: 'Password',
+      );
+    }
+    if (lower == 'account_phone_changed') {
+      return const _NotificationStyle(
+        icon: Icons.phone_android_rounded,
+        color: Color(0xFF4F46E5),
+        bgColor: Color(0xFFEEF2FF),
+        tag: 'Phone',
+      );
+    }
+    if (lower.contains('account') || lower.contains('profile')) {
+      return const _NotificationStyle(
+        icon: Icons.person_outline_rounded,
+        color: Color(0xFF0D9488),
+        bgColor: Color(0xFFF0FDFA),
+        tag: 'Account',
+      );
+    }
+
+    // 6. System Notifications
+    if (lower == 'system_announcement') {
+      return const _NotificationStyle(
+        icon: Icons.campaign_outlined,
+        color: Color(0xFF7C3AED),
+        bgColor: Color(0xFFF5F3FF),
+        tag: 'Announcement',
+      );
+    }
+    if (lower == 'system_maintenance') {
+      return const _NotificationStyle(
+        icon: Icons.build_circle_outlined,
+        color: Color(0xFFEA580C),
+        bgColor: Color(0xFFFFF7ED),
+        tag: 'Maintenance',
+      );
+    }
+    if (lower == 'system_new_feature') {
+      return const _NotificationStyle(
+        icon: Icons.auto_awesome_rounded,
+        color: Color(0xFFD946EF),
+        bgColor: Color(0xFFFDF4FF),
+        tag: 'New Feature',
+      );
+    }
+    if (lower == 'system_policy_update') {
+      return const _NotificationStyle(
+        icon: Icons.gavel_rounded,
+        color: Color(0xFF475569),
+        bgColor: Color(0xFFF8FAFC),
+        tag: 'Policy Update',
+      );
+    }
+    if (lower == 'system_interruption') {
+      return const _NotificationStyle(
+        icon: Icons.warning_amber_rounded,
+        color: Color(0xFFDC2626),
+        bgColor: Color(0xFFFEF2F2),
+        tag: 'Interruption',
+      );
+    }
+
     return const _NotificationStyle(
       icon: Icons.notifications_none_rounded,
       color: Color(0xFF0D9488),

@@ -45,7 +45,6 @@ export class UsersService {
     const {
       password,
       refreshToken,
-      phone,
       otp,
       otpExpiresAt,
       ...publicUser
@@ -77,6 +76,11 @@ export class UsersService {
           id: farmer.id,
           name: farmer.name,
           avatarUrl: farmer.avatarUrl,
+          coverUrl: farmer.coverUrl,
+          businessName: farmer.businessName,
+          address: farmer.address,
+          bio: farmer.bio,
+          phone: farmer.phone,
           orderCount: Number(row.orderCount),
         };
       }),
@@ -111,6 +115,18 @@ export class UsersService {
 
     if ((dto as any).coverUrl !== undefined) {
       user.coverUrl = (dto as any).coverUrl;
+    }
+
+    if (dto.businessName !== undefined) {
+      user.businessName = dto.businessName;
+    }
+
+    if (dto.address !== undefined) {
+      user.address = dto.address;
+    }
+
+    if (dto.bio !== undefined) {
+      user.bio = dto.bio;
     }
 
     await this.userRepo.save(user);

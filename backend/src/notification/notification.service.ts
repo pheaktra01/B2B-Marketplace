@@ -11,6 +11,7 @@ import {
   NotificationType,
 } from './entities/notification.entity';
 
+import { User } from '../users/entities/user.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -19,6 +20,8 @@ export class NotificationService {
   constructor(
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -193,6 +196,112 @@ export class NotificationService {
 
     return {
       success: true,
+    };
+  }
+
+  // =========================================================
+  // CREATE OR GROUP MESSAGE NOTIFICATION
+  // =========================================================
+
+  async createOrGroupMessageNotification(params: {
+    userId: string;
+    conversationId: string;
+    senderName: string;
+    messageType?: string;
+    orderId?: string;
+  }): Promise<Notification> {
+    const { userId, conversationId, senderName, messageType, orderId } = params;
+
+    // Check if there is an unread chat notification for this conversation in the last 10 minutes
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const existing = await this.notificationRepository
+      .createQueryBuilder('n')
+      .where('n.user_id = :userId', { userId })
+      .andWhere('n.reference_id = :conversationId', { conversationId })
+      .andWhere('n.is_read = :isRead', { isRead: false })
+      .andWhere('n.created_at >= :since', { since: tenMinutesAgo })
+      .orderBy('n.created_at', 'DESC')
+      .getOne();
+
+    if (existing) {
+      existing.title = `New Messages from ${senderName}`;
+      existing.message = `You have multiple unread messages from ${senderName}.`;
+      existing.type = NotificationType.MESSAGE;
+      const updated = await this.notificationRepository.save(existing);
+      this.eventEmitter.emit('notification.created', updated);
+      return updated;
+    }
+
+    let type: NotificationType = NotificationType.MESSAGE;
+    let title = 'New Message';
+    let message = `${senderName} sent you a message.`;
+
+    if (messageType === 'image') {
+      type = NotificationType.CHAT_IMAGE;
+      title = 'New Photo Message';
+      message = `${senderName} sent you a photo.`;
+    } else if (orderId || messageType === 'order') {
+      type = NotificationType.CHAT_ORDER;
+      title = 'New Order Chat';
+      message = orderId
+        ? `You have a new message about order #${orderId.slice(0, 8)}.`
+        : 'You have a new message about your order.';
+    }
+
+    return this.create({
+      userId,
+      type,
+      title,
+      message,
+      referenceId: conversationId,
+      referenceType: 'conversation',
+    });
+  }
+
+  // =========================================================
+  // BROADCAST SYSTEM NOTIFICATION
+  // =========================================================
+
+  async broadcastSystemNotification(dto: {
+    type?: NotificationType;
+    title: string;
+    message: string;
+    targetRole?: string;
+  }) {
+    const type = dto.type ?? NotificationType.SYSTEM_ANNOUNCEMENT;
+
+    let usersQuery = this.userRepository.createQueryBuilder('user');
+    if (dto.targetRole) {
+      usersQuery = usersQuery.where('user.role = :role', {
+        role: dto.targetRole,
+      });
+    }
+    const users = await usersQuery.getMany();
+
+    const createdNotifications: Notification[] = [];
+    for (const user of users) {
+      const notification = this.notificationRepository.create({
+        userId: user.id,
+        type,
+        title: dto.title,
+        message: dto.message,
+        referenceId: null,
+        referenceType: 'system',
+        isRead: false,
+      });
+      createdNotifications.push(notification);
+    }
+
+    if (createdNotifications.length > 0) {
+      await this.notificationRepository.save(createdNotifications);
+      for (const n of createdNotifications) {
+        this.eventEmitter.emit('notification.created', n);
+      }
+    }
+
+    return {
+      success: true,
+      recipientsCount: createdNotifications.length,
     };
   }
 }

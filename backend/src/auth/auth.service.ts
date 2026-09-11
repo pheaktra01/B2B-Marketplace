@@ -11,6 +11,9 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { response } from 'express';
 
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType } from '../notification/entities/notification.entity';
+
 @Injectable()
 export class AuthService {
     private getStaticOtp(): string {
@@ -21,6 +24,7 @@ export class AuthService {
     private readonly userRepo: Repository<User>,
 
     private readonly jwtService: JwtService,
+    private readonly notificationService: NotificationService,
     ) {}
 
     async register(dto: RegisterDto){
@@ -131,6 +135,19 @@ export class AuthService {
             role: user.role,
         });
 
+        try {
+            await this.notificationService.create({
+                userId: user.id,
+                type: NotificationType.ACCOUNT_LOGIN,
+                title: 'Login from New Device',
+                message: 'New login detected on your account.',
+                referenceId: null,
+                referenceType: 'account',
+            });
+        } catch (e) {
+            console.error('Failed to create login notification:', e);
+        }
+
         return {
             accessToken,
             user: {
@@ -183,6 +200,19 @@ export class AuthService {
         user.otp = null;
 
         await this.userRepo.save(user);
+
+        try {
+            await this.notificationService.create({
+                userId: user.id,
+                type: NotificationType.ACCOUNT_PASSWORD_CHANGED,
+                title: 'Password Changed',
+                message: 'Your account password was changed successfully.',
+                referenceId: null,
+                referenceType: 'account',
+            });
+        } catch (e) {
+            console.error('Failed to notify password change:', e);
+        }
 
         return {
             message: 'Password reset successful',

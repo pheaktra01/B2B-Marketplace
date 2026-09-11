@@ -26,11 +26,10 @@ export class CreateNotificationDto {
   message: string;
 
   @IsOptional()
-  @IsUUID()
-  referenceId?: string;
+  referenceId?: string | null;
 
   @IsOptional()
   @IsString()
   @MaxLength(50)
-  referenceType?: string;
+  referenceType?: string | null;
 }

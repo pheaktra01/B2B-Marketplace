@@ -28,6 +28,8 @@ import {
   Notification,
   NotificationType,
 } from '../notification/entities/notification.entity';
+import { User } from '../users/entities/user.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class OrderService {
@@ -50,7 +52,11 @@ export class OrderService {
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
 
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+
     private readonly dataSource: DataSource,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // ==========================================
@@ -171,6 +177,11 @@ export class OrderService {
         // --------------------------------------
         // 5. Create orders
         // --------------------------------------
+
+        const buyer = await this.userRepository.findOne({
+          where: { id: restaurantId },
+        });
+        const buyerName = buyer?.name ?? 'Green Garden Restaurant';
 
         const createdOrders: Order[] = [];
 
@@ -329,6 +340,32 @@ export class OrderService {
             ) {
               product.quantity = 0;
               product.isAvailable = false;
+
+              // Out of stock notification for farmer
+              const outOfStockNotif = manager.create(Notification, {
+                userId: farmerId,
+                type: NotificationType.PRODUCT_OUT_OF_STOCK,
+                title: 'Out of Stock',
+                message: `${product.name} is now out of stock.`,
+                referenceId: product.id,
+                referenceType: 'product',
+                isRead: false,
+              });
+              await manager.save(Notification, outOfStockNotif);
+              this.eventEmitter.emit('notification.created', outOfStockNotif);
+            } else if (Number(product.quantity) <= 5) {
+              // Low stock notification for farmer
+              const lowStockNotif = manager.create(Notification, {
+                userId: farmerId,
+                type: NotificationType.PRODUCT_LOW_STOCK,
+                title: 'Low Stock',
+                message: `Your ${product.name} stock is running low.`,
+                referenceId: product.id,
+                referenceType: 'product',
+                isRead: false,
+              });
+              await manager.save(Notification, lowStockNotif);
+              this.eventEmitter.emit('notification.created', lowStockNotif);
             }
 
             await manager.save(
@@ -337,27 +374,88 @@ export class OrderService {
             );
           }
 
-          // ------------------------------------
-          // Notify Farmer of new order
-          // ------------------------------------
+          const orderNum = savedOrder.id.slice(0, 8);
 
+          // ------------------------------------
+          // 1. Notify Farmer of new order
+          // ------------------------------------
           const farmerNotification = manager.create(
             Notification,
             {
               userId: farmerId,
               type: NotificationType.ORDER_CREATED,
-              title: 'New Order Received',
-              message: `You received a new order #${savedOrder.id.slice(0, 8)} totaling $${savedOrder.total} from buyer.`,
+              title: 'New Order',
+              message: `You received a new order from ${buyerName}.`,
               referenceId: savedOrder.id,
               referenceType: 'order',
               isRead: false,
             },
           );
-
           await manager.save(
             Notification,
             farmerNotification,
           );
+          this.eventEmitter.emit('notification.created', farmerNotification);
+
+          // ------------------------------------
+          // 2. Notify Restaurant of order placed
+          // ------------------------------------
+          const buyerNotification = manager.create(
+            Notification,
+            {
+              userId: restaurantId,
+              type: NotificationType.ORDER_PLACED,
+              title: 'Order Placed',
+              message: 'Your order has been placed successfully.',
+              referenceId: savedOrder.id,
+              referenceType: 'order',
+              isRead: false,
+            },
+          );
+          await manager.save(
+            Notification,
+            buyerNotification,
+          );
+          this.eventEmitter.emit('notification.created', buyerNotification);
+
+          // ------------------------------------
+          // 3. Payment Notifications
+          // ------------------------------------
+          const buyerPaymentNotif = manager.create(
+            Notification,
+            {
+              userId: restaurantId,
+              type: NotificationType.PAYMENT_SUCCESS,
+              title: 'Payment Successful',
+              message: `Payment for order #${orderNum} was successful.`,
+              referenceId: savedOrder.id,
+              referenceType: 'order',
+              isRead: false,
+            },
+          );
+          await manager.save(
+            Notification,
+            buyerPaymentNotif,
+          );
+          this.eventEmitter.emit('notification.created', buyerPaymentNotif);
+
+          const farmerPaymentNotif = manager.create(
+            Notification,
+            {
+              userId: farmerId,
+              type: NotificationType.PAYMENT_RECEIVED,
+              title: 'Payment Received',
+              message: `You received payment for order #${orderNum}.`,
+              referenceId: savedOrder.id,
+              referenceType: 'order',
+              isRead: false,
+            },
+          );
+          await manager.save(
+            Notification,
+            farmerPaymentNotif,
+          );
+          this.eventEmitter.emit('notification.created', farmerPaymentNotif);
 
           createdOrders.push(
             savedOrder,
@@ -493,20 +591,97 @@ export class OrderService {
     order.status = status;
     const updatedOrder = await this.orderRepository.save(order);
 
-    // Notify buyer (restaurant) of status change
+    // Notify buyer (restaurant) and farmer of status change
     try {
+      const orderNum = order.id.slice(0, 8);
+      let buyerType = NotificationType.ORDER_STATUS_CHANGED;
+      let buyerTitle = 'Order Status Updated';
+      let buyerMessage = `Your order #${orderNum} status changed to ${status}.`;
+
+      let farmerType = NotificationType.ORDER_STATUS_CHANGED;
+      let farmerTitle = 'Order Status Updated';
+      let farmerMessage = `Order #${orderNum} status changed to ${status}.`;
+
+      if (status === OrderStatus.CONFIRMED) {
+        buyerType = NotificationType.ORDER_ACCEPTED;
+        buyerTitle = 'Order Accepted';
+        buyerMessage = `Your order #${orderNum} has been accepted by the farmer.`;
+
+        farmerType = NotificationType.ORDER_ACCEPTED;
+        farmerTitle = 'Order Accepted';
+        farmerMessage = `You accepted order #${orderNum}.`;
+      } else if (status === OrderStatus.PROCESSING) {
+        buyerType = NotificationType.ORDER_READY;
+        buyerTitle = 'Order Ready';
+        buyerMessage = `Your order #${orderNum} is ready for pickup.`;
+
+        farmerType = NotificationType.ORDER_READY;
+        farmerTitle = 'Order Ready';
+        farmerMessage = `Order #${orderNum} is ready for pickup.`;
+      } else if (status === OrderStatus.SHIPPED) {
+        buyerType = NotificationType.ORDER_STATUS_CHANGED;
+        buyerTitle = 'Order Shipped';
+        buyerMessage = `Your order #${orderNum} is on the way.`;
+
+        farmerType = NotificationType.ORDER_STATUS_CHANGED;
+        farmerTitle = 'Order Shipped';
+        farmerMessage = `Order #${orderNum} is on the way.`;
+      } else if (status === OrderStatus.DELIVERED) {
+        buyerType = NotificationType.ORDER_COMPLETED;
+        buyerTitle = 'Order Completed';
+        buyerMessage = `Your order #${orderNum} has been completed.`;
+
+        farmerType = NotificationType.ORDER_COMPLETED;
+        farmerTitle = 'Order Completed';
+        farmerMessage = `Order #${orderNum} has been completed.`;
+
+        // Farmer payment completed notification
+        const farmerPayNotif = this.notificationRepository.create({
+          userId: order.farmerId,
+          type: NotificationType.PAYMENT_COMPLETED,
+          title: 'Payment Completed',
+          message: `Payment for order #${orderNum} has been completed.`,
+          referenceId: order.id,
+          referenceType: 'order',
+          isRead: false,
+        });
+        await this.notificationRepository.save(farmerPayNotif);
+        this.eventEmitter.emit('notification.created', farmerPayNotif);
+      } else if (status === OrderStatus.CANCELLED) {
+        buyerType = NotificationType.ORDER_REJECTED;
+        buyerTitle = 'Order Rejected / Cancelled';
+        buyerMessage = `Your order #${orderNum} was rejected by the farmer.`;
+
+        farmerType = NotificationType.ORDER_CANCELLED;
+        farmerTitle = 'Order Cancelled';
+        farmerMessage = `Order #${orderNum} has been cancelled.`;
+      }
+
       const buyerNotification = this.notificationRepository.create({
         userId: order.restaurantId,
-        type: NotificationType.ORDER_STATUS_CHANGED,
-        title: 'Order Status Updated',
-        message: `Your order #${order.id.slice(0, 8)} status changed to ${status}.`,
+        type: buyerType,
+        title: buyerTitle,
+        message: buyerMessage,
         referenceId: order.id,
         referenceType: 'order',
         isRead: false,
       });
       await this.notificationRepository.save(buyerNotification);
+      this.eventEmitter.emit('notification.created', buyerNotification);
+
+      const farmerNotification = this.notificationRepository.create({
+        userId: order.farmerId,
+        type: farmerType,
+        title: farmerTitle,
+        message: farmerMessage,
+        referenceId: order.id,
+        referenceType: 'order',
+        isRead: false,
+      });
+      await this.notificationRepository.save(farmerNotification);
+      this.eventEmitter.emit('notification.created', farmerNotification);
     } catch (e) {
-      console.error('Failed to create buyer notification:', e);
+      console.error('Failed to create status notifications:', e);
     }
 
     return updatedOrder;

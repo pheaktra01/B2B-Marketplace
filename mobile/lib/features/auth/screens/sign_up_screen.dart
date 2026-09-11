@@ -148,7 +148,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       style: TextStyle(fontSize: 14, color: Colors.black87, height: 1.3),
                                     ),
 
-                                    const SizedBox(height: 28),
+                                    const SizedBox(height: 20),
+
+                                    // Role indicator badge
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: brandGreen.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            widget.selectedRole == 'farmer' ? Icons.agriculture : Icons.restaurant,
+                                            size: 16,
+                                            color: brandGreen,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            widget.selectedRole == 'farmer'
+                                                ? 'ចុះឈ្មោះជា៖ កសិករ (Farmer)'
+                                                : 'ចុះឈ្មោះជា៖ ភោជនីយដ្ឋាន (Restaurant)',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: brandGreen,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 14),
+
                                     const Text(
                                       'បង្កើតគណនីរបស់អ្នក',
                                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
@@ -160,11 +193,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       style: TextStyle(fontSize: 13, color: Colors.black54, height: 1.3),
                                     ),
 
-                                    const SizedBox(height: 28),
+                                    const SizedBox(height: 24),
 
-                                    // --- Dynamic Form Grid Layout ---
+                                    // --- Form Layout ---
                                     if (isWide) ...[
-                                      // 2-Column Row 1: Name & Email
+                                      // 2-Column Row 1: Name & Phone
                                       Row(
                                         children: [
                                           Expanded(
@@ -185,43 +218,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           const SizedBox(width: 16),
                                           Expanded(
                                             child: _buildInputField(
-                                              label: 'អ៊ីមែល',
-                                              hint: 'email@business.com',
-                                              prefixIcon: Icons.mail_outline,
-                                              controller: _emailController,
-                                              keyboardType: TextInputType.emailAddress,
-                                              validator: (value) {
-                                                if (value == null || value.trim().isEmpty) {
-                                                  return 'សូមបញ្ចូលអ៊ីមែល';
-                                                }
-
-                                                if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value.trim())) {
-                                                  return 'អ៊ីមែលមិនត្រឹមត្រូវ';
-                                                }
-
-                                                return null;
-                                              },
-                                              fillColor: inputFill,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      // 2-Column Row 2: Phone & Enterprise
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: _buildInputField(
                                               label: 'លេខទូរស័ព្ទ',
-                                              hint: '+0123456789',
+                                              hint: '012345678',
                                               prefixIcon: Icons.phone_outlined,
                                               controller: _phoneController,
                                               keyboardType: TextInputType.phone,
                                               validator: (value) {
-                                                if (value == null || value.trim().isEmpty) {
+                                                final cleaned = (value ?? '').replaceAll(RegExp(r'\s+'), '');
+                                                if (cleaned.isEmpty) {
                                                   return 'សូមបញ្ចូលលេខទូរស័ព្ទ';
                                                 }
 
-                                                if (!RegExp(r'^(0|\+855)\d{8,9}$').hasMatch(value.trim())) {
+                                                if (!RegExp(r'^(0|\+855)\d{7,9}$').hasMatch(cleaned)) {
                                                   return 'លេខទូរស័ព្ទមិនត្រឹមត្រូវ';
                                                 }
 
@@ -230,25 +238,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               fillColor: inputFill,
                                             ),
                                           ),
-                                          const SizedBox(width: 16),
-                                          Expanded(
-                                            child: _buildInputField(
-                                              label: 'ឈ្មោះភោជនីយដ្ឋាន / កសិដ្ឋាន',
-                                              hint: 'ឈ្មោះសហគ្រាស',
-                                              prefixIcon: Icons.storefront_outlined,
-                                              controller: _enterpriseController,
-                                              validator: (value) {
-                                                if (value == null || value.trim().isEmpty) {
-                                                  return 'សូមបញ្ចូលឈ្មោះភោជនីយដ្ឋាន / កសិដ្ឋាន';
-                                                }
-                                                return null;
-                                              },
-                                              fillColor: inputFill,
-                                            ),
-                                          ),
                                         ],
                                       ),
-                                      // 2-Column Row 3: Passwords
+                                      // 2-Column Row 2: Passwords
                                       Row(
                                         children: [
                                           Expanded(
@@ -329,52 +321,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         fillColor: inputFill,
                                       ),
                                       _buildInputField(
-                                        label: 'អ៊ីមែល',
-                                        hint: 'email@business.com',
-                                        prefixIcon: Icons.mail_outline,
-                                        controller: _emailController,
-                                        keyboardType: TextInputType.emailAddress,
-                                        validator: (value) {
-                                          if (value == null || value.trim().isEmpty) {
-                                            return 'សូមបញ្ចូលអ៊ីមែល';
-                                          }
-
-                                          if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value.trim())) {
-                                            return 'អ៊ីមែលមិនត្រឹមត្រូវ';
-                                          }
-
-                                          return null;
-                                        },
-                                        fillColor: inputFill,
-                                      ),
-                                      _buildInputField(
                                         label: 'លេខទូរស័ព្ទ',
-                                        hint: '+0123456789',
+                                        hint: '012345678',
                                         prefixIcon: Icons.phone_outlined,
                                         controller: _phoneController,
                                         keyboardType: TextInputType.phone,
                                         validator: (value) {
-                                          if (value == null || value.trim().isEmpty) {
+                                          final cleaned = (value ?? '').replaceAll(RegExp(r'\s+'), '');
+                                          if (cleaned.isEmpty) {
                                             return 'សូមបញ្ចូលលេខទូរស័ព្ទ';
                                           }
 
-                                          if (!RegExp(r'^(0|\+855)\d{8,9}$').hasMatch(value.trim())) {
+                                          if (!RegExp(r'^(0|\+855)\d{7,9}$').hasMatch(cleaned)) {
                                             return 'លេខទូរស័ព្ទមិនត្រឹមត្រូវ';
                                           }
 
-                                          return null;
-                                        },
-                                        fillColor: inputFill,
-                                      ),
-                                      _buildInputField(
-                                        label: 'ឈ្មោះភោជនីយដ្ឋាន / កសិដ្ឋាន',
-                                        hint: 'ឈ្មោះសហគ្រាសរបស់អ្នក',
-                                        prefixIcon: Icons.storefront_outlined,
-                                        controller: _enterpriseController,
-                                        validator: (value) {
-                                          if (value == null || value.trim().isEmpty) {
-                                            return 'សូមបញ្ចូលឈ្មោះភោជនីយដ្ឋាន / កសិដ្ឋាន';
-                                          }
                                           return null;
                                         },
                                         fillColor: inputFill,
@@ -503,7 +464,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   return;
                                                 }
 
-                                                Navigator.of(context);
                                                 final messenger = ScaffoldMessenger.of(context);
 
                                                 setState(() {
@@ -511,9 +471,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                 });
 
                                                 try {
+                                                  final cleanPhone = _phoneController.text.replaceAll(RegExp(r'\s+'), '');
                                                   final response = await _authService.register(
                                                     name: _nameController.text.trim(),
-                                                    phone: _phoneController.text.trim(),
+                                                    phone: cleanPhone,
                                                     password: _passwordController.text,
                                                     role: widget.selectedRole,
                                                   );
@@ -528,10 +489,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                       AppRoutes.verifyPhone,
                                                       extra: VerifyPhoneArgs(
                                                         type: VerificationType.signup,
-                                                        phoneNumber: _phoneController.text.trim(),
+                                                        phoneNumber: cleanPhone,
                                                         selectedRole: widget.selectedRole,
                                                         userId: data['userId']?.toString(),
-                                                        initialOtp: data['otp']?.toString(),
+                                                        initialOtp: data['otp']?.toString() ?? '123456',
                                                         password: _passwordController.text,
                                                       ),
                                                     );
@@ -576,6 +537,39 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           ],
                                         ),
                                       ),
+                                    ),
+
+                                    const SizedBox(height: 24),
+
+                                    // --- Already have an account? Log In ---
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Text(
+                                          'មានគណនីរួចហើយមែនទេ? ',
+                                          style: TextStyle(
+                                            color: Colors.black54,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (context.canPop()) {
+                                              context.pop();
+                                            } else {
+                                              context.go(AppRoutes.login);
+                                            }
+                                          },
+                                          child: const Text(
+                                            'ចូលគណនី',
+                                            style: TextStyle(
+                                              color: brandGreen,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),

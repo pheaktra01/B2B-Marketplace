@@ -17,6 +17,7 @@ import {
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { MarkReadDto } from './dto/mark-read.dto';
+import { User } from '../users/entities/user.entity';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationType } from 'src/notification/entities/notification.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -32,6 +33,9 @@ export class ChatService {
 
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
+
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
 
     private readonly notificationService: NotificationService,
     private readonly eventEmitter: EventEmitter2,
@@ -349,19 +353,21 @@ export class ChatService {
         );
 
     if (otherParticipant) {
-        await this.notificationService.create({
-            userId: otherParticipant.userId,
-
-            type: NotificationType.MESSAGE,
-
-            title: 'New Message',
-
-            message: 'You received a new message.',
-
-            referenceId: conversationId,
-
-            referenceType: 'conversation',
+      try {
+        const sender = await this.userRepository.findOne({
+          where: { id: currentUserId },
         });
+        const senderName = sender?.name ?? 'Someone';
+
+        await this.notificationService.createOrGroupMessageNotification({
+          userId: otherParticipant.userId,
+          conversationId,
+          senderName,
+          messageType: savedMessage.messageType,
+        });
+      } catch (e) {
+        console.error('Failed to create chat notification:', e);
+      }
     }
 
     return savedMessage;

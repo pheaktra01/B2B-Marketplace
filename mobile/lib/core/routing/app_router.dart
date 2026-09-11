@@ -11,6 +11,7 @@ import 'package:mobile/features/auth/screens/language_selection_screen.dart';
 import 'package:mobile/features/auth/screens/login_screen.dart';
 import 'package:mobile/features/auth/screens/reset_password_screen.dart';
 import 'package:mobile/features/auth/screens/role_selection_screen.dart';
+import 'package:mobile/features/auth/screens/setup_profile_screen.dart';
 import 'package:mobile/features/auth/screens/sign_up_screen.dart';
 import 'package:mobile/features/auth/screens/splash_screen.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
@@ -48,7 +49,7 @@ import 'package:mobile/features/product/screens/add_product_screen.dart';
 import 'package:mobile/features/product/screens/favorite_products_screen.dart';
 import 'package:mobile/features/product/screens/product_detail_screen.dart';
 
-// Restaurant
+import 'package:mobile/features/restaurant/screens/buyer_farmer_profile_screen.dart';
 import 'package:mobile/features/restaurant/screens/home_screen.dart';
 import 'package:mobile/features/restaurant/screens/search_market_screen.dart';
 import 'package:mobile/features/restaurant/screens/user_profile_screen.dart';
@@ -82,6 +83,10 @@ class AppRouter {
       ),
     ),
     routes: [
+      GoRoute(
+        path: '/',
+        redirect: (context, state) => AppRoutes.splash,
+      ),
       // Splash & Onboarding
       GoRoute(
         path: AppRoutes.splash,
@@ -144,6 +149,18 @@ class AppRouter {
             phoneNumber: args.phoneNumber,
             otp: args.otp,
           );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.setupProfile,
+        builder: (context, state) {
+          final role = state.extra is String
+              ? state.extra as String
+              : (state.extra is Map<String, dynamic>
+                  ? (state.extra as Map<String, dynamic>)['role']?.toString()
+                  : null) ??
+              'restaurant';
+          return SetupProfileScreen(role: role);
         },
       ),
 
@@ -390,6 +407,40 @@ class AppRouter {
         parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.restaurantFavorites,
         builder: (context, state) => const FavoriteProductsScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: AppRoutes.restaurantFarmerProfile,
+        builder: (context, state) {
+          String farmerId = '';
+          Map<String, dynamic>? initialData;
+
+          final extra = state.extra;
+          if (extra is String) {
+            farmerId = extra;
+          } else if (extra is Map<String, dynamic>) {
+            farmerId = extra['farmerId']?.toString() ??
+                extra['id']?.toString() ??
+                '';
+            initialData = extra;
+          } else if (extra is Map) {
+            farmerId = extra['farmerId']?.toString() ??
+                extra['id']?.toString() ??
+                '';
+            initialData = Map<String, dynamic>.from(extra);
+          }
+
+          if (farmerId.isEmpty) {
+            farmerId = state.uri.queryParameters['farmerId'] ??
+                state.uri.queryParameters['id'] ??
+                '';
+          }
+
+          return BuyerFarmerProfileScreen(
+            farmerId: farmerId,
+            initialFarmerData: initialData,
+          );
+        },
       ),
 
       // Shared / Details (Fullscreen over root navigator)

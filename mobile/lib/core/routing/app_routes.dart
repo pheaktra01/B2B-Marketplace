@@ -11,6 +11,7 @@ class AppRoutes {
   static const String verifyPhone = '/verify-phone';
   static const String forgotPassword = '/forgot-password';
   static const String resetPassword = '/reset-password';
+  static const String setupProfile = '/setup-profile';
 
   // Farmer
   static const String farmerDashboard = '/farmer';
@@ -35,6 +36,7 @@ class AppRoutes {
   static const String restaurantOrders = '/restaurant/orders';
   static const String restaurantOrderTracking = '/restaurant/orders/tracking';
   static const String restaurantFavorites = '/restaurant/favorites';
+  static const String restaurantFarmerProfile = '/restaurant/farmer-profile';
 
   // Shared / Details
   static const String productDetail = '/product/detail';

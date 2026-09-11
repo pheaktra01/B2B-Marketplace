@@ -5,12 +5,16 @@ import { User } from './entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Order } from '../order/entities/order.entity';
 
+import { NotificationModule } from '../notification/notification.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Order]),
+    NotificationModule,
   ],
   exports: [
     TypeOrmModule,
+    UsersService,
   ],
   controllers: [UsersController],
   providers: [UsersService]

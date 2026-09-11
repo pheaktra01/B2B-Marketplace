@@ -198,15 +198,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                       controller: _phoneController,
                                       keyboardType: TextInputType.phone,
                                       validator: (value) {
-                                        if (value == null ||
-                                            value.trim().isEmpty) {
-                                          return l10n
-                                              .pleaseEnterPhoneNumber;
+                                        final cleaned = (value ?? '').replaceAll(RegExp(r'\s+'), '');
+                                        if (cleaned.isEmpty) {
+                                          return l10n.pleaseEnterPhoneNumber;
                                         }
 
                                         if (!RegExp(
-                                          r'^(0|\+855)\d{8,9}$',
-                                        ).hasMatch(value.trim())) {
+                                          r'^(0|\+855)\d{7,9}$',
+                                        ).hasMatch(cleaned)) {
                                           return l10n.invalidPhoneNumber;
                                         }
 
@@ -430,11 +429,43 @@ class _LoginScreenState extends State<LoginScreen> {
                                           child: ConstrainedBox(
                                             constraints:
                                                 const BoxConstraints(
-                                              minHeight: 50,
+                                              minHeight: 16,
                                             ),
                                           ),
                                         ),
                                       ],
+                                    ),
+
+                                    const SizedBox(height: 8),
+
+                                    // Don't have an account? Sign up
+                                    Center(
+                                      child: Wrap(
+                                        alignment: WrapAlignment.center,
+                                        crossAxisAlignment: WrapCrossAlignment.center,
+                                        children: [
+                                          const Text(
+                                            'មិនទាន់មានគណនីមែនទេ? ',
+                                            style: TextStyle(
+                                              color: textMuted,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              context.push(AppRoutes.roleSelection);
+                                            },
+                                            child: const Text(
+                                              'បង្កើតគណនីថ្មី',
+                                              style: TextStyle(
+                                                color: primaryGreen,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -467,12 +498,13 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
+    final cleanPhone = _phoneController.text.replaceAll(RegExp(r'\s+'), '');
     print('========== LOGIN BUTTON PRESSED ==========');
-    print('Phone: ${_phoneController.text.trim()}');
+    print('Phone: $cleanPhone');
 
     try {
       final response = await _authService.login(
-        phone: _phoneController.text.trim(),
+        phone: cleanPhone,
         password: _passwordController.text,
       );
 

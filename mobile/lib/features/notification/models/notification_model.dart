@@ -44,4 +44,21 @@ class NotificationModel {
       createdAt: createdAt,
     );
   }
+
+  String get category {
+    final lower = type.toLowerCase();
+    if (lower.contains('order')) return 'orders';
+    if (lower.contains('message') || lower.contains('chat')) return 'messages';
+    if (lower.contains('payment')) return 'payments';
+    if (lower.contains('product') || lower.contains('stock') || lower.contains('inventory')) return 'products';
+    if (lower.contains('account') || lower.contains('security') || lower.contains('password') || lower.contains('login') || lower.contains('profile')) return 'account';
+    return 'system';
+  }
+
+  bool get isOrder => category == 'orders';
+  bool get isChat => category == 'messages';
+  bool get isPayment => category == 'payments';
+  bool get isProduct => category == 'products';
+  bool get isAccount => category == 'account';
+  bool get isSystem => category == 'system';
 }

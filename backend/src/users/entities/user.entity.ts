@@ -63,6 +63,21 @@ export class User {
   coverUrl: string;
 
   @Column({
+    nullable: true,
+  })
+  businessName: string;
+
+  @Column({
+    nullable: true,
+  })
+  address: string;
+
+  @Column({
+    nullable: true,
+  })
+  bio: string;
+
+  @Column({
     default: true,
   })
   isActive: boolean;

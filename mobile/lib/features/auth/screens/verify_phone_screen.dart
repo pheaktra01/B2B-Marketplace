@@ -65,11 +65,11 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
   void initState() {
     super.initState();
 
-    final initialOtp = widget.initialOtp;
-    if (initialOtp != null && initialOtp.length == 6) {
-      for (var index = 0; index < _controllers.length; index++) {
-        _controllers[index].text = initialOtp[index];
-      }
+    final initialOtp = (widget.initialOtp != null && widget.initialOtp!.length == 6)
+        ? widget.initialOtp!
+        : '123456';
+    for (var index = 0; index < _controllers.length; index++) {
+      _controllers[index].text = initialOtp[index];
     }
   }
 
@@ -213,6 +213,39 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                   height: 1.4,
                                 ),
                               ),
+                              const SizedBox(height: 10),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE8F5E9),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: brandGreen.withValues(alpha: 0.25),
+                                  ),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.lock_clock_outlined,
+                                      size: 16,
+                                      color: brandGreen,
+                                    ),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      'លេខកូដសាកល្បង / OTP: 123456',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: brandGreen,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
 
                               SizedBox(height: isShortScreen ? 20 : 28),
 
@@ -317,28 +350,25 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                                     }
 
                                                     if (!mounted) return;
-                                                    if (role == 'farmer') {
-                                                      context.go(AppRoutes.farmerDashboard);
-                                                    } else {
-                                                      context.go(AppRoutes.restaurantHome);
-                                                    }
+                                                    context.go(
+                                                      AppRoutes.setupProfile,
+                                                      extra: role ?? widget.selectedRole ?? 'restaurant',
+                                                    );
                                                   } else {
-                                                    // If login failed, still navigate based on selectedRole to continue UX flow
+                                                    // If login failed, still navigate to setupProfile
                                                     if (!mounted) return;
-                                                    if (widget.selectedRole == 'farmer') {
-                                                      context.go(AppRoutes.farmerDashboard);
-                                                    } else {
-                                                      context.go(AppRoutes.restaurantHome);
-                                                    }
+                                                    context.go(
+                                                      AppRoutes.setupProfile,
+                                                      extra: widget.selectedRole ?? 'restaurant',
+                                                    );
                                                   }
                                                 } else {
-                                                  // No password provided: just route by selectedRole
+                                                  // No password provided: route to setupProfile
                                                   if (!mounted) return;
-                                                  if (widget.selectedRole == 'farmer') {
-                                                    context.go(AppRoutes.farmerDashboard);
-                                                  } else {
-                                                    context.go(AppRoutes.restaurantHome);
-                                                  }
+                                                  context.go(
+                                                    AppRoutes.setupProfile,
+                                                    extra: widget.selectedRole ?? 'restaurant',
+                                                  );
                                                 }
                                                 break;
 
@@ -401,7 +431,16 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                               const SizedBox(height: 2),
                               TextButton.icon(
                                 onPressed: () {
-                                  // Trigger API resend logic
+                                  const staticOtp = '123456';
+                                  for (var i = 0; i < _controllers.length; i++) {
+                                    _controllers[i].text = staticOtp[i];
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('លេខកូដផ្ទៀងផ្ទាត់របស់អ្នកគឺ: 123456'),
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
                                 },
                                 icon: const Icon(
                                   Icons.refresh,

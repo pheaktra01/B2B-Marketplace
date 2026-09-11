@@ -11,6 +11,7 @@ import { Cart } from '../cart/entities/cart.entity';
 import { CartItem } from '../cart/entities/cart-item.entity';
 import { Product } from 'src/products/enterties/product.entity';
 import { Notification } from '../notification/entities/notification.entity';
+import { User } from '../users/entities/user.entity';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { Notification } from '../notification/entities/notification.entity';
       CartItem,
       Product,
       Notification,
+      User,
     ]),
   ],
 

@@ -5,6 +5,8 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Post,
+  Body,
   Query,
   Req,
   DefaultValuePipe,
@@ -119,5 +121,22 @@ export class NotificationController {
     return this.notificationService.deleteAll(
       req.user.id,
     );
+  }
+
+  // =========================================================
+  // BROADCAST SYSTEM NOTIFICATION (ADMIN / SYSTEM)
+  // =========================================================
+
+  @Post('broadcast')
+  async broadcastNotification(
+    @Body()
+    dto: {
+      type?: any;
+      title: string;
+      message: string;
+      targetRole?: string;
+    },
+  ) {
+    return this.notificationService.broadcastSystemNotification(dto);
   }
 }

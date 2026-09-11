@@ -1243,91 +1243,139 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
+  void _openFarmerProfile() {
+    final farmerId = _farmerId;
+    if (farmerId == null || farmerId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Farmer profile is not available')),
+      );
+      return;
+    }
+
+    context.push(
+      AppRoutes.restaurantFarmerProfile,
+      extra: <String, dynamic>{
+        'farmerId': farmerId,
+        'name': _publisherName?.isNotEmpty == true
+            ? _publisherName!
+            : _farmName,
+        'avatarUrl': _publisherAvatarUrl,
+        'location': _location,
+      },
+    );
+  }
+
   Widget _buildFarmerProfileCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: _openFarmerProfile,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'FARMER & PRODUCER',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.6,
-              color: Colors.grey,
-            ),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
           ),
-          const SizedBox(height: 12),
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _publisherAvatarUrl == null
-                  ? const CircleAvatar(
-                      radius: 26,
-                      backgroundColor: lightGreenBg,
-                      child: Icon(Icons.agriculture, color: primaryGreen, size: 26),
-                    )
-                  : CircleAvatar(
-                      radius: 26,
-                      backgroundImage: NetworkImage(_publisherAvatarUrl!),
-                      onBackgroundImageError: (_, _) {},
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'FARMER & PRODUCER',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.6,
+                      color: Colors.grey,
                     ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _publisherName?.isNotEmpty == true
-                          ? _publisherName!
-                          : _farmName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                  ),
+                  Row(
+                    children: const [
+                      Text(
+                        'View Profile',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: primaryGreen,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Row(
+                      SizedBox(width: 3),
+                      Icon(Icons.chevron_right, size: 16, color: primaryGreen),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  _publisherAvatarUrl == null
+                      ? const CircleAvatar(
+                          radius: 26,
+                          backgroundColor: lightGreenBg,
+                          child: Icon(Icons.agriculture, color: primaryGreen, size: 26),
+                        )
+                      : CircleAvatar(
+                          radius: 26,
+                          backgroundImage: NetworkImage(_publisherAvatarUrl!),
+                          onBackgroundImageError: (_, _) {},
+                        ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.verified, color: primaryGreen, size: 14),
-                        SizedBox(width: 4),
                         Text(
-                          'Verified Local Producer',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: primaryGreen,
+                          _publisherName?.isNotEmpty == true
+                              ? _publisherName!
+                              : _farmName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Row(
+                          children: [
+                            Icon(Icons.verified, color: primaryGreen, size: 14),
+                            SizedBox(width: 4),
+                            Text(
+                              'Verified Local Producer',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: primaryGreen,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: _isContactingFarmer ? null : _contactFarmer,
-                icon: const Icon(Icons.chat_outlined, size: 16),
-                label: const Text('Chat'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: lightGreenBg,
-                  foregroundColor: primaryGreen,
-                  elevation: 0,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
                   ),
-                ),
+                  ElevatedButton.icon(
+                    onPressed: _isContactingFarmer ? null : _contactFarmer,
+                    icon: const Icon(Icons.chat_outlined, size: 16),
+                    label: const Text('Chat'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: lightGreenBg,
+                      foregroundColor: primaryGreen,
+                      elevation: 0,
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

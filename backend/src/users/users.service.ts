@@ -9,6 +9,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Order, OrderStatus } from '../order/entities/order.entity';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType } from '../notification/entities/notification.entity';
 
 @Injectable()
 export class UsersService {
@@ -17,6 +19,7 @@ export class UsersService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Order)
     private readonly orderRepo: Repository<Order>,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async getProfile(userId: string) {
@@ -101,6 +104,9 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
+    const phoneChanged =
+      (dto as any).phone !== undefined && (dto as any).phone !== user.phone;
+
     if (dto.name !== undefined) {
       user.name = dto.name;
     }
@@ -130,6 +136,30 @@ export class UsersService {
     }
 
     await this.userRepo.save(user);
+
+    try {
+      if (phoneChanged) {
+        await this.notificationService.create({
+          userId: user.id,
+          type: NotificationType.ACCOUNT_PHONE_CHANGED,
+          title: 'Phone Number Changed',
+          message: 'Your account phone number was updated successfully.',
+          referenceId: null,
+          referenceType: 'account',
+        });
+      } else {
+        await this.notificationService.create({
+          userId: user.id,
+          type: NotificationType.ACCOUNT_PROFILE_UPDATED,
+          title: 'Profile Updated',
+          message: 'Your profile details have been updated successfully.',
+          referenceId: null,
+          referenceType: 'account',
+        });
+      }
+    } catch (e) {
+      console.error('Failed to notify profile update:', e);
+    }
 
     const { password, refreshToken, ...rest } = user as any;
 

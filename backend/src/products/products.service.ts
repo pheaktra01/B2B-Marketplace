@@ -10,6 +10,8 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './enterties/product.entity';
 import { User } from '../users/entities/user.entity';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType } from '../notification/entities/notification.entity';
 
 @Injectable()
 export class ProductsService {
@@ -18,6 +20,7 @@ export class ProductsService {
     private readonly productRepo: Repository<Product>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    private readonly notificationService: NotificationService,
   ) {}
 
   // ============================================================
@@ -75,9 +78,24 @@ export class ProductsService {
         isAvailable: true,
       });
 
-    return this.productRepo.save(
+    const saved = await this.productRepo.save(
       product,
     );
+
+    try {
+      await this.notificationService.create({
+        userId: farmerId,
+        type: NotificationType.PRODUCT_PUBLISHED,
+        title: 'Product Published',
+        message: `Your ${saved.name} product is now available.`,
+        referenceId: saved.id,
+        referenceType: 'product',
+      });
+    } catch (e) {
+      console.error('Failed to notify product published:', e);
+    }
+
+    return saved;
   }
 
   // ============================================================
@@ -193,7 +211,42 @@ export class ProductsService {
         new Date(dto.availableUntil);
     }
 
-    return this.productRepo.save(product);
+    const saved = await this.productRepo.save(product);
+
+    try {
+      await this.notificationService.create({
+        userId: farmerId,
+        type: NotificationType.PRODUCT_UPDATED,
+        title: 'Product Updated',
+        message: `Your product information for ${saved.name} has been updated.`,
+        referenceId: saved.id,
+        referenceType: 'product',
+      });
+
+      if (Number(saved.quantity) <= 0) {
+        await this.notificationService.create({
+          userId: farmerId,
+          type: NotificationType.PRODUCT_OUT_OF_STOCK,
+          title: 'Out of Stock',
+          message: `${saved.name} is now out of stock.`,
+          referenceId: saved.id,
+          referenceType: 'product',
+        });
+      } else if (Number(saved.quantity) <= 5) {
+        await this.notificationService.create({
+          userId: farmerId,
+          type: NotificationType.PRODUCT_LOW_STOCK,
+          title: 'Low Stock',
+          message: `Your ${saved.name} stock is running low (${saved.quantity} left).`,
+          referenceId: saved.id,
+          referenceType: 'product',
+        });
+      }
+    } catch (e) {
+      console.error('Failed to notify product updated:', e);
+    }
+
+    return saved;
   }
 
   // ============================================================

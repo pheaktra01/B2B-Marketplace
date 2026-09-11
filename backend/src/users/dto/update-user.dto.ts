@@ -16,4 +16,16 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   coverUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  businessName?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
+  @IsString()
+  bio?: string;
 }

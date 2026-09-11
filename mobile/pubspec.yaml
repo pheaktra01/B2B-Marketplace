@@ -28,13 +28,11 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 flutter_native_splash:
-  color: "#FFFFFF"
-  image: assets/images/splash_logo.png
-
+  color: "#0F5A27"
+  image: "assets/logo01.png"
   android_12:
-    color: "#FFFFFF"
-    image: assets/images/splash_logo.png
-
+    color: "#0F5A27"
+    image: "assets/logo01.png"
 
 dependencies:
   flutter_launcher_icons: ^0.14.4
@@ -68,6 +66,7 @@ flutter_launcher_icons:
   min_sdk_android: 21
   adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "assets/logo01.png"
+
 
 dev_dependencies:
   flutter_test:

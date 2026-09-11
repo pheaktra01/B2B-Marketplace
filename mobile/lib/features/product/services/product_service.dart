@@ -423,4 +423,30 @@ class ProductService {
       return [];
     }
   }
+
+  // ============================================================
+  // GET PRODUCTS BY FARMER
+  // ============================================================
+
+  static Future<List<Map<String, dynamic>>> getProductsByFarmer(
+    String farmerId,
+  ) async {
+    try {
+      final all = await getAllProducts();
+      return all
+          .where((p) {
+            final pFarmerId = p['farmerId']?.toString() ??
+                (p['publisher'] is Map
+                    ? p['publisher']['id']?.toString()
+                    : null) ??
+                p['publisherId']?.toString() ??
+                (p['farmer'] is Map ? p['farmer']['id']?.toString() : null);
+            return pFarmerId != null && pFarmerId == farmerId;
+          })
+          .map((p) => Map<String, dynamic>.from(p))
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
 }

@@ -538,7 +538,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             fit: BoxFit.cover,
                           )
                         : const DecorationImage(
-                            image: AssetImage('assets/mokoto.jpg'),
+                            image: AssetImage('assets/default_avatar.jpg'),
                             fit: BoxFit.cover,
                           ),
                   ),

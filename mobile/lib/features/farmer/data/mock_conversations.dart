@@ -7,7 +7,7 @@
 //     time: '10:45 AM',
 //     unreadCount: 2,
 //     isOnline: true,
-//     avatarUrl: 'assets/mokoto.jpg',
+//     avatarUrl: 'assets/default_avatar.jpg',
 //   ),
 
 //   Conversation(

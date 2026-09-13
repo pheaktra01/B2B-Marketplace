@@ -43,7 +43,7 @@ class Conversation {
       avatarUrl:
           participant['avatarUrl'] == null ||
               participant['avatarUrl'].toString().isEmpty
-          ? 'assets/mokoto.jpg'
+          ? 'assets/default_avatar.jpg'
           : ApiConstants.imageUrl(participant['avatarUrl'].toString()),
     );
   }

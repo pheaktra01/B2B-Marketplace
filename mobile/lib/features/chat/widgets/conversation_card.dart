@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
 
@@ -75,9 +76,11 @@ class ConversationCard extends StatelessWidget {
                     CircleAvatar(
                       radius: 26,
                       backgroundColor: Colors.grey[200],
-                      backgroundImage: avatarUrl.startsWith('http')
-                          ? NetworkImage(avatarUrl)
-                          : AssetImage(avatarUrl) as ImageProvider,
+                      backgroundImage: avatarUrl.isEmpty || avatarUrl == 'assets/default_avatar.jpg'
+                          ? const AssetImage('assets/default_avatar.jpg') as ImageProvider
+                          : (avatarUrl.startsWith('http') || avatarUrl.startsWith('/')
+                              ? NetworkImage(ApiConstants.imageUrl(avatarUrl))
+                              : AssetImage(avatarUrl) as ImageProvider),
                     ),
                     Positioned(
                       right: 0,

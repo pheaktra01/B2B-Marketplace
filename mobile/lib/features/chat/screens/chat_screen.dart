@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/features/chat/models/conversation_model.dart';
 import 'package:mobile/features/chat/services/chat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -461,8 +462,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildParticipantAvatar({double radius = 18}) {
-    final avatarUrl = widget.participantAvatarUrl;
-    if (avatarUrl == null || avatarUrl.isEmpty) {
+    final rawAvatarUrl = widget.participantAvatarUrl;
+    if (rawAvatarUrl == null || rawAvatarUrl.isEmpty) {
       return CircleAvatar(
         radius: radius,
         backgroundColor: const Color(0xFFE8EFE6),
@@ -477,6 +478,15 @@ class _ChatScreenState extends State<ChatScreen> {
       );
     }
 
+    if (rawAvatarUrl == 'assets/default_avatar.jpg' || rawAvatarUrl.startsWith('assets/')) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: const Color(0xFFF2F4F7),
+        backgroundImage: AssetImage(rawAvatarUrl),
+      );
+    }
+
+    final avatarUrl = ApiConstants.imageUrl(rawAvatarUrl);
     if (avatarUrl.startsWith('http')) {
       return CircleAvatar(
         radius: radius,
@@ -489,7 +499,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return CircleAvatar(
       radius: radius,
       backgroundColor: const Color(0xFFF2F4F7),
-      backgroundImage: AssetImage(avatarUrl),
+      backgroundImage: const AssetImage('assets/default_avatar.jpg'),
     );
   }
 
@@ -1083,19 +1093,28 @@ class _MessageBubble extends StatelessWidget {
       );
     }
 
-    if (avatarUrl!.startsWith('http')) {
+    if (avatarUrl == 'assets/default_avatar.jpg' || avatarUrl!.startsWith('assets/')) {
       return CircleAvatar(
         radius: 13,
         backgroundColor: const Color(0xFFE4E7EC),
-        backgroundImage: NetworkImage(avatarUrl!),
+        backgroundImage: AssetImage(avatarUrl!),
+      );
+    }
+
+    final fullUrl = ApiConstants.imageUrl(avatarUrl!);
+    if (fullUrl.startsWith('http')) {
+      return CircleAvatar(
+        radius: 13,
+        backgroundColor: const Color(0xFFE4E7EC),
+        backgroundImage: NetworkImage(fullUrl),
         onBackgroundImageError: (_, _) {},
       );
     }
 
-    return CircleAvatar(
+    return const CircleAvatar(
       radius: 13,
-      backgroundColor: const Color(0xFFE4E7EC),
-      backgroundImage: AssetImage(avatarUrl!),
+      backgroundColor: Color(0xFFE4E7EC),
+      backgroundImage: AssetImage('assets/default_avatar.jpg'),
     );
   }
 

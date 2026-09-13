@@ -11,6 +11,7 @@ class FarmerAppBar extends StatefulWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final bool showLogo;
   final bool isProfileScreen;
+  final bool isRestaurant;
   final VoidCallback? onSettingsTap;
 
   const FarmerAppBar({
@@ -19,6 +20,7 @@ class FarmerAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.actions,
     this.showLogo = true,
     this.isProfileScreen = false,
+    this.isRestaurant = false,
     this.onSettingsTap,
   });
 
@@ -84,7 +86,11 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
   }
 
   void _openProfile(BuildContext context) {
-    context.go(AppRoutes.farmerProfile);
+    if (widget.isRestaurant) {
+      context.go(AppRoutes.restaurantProfile);
+    } else {
+      context.go(AppRoutes.farmerProfile);
+    }
   }
 
   @override
@@ -206,7 +212,7 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
                         child: ClipOval(
                           child: _avatarUrl == null
                               ? Image.asset(
-                                  'assets/mokoto.jpg',
+                                  'assets/default_avatar.jpg',
                                   width: 36,
                                   height: 36,
                                   fit: BoxFit.cover,
@@ -218,7 +224,7 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
                                       Image.asset(
-                                        'assets/mokoto.jpg',
+                                        'assets/default_avatar.jpg',
                                         width: 36,
                                         height: 36,
                                         fit: BoxFit.cover,

@@ -95,9 +95,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
       backgroundColor: pageBg,
 
       // ========================================================
-      // APP BAR
-      // ========================================================
-      appBar: const FarmerAppBar(),
+      appBar: FarmerAppBar(
+        isRestaurant: widget.isRestaurant,
+      ),
 
       // ========================================================
       // BODY

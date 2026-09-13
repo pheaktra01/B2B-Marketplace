@@ -5,6 +5,7 @@ import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/notification/models/notification_model.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
+import 'package:mobile/features/notification/services/push_notification_service.dart';
 import 'package:mobile/features/notification/widgets/notification_card.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
@@ -216,6 +217,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            tooltip: 'Send Test Notification',
+            icon: const Icon(Icons.notifications_active_outlined, color: primaryGreen),
+            onPressed: () async {
+              await PushNotificationService.showTestNotification(
+                title: 'PsarKasekor Notification',
+                body: 'Testing lock screen notification! If you lock your phone now, this appears on your lock screen.',
+              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Test notification sent! Check your lock screen & status bar.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
+          ),
           TextButton(
             onPressed: _markAllAsRead,
             child: Text(

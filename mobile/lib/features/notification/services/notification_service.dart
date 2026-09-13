@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
@@ -132,6 +133,28 @@ class NotificationService {
 
     if (response.statusCode != 200) {
       throw Exception('Failed to delete notifications: ${response.body}');
+    }
+  }
+
+  // Update / register FCM device token with backend
+  Future<void> updateDeviceToken(String fcmToken) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/notifications/device-token'),
+        headers: await _headers(),
+        body: jsonEncode({
+          'token': fcmToken,
+          'platform': defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android',
+        }),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        debugPrint('FCM device token updated successfully on server');
+      } else {
+        debugPrint('Server responded with ${response.statusCode} for device token registration');
+      }
+    } catch (e) {
+      debugPrint('Error updating device token with server: $e');
     }
   }
 }

@@ -538,14 +538,7 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                             backgroundColor: lightGreenBg,
                             backgroundImage: _avatarUrl != null
                                 ? NetworkImage(_avatarUrl!)
-                                : null,
-                            child: _avatarUrl == null
-                                ? const Icon(
-                                    Icons.agriculture,
-                                    color: primaryGreen,
-                                    size: 38,
-                                  )
-                                : null,
+                                : const AssetImage('assets/default_avatar.jpg') as ImageProvider,
                           ),
                         ),
                       ),
@@ -836,18 +829,22 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
   }
 
   Widget _buildCoverFallback() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF0F471D), Color(0xFF1D7838)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Image.asset(
+      'assets/default_cover.jpg',
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0F471D), Color(0xFF1D7838)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-      ),
-      child: const Icon(
-        Icons.agriculture,
-        color: Colors.white12,
-        size: 110,
+        child: const Icon(
+          Icons.agriculture,
+          color: Colors.white12,
+          size: 110,
+        ),
       ),
     );
   }

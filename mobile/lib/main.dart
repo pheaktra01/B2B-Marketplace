@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:mobile/core/app_locale.dart';
 import 'package:mobile/core/routing/app_router.dart';
+import 'package:mobile/features/notification/services/push_notification_service.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
 Future<void> main() async {
@@ -9,6 +10,9 @@ Future<void> main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   await AppLocale.load();
+
+  // Initialize push notifications & background handler
+  await PushNotificationService.initialize();
 
   runApp(const MyApp());
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../notification/services/push_notification_service.dart';
 
 class AuthService {
   Future<Map<String, dynamic>> _post(
@@ -54,6 +55,7 @@ class AuthService {
     await prefs.remove('userId');
     await prefs.remove('userRole');
     await prefs.remove('tokenExpiry');
+    await PushNotificationService.clearToken();
     print('Local authentication data cleared');
   }
 
@@ -119,6 +121,12 @@ class AuthService {
         print('Token exists: ${savedToken != null}');
         print('Token Expiry: ${DateTime.fromMillisecondsSinceEpoch(sevenDaysExpiry)}');
         print('=============================================');
+
+        // Sync FCM device token with backend
+        await PushNotificationService.syncTokenWithBackend();
+
+        // Start listening to realtime notifications for instant alerts
+        await PushNotificationService.startRealtimeNotificationListener();
       }
     }
 

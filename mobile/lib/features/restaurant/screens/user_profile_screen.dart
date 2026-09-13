@@ -246,6 +246,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     return Scaffold(
       backgroundColor: pageBgColor,
       appBar: FarmerAppBar(
+        isRestaurant: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none),
@@ -253,10 +254,38 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               context.push(AppRoutes.notifications);
             },
           ),
-          const Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              backgroundImage: AssetImage('assets/mokoto.jpg'),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFF2E7D32).withValues(alpha: 0.8),
+                  width: 2.0,
+                ),
+              ),
+              child: ClipOval(
+                child: _avatarUrl != null
+                    ? Image.network(
+                        _avatarUrl!,
+                        width: 36,
+                        height: 36,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Image.asset(
+                              'assets/default_avatar.jpg',
+                              width: 36,
+                              height: 36,
+                              fit: BoxFit.cover,
+                            ),
+                      )
+                    : Image.asset(
+                        'assets/default_avatar.jpg',
+                        width: 36,
+                        height: 36,
+                        fit: BoxFit.cover,
+                      ),
+              ),
             ),
           ),
         ],
@@ -387,7 +416,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       ? MemoryImage(_localCoverBytes!)
                       : _coverUrl != null
                           ? NetworkImage(_coverUrl!)
-                          : const AssetImage('assets/farm_background.png')
+                          : const AssetImage('assets/default_cover.jpg')
                               as ImageProvider,
                   fit: BoxFit.cover,
                 ),
@@ -415,7 +444,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     : _avatarUrl == null
                         ? const CircleAvatar(
                             radius: 50,
-                            backgroundImage: AssetImage('assets/mokoto.jpg'),
+                            backgroundImage: AssetImage('assets/default_avatar.jpg'),
                           )
                         : CircleAvatar(
                             radius: 50,
@@ -741,7 +770,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     radius: 28,
                     backgroundImage: _avatarUrl != null
                         ? NetworkImage(_avatarUrl!)
-                        : const AssetImage('assets/mokoto.jpg') as ImageProvider,
+                        : const AssetImage('assets/default_avatar.jpg') as ImageProvider,
                   ),
                   const SizedBox(width: 14),
                   Expanded(

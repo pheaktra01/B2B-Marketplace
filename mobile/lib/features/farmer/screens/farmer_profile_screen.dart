@@ -73,12 +73,9 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
 
   // ------------------------------------------------------------
   // IMAGE FALLBACKS
-  // ------------------------------------------------------------
+  final String _defaultCoverUrl = 'assets/default_cover.jpg';
 
-  final String _defaultCoverUrl =
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGo2z3rQrSISUbvCJO0kZFrymxlPHjG6lkT0EkFKM8ntPy1Ug9ZWrQzA8&s=10';
-
-  final String _defaultAvatarUrl = 'assets/mokoto.jpg';
+  final String _defaultAvatarUrl = 'assets/default_avatar.jpg';
 
   String? _avatarUrl;
   String? _coverUrl;
@@ -406,12 +403,13 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
               InteractiveViewer(
                 child: localBytes != null
                     ? Image.memory(localBytes, fit: BoxFit.contain)
-                    : Image.network(
-                        isAvatar
-                            ? (_avatarUrl ?? _defaultAvatarUrl)
-                            : (_coverUrl ?? _defaultCoverUrl),
-                        fit: BoxFit.contain,
-                      ),
+                    : (isAvatar
+                        ? (_avatarUrl != null && _avatarUrl!.isNotEmpty
+                            ? Image.network(_avatarUrl!, fit: BoxFit.contain)
+                            : Image.asset(_defaultAvatarUrl, fit: BoxFit.contain))
+                        : (_coverUrl != null && _coverUrl!.isNotEmpty
+                            ? Image.network(_coverUrl!, fit: BoxFit.contain)
+                            : Image.asset(_defaultCoverUrl, fit: BoxFit.contain))),
               ),
 
               Positioned(
@@ -563,17 +561,17 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
 
     if (_localCoverBytes != null) {
       coverImageProvider = MemoryImage(_localCoverBytes!);
-    } else if (_coverUrl != null) {
+    } else if (_coverUrl != null && _coverUrl!.isNotEmpty) {
       coverImageProvider = NetworkImage(_coverUrl!);
     } else {
-      coverImageProvider = NetworkImage(_defaultCoverUrl);
+      coverImageProvider = AssetImage(_defaultCoverUrl);
     }
 
     ImageProvider avatarImageProvider;
 
     if (_localAvatarBytes != null) {
       avatarImageProvider = MemoryImage(_localAvatarBytes!);
-    } else if (_avatarUrl != null) {
+    } else if (_avatarUrl != null && _avatarUrl!.isNotEmpty) {
       avatarImageProvider = NetworkImage(_avatarUrl!);
     } else {
       avatarImageProvider = AssetImage(_defaultAvatarUrl);

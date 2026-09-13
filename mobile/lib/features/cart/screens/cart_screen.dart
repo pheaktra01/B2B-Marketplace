@@ -6,6 +6,7 @@ import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/cart/models/cart_model.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
+import 'package:mobile/features/profile/services/user_service.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -37,6 +38,9 @@ class _CartScreenState extends State<CartScreen> {
   Cart? _cart;
   bool _isLoading = true;
   String? _errorMessage;
+  String? _avatarUrl;
+
+  final UserService _userService = UserService();
 
   // Track which item is currently being updated
   String? _updatingItemId;
@@ -62,6 +66,20 @@ class _CartScreenState extends State<CartScreen> {
   void initState() {
     super.initState();
     _loadCart();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      final profile = await _userService.getProfile();
+      final data = profile['data'];
+      final avatar = data is Map ? data['avatarUrl']?.toString() : null;
+      if (mounted && avatar != null && avatar.isNotEmpty) {
+        setState(() => _avatarUrl = ApiConstants.imageUrl(avatar));
+      }
+    } catch (e) {
+      debugPrint('Error loading user profile in cart: $e');
+    }
   }
 
   @override
@@ -369,6 +387,7 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       backgroundColor: pageBgColor,
       appBar: FarmerAppBar(
+        isRestaurant: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.receipt_long_outlined, color: primaryGreen),
@@ -389,15 +408,48 @@ class _CartScreenState extends State<CartScreen> {
             padding: const EdgeInsets.only(right: 16),
             child: GestureDetector(
               onTap: () => context.go(AppRoutes.restaurantProfile),
-              child: const CircleAvatar(
-                backgroundImage: AssetImage('assets/mokoto.jpg'),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFF2E7D32).withValues(alpha: 0.8),
+                    width: 2.0,
+                  ),
+                ),
+                child: ClipOval(
+                  child: _avatarUrl != null
+                      ? Image.network(
+                          _avatarUrl!,
+                          width: 36,
+                          height: 36,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Image.asset(
+                                'assets/default_avatar.jpg',
+                                width: 36,
+                                height: 36,
+                                fit: BoxFit.cover,
+                              ),
+                        )
+                      : Image.asset(
+                          'assets/default_avatar.jpg',
+                          width: 36,
+                          height: 36,
+                          fit: BoxFit.cover,
+                        ),
+                ),
               ),
             ),
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _loadCart,
+        onRefresh: () async {
+          await Future.wait([
+            _loadCart(),
+            _loadUserProfile(),
+          ]);
+        },
         color: primaryGreen,
         child: _buildBody(),
       ),

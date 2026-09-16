@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
@@ -22,8 +23,10 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Remove the native OS splash screen once Flutter starts rendering
-    FlutterNativeSplash.remove();
+    // Remove the native OS splash screen once Flutter starts rendering (mobile only)
+    if (!kIsWeb) {
+      FlutterNativeSplash.remove();
+    }
 
     // Initialize smooth entrance animation
     _animationController = AnimationController(

@@ -91,6 +91,7 @@ class PushNotificationService {
 
   /// Initialize Firebase Messaging & Local Notifications
   static Future<void> initialize() async {
+    if (kIsWeb) return;
     if (_isInitialized) return;
 
     try {
@@ -262,6 +263,7 @@ class PushNotificationService {
     Map<String, dynamic>? data,
     int? id,
   }) async {
+    if (kIsWeb) return;
     final payloadData = data ?? {'type': 'system', 'message': body};
     final notificationId = id ?? _generateNotificationId();
 
@@ -428,6 +430,7 @@ class PushNotificationService {
 
   /// Send FCM token to backend API if the user is authenticated
   static Future<void> syncTokenWithBackend([String? token]) async {
+    if (kIsWeb) return;
     try {
       final prefs = await SharedPreferences.getInstance();
       final currentToken = token ?? prefs.getString('fcmToken');
@@ -452,8 +455,10 @@ class PushNotificationService {
       NotificationService.resetState();
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('fcmToken');
-      // Optionally delete instance token so no stale messages arrive
-      await _messaging.deleteToken();
+      if (!kIsWeb) {
+        // Optionally delete instance token so no stale messages arrive
+        await _messaging.deleteToken();
+      }
     } catch (e) {
       debugPrint('Error clearing FCM token: $e');
     }

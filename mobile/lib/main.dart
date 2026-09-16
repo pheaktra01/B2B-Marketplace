@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:mobile/core/app_locale.dart';
@@ -7,12 +8,16 @@ import 'package:mobile/l10n/app_localizations.dart';
 
 Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  if (!kIsWeb) {
+    FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  }
 
   await AppLocale.load();
 
-  // Initialize push notifications & background handler
-  await PushNotificationService.initialize();
+  // Initialize push notifications & background handler (mobile only)
+  if (!kIsWeb) {
+    await PushNotificationService.initialize();
+  }
 
   runApp(const MyApp());
 }

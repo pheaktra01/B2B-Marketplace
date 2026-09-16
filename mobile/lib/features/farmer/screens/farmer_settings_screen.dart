@@ -2,11 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/app_locale.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
+import 'package:mobile/features/profile/services/user_service.dart';
+import 'package:mobile/features/profile/widgets/edit_profile_bottom_sheet.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
 class FarmerSettingsScreen extends StatefulWidget {
-  const FarmerSettingsScreen({super.key});
+  final bool isRestaurant;
+
+  const FarmerSettingsScreen({
+    super.key,
+    this.isRestaurant = false,
+  });
 
   @override
   State<FarmerSettingsScreen> createState() =>
@@ -19,9 +27,12 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
   bool _darkMode = false;
 
   final AuthService _authService = AuthService();
+  final UserService _userService = UserService();
   bool _isLoggingOut = false;
 
-  static const Color _primaryColor = Color(0xFF2E7D32);
+  Color get _primaryColor => widget.isRestaurant
+      ? const Color(0xFF135A27)
+      : const Color(0xFF2E7D32);
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +52,7 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
             backgroundColor: const Color(0xFFFBFBFC),
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_ios,
                 color: _primaryColor,
               ),
@@ -49,7 +60,7 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
             ),
             title: Text(
               l10n.settings,
-              style: const TextStyle(
+              style: TextStyle(
                 color: _primaryColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -78,9 +89,7 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
                 icon: Icons.person_outline,
                 title: l10n.editProfile,
                 subtitle: l10n.namePhoneNumberLocation,
-                onTap: () {
-                  // Navigate to Edit Profile
-                },
+                onTap: _openEditProfile,
               ),
 
               _buildSettingsTile(
@@ -88,7 +97,7 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
                 title: l10n.security,
                 subtitle: l10n.changePassword,
                 onTap: () {
-                  // Navigate to Security
+                  context.push(AppRoutes.forgotPassword);
                 },
               ),
 
@@ -114,7 +123,9 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
               _buildSwitchTile(
                 icon: Icons.notifications_none,
                 title: l10n.notifications,
-                subtitle: l10n.receiveMarketAlerts,
+                subtitle: widget.isRestaurant
+                    ? 'Receive order and delivery updates'
+                    : l10n.receiveMarketAlerts,
                 value: _pushNotifications,
                 onChanged: (value) {
                   setState(() {
@@ -333,7 +344,7 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
             fontSize: 13,
           ),
         ),
-        activeColor: _primaryColor,
+        activeThumbColor: _primaryColor,
         value: value,
         onChanged: onChanged,
       ),
@@ -372,7 +383,7 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
                     ),
                     title: Text(l10n.khmer),
                     trailing: locale.languageCode == 'km'
-                        ? const Icon(
+                        ? Icon(
                             Icons.check,
                             color: _primaryColor,
                           )
@@ -399,7 +410,7 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
                     ),
                     title: Text(l10n.english),
                     trailing: locale.languageCode == 'en'
-                        ? const Icon(
+                        ? Icon(
                             Icons.check,
                             color: _primaryColor,
                           )
@@ -525,6 +536,40 @@ class _FarmerSettingsScreenState extends State<FarmerSettingsScreen> {
         setState(() {
           _isLoggingOut = false;
         });
+      }
+    }
+  }
+
+  Future<void> _openEditProfile() async {
+    try {
+      final res = await _userService.getProfile();
+      final data = res['data'] is Map ? res['data'] as Map : res;
+
+      if (!mounted) return;
+
+      final avatar = data['avatarUrl']?.toString();
+      final cover = data['coverUrl']?.toString();
+
+      await EditProfileBottomSheet.show(
+        context: context,
+        isFarmer: !widget.isRestaurant,
+        currentName: data['name']?.toString() ?? '',
+        currentBusinessName: data['businessName']?.toString(),
+        currentPhone: data['phone']?.toString() ?? '',
+        currentAddress: data['address']?.toString() ?? '',
+        currentBio: data['bio']?.toString() ?? '',
+        currentAvatarUrl: (avatar != null && avatar.isNotEmpty)
+            ? ApiConstants.imageUrl(avatar)
+            : null,
+        currentCoverUrl: (cover != null && cover.isNotEmpty)
+            ? ApiConstants.imageUrl(cover)
+            : null,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load profile: $e')),
+        );
       }
     }
   }

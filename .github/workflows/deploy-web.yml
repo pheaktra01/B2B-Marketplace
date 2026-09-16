@@ -21,16 +21,16 @@ jobs:
           cache: true
 
       - name: Install dependencies
+        working-directory: mobile
         run: flutter pub get
 
       - name: Build Flutter Web
+        working-directory: mobile
         run: flutter build web --release
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: psarkasekor-web
-          directory: build/web
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          command: pages deploy mobile/build/web --project-name=psarkasekor-web

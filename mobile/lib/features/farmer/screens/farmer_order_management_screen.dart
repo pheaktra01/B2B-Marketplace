@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
@@ -262,54 +265,92 @@ class _FarmerOrderManagementScreenState
       elevation: 0,
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    'Order #$shortId',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () async {
+          await context.push(
+            AppRoutes.farmerOrderDetail,
+            extra: OrderTrackingArgs(
+              orderId: order.id,
+              order: order,
+            ),
+          );
+          if (mounted) setState(_loadOrders);
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Order #$shortId',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
-                ),
-                Chip(
-                  label: Text(_statusLabel(order.status)),
-                  backgroundColor: order.status == 'pending'
-                      ? orange
-                      : Colors.green.shade100,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              items.isEmpty ? 'No items' : items,
-              style: TextStyle(color: Colors.grey.shade700),
-            ),
-            const SizedBox(height: 8),
-            Text('Delivery: ${order.deliveryMethod}'),
-            Text(
-              'Total: \$${order.total.toStringAsFixed(2)}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            if (buttons.isNotEmpty) ...[
-              const Divider(height: 24),
-              Row(
-                children: [
-                  for (var index = 0; index < buttons.length; index++) ...[
-                    if (index > 0) const SizedBox(width: 8),
-                    buttons[index],
-                  ],
+                  Chip(
+                    label: Text(_statusLabel(order.status)),
+                    backgroundColor: order.status == 'pending'
+                        ? orange
+                        : Colors.green.shade100,
+                  ),
                 ],
               ),
+              const SizedBox(height: 8),
+              Text(
+                items.isEmpty ? 'No items' : items,
+                style: TextStyle(color: Colors.grey.shade700),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Delivery: ${order.deliveryMethod}'),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Details',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: primaryGreen,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 16,
+                        color: primaryGreen,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Total: \$${order.total.toStringAsFixed(2)}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              if (buttons.isNotEmpty) ...[
+                const Divider(height: 24),
+                Row(
+                  children: [
+                    for (var index = 0; index < buttons.length; index++) ...[
+                      if (index > 0) const SizedBox(width: 8),
+                      buttons[index],
+                    ],
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

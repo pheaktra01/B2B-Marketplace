@@ -698,33 +698,39 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Payment Method',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+      child: RadioGroup<String>(
+        groupValue: _paymentMethod,
+        onChanged: (val) {
+          if (val != null) setState(() => _paymentMethod = val);
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Payment Method',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          _buildPaymentOption(
-            value: 'KHQR',
-            title: 'Bakong / KHQR',
-            subtitle: 'Scan and pay instantly with any mobile banking app',
-            icon: Icons.qr_code_2,
-            badge: 'RECOMMENDED',
-          ),
-          const SizedBox(height: 10),
-          _buildPaymentOption(
-            value: 'CASH',
-            title: 'Cash on Delivery',
-            subtitle: 'Pay in cash upon arrival & inspection',
-            icon: Icons.payments_outlined,
-          ),
-        ],
+            const SizedBox(height: 12),
+            _buildPaymentOption(
+              value: 'KHQR',
+              title: 'Bakong / KHQR',
+              subtitle: 'Scan and pay instantly with any mobile banking app',
+              icon: Icons.qr_code_2,
+              badge: 'RECOMMENDED',
+            ),
+            const SizedBox(height: 10),
+            _buildPaymentOption(
+              value: 'CASH',
+              title: 'Cash on Delivery',
+              subtitle: 'Pay in cash upon arrival & inspection',
+              icon: Icons.payments_outlined,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -823,11 +829,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             Radio<String>(
               value: value,
-              groupValue: _paymentMethod,
               activeColor: primaryGreen,
-              onChanged: (val) {
-                if (val != null) setState(() => _paymentMethod = val);
-              },
             ),
           ],
         ),

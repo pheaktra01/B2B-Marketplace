@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,10 +9,10 @@ class ApiService {
 
     final token = prefs.getString('accessToken');
 
-    print('========== API AUTH ==========');
-    print('Token exists: ${token != null}');
-    print('Token length: ${token?.length ?? 0}');
-    print('==============================');
+    debugPrint('========== API AUTH ==========');
+    debugPrint('Token exists: ${token != null}');
+    debugPrint('Token length: ${token?.length ?? 0}');
+    debugPrint('==============================');
 
     return {
       'Content-Type': 'application/json',
@@ -24,8 +25,8 @@ class ApiService {
   static Future<http.Response> get(String url) async {
     final headers = await _headers();
 
-    print('GET: $url');
-    print('Authorization attached: ${headers.containsKey('Authorization')}');
+    debugPrint('GET: $url');
+    debugPrint('Authorization attached: ${headers.containsKey('Authorization')}');
 
     return http.get(
       Uri.parse(url),

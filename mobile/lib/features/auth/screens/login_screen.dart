@@ -499,8 +499,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final cleanPhone = _phoneController.text.replaceAll(RegExp(r'\s+'), '');
-    print('========== LOGIN BUTTON PRESSED ==========');
-    print('Phone: $cleanPhone');
+    debugPrint('========== LOGIN BUTTON PRESSED ==========');
+    debugPrint('Phone: $cleanPhone');
 
     try {
       final response = await _authService.login(
@@ -511,9 +511,9 @@ class _LoginScreenState extends State<LoginScreen> {
       final data = response['data'] as Map<String, dynamic>;
       final status = response['statusCode'] as int;
 
-      print('========== LOGIN RESULT ==========');
-      print('Status: $status');
-      print('Message: ${data['message']}');
+      debugPrint('========== LOGIN RESULT ==========');
+      debugPrint('Status: $status');
+      debugPrint('Message: ${data['message']}');
 
       if (status >= 200 && status < 300) {
         final user = data['user'] as Map<String, dynamic>;
@@ -521,9 +521,9 @@ class _LoginScreenState extends State<LoginScreen> {
         final role = user['role']?.toString();
         final userId = user['id']?.toString();
 
-        print('Login successful');
-        print('User ID: $userId');
-        print('Role: $role');
+        debugPrint('Login successful');
+        debugPrint('User ID: $userId');
+        debugPrint('Role: $role');
 
         if (userId != null && userId.isNotEmpty) {
           final prefs = await SharedPreferences.getInstance();
@@ -555,7 +555,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (error) {
-      print('LOGIN ERROR: $error');
+      debugPrint('LOGIN ERROR: $error');
 
       if (!mounted) return;
 

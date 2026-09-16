@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
@@ -140,15 +141,15 @@ class ProductService {
         multipartFile,
       );
 
-      print(
+      debugPrint(
         'Image: ${image.name}',
       );
 
-      print(
+      debugPrint(
         'MIME: $mimeType',
       );
 
-      print(
+      debugPrint(
         'Size: ${bytes.length} bytes',
       );
     }
@@ -157,23 +158,23 @@ class ProductService {
     // DEBUG
     // ==========================================================
 
-    print(
+    debugPrint(
       '========== CREATE PRODUCT =========',
     );
 
-    print(
+    debugPrint(
       'URL: $uri',
     );
 
-    print(
+    debugPrint(
       'Images: ${images.length}',
     );
 
-    print(
+    debugPrint(
       'Fields: ${request.fields}',
     );
 
-    print(
+    debugPrint(
       '===================================',
     );
 
@@ -194,11 +195,11 @@ class ProductService {
             ? <String, dynamic>{}
             : jsonDecode(response.body);
 
-    print(
+    debugPrint(
       'Status: ${response.statusCode}',
     );
 
-    print(
+    debugPrint(
       'Response: $data',
     );
 
@@ -234,10 +235,10 @@ class ProductService {
         ? []
         : jsonDecode(response.body);
 
-    print('========== MY PRODUCTS ==========');
-    print('Status: ${response.statusCode}');
-    print('Data: $data');
-    print('==================================');
+    debugPrint('========== MY PRODUCTS ==========');
+    debugPrint('Status: ${response.statusCode}');
+    debugPrint('Data: $data');
+    debugPrint('==================================');
 
     if (response.statusCode != 200) {
       throw Exception(

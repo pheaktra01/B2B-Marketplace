@@ -481,7 +481,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   final data = response['data'] as Map<String, dynamic>;
 
                                                   if (response['statusCode'] == 201 || response['statusCode'] == 200) {
-                                                    if (!mounted) {
+                                                    if (!context.mounted) {
                                                       return;
                                                     }
 

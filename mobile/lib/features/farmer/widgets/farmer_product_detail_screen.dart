@@ -147,7 +147,7 @@ class _FarmerProductDetailScreenState
                       imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder:
-                          (_, __, ___) {
+                          (_, _, _) {
                         return _placeholder();
                       },
                     )

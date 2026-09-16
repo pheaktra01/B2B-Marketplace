@@ -97,7 +97,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                           onPressed: () async {
                             final locale = selectedIndex == 0 ? const Locale('km') : const Locale('en');
                             await AppLocale.setLocale(locale);
-                            if (!mounted) return;
+                            if (!context.mounted) return;
                             context.go(AppRoutes.getStarted);
                           },
                           child: Row(

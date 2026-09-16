@@ -349,14 +349,14 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                                       await prefs.setString('userId', loggedInUserId);
                                                     }
 
-                                                    if (!mounted) return;
+                                                    if (!context.mounted) return;
                                                     context.go(
                                                       AppRoutes.setupProfile,
                                                       extra: role ?? widget.selectedRole ?? 'restaurant',
                                                     );
                                                   } else {
                                                     // If login failed, still navigate to setupProfile
-                                                    if (!mounted) return;
+                                                    if (!context.mounted) return;
                                                     context.go(
                                                       AppRoutes.setupProfile,
                                                       extra: widget.selectedRole ?? 'restaurant',
@@ -364,7 +364,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                                   }
                                                 } else {
                                                   // No password provided: route to setupProfile
-                                                  if (!mounted) return;
+                                                  if (!context.mounted) return;
                                                   context.go(
                                                     AppRoutes.setupProfile,
                                                     extra: widget.selectedRole ?? 'restaurant',
@@ -373,7 +373,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                                 break;
 
                                               case VerificationType.forgotPassword:
-                                                if (!mounted) return;
+                                                if (!context.mounted) return;
                                                 context.push(AppRoutes.resetPassword, extra: ResetPasswordArgs(
                                                   phoneNumber: widget.phoneNumber,
                                                   otp: _currentOtpCode,

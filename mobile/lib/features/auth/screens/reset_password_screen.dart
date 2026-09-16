@@ -299,7 +299,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                                               final status = response['statusCode'] as int;
                                               if (status >= 200 && status < 300) {
-                                                if (!mounted) {
+                                                if (!context.mounted) {
                                                   return;
                                                 }
 

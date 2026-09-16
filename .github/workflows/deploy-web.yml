@@ -34,5 +34,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: |
-            pages project list
+            pages project create psarkasekor-web --production-branch=main || true
             pages deploy mobile/build/web --project-name=psarkasekor-web --branch=main --commit-dirty=true

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
@@ -23,9 +24,13 @@ class ChatService {
   }
 
   Future<io.Socket> connectToConversation(
-    String conversationId,
-    void Function(Map<String, dynamic>) onMessage,
-  ) async {
+    String conversationId, {
+    required void Function(Map<String, dynamic> message) onMessage,
+    void Function(Map<String, dynamic> payload)? onMessagesRead,
+    void Function(String userId)? onTyping,
+    void Function(String userId)? onStopTyping,
+    void Function(String userId, bool isOnline)? onUserStatusChanged,
+  }) async {
     final token = await _getToken();
     if (token == null || token.isEmpty) {
       throw Exception('Authentication token not found');
@@ -42,19 +47,70 @@ class ChatService {
 
     socket.onConnect((_) {
       socket.emit('join_conversation', {'conversationId': conversationId});
+      socket.emit('join_notifications');
     });
+
+    socket.on('reconnect', (_) {
+      socket.emit('join_conversation', {'conversationId': conversationId});
+      socket.emit('join_notifications');
+    });
+
     socket.on('message_created', (data) {
       if (data is Map) {
         onMessage(Map<String, dynamic>.from(data));
       }
     });
+
+    if (onMessagesRead != null) {
+      socket.on('messages_read', (data) {
+        if (data is Map) {
+          onMessagesRead(Map<String, dynamic>.from(data));
+        }
+      });
+    }
+
+    if (onTyping != null) {
+      socket.on('user_typing', (data) {
+        if (data is Map && data['userId'] != null) {
+          onTyping(data['userId'].toString());
+        }
+      });
+    }
+
+    if (onStopTyping != null) {
+      socket.on('user_stop_typing', (data) {
+        if (data is Map && data['userId'] != null) {
+          onStopTyping(data['userId'].toString());
+        }
+      });
+    }
+
+    if (onUserStatusChanged != null) {
+      socket.on('user_status_changed', (data) {
+        if (data is Map && data['userId'] != null) {
+          final userId = data['userId'].toString();
+          final isOnline = data['isOnline'] == true;
+          onUserStatusChanged(userId, isOnline);
+        }
+      });
+    }
+
     socket.connect();
     return socket;
   }
 
-  Future<io.Socket> connectToConversationList(
-    void Function() onConversationUpdated,
-  ) async {
+  void emitTyping(io.Socket? socket, String conversationId) {
+    socket?.emit('typing', {'conversationId': conversationId});
+  }
+
+  void emitStopTyping(io.Socket? socket, String conversationId) {
+    socket?.emit('stop_typing', {'conversationId': conversationId});
+  }
+
+  Future<io.Socket> connectToConversationList({
+    required void Function(Map<String, dynamic>? data) onConversationUpdated,
+    void Function(String userId, bool isOnline)? onUserStatusChanged,
+  }) async {
     final token = await _getToken();
     if (token == null || token.isEmpty) {
       throw Exception('Authentication token not found');
@@ -68,8 +124,64 @@ class ChatService {
           .disableAutoConnect()
           .build(),
     );
-    socket.onConnect((_) => socket.emit('join_notifications'));
-    socket.on('conversation_updated', (_) => onConversationUpdated());
+
+    socket.onConnect((_) {
+      debugPrint('Chat list socket connected');
+      socket.emit('join_notifications');
+    });
+
+    socket.on('reconnect', (_) {
+      debugPrint('Chat list socket reconnected');
+      socket.emit('join_notifications');
+      onConversationUpdated(null);
+    });
+
+    socket.on('conversation_updated', (data) {
+      debugPrint('Socket event conversation_updated: $data');
+      if (data is Map) {
+        onConversationUpdated(Map<String, dynamic>.from(data));
+      } else {
+        onConversationUpdated(null);
+      }
+    });
+
+    socket.on('message_created', (data) {
+      debugPrint('Socket event message_created: $data');
+      if (data is Map) {
+        onConversationUpdated(Map<String, dynamic>.from(data));
+      } else {
+        onConversationUpdated(null);
+      }
+    });
+
+    socket.on('messages_read', (data) {
+      debugPrint('Socket event messages_read: $data');
+      if (data is Map) {
+        onConversationUpdated(Map<String, dynamic>.from(data));
+      } else {
+        onConversationUpdated(null);
+      }
+    });
+
+    socket.on('notification_created', (data) {
+      if (data is Map) {
+        final type = data['type']?.toString().toLowerCase() ?? '';
+        if (type.contains('message') || type.contains('chat')) {
+          onConversationUpdated(Map<String, dynamic>.from(data));
+        }
+      }
+    });
+
+    if (onUserStatusChanged != null) {
+      socket.on('user_status_changed', (data) {
+        if (data is Map && data['userId'] != null) {
+          final userId = data['userId'].toString();
+          final isOnline = data['isOnline'] == true;
+          onUserStatusChanged(userId, isOnline);
+        }
+      });
+    }
+
     socket.connect();
     return socket;
   }
@@ -92,6 +204,24 @@ class ChatService {
     }
 
     return data['conversations'] ?? [];
+  }
+
+  // Get single conversation by ID
+  Future<Map<String, dynamic>> getConversation(String conversationId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/chat/conversations/$conversationId'),
+      headers: await _headers(),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load conversation: ${response.body}');
+    }
+
+    final data = jsonDecode(response.body);
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+    return Map<String, dynamic>.from(data as Map);
   }
 
   // Create or get conversation

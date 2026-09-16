@@ -692,15 +692,21 @@ export class OrderService {
   // ==========================================
 
   async getOrderById(
-    restaurantId: string,
+    userId: string,
     orderId: string,
   ) {
     const order =
       await this.orderRepository.findOne({
-        where: {
-          id: orderId,
-          restaurantId,
-        },
+        where: [
+          {
+            id: orderId,
+            restaurantId: userId,
+          },
+          {
+            id: orderId,
+            farmerId: userId,
+          },
+        ],
         relations: {
           items: true,
         },

@@ -16,6 +16,7 @@ class AppRoutes {
   // Farmer
   static const String farmerDashboard = '/farmer';
   static const String farmerOrders = '/farmer/orders';
+  static const String farmerOrderDetail = '/farmer/orders/detail';
   static const String farmerInventory = '/farmer/inventory';
   static const String farmerAddProduct = '/farmer/inventory/add';
   static const String farmerProductDetail = '/farmer/inventory/detail';
@@ -37,6 +38,7 @@ class AppRoutes {
   static const String restaurantOrderTracking = '/restaurant/orders/tracking';
   static const String restaurantFavorites = '/restaurant/favorites';
   static const String restaurantFarmerProfile = '/restaurant/farmer-profile';
+  static const String restaurantSettings = '/restaurant/settings';
 
   // Shared / Details
   static const String productDetail = '/product/detail';

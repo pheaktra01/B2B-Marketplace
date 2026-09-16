@@ -1,0 +1,11 @@
+# ==============================================================================
+# Android Release Signing Configuration Template
+# Copy this file to 'key.properties' in 'mobile/android/' (DO NOT commit key.properties).
+#
+# Generate a new upload keystore with:
+# keytool -genkey -v -keystore app-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+# ==============================================================================
+storePassword=your_keystore_password
+keyPassword=your_key_password
+keyAlias=upload
+storeFile=../app-release.jks

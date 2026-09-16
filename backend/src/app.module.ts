@@ -39,7 +39,10 @@ try {
       database:process.env.DB_DATABASE,
 
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize:
+        process.env.NODE_ENV === 'production'
+          ? process.env.DB_SYNCHRONIZE === 'true'
+          : true,
     }),
     AuthModule,
     UsersModule,

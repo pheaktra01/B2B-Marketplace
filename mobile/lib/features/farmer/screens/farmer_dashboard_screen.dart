@@ -37,6 +37,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
   bool _isLoading = true;
   String? _error;
   String _farmerName = '';
+  String _currentUserId = '';
   List<Map<String, dynamic>> _myProducts = [];
   List<OrderModel> _farmerOrders = [];
   List<Map<String, dynamic>> _marketProducts = [];
@@ -56,10 +57,22 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
 
     try {
       final results = await Future.wait([
-        _userService.getProfile().catchError((_) => <String, dynamic>{}),
-        ProductService.getMyProducts().catchError((_) => <Map<String, dynamic>>[]),
-        _orderService.getFarmerOrders().catchError((_) => <OrderModel>[]),
-        ProductService.getAllProducts().catchError((_) => <dynamic>[]),
+        _userService.getProfile().catchError((e) {
+          debugPrint('Dashboard profile load error: $e');
+          return <String, dynamic>{};
+        }),
+        ProductService.getMyProducts().catchError((e) {
+          debugPrint('Dashboard products load error: $e');
+          return <Map<String, dynamic>>[];
+        }),
+        _orderService.getFarmerOrders().catchError((e) {
+          debugPrint('Dashboard farmer orders load error: $e');
+          return <OrderModel>[];
+        }),
+        ProductService.getAllProducts().catchError((e) {
+          debugPrint('Dashboard all products load error: $e');
+          return <dynamic>[];
+        }),
       ]);
 
       if (!mounted) return;
@@ -70,14 +83,23 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
       final allProductsRes = results[3] as List<dynamic>;
 
       String name = '';
+      String currentUserId = '';
       if (profileRes['data'] != null && profileRes['data'] is Map) {
-        name = profileRes['data']['name']?.toString() ?? '';
+        final profileMap = profileRes['data'] as Map;
+        final bName = profileMap['businessName']?.toString();
+        final pName = profileMap['name']?.toString();
+        name = (bName != null && bName.isNotEmpty) ? bName : (pName ?? '');
+        currentUserId = profileMap['id']?.toString() ?? '';
       } else if (profileRes['name'] != null) {
-        name = profileRes['name'].toString();
+        final bName = profileRes['businessName']?.toString();
+        final pName = profileRes['name']?.toString();
+        name = (bName != null && bName.isNotEmpty) ? bName : (pName ?? '');
+        currentUserId = profileRes['id']?.toString() ?? '';
       }
 
       setState(() {
         _farmerName = name;
+        _currentUserId = currentUserId;
         _myProducts = productsRes;
         _farmerOrders = ordersRes;
         _marketProducts = allProductsRes
@@ -283,6 +305,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         'icon': Icons.attach_money_rounded,
         'color': primaryGreen,
         'bg': const Color(0xFFE8F5E9),
+        'onTap': () => context.go(AppRoutes.farmerOrders),
       },
       {
         'title': l10n.activeOrders,
@@ -290,6 +313,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         'icon': Icons.shopping_bag_outlined,
         'color': const Color(0xFF0288D1),
         'bg': const Color(0xFFE1F5FE),
+        'onTap': () => context.go(AppRoutes.farmerOrders),
       },
       {
         'title': l10n.productsListed,
@@ -297,6 +321,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         'icon': Icons.inventory_2_outlined,
         'color': const Color(0xFF7B1FA2),
         'bg': const Color(0xFFF3E5F5),
+        'onTap': () => context.go(AppRoutes.farmerInventory),
       },
       {
         'title': 'Low Stock Alert',
@@ -304,6 +329,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
         'icon': Icons.warning_amber_rounded,
         'color': const Color(0xFFE65100),
         'bg': const Color(0xFFFFE0B2),
+        'onTap': () => context.go(AppRoutes.farmerInventory),
       },
     ];
 
@@ -320,66 +346,73 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
       itemBuilder: (context, index) {
         final item = stats[index];
 
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: cardBgColor,
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: item['onTap'] as VoidCallback?,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: cardBgColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Text(
-                      item['title'] as String,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[600],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item['title'] as String,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[600],
+                          ),
+                        ),
                       ),
-                    ),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: item['bg'] as Color,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          item['icon'] as IconData,
+                          size: 18,
+                          color: item['color'] as Color,
+                        ),
+                      ),
+                    ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: item['bg'] as Color,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      item['icon'] as IconData,
-                      size: 18,
-                      color: item['color'] as Color,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      item['value'] as String,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: item['color'] as Color,
+                      ),
                     ),
                   ),
                 ],
               ),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  item['value'] as String,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: item['color'] as Color,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },
@@ -487,18 +520,21 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
 
   Widget _buildInventoryAlerts(AppLocalizations l10n) {
     Map<String, dynamic>? lowStockProduct;
+    int lowCount = 0;
     for (final p in _myProducts) {
       final qty = double.tryParse(p['quantity']?.toString() ?? '0') ?? 0;
       if (qty <= 15) {
-        lowStockProduct = p;
-        break;
+        lowCount++;
+        lowStockProduct ??= p;
       }
     }
 
     final hasAlert = lowStockProduct != null;
     final titleText = hasAlert ? l10n.inventoryAlert : 'Inventory Status';
     final alertMessage = hasAlert
-        ? '${lowStockProduct['name']} is almost sold out (${lowStockProduct['quantity']} kg left).'
+        ? (lowCount > 1
+            ? '${lowStockProduct['name']} and ${lowCount - 1} other item(s) are low on stock.'
+            : '${lowStockProduct['name']} is almost sold out (${lowStockProduct['quantity']} kg left).')
         : 'All listed products currently have healthy inventory levels.';
 
     return Container(
@@ -568,23 +604,46 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
   // ===========================================================================
 
   Widget _buildMarketOpportunities(AppLocalizations l10n) {
+    final otherProducts = _marketProducts.where((p) {
+      final farmerId = p['farmerId']?.toString();
+      if (_currentUserId.isNotEmpty && farmerId == _currentUserId) {
+        return false;
+      }
+      return true;
+    }).toList();
+
     List<Map<String, dynamic>> opportunities = [];
 
-    if (_marketProducts.isNotEmpty) {
-      opportunities = _marketProducts.take(5).map((p) {
+    if (otherProducts.isNotEmpty) {
+      opportunities = otherProducts.take(6).map((p) {
+        String img = '';
+        final images = p['imageUrls'] ?? p['images'];
+        if (images is List && images.isNotEmpty) {
+          img = images.first.toString();
+        } else if (images is String && images.isNotEmpty && images != '{}') {
+          img = images.replaceAll('{', '').replaceAll('}', '').split(',').first.trim();
+        } else if (p['imageUrl'] != null) {
+          img = p['imageUrl'].toString();
+        }
+        final priceNum = double.tryParse(p['price']?.toString() ?? '0') ?? 0.0;
+
         return {
+          'raw': p,
+          'imageUrl': img.isNotEmpty ? ApiConstants.imageUrl(img) : '',
           'icon': Icons.eco_rounded,
           'iconColor': primaryGreen,
           'name': p['name']?.toString() ?? 'Crop',
-          'trend': 'High Demand',
-          'price': '\$${p['price']} / kg',
-          'badge': 'Recommended',
+          'trend': p['category']?.toString() ?? 'Market Crop',
+          'price': '\$${priceNum.toStringAsFixed(2)} / kg',
+          'badge': 'Market',
           'badgeColor': primaryGreen,
         };
       }).toList();
     } else {
       opportunities = [
         {
+          'raw': null,
+          'imageUrl': '',
           'icon': Icons.eco_rounded,
           'iconColor': primaryGreen,
           'name': 'Cucumber',
@@ -594,6 +653,8 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           'badgeColor': primaryGreen,
         },
         {
+          'raw': null,
+          'imageUrl': '',
           'icon': Icons.nature_rounded,
           'iconColor': const Color(0xFFD32F2F),
           'name': 'Tomato',
@@ -603,6 +664,8 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           'badgeColor': const Color(0xFF0288D1),
         },
         {
+          'raw': null,
+          'imageUrl': '',
           'icon': Icons.local_fire_department_rounded,
           'iconColor': const Color(0xFFE65100),
           'name': 'Chili',
@@ -639,7 +702,9 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
               ],
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                context.go(AppRoutes.farmerInventory);
+              },
               child: Text(
                 l10n.viewAll,
                 style: const TextStyle(
@@ -659,87 +724,121 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
             itemCount: opportunities.length,
             itemBuilder: (context, index) {
               final opp = opportunities[index];
+              final oppImage = opp['imageUrl'] as String;
 
-              return Container(
-                width: 170,
-                margin: const EdgeInsets.only(right: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: cardBgColor,
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    if (opp['raw'] != null) {
+                      context.push(
+                        AppRoutes.productDetail,
+                        extra: opp['raw'],
+                      );
+                    } else {
+                      context.go(AppRoutes.farmerInventory);
+                    }
+                  },
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                  child: Container(
+                    width: 170,
+                    margin: const EdgeInsets.only(right: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: cardBgColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade200),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.02),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          opp['icon'] as IconData,
-                          color: opp['iconColor'] as Color,
-                          size: 26,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: (opp['badgeColor'] as Color).withValues(
-                              alpha: 0.12,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (oppImage.isNotEmpty)
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  oppImage,
+                                  width: 28,
+                                  height: 28,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Icon(
+                                    opp['icon'] as IconData,
+                                    color: opp['iconColor'] as Color,
+                                    size: 26,
+                                  ),
+                                ),
+                              )
+                            else
+                              Icon(
+                                opp['icon'] as IconData,
+                                color: opp['iconColor'] as Color,
+                                size: 26,
+                              ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: (opp['badgeColor'] as Color).withValues(
+                                  alpha: 0.12,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                opp['badge'] as String,
+                                style: TextStyle(
+                                  color: opp['badgeColor'] as Color,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            opp['badge'] as String,
-                            style: TextStyle(
-                              color: opp['badgeColor'] as Color,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              opp['name'] as String,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              opp['trend'] as String,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
                         Text(
-                          opp['name'] as String,
+                          opp['price'] as String,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          opp['trend'] as String,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[600],
+                            color: primaryGreen,
+                            fontSize: 14,
                           ),
                         ),
                       ],
                     ),
-                    Text(
-                      opp['price'] as String,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: primaryGreen,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               );
             },
@@ -792,7 +891,8 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
 
     for (final order in _farmerOrders) {
       if (order.createdAt != null && order.status.toLowerCase() != 'cancelled') {
-        final diff = order.createdAt!.difference(startOfMonday).inDays;
+        final orderLocal = order.createdAt!.toLocal();
+        final diff = orderLocal.difference(startOfMonday).inDays;
         if (diff >= 0 && diff < 7) {
           barValues[diff] += order.total;
         }
@@ -805,6 +905,8 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
     }
 
     final todayIndex = now.weekday - 1;
+    final double thisWeekRevenue =
+        barValues.fold<double>(0.0, (sum, val) => sum + val);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -831,7 +933,9 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
                     ),
                   ),
                   Text(
-                    l10n.thisWeeksRevenue,
+                    thisWeekRevenue > 0
+                        ? 'This week: \$${thisWeekRevenue.toStringAsFixed(2)}'
+                        : l10n.thisWeeksRevenue,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
@@ -870,7 +974,8 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
               children: List.generate(7, (index) {
                 final isSelected = index == todayIndex;
                 final double barHeight = maxDataValue > 0
-                    ? ((barValues[index] / maxDataValue) * 100).clamp(8.0, 110.0)
+                    ? ((barValues[index] / maxDataValue) * 100)
+                        .clamp(8.0, 110.0)
                     : 8.0;
 
                 return Column(
@@ -912,7 +1017,18 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
   // ===========================================================================
 
   Widget _buildActiveOrdersSection(AppLocalizations l10n) {
-    final activeOrders = _farmerOrders.take(3).toList();
+    final activeOrders = _farmerOrders.where((o) {
+      final s = o.status.toLowerCase();
+      return s == 'pending' ||
+          s == 'confirmed' ||
+          s == 'processing' ||
+          s == 'shipped';
+    }).take(4).toList();
+
+    // Fallback to recent orders if no active orders currently exist
+    final displayOrders = activeOrders.isNotEmpty
+        ? activeOrders
+        : _farmerOrders.take(3).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -921,7 +1037,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              l10n.activeOrders,
+              activeOrders.isNotEmpty ? l10n.activeOrders : 'Recent Orders',
               style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
@@ -943,7 +1059,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        if (activeOrders.isEmpty)
+        if (displayOrders.isEmpty)
           Container(
             padding: const EdgeInsets.all(20),
             alignment: Alignment.center,
@@ -953,7 +1069,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
               border: Border.all(color: Colors.grey.shade200),
             ),
             child: Text(
-              'No recent orders',
+              'No orders yet',
               style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
           )
@@ -961,9 +1077,9 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: activeOrders.length,
+            itemCount: displayOrders.length,
             itemBuilder: (context, index) {
-              final order = activeOrders[index];
+              final order = displayOrders[index];
 
               Color statusBg = const Color(0xFFFFE0B2);
               Color statusText = const Color(0xFFE65100);
@@ -981,89 +1097,116 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
               }
 
               final orderIdDisplay = order.id.length > 8
-                  ? '#ORD-${order.id.substring(0, 8)}'
-                  : '#ORD-${order.id}';
+                  ? '#ORD-${order.id.substring(0, 8).toUpperCase()}'
+                  : '#ORD-${order.id.toUpperCase()}';
 
               final itemsText = order.items.isNotEmpty
-                  ? order.items.map((i) => '${i.productName} (${i.quantity} kg)').join(', ')
-                  : 'Order Items';
+                  ? order.items
+                      .map((i) => '${i.productName} (${i.quantity} kg)')
+                      .join(', ')
+                  : 'Produce Order';
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: cardBgColor,
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                  onTap: () async {
+                    await context.push(
+                      AppRoutes.farmerOrderDetail,
+                      extra: order,
+                    );
+                    _loadDashboardData();
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: cardBgColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    orderIdDisplay,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: statusBg,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      order.status.toUpperCase(),
+                                      style: TextStyle(
+                                        color: statusText,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
                               Text(
-                                orderIdDisplay,
+                                itemsText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.grey,
+                                  fontSize: 15,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: statusBg,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  order.status.toUpperCase(),
-                                  style: TextStyle(
-                                    color: statusText,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Delivery: ${order.deliveryMethod}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[700],
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            itemsText,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '\$${order.total.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: primaryGreen,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Delivery: ${order.deliveryMethod}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[700],
+                            const SizedBox(height: 4),
+                            const Icon(
+                              Icons.chevron_right_rounded,
+                              color: Colors.grey,
+                              size: 18,
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ],
                     ),
-                    Text(
-                      '\$${order.total.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: primaryGreen,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               );
             },
@@ -1077,7 +1220,7 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
   // ===========================================================================
 
   Widget _buildMyProductsSection(AppLocalizations l10n) {
-    final recentProducts = _myProducts.take(3).toList();
+    final recentProducts = _myProducts.take(4).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1131,8 +1274,11 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
               final prod = recentProducts[index];
 
               final String name = prod['name']?.toString() ?? 'Product';
-              final String price = '\$${prod['price']} / kg';
-              final double qtyNum = double.tryParse(prod['quantity']?.toString() ?? '0') ?? 0;
+              final double priceNum =
+                  double.tryParse(prod['price']?.toString() ?? '0') ?? 0;
+              final String price = '\$${priceNum.toStringAsFixed(2)} / kg';
+              final double qtyNum =
+                  double.tryParse(prod['quantity']?.toString() ?? '0') ?? 0;
               final String qtyStr = '${qtyNum.toStringAsFixed(0)} kg left';
 
               String status = 'In Stock';
@@ -1145,76 +1291,115 @@ class _FarmerDashboardScreenState extends State<FarmerDashboardScreen> {
                 statusColor = const Color(0xFFE65100);
               }
 
-              String imageUrl = '';
-              if (prod['images'] is List && (prod['images'] as List).isNotEmpty) {
-                imageUrl = ApiConstants.imageUrl(prod['images'][0].toString());
+              String img = '';
+              final images = prod['imageUrls'] ?? prod['images'];
+              if (images is List && images.isNotEmpty) {
+                img = images.first.toString();
+              } else if (images is String &&
+                  images.isNotEmpty &&
+                  images != '{}') {
+                img = images
+                    .replaceAll('{', '')
+                    .replaceAll('}', '')
+                    .split(',')
+                    .first
+                    .trim();
+              } else if (prod['imageUrl'] != null) {
+                img = prod['imageUrl'].toString();
               }
+              final imageUrl =
+                  img.isNotEmpty ? ApiConstants.imageUrl(img) : '';
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: cardBgColor,
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: imageUrl.isNotEmpty
-                          ? Image.network(
-                              imageUrl,
-                              width: 54,
-                              height: 54,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => _buildFallbackImage(),
-                            )
-                          : _buildFallbackImage(),
+                  onTap: () async {
+                    await context.push(
+                      AppRoutes.farmerProductDetail,
+                      extra: prod,
+                    );
+                    _loadDashboardData();
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: cardBgColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade200),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            price,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: primaryGreen,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Row(
                       children: [
-                        Text(
-                          qtyStr,
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: imageUrl.isNotEmpty
+                              ? Image.network(
+                                  imageUrl,
+                                  width: 54,
+                                  height: 54,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildFallbackImage(),
+                                )
+                              : _buildFallbackImage(),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          status,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: statusColor,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                price,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: primaryGreen,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              qtyStr,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              status,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: statusColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          color: Colors.grey,
+                          size: 18,
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               );
             },

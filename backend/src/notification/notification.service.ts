@@ -13,7 +13,7 @@ import {
 
 import { User } from '../users/entities/user.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class NotificationService {
@@ -101,6 +101,26 @@ export class NotificationService {
     };
   }
 
+  async emitUnreadCount(userId: string): Promise<void> {
+    try {
+      const { count } = await this.getUnreadCount(userId);
+      this.eventEmitter.emit('notification.count_updated', {
+        userId,
+        unreadCount: count,
+      });
+    } catch {
+      // Ignored
+    }
+  }
+
+  @OnEvent('notification.created')
+  async handleNotificationCreatedEvent(notification: Record<string, unknown>) {
+    const userId = notification?.userId?.toString();
+    if (userId) {
+      await this.emitUnreadCount(userId);
+    }
+  }
+
   // =========================================================
   // MARK ONE AS READ
   // =========================================================
@@ -129,6 +149,13 @@ export class NotificationService {
       notification,
     );
 
+    this.eventEmitter.emit('notification.read', {
+      notificationId,
+      userId,
+    });
+
+    await this.emitUnreadCount(userId);
+
     return {
       success: true,
     };
@@ -148,6 +175,15 @@ export class NotificationService {
         isRead: true,
       },
     );
+
+    this.eventEmitter.emit('notification.read_all', {
+      userId,
+    });
+
+    this.eventEmitter.emit('notification.count_updated', {
+      userId,
+      unreadCount: 0,
+    });
 
     return {
       success: true,
@@ -180,6 +216,13 @@ export class NotificationService {
       notificationId,
     );
 
+    this.eventEmitter.emit('notification.deleted', {
+      notificationId,
+      userId,
+    });
+
+    await this.emitUnreadCount(userId);
+
     return {
       success: true,
     };
@@ -192,6 +235,15 @@ export class NotificationService {
   async deleteAll(userId: string) {
     await this.notificationRepository.delete({
       userId,
+    });
+
+    this.eventEmitter.emit('notification.deleted_all', {
+      userId,
+    });
+
+    this.eventEmitter.emit('notification.count_updated', {
+      userId,
+      unreadCount: 0,
     });
 
     return {
@@ -224,7 +276,7 @@ export class NotificationService {
       .getOne();
 
     if (existing) {
-      existing.title = `New Messages from ${senderName}`;
+      existing.title = senderName;
       existing.message = `You have multiple unread messages from ${senderName}.`;
       existing.type = NotificationType.MESSAGE;
       const updated = await this.notificationRepository.save(existing);
@@ -233,19 +285,19 @@ export class NotificationService {
     }
 
     let type: NotificationType = NotificationType.MESSAGE;
-    let title = 'New Message';
+    let title = senderName;
     let message = `${senderName} sent you a message.`;
 
     if (messageType === 'image') {
       type = NotificationType.CHAT_IMAGE;
-      title = 'New Photo Message';
+      title = senderName;
       message = `${senderName} sent you a photo.`;
     } else if (orderId || messageType === 'order') {
       type = NotificationType.CHAT_ORDER;
-      title = 'New Order Chat';
+      title = senderName;
       message = orderId
-        ? `You have a new message about order #${orderId.slice(0, 8)}.`
-        : 'You have a new message about your order.';
+        ? `New message about order #${orderId.slice(0, 8)}.`
+        : 'New message about your order.';
     }
 
     return this.create({

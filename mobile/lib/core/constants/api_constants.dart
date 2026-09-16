@@ -9,7 +9,7 @@ class ApiConstants {
   );
 
   // Host port matching docker-compose.yml (3001:3000)
-  static const int port = 3000;
+  static const int port = 3001;
 
   // Local development IP (used as fallback when no API_BASE_URL is injected)
   static const String _lanIp = '192.168.100.237';

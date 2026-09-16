@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -9,7 +10,6 @@ import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:socket_io_client/socket_io_client.dart' as io;
 
 /// Top-level background message handler for FCM.
 /// Must be annotated with @pragma('vm:entry-point') so it can be called from background isolate.
@@ -35,8 +35,12 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         message.data['body']?.toString() ??
         '';
 
+    final notifId = (message.messageId != null)
+        ? (message.messageId.hashCode.abs() % 2147483647)
+        : (DateTime.now().millisecondsSinceEpoch % 2147483647);
+
     await localNotifications.show(
-      id: message.hashCode,
+      id: notifId,
       title: title,
       body: body,
       notificationDetails: const NotificationDetails(
@@ -48,7 +52,10 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           priority: Priority.max,
           icon: '@mipmap/ic_launcher',
           visibility: NotificationVisibility.public,
-          fullScreenIntent: true,
+          fullScreenIntent: false,
+          channelShowBadge: true,
+          playSound: true,
+          enableVibration: true,
           ticker: 'New notification',
         ),
       ),
@@ -68,7 +75,8 @@ class PushNotificationService {
       FlutterLocalNotificationsPlugin();
 
   static bool _isInitialized = false;
-  static io.Socket? _realtimeSocket;
+  static StreamSubscription<Map<String, dynamic>>? _rawNotificationSub;
+  static int _notificationCounter = 0;
 
   /// High importance notification channel for Android heads-up and lock screen alerts
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
@@ -217,17 +225,48 @@ class PushNotificationService {
     });
   }
 
+  static int _generateNotificationId([String? key]) {
+    if (key != null && key.isNotEmpty) {
+      return key.hashCode.abs() % 2147483647;
+    }
+    _notificationCounter = (_notificationCounter + 1) % 100000;
+    return (DateTime.now().millisecondsSinceEpoch % 1000000) * 1000 +
+        _notificationCounter;
+  }
+
   /// Handle incoming foreground messages and display local notifications
   static void _handleForegroundMessage(RemoteMessage message) {
     debugPrint('Foreground FCM message received: ${message.messageId}');
     final notification = message.notification;
     final data = message.data;
 
-    final title = notification?.title ?? data['title'] ?? 'Notification';
-    final body = notification?.body ?? data['message'] ?? data['body'] ?? '';
+    final title = notification?.title ?? data['title']?.toString() ?? 'Notification';
+    final body = notification?.body ?? data['message']?.toString() ?? data['body']?.toString() ?? '';
 
-    _localNotifications.show(
-      id: notification.hashCode,
+    final notifId = message.messageId != null
+        ? _generateNotificationId(message.messageId)
+        : _generateNotificationId();
+
+    showNotification(
+      id: notifId,
+      title: title,
+      body: body,
+      data: data,
+    );
+  }
+
+  /// Display a local heads-up and lock-screen notification
+  static Future<void> showNotification({
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+    int? id,
+  }) async {
+    final payloadData = data ?? {'type': 'system', 'message': body};
+    final notificationId = id ?? _generateNotificationId();
+
+    await _localNotifications.show(
+      id: notificationId,
       title: title,
       body: body,
       notificationDetails: NotificationDetails(
@@ -239,8 +278,11 @@ class PushNotificationService {
           priority: Priority.max,
           icon: '@mipmap/ic_launcher',
           visibility: NotificationVisibility.public,
-          fullScreenIntent: true,
-          ticker: 'New notification',
+          fullScreenIntent: false,
+          ticker: title,
+          channelShowBadge: true,
+          playSound: true,
+          enableVibration: true,
         ),
         iOS: const DarwinNotificationDetails(
           presentAlert: true,
@@ -248,7 +290,7 @@ class PushNotificationService {
           presentSound: true,
         ),
       ),
-      payload: jsonEncode(data),
+      payload: jsonEncode(payloadData),
     );
   }
 
@@ -258,30 +300,10 @@ class PushNotificationService {
     String body = 'This is a test notification. Check your lock screen & status bar!',
     Map<String, dynamic>? data,
   }) async {
-    final payloadData = data ?? {'type': 'system', 'message': body};
-    await _localNotifications.show(
-      id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+    await showNotification(
       title: title,
       body: body,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channel.id,
-          _channel.name,
-          channelDescription: _channel.description,
-          importance: Importance.max,
-          priority: Priority.max,
-          icon: '@mipmap/ic_launcher',
-          visibility: NotificationVisibility.public,
-          fullScreenIntent: true,
-          ticker: 'Test notification',
-        ),
-        iOS: const DarwinNotificationDetails(
-          presentAlert: true,
-          presentBadge: true,
-          presentSound: true,
-        ),
-      ),
-      payload: jsonEncode(payloadData),
+      data: data ?? {'type': 'system', 'message': body},
     );
   }
 
@@ -312,11 +334,37 @@ class PushNotificationService {
     if (type.contains('chat') || type.contains('message') || data.containsKey('conversationId')) {
       final conversationId = data['conversationId']?.toString() ?? referenceId;
       if (conversationId != null && conversationId.isNotEmpty) {
+        String participantName = (data['senderName'] ?? data['title'] ?? '').toString().trim();
+        if (participantName.startsWith('New Messages from ')) {
+          participantName = participantName.replaceFirst('New Messages from ', '').trim();
+        } else {
+          final lower = participantName.toLowerCase();
+          if (lower == 'new message' ||
+              lower == 'new messages' ||
+              lower == 'new photo message' ||
+              lower == 'new order chat' ||
+              lower == 'chat' ||
+              lower == 'notification') {
+            final body = (data['body'] ?? data['message'] ?? '').toString();
+            final sentMatch = RegExp(r'^(.+?)\s+sent you', caseSensitive: false).firstMatch(body);
+            if (sentMatch != null) {
+              participantName = sentMatch.group(1)!.trim();
+            } else {
+              participantName = '';
+            }
+          }
+        }
+
+        final senderAvatar = data['senderAvatar']?.toString() ??
+            data['senderAvatarUrl']?.toString() ??
+            data['avatarUrl']?.toString();
+
         AppRouter.router.push(
           AppRoutes.chatConversation,
           extra: ChatConversationArgs(
             conversationId: conversationId,
-            participantName: data['senderName']?.toString() ?? 'Chat',
+            participantName: participantName,
+            participantAvatarUrl: senderAvatar,
             isOnline: false,
           ),
         );
@@ -326,33 +374,50 @@ class PushNotificationService {
 
     // 2. Orders & Payments
     if (type.contains('order') || type.contains('payment')) {
-      final userRole = await AuthService.getUserRole();
+      final userRole = (await AuthService.getUserRole())?.toLowerCase();
       if (userRole == 'farmer') {
-        AppRouter.router.push(AppRoutes.farmerOrders);
+        if (referenceId != null && referenceId.isNotEmpty) {
+          AppRouter.router.push(
+            AppRoutes.farmerOrderDetail,
+            extra: OrderTrackingArgs(orderId: referenceId),
+          );
+        } else {
+          AppRouter.router.go(AppRoutes.farmerOrders);
+        }
       } else {
-        AppRouter.router.push(AppRoutes.restaurantOrders);
+        if (referenceId != null && referenceId.isNotEmpty) {
+          AppRouter.router.push(
+            AppRoutes.restaurantOrderTracking,
+            extra: OrderTrackingArgs(orderId: referenceId),
+          );
+        } else {
+          AppRouter.router.push(AppRoutes.restaurantOrders);
+        }
       }
       return;
     }
 
     // 3. Products & Stock
     if (type.contains('product') || type.contains('stock') || type.contains('inventory')) {
-      final userRole = await AuthService.getUserRole();
+      final userRole = (await AuthService.getUserRole())?.toLowerCase();
       if (userRole == 'farmer') {
-        AppRouter.router.push(AppRoutes.farmerInventory);
+        AppRouter.router.go(AppRoutes.farmerInventory);
       } else {
-        AppRouter.router.push(AppRoutes.restaurantHome);
+        AppRouter.router.go(AppRoutes.restaurantHome);
       }
       return;
     }
 
-    // 4. Account
-    if (type.contains('account') || type.contains('profile')) {
-      final userRole = await AuthService.getUserRole();
+    // 4. Account & Security
+    if (type.contains('account') ||
+        type.contains('profile') ||
+        type.contains('login') ||
+        type.contains('security')) {
+      final userRole = (await AuthService.getUserRole())?.toLowerCase();
       if (userRole == 'farmer') {
-        AppRouter.router.push(AppRoutes.farmerProfile);
+        AppRouter.router.go(AppRoutes.farmerProfile);
       } else {
-        AppRouter.router.push(AppRoutes.restaurantProfile);
+        AppRouter.router.go(AppRoutes.restaurantProfile);
       }
       return;
     }
@@ -384,6 +449,7 @@ class PushNotificationService {
   static Future<void> clearToken() async {
     try {
       stopRealtimeNotificationListener();
+      NotificationService.resetState();
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('fcmToken');
       // Optionally delete instance token so no stale messages arrive
@@ -403,16 +469,17 @@ class PushNotificationService {
         return;
       }
 
-      _realtimeSocket?.disconnect();
-      _realtimeSocket?.dispose();
+      // Ensure notification socket is connected
+      await NotificationService().connectToNotifications();
 
-      _realtimeSocket = await NotificationService().connectToNotifications((data) {
+      // Cancel any previous stream subscription to prevent duplicates
+      await _rawNotificationSub?.cancel();
+      _rawNotificationSub = NotificationService.onRawNotification.listen((data) {
         debugPrint('Realtime notification received via Socket.IO: $data');
         final title = data['title']?.toString() ?? 'PsarKasekor Notification';
         final body = data['message']?.toString() ?? '';
 
-        // Immediately trigger high-priority lock screen & heads-up notification
-        showTestNotification(
+        showNotification(
           title: title,
           body: body,
           data: Map<String, dynamic>.from(data),
@@ -427,8 +494,7 @@ class PushNotificationService {
 
   /// Stop realtime listener on logout
   static void stopRealtimeNotificationListener() {
-    _realtimeSocket?.disconnect();
-    _realtimeSocket?.dispose();
-    _realtimeSocket = null;
+    _rawNotificationSub?.cancel();
+    _rawNotificationSub = null;
   }
 }

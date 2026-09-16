@@ -6,11 +6,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
+import 'package:mobile/features/farmer/screens/farmer_settings_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
+import 'package:mobile/features/profile/widgets/edit_profile_bottom_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -30,8 +32,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   final OrderService _orderService = OrderService();
 
   String _displayName = 'User';
+  String? _businessName;
   String _role = 'Restaurant';
   String _phone = '';
+  String _address = '';
+  String _bio = '';
   String? _avatarUrl;
   String? _coverUrl;
   Uint8List? _localAvatarBytes;
@@ -65,6 +70,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       final avatar = data['avatarUrl']?.toString();
       setState(() {
         _displayName = data['name']?.toString() ?? _displayName;
+        _businessName = data['businessName']?.toString();
+        _address = data['address']?.toString() ?? '';
+        _bio = data['bio']?.toString() ?? '';
         _role = data['role']?.toString() ?? _role;
         _phone = data['phone']?.toString() ?? '';
         _avatarUrl = avatar == null || avatar.isEmpty
@@ -116,86 +124,43 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future<void> _editProfile() async {
-    final nameController = TextEditingController(text: _displayName);
-    final phoneController = TextEditingController(text: _phone);
-
-    await showDialog<void>(
+    final result = await EditProfileBottomSheet.show(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Business / Restaurant Name',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: phoneController,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'Phone Number',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey.shade700)),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final name = nameController.text.trim();
-              if (name.isEmpty) return;
-              try {
-                final phone = phoneController.text.trim();
-                await _userService.updateProfile({
-                  'name': name,
-                  'phone': phone,
-                });
-                if (!mounted) return;
-                setState(() {
-                  _displayName = name;
-                  _phone = phone;
-                });
-                if (dialogContext.mounted) Navigator.pop(dialogContext);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Profile updated successfully'),
-                    backgroundColor: primaryGreen,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              } catch (error) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update profile: $error')),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryGreen,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+      isFarmer: false,
+      currentName: _displayName,
+      currentBusinessName: _businessName,
+      currentPhone: _phone,
+      currentAddress: _address,
+      currentBio: _bio,
+      currentAvatarUrl: _avatarUrl,
+      currentCoverUrl: _coverUrl,
     );
+
+    if (result != null && mounted) {
+      setState(() {
+        _displayName = result['name'] ?? _displayName;
+        _businessName = result['businessName'];
+        _phone = result['phone'] ?? _phone;
+        _address = result['address'] ?? _address;
+        _bio = result['bio'] ?? _bio;
+        if (result['avatarUrl'] != null) {
+          _avatarUrl = result['avatarUrl'];
+          _localAvatarBytes = null;
+        }
+        if (result['coverUrl'] != null) {
+          _coverUrl = result['coverUrl'];
+          _localCoverBytes = null;
+        }
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Restaurant profile updated successfully! 🍽️'),
+          backgroundColor: primaryGreen,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Future<void> _pickProfileImage({required bool isAvatar}) async {
@@ -247,48 +212,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       backgroundColor: pageBgColor,
       appBar: FarmerAppBar(
         isRestaurant: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {
-              context.push(AppRoutes.notifications);
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFF2E7D32).withValues(alpha: 0.8),
-                  width: 2.0,
-                ),
-              ),
-              child: ClipOval(
-                child: _avatarUrl != null
-                    ? Image.network(
-                        _avatarUrl!,
-                        width: 36,
-                        height: 36,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Image.asset(
-                              'assets/default_avatar.jpg',
-                              width: 36,
-                              height: 36,
-                              fit: BoxFit.cover,
-                            ),
-                      )
-                    : Image.asset(
-                        'assets/default_avatar.jpg',
-                        width: 36,
-                        height: 36,
-                        fit: BoxFit.cover,
-                      ),
-              ),
+        isProfileScreen: true,
+        onSettingsTap: () async {
+          await Navigator.of(context, rootNavigator: true).push(
+            MaterialPageRoute(
+              builder: (_) => const FarmerSettingsScreen(isRestaurant: true),
             ),
-          ),
-        ],
+          );
+          _loadProfile();
+        },
       ),
       body: RefreshIndicator(
         color: primaryGreen,
@@ -312,7 +244,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
               // 2. Name and Title
               Text(
-                _displayName,
+                (_businessName != null && _businessName!.isNotEmpty)
+                    ? _businessName!
+                    : _displayName,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -321,26 +256,70 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                _role,
+                (_businessName != null && _businessName!.isNotEmpty)
+                    ? '$_displayName • $_role'
+                    : _role,
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey.shade600,
                   fontWeight: FontWeight.w400,
                 ),
               ),
-
-              const SizedBox(height: 10),
-              OutlinedButton.icon(
-                onPressed: _editProfile,
-                icon: const Icon(Icons.edit_outlined, size: 17),
-                label: const Text('Edit Profile'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: primaryGreen,
-                  side: const BorderSide(color: primaryGreen),
+              if (_address.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 15,
+                      color: Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        _address,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+              ],
+              if (_bio.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Text(
+                    _bio,
+                    textAlign: TextAlign.center,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey.shade700,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
               // 3. Stats Row (Orders, Spent, Favorites)
               _buildStatsRow(),
@@ -406,69 +385,93 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             onTap: _isUploadingImage
                 ? null
                 : () => _pickProfileImage(isAvatar: false),
-            child: Container(
-              height: 150,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
-                  image: _localCoverBytes != null
-                      ? MemoryImage(_localCoverBytes!)
-                      : _coverUrl != null
-                          ? NetworkImage(_coverUrl!)
-                          : const AssetImage('assets/default_cover.jpg')
-                              as ImageProvider,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -48,
-            child: GestureDetector(
-              onTap: _isUploadingImage
-                  ? null
-                  : () => _pickProfileImage(isAvatar: true),
-              child: Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF62A06E), width: 2),
-                ),
-                child: _localAvatarBytes != null
-                    ? CircleAvatar(
-                        radius: 50,
-                        backgroundImage: MemoryImage(_localAvatarBytes!),
-                      )
-                    : _avatarUrl == null
-                        ? const CircleAvatar(
-                            radius: 50,
-                            backgroundImage: AssetImage('assets/default_avatar.jpg'),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: SizedBox(
+                height: 150,
+                width: double.infinity,
+                child: _localCoverBytes != null
+                    ? Image.memory(_localCoverBytes!, fit: BoxFit.cover)
+                    : (_coverUrl != null && _coverUrl!.isNotEmpty)
+                        ? Image.network(
+                            _coverUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Image.asset(
+                              'assets/default_cover.jpg',
+                              fit: BoxFit.cover,
+                            ),
                           )
-                        : CircleAvatar(
-                            radius: 50,
-                            backgroundImage: NetworkImage(_avatarUrl!),
-                            onBackgroundImageError: (_, _) {},
+                        : Image.asset(
+                            'assets/default_cover.jpg',
+                            fit: BoxFit.cover,
                           ),
               ),
             ),
           ),
           Positioned(
-            bottom: -40,
-            right: 76,
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: primaryGreen,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: const Icon(
-                Icons.edit_outlined,
-                color: Colors.white,
-                size: 14,
-              ),
+            bottom: -48,
+            child: Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                GestureDetector(
+                  onTap: _isUploadingImage
+                      ? null
+                      : () => _pickProfileImage(isAvatar: true),
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border:
+                          Border.all(color: const Color(0xFF62A06E), width: 2),
+                    ),
+                    child: ClipOval(
+                      child: SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: _localAvatarBytes != null
+                            ? Image.memory(
+                                _localAvatarBytes!,
+                                fit: BoxFit.cover,
+                              )
+                            : (_avatarUrl != null && _avatarUrl!.isNotEmpty)
+                                ? Image.network(
+                                    _avatarUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Image.asset(
+                                      'assets/default_avatar.jpg',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : Image.asset(
+                                    'assets/default_avatar.jpg',
+                                    fit: BoxFit.cover,
+                                  ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 2,
+                  right: 2,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: primaryGreen,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.edit_outlined,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -589,6 +592,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         'title': 'Analytics',
         'badge': null,
       },
+      {
+        'icon': Icons.settings_outlined,
+        'title': 'Settings',
+        'badge': null,
+      },
     ];
 
     return Material(
@@ -686,6 +694,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       _showPaymentMethodsBottomSheet();
                     } else if (title == 'Analytics') {
                       _showAnalyticsBottomSheet();
+                    } else if (title == 'Settings') {
+                      Navigator.of(context, rootNavigator: true)
+                          .push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const FarmerSettingsScreen(isRestaurant: true),
+                            ),
+                          )
+                          .then((_) => _loadProfile());
                     }
                   },
                 ),
@@ -821,6 +838,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             _buildBusinessDetailItem(
               Icons.storefront_outlined,
               'Business Name',
+              (_businessName != null && _businessName!.isNotEmpty)
+                  ? _businessName!
+                  : _displayName,
+            ),
+            _buildBusinessDetailItem(
+              Icons.person_outline_rounded,
+              'Manager / Contact',
               _displayName,
             ),
             _buildBusinessDetailItem(
@@ -830,9 +854,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
             _buildBusinessDetailItem(
               Icons.location_on_outlined,
-              'Operating Region',
-              'Phnom Penh, Cambodia',
+              'Delivery Address',
+              _address.isNotEmpty ? _address : 'Not set',
             ),
+            if (_bio.isNotEmpty)
+              _buildBusinessDetailItem(
+                Icons.notes_rounded,
+                'About Kitchen & Concept',
+                _bio,
+              ),
             _buildBusinessDetailItem(
               Icons.badge_outlined,
               'Account Role',

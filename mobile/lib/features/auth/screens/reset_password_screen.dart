@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String phoneNumber;
@@ -92,18 +93,24 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             ),
                           ],
                         ),
-                        TextButton(
-                          onPressed: () {
-                            // Support action
-                          },
-                          child: const Text(
-                            'ជំនួយ',
-                            style: TextStyle(
-                              color: brandGreen,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                        Row(
+                          children: [
+                            const AuthLanguageSwitch(),
+                            const SizedBox(width: 8),
+                            TextButton(
+                              onPressed: () {
+                                // Support action
+                              },
+                              child: const Text(
+                                'ជំនួយ',
+                                style: TextStyle(
+                                  color: brandGreen,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),

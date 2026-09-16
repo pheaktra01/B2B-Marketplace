@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 
 class RoleSelectionScreen extends StatefulWidget {
   const RoleSelectionScreen({super.key});
@@ -47,28 +48,31 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // --- Back Button ---
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Material(
-                          color: Colors.white,
-                          shape: const CircleBorder(),
-                          elevation: 2,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.arrow_back_ios_new,
-                              size: 20,
-                              color: textDark,
+                      // --- Header (Back Button & Language Switch) ---
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Material(
+                            color: Colors.white,
+                            shape: const CircleBorder(),
+                            elevation: 2,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.arrow_back_ios_new,
+                                size: 20,
+                                color: textDark,
+                              ),
+                              onPressed: () {
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  context.go(AppRoutes.getStarted);
+                                }
+                              },
                             ),
-                            onPressed: () {
-                              if (context.canPop()) {
-                                context.pop();
-                              } else {
-                                context.go(AppRoutes.getStarted);
-                              }
-                            },
                           ),
-                        ),
+                          const AuthLanguageSwitch(),
+                        ],
                       ),
 
                       const SizedBox(height: 16),

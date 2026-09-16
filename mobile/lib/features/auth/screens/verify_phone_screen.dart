@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class VerifyPhoneScreen extends StatefulWidget {
@@ -112,33 +113,36 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // --- Back Button ---
-                      if (showBackButton)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Material(
-                            color: Colors.white,
-                            shape: const CircleBorder(),
-                            elevation: 2,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.arrow_back_ios_new,
-                                size: 20,
-                                color: brandGreen,
+                      // --- Top Header (Back Button & Language Switch) ---
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (showBackButton)
+                            Material(
+                              color: Colors.white,
+                              shape: const CircleBorder(),
+                              elevation: 2,
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.arrow_back_ios_new,
+                                  size: 20,
+                                  color: brandGreen,
+                                ),
+                                onPressed: () {
+                                  if (context.canPop()) {
+                                    context.pop();
+                                  } else {
+                                    context.go(AppRoutes.login);
+                                  }
+                                },
                               ),
-                              onPressed: () {
-                                if (context.canPop()) {
-                                  context.pop();
-                                } else {
-                                  context.go(AppRoutes.login);
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-
-                      if (showBackButton)
-                        SizedBox(height: isShortScreen ? 12 : 16),
+                            )
+                          else
+                            const SizedBox.shrink(),
+                          const AuthLanguageSwitch(),
+                        ],
+                      ),
+                      SizedBox(height: isShortScreen ? 12 : 16),
 
                       // --- Green Padlock Security Icon ---
                       Container(

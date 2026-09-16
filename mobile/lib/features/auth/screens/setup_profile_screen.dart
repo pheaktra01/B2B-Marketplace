@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
 
 class SetupProfileScreen extends StatefulWidget {
@@ -172,6 +173,13 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          // Language Switch
+                          const Align(
+                            alignment: Alignment.topRight,
+                            child: AuthLanguageSwitch(),
+                          ),
+                          const SizedBox(height: 12),
+
                           // Step badge
                           Container(
                             padding: const EdgeInsets.symmetric(

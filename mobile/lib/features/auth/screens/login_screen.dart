@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -92,8 +93,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   crossAxisAlignment:
                                       CrossAxisAlignment.start,
                                   children: [
-                                    // Back button
+                                    // Back button & Language switcher
                                     Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Material(
                                           color: isDesktopOrTablet
@@ -117,6 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             },
                                           ),
                                         ),
+                                        const AuthLanguageSwitch(),
                                       ],
                                     ),
 

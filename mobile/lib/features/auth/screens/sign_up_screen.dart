@@ -4,6 +4,7 @@ import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 
 class SignUpScreen extends StatefulWidget {
   final String selectedRole;
@@ -99,28 +100,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    // --- Navigation Back Button ---
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Material(
-                                        color: isDesktopOrTablet ? bgLight : Colors.white,
-                                        shape: const CircleBorder(),
-                                        elevation: isDesktopOrTablet ? 0 : 2,
-                                        child: IconButton(
-                                          icon: const Icon(
-                                            Icons.arrow_back_ios_new,
-                                            size: 20,
-                                            color: brandGreen,
+                                    // --- Navigation Header (Back Button & Language Switch) ---
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Material(
+                                          color: isDesktopOrTablet ? bgLight : Colors.white,
+                                          shape: const CircleBorder(),
+                                          elevation: isDesktopOrTablet ? 0 : 2,
+                                          child: IconButton(
+                                            icon: const Icon(
+                                              Icons.arrow_back_ios_new,
+                                              size: 20,
+                                              color: brandGreen,
+                                            ),
+                                            onPressed: () {
+                                              if (context.canPop()) {
+                                                context.pop();
+                                              } else {
+                                                context.go(AppRoutes.roleSelection);
+                                              }
+                                            },
                                           ),
-                                          onPressed: () {
-                                            if (context.canPop()) {
-                                              context.pop();
-                                            } else {
-                                              context.go(AppRoutes.roleSelection);
-                                            }
-                                          },
                                         ),
-                                      ),
+                                        const AuthLanguageSwitch(),
+                                      ],
                                     ),
 
                                     const SizedBox(height: 12),

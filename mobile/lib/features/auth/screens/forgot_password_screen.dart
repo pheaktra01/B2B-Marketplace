@@ -4,6 +4,7 @@ import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -57,6 +58,34 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // --- Top Bar (Back Button & Language Switch) ---
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Material(
+                            color: Colors.white,
+                            shape: const CircleBorder(),
+                            elevation: 2,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.arrow_back_ios_new,
+                                size: 20,
+                                color: brandGreen,
+                              ),
+                              onPressed: () {
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  context.go(AppRoutes.login);
+                                }
+                              },
+                            ),
+                          ),
+                          const AuthLanguageSwitch(),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
                       // --- Logo & Branding Header ---
                       Column(
                         children: [

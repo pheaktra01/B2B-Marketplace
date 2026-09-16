@@ -28,15 +28,28 @@ class Conversation {
   factory Conversation.fromJson(Map<String, dynamic> json) {
     final participant = json['participant'] as Map<String, dynamic>? ?? {};
     final lastMessage = json['lastMessage'] as Map<String, dynamic>?;
-    final updatedAt = DateTime.tryParse(json['updatedAt']?.toString() ?? '');
+    final messageDateStr = lastMessage?['createdAt']?.toString() ??
+        json['updatedAt']?.toString() ??
+        json['createdAt']?.toString();
+    final updatedAt = DateTime.tryParse(messageDateStr ?? '');
+
+    String previewMessage = 'No messages yet';
+    if (lastMessage != null) {
+      final msgType = lastMessage['messageType']?.toString() ?? 'text';
+      if (msgType == 'image') {
+        previewMessage = '📷 Photo';
+      } else {
+        previewMessage = lastMessage['content']?.toString() ?? '';
+      }
+    }
 
     return Conversation(
       id: json['id'].toString(),
       participantId: participant['id']?.toString() ?? '',
       name: participant['name']?.toString() ?? 'Unknown user',
       role: participant['role']?.toString() ?? '',
-      message: lastMessage?['content']?.toString() ?? 'No messages yet',
-      time: _formatTime(updatedAt),
+      message: previewMessage,
+      time: formatTime(updatedAt),
       updatedAt: updatedAt,
       unreadCount: (json['unreadCount'] as num?)?.toInt() ?? 0,
       isOnline: participant['isOnline'] == true,
@@ -48,12 +61,56 @@ class Conversation {
     );
   }
 
-  static String _formatTime(DateTime? value) {
+  static String formatTime(DateTime? value) {
     if (value == null) return '';
+    final now = DateTime.now();
     final local = value.toLocal();
-    final hour = local.hour % 12 == 0 ? 12 : local.hour % 12;
-    final minute = local.minute.toString().padLeft(2, '0');
-    return '$hour:$minute ${local.hour >= 12 ? 'PM' : 'AM'}';
+    final diff = now.difference(local);
+
+    if (diff.inSeconds < 60) {
+      return 'Just now';
+    } else if (diff.inMinutes < 60) {
+      return '${diff.inMinutes}m ago';
+    }
+
+    final today = DateTime(now.year, now.month, now.day);
+    final messageDay = DateTime(local.year, local.month, local.day);
+
+    if (messageDay == today) {
+      final hour = local.hour % 12 == 0 ? 12 : local.hour % 12;
+      final minute = local.minute.toString().padLeft(2, '0');
+      return '$hour:$minute ${local.hour >= 12 ? 'PM' : 'AM'}';
+    } else if (messageDay == today.subtract(const Duration(days: 1))) {
+      return 'Yesterday';
+    } else {
+      return '${local.month}/${local.day}/${local.year}';
+    }
+  }
+
+  Conversation copyWith({
+    String? id,
+    String? participantId,
+    String? name,
+    String? role,
+    String? message,
+    String? time,
+    DateTime? updatedAt,
+    int? unreadCount,
+    bool? isOnline,
+    String? avatarUrl,
+  }) {
+    return Conversation(
+      id: id ?? this.id,
+      participantId: participantId ?? this.participantId,
+      name: name ?? this.name,
+      role: role ?? this.role,
+      message: message ?? this.message,
+      time: time ?? this.time,
+      updatedAt: updatedAt ?? this.updatedAt,
+      unreadCount: unreadCount ?? this.unreadCount,
+      isOnline: isOnline ?? this.isOnline,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+    );
   }
 }
 

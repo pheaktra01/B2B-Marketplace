@@ -21,6 +21,7 @@ import { User } from '../users/entities/user.entity';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationType } from 'src/notification/entities/notification.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { OnlinePresenceService } from './online-presence.service';
 
 @Injectable()
 export class ChatService {
@@ -39,6 +40,7 @@ export class ChatService {
 
     private readonly notificationService: NotificationService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly onlinePresenceService: OnlinePresenceService,
   ) {}
 
   // =========================================================
@@ -89,6 +91,11 @@ export class ChatService {
     ]);
 
     await this.participantRepository.save(participants);
+
+    this.eventEmitter.emit('chat.conversation.created', {
+      conversationId: savedConversation.id,
+      participantIds: [currentUserId, dto.participantId],
+    });
 
     return this.getConversationById(
       savedConversation.id,
@@ -192,6 +199,7 @@ export class ChatService {
           name: otherParticipant.user.name,
           role: otherParticipant.user.role,
           avatarUrl: otherParticipant.user.avatarUrl,
+          isOnline: this.onlinePresenceService.isUserOnline(otherParticipant.user.id),
         },
 
         lastMessage: lastMessage
@@ -206,9 +214,20 @@ export class ChatService {
         unreadCount,
 
         createdAt: conversation.createdAt,
-        updatedAt: conversation.updatedAt,
+        updatedAt: lastMessage ? lastMessage.createdAt : conversation.updatedAt,
       });
     }
+
+    // Sort by latest message time (most recent first)
+    results.sort((a, b) => {
+      const timeA = a.lastMessage?.createdAt
+        ? new Date(a.lastMessage.createdAt).getTime()
+        : new Date(a.updatedAt || a.createdAt).getTime();
+      const timeB = b.lastMessage?.createdAt
+        ? new Date(b.lastMessage.createdAt).getTime()
+        : new Date(b.updatedAt || b.createdAt).getTime();
+      return timeB - timeA;
+    });
 
     return results;
   }
@@ -251,6 +270,7 @@ export class ChatService {
             name: otherParticipant.user.name,
             role: otherParticipant.user.role,
             avatarUrl: otherParticipant.user.avatarUrl,
+            isOnline: this.onlinePresenceService.isUserOnline(otherParticipant.user.id),
           }
         : null,
 
@@ -328,6 +348,14 @@ export class ChatService {
     const savedMessage =
         await this.messageRepository.save(message);
 
+    try {
+      await this.conversationRepository.update(conversationId, {
+        updatedAt: new Date(),
+      });
+    } catch {
+      // Ignored
+    }
+
     this.eventEmitter.emit('chat.message.created', {
       id: savedMessage.id,
       conversationId: savedMessage.conversationId,
@@ -402,6 +430,24 @@ export class ChatService {
 
     await this.participantRepository.save(participant);
 
+    // Update message status to READ for incoming messages up to this timestamp
+    await this.messageRepository
+      .createQueryBuilder()
+      .update(Message)
+      .set({ status: MessageStatus.READ })
+      .where('conversation_id = :conversationId', { conversationId })
+      .andWhere('sender_id != :currentUserId', { currentUserId })
+      .andWhere('created_at <= :createdAt', { createdAt: message.createdAt })
+      .andWhere('status = :sentStatus', { sentStatus: MessageStatus.SENT })
+      .execute();
+
+    this.eventEmitter.emit('chat.messages.read', {
+      conversationId,
+      readerId: currentUserId,
+      messageId: dto.messageId,
+      lastReadAt: participant.lastReadAt,
+    });
+
     return {
       success: true,
       lastReadAt: participant.lastReadAt,
@@ -419,6 +465,11 @@ export class ChatService {
     await this.ensureParticipant(conversationId, currentUserId);
 
     await this.conversationRepository.delete(conversationId);
+
+    this.eventEmitter.emit('chat.conversation.deleted', {
+      conversationId,
+      deletedBy: currentUserId,
+    });
 
     return {
       success: true,

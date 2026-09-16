@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/features/farmer/screens/farmer_settings_screen.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
-import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class FarmerAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -13,6 +13,8 @@ class FarmerAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool isProfileScreen;
   final bool isRestaurant;
   final VoidCallback? onSettingsTap;
+  final Widget? leading;
+  final bool showBack;
 
   const FarmerAppBar({
     super.key,
@@ -22,6 +24,8 @@ class FarmerAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.isProfileScreen = false,
     this.isRestaurant = false,
     this.onSettingsTap,
+    this.leading,
+    this.showBack = false,
   });
 
   @override
@@ -33,8 +37,6 @@ class FarmerAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _FarmerAppBarState extends State<FarmerAppBar> {
   String? _avatarUrl;
-  int _unreadNotificationCount = 0;
-  io.Socket? _notificationSocket;
 
   final UserService _userService = UserService();
   final NotificationService _notificationService = NotificationService();
@@ -48,13 +50,7 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
 
   Future<void> _connectNotificationUpdates() async {
     try {
-      _notificationSocket = await _notificationService.connectToNotifications(
-        (_) {
-          if (mounted) {
-            setState(() => _unreadNotificationCount++);
-          }
-        },
-      );
+      await _notificationService.connectToNotifications();
     } catch (error) {
       debugPrint('Failed to connect app bar notifications: $error');
     }
@@ -73,8 +69,7 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
     }
 
     try {
-      final count = await _notificationService.getUnreadCount();
-      if (mounted) setState(() => _unreadNotificationCount = count);
+      await _notificationService.getUnreadCount();
     } catch (error) {
       debugPrint('Failed to load unread notification count: $error');
     }
@@ -94,19 +89,32 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
   }
 
   @override
-  void dispose() {
-    _notificationSocket?.disconnect();
-    _notificationSocket?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final hasLeading = widget.leading != null || widget.showBack;
+
     return AppBar(
       automaticallyImplyLeading: false,
       backgroundColor: const Color(0xFFFBFBFC),
       elevation: 0,
-      titleSpacing: 16,
+      titleSpacing: hasLeading ? 0 : 16,
+      leading: widget.leading ??
+          (widget.showBack
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                  color: widget.isRestaurant
+                      ? const Color(0xFF135A27)
+                      : const Color(0xFF2E7D32),
+                  onPressed: () {
+                    if (Navigator.of(context).canPop()) {
+                      Navigator.of(context).pop();
+                    } else {
+                      context.go(widget.isRestaurant
+                          ? AppRoutes.restaurantHome
+                          : AppRoutes.farmerDashboard);
+                    }
+                  },
+                )
+              : null),
       title: widget.showLogo
           ? Row(
               children: [
@@ -149,35 +157,38 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
                   ),
                   onPressed: () => _openNotifications(context),
                 ),
-                if (_unreadNotificationCount > 0)
-                  Positioned(
-                    right: 4,
-                    top: 3,
-                    child: Container(
-                      constraints: const BoxConstraints(minWidth: 16),
-                      height: 16,
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade700,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: const Color(0xFFFBFBFC),
-                          width: 1.5,
+                ValueListenableBuilder<int>(
+                  valueListenable: NotificationService.unreadCountNotifier,
+                  builder: (context, unreadCount, _) {
+                    if (unreadCount <= 0) return const SizedBox.shrink();
+                    return Positioned(
+                      right: 4,
+                      top: 3,
+                      child: Container(
+                        constraints: const BoxConstraints(minWidth: 16),
+                        height: 16,
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade700,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFFFBFBFC),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Text(
+                          unreadCount > 99 ? '99+' : '$unreadCount',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      child: Text(
-                        _unreadNotificationCount > 99
-                            ? '99+'
-                            : '$_unreadNotificationCount',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
+                    );
+                  },
+                ),
               ],
             ),
             const SizedBox(width: 4),
@@ -190,10 +201,15 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
                         size: 28,
                         color: const Color(0xFF2E7D32).withValues(alpha: 0.9),
                       ),
-                      onPressed:
-                          widget.onSettingsTap ??
+                      onPressed: widget.onSettingsTap ??
                           () {
-                            // Navigate to Settings screen here
+                            Navigator.of(context, rootNavigator: true).push(
+                              MaterialPageRoute(
+                                builder: (_) => FarmerSettingsScreen(
+                                  isRestaurant: widget.isRestaurant,
+                                ),
+                              ),
+                            );
                           },
                     )
                   : InkWell(

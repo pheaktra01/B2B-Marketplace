@@ -26,7 +26,7 @@ jobs:
 
       - name: Build Flutter Web
         working-directory: mobile
-        run: flutter build web --release
+        run: flutter build web --release --dart-define=API_BASE_URL=${{ secrets.API_BASE_URL || 'https://13-54-88-26.sslip.io' }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

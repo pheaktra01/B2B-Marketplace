@@ -477,8 +477,16 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
       final Uint8List imageBytes = await pickedFile.readAsBytes();
 
       final result = isAvatar
-          ? await _userService.uploadAvatar(pickedFile.path)
-          : await _userService.uploadCover(pickedFile.path);
+          ? await _userService.uploadAvatar(
+              pickedFile.path,
+              imageBytes: imageBytes,
+              filename: pickedFile.name,
+            )
+          : await _userService.uploadCover(
+              pickedFile.path,
+              imageBytes: imageBytes,
+              filename: pickedFile.name,
+            );
       final data = result['data'];
       final uploadedUrl = _toImageUrl(
         data is Map

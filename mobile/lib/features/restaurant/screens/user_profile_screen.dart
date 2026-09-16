@@ -174,8 +174,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     try {
       final bytes = await pickedFile.readAsBytes();
       final result = isAvatar
-          ? await _userService.uploadAvatar(pickedFile.path)
-          : await _userService.uploadCover(pickedFile.path);
+          ? await _userService.uploadAvatar(
+              pickedFile.path,
+              imageBytes: bytes,
+              filename: pickedFile.name,
+            )
+          : await _userService.uploadCover(
+              pickedFile.path,
+              imageBytes: bytes,
+              filename: pickedFile.name,
+            );
       final data = result['data'];
       final uploadedUrl = data is Map
           ? data[isAvatar ? 'avatarUrl' : 'coverUrl']?.toString()

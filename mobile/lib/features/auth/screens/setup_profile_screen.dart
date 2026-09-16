@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -26,7 +26,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
   final _addressController = TextEditingController();
   final _bioController = TextEditingController();
 
-  File? _imageFile;
+  XFile? _imageFile;
+  Uint8List? _imageBytes;
   bool _isLoading = false;
 
   bool get isFarmer => widget.role == 'farmer';
@@ -49,8 +50,10 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
       );
 
       if (picked != null) {
+        final bytes = await picked.readAsBytes();
         setState(() {
-          _imageFile = File(picked.path);
+          _imageFile = picked;
+          _imageBytes = bytes;
         });
       }
     } catch (e) {
@@ -80,7 +83,11 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
     try {
       // 1. Upload avatar if selected
       if (_imageFile != null) {
-        await _userService.uploadAvatar(_imageFile!.path);
+        await _userService.uploadAvatar(
+          _imageFile!.path,
+          imageBytes: _imageBytes,
+          filename: _imageFile!.name,
+        );
       }
 
       // 2. Update profile details if provided
@@ -244,9 +251,9 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                                     ],
                                   ),
                                   child: ClipOval(
-                                    child: _imageFile != null
-                                        ? Image.file(
-                                            _imageFile!,
+                                    child: _imageBytes != null
+                                        ? Image.memory(
+                                            _imageBytes!,
                                             fit: BoxFit.cover,
                                             width: 110,
                                             height: 110,

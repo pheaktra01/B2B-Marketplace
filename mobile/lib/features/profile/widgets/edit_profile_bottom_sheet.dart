@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/core/constants/api_constants.dart';
@@ -101,8 +101,10 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
   late TextEditingController _addressController;
   late TextEditingController _bioController;
 
-  File? _newAvatarFile;
-  File? _newCoverFile;
+  XFile? _newAvatarFile;
+  Uint8List? _newAvatarBytes;
+  XFile? _newCoverFile;
+  Uint8List? _newCoverBytes;
 
   bool _isSubmitting = false;
 
@@ -214,11 +216,14 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
       );
 
       if (picked != null) {
+        final bytes = await picked.readAsBytes();
         setState(() {
           if (isAvatar) {
-            _newAvatarFile = File(picked.path);
+            _newAvatarFile = picked;
+            _newAvatarBytes = bytes;
           } else {
-            _newCoverFile = File(picked.path);
+            _newCoverFile = picked;
+            _newCoverBytes = bytes;
           }
         });
       }
@@ -243,7 +248,11 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
       // 1. Upload Avatar if modified
       if (_newAvatarFile != null) {
-        final res = await _userService.uploadAvatar(_newAvatarFile!.path);
+        final res = await _userService.uploadAvatar(
+          _newAvatarFile!.path,
+          imageBytes: _newAvatarBytes,
+          filename: _newAvatarFile!.name,
+        );
         final data = res['data'];
         if (data is Map && data['avatarUrl'] != null) {
           updatedAvatarUrl = ApiConstants.imageUrl(data['avatarUrl'].toString());
@@ -252,7 +261,11 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
       // 2. Upload Cover if modified
       if (_newCoverFile != null) {
-        final res = await _userService.uploadCover(_newCoverFile!.path);
+        final res = await _userService.uploadCover(
+          _newCoverFile!.path,
+          imageBytes: _newCoverBytes,
+          filename: _newCoverFile!.name,
+        );
         final data = res['data'];
         if (data is Map && data['coverUrl'] != null) {
           updatedCoverUrl = ApiConstants.imageUrl(data['coverUrl'].toString());
@@ -666,9 +679,9 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          if (_newCoverFile != null)
-                            Image.file(
-                              _newCoverFile!,
+                          if (_newCoverBytes != null)
+                            Image.memory(
+                              _newCoverBytes!,
                               fit: BoxFit.cover,
                             )
                           else if (widget.currentCoverUrl != null &&
@@ -760,9 +773,9 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                             ],
                           ),
                           child: ClipOval(
-                            child: _newAvatarFile != null
-                                ? Image.file(
-                                    _newAvatarFile!,
+                            child: _newAvatarBytes != null
+                                ? Image.memory(
+                                    _newAvatarBytes!,
                                     fit: BoxFit.cover,
                                   )
                                 : (widget.currentAvatarUrl != null &&

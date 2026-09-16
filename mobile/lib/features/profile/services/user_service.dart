@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mime/mime.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:mobile/core/constants/api_constants.dart';
@@ -83,71 +84,66 @@ class UserService {
   // ============================================================
 
   /// Upload profile/avatar image
-  Future<Map<String, dynamic>> uploadAvatar(String imagePath) async {
+  Future<Map<String, dynamic>> uploadAvatar(
+    String imagePath, {
+    Uint8List? imageBytes,
+    String? filename,
+  }) async {
     return _uploadImage(
       endpoint: '/users/profile/avatar',
       imagePath: imagePath,
+      imageBytes: imageBytes,
+      filename: filename,
     );
   }
 
   /// Upload cover image
-  Future<Map<String, dynamic>> uploadCover(String imagePath) async {
-    return _uploadImage(endpoint: '/users/profile/cover', imagePath: imagePath);
+  Future<Map<String, dynamic>> uploadCover(
+    String imagePath, {
+    Uint8List? imageBytes,
+    String? filename,
+  }) async {
+    return _uploadImage(
+      endpoint: '/users/profile/cover',
+      imagePath: imagePath,
+      imageBytes: imageBytes,
+      filename: filename,
+    );
   }
 
   /// Generic multipart image upload
   Future<Map<String, dynamic>> _uploadImage({
     required String endpoint,
     required String imagePath,
+    Uint8List? imageBytes,
+    String? filename,
   }) async {
     try {
       final headers = await _authHeaders();
 
-      final file = File(imagePath);
+      // Read image bytes (works on both Web & Mobile without dart:io)
+      final Uint8List bytes =
+          imageBytes ?? await XFile(imagePath).readAsBytes();
 
-      if (!await file.exists()) {
-        throw Exception('Image file does not exist: $imagePath');
-      }
-
-      final int fileLength = await file.length();
-
-      if (fileLength == 0) {
+      if (bytes.isEmpty) {
         throw Exception('Image file is empty.');
       }
 
-      // Detect image type
-      final extension = imagePath.split('.').last.toLowerCase();
+      final resolvedFilename = filename ??
+          (imagePath.contains('/')
+              ? imagePath.split('/').last
+              : imagePath.split(r'\').last);
 
-      String mimeType;
-
-      switch (extension) {
-        case 'jpg':
-        case 'jpeg':
-          mimeType = 'image/jpeg';
-          break;
-
-        case 'png':
-          mimeType = 'image/png';
-          break;
-
-        case 'webp':
-          mimeType = 'image/webp';
-          break;
-
-        case 'gif':
-          mimeType = 'image/gif';
-          break;
-
-        default:
-          mimeType = 'image/jpeg';
-      }
+      final mimeType =
+          lookupMimeType(resolvedFilename, headerBytes: bytes) ?? 'image/jpeg';
+      final mimeParts = mimeType.split('/');
 
       debugPrint('================================');
       debugPrint('MULTIPART IMAGE UPLOAD');
       debugPrint('================================');
       debugPrint('Endpoint: $endpoint');
-      debugPrint('Image path: $imagePath');
-      debugPrint('Image size: $fileLength bytes');
+      debugPrint('Filename: $resolvedFilename');
+      debugPrint('Image size: ${bytes.length} bytes');
       debugPrint('Image type: $mimeType');
       debugPrint('================================');
 
@@ -158,11 +154,11 @@ class UserService {
 
       request.headers.addAll(headers);
       request.files.add(
-        await http.MultipartFile.fromPath(
+        http.MultipartFile.fromBytes(
           'file',
-          imagePath,
-          contentType: MediaType.parse(mimeType),
-          filename: imagePath.split(Platform.pathSeparator).last,
+          bytes,
+          filename: resolvedFilename,
+          contentType: MediaType(mimeParts[0], mimeParts[1]),
         ),
       );
 

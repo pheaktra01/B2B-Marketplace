@@ -7,6 +7,7 @@ import 'package:mobile/features/cart/models/cart_model.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
+import 'package:mobile/features/notification/services/notification_service.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -400,9 +401,42 @@ class _CartScreenState extends State<CartScreen> {
               tooltip: 'Clear Cart',
               onPressed: _confirmClearCart,
             ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () => context.push(AppRoutes.notifications),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_none),
+                onPressed: () => context.push(AppRoutes.notifications),
+              ),
+              ValueListenableBuilder<int>(
+                valueListenable: NotificationService.unreadCountNotifier,
+                builder: (context, unreadCount, _) {
+                  if (unreadCount <= 0) return const SizedBox.shrink();
+                  return Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Container(
+                      constraints: const BoxConstraints(minWidth: 16),
+                      height: 16,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade700,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        unreadCount > 99 ? '99+' : '$unreadCount',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           Padding(
             padding: const EdgeInsets.only(right: 16),

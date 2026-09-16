@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
 
@@ -28,13 +29,49 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
   OrderModel? _order;
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isFarmer = false;
 
   @override
   void initState() {
     super.initState();
     _order = widget.initialOrder;
+    _checkRole();
     if (_order == null) {
       _loadOrder();
+    }
+  }
+
+  Future<void> _checkRole() async {
+    final role = (await AuthService.getUserRole())?.toLowerCase();
+    if (mounted) {
+      setState(() {
+        _isFarmer = role == 'farmer';
+      });
+    }
+  }
+
+  Future<void> _changeStatus(String status) async {
+    if (_order == null) return;
+    setState(() => _isLoading = true);
+    try {
+      final updated = await _orderService.updateOrderStatus(
+        orderId: _order!.id,
+        status: status,
+      );
+      if (!mounted) return;
+      setState(() {
+        _order = updated;
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Order status updated to ${updated.statusLabel}')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to update order: $e')),
+      );
     }
   }
 
@@ -69,7 +106,17 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              if (_isFarmer) {
+                context.go(AppRoutes.farmerOrders);
+              } else {
+                context.go(AppRoutes.restaurantOrders);
+              }
+            }
+          },
         ),
         title: Text(
           _order != null ? 'Order #${_order!.displayId}' : 'Order Tracking',
@@ -197,27 +244,37 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
       bannerBg = primaryGreen.withValues(alpha: 0.1);
       textColor = primaryGreen;
       icon = Icons.check_circle_outline;
-      subtitle = 'Delivered to your kitchen successfully.';
+      subtitle = _isFarmer
+          ? 'Order delivered and completed successfully.'
+          : 'Delivered to your kitchen successfully.';
     } else if (order.status.toLowerCase() == 'shipped') {
       bannerBg = Colors.teal.shade50;
       textColor = Colors.teal.shade800;
       icon = Icons.local_shipping_outlined;
-      subtitle = 'Produce is in transit to your kitchen.';
+      subtitle = _isFarmer
+          ? 'Produce is out for delivery to the restaurant.'
+          : 'Produce is in transit to your kitchen.';
     } else if (order.status.toLowerCase() == 'processing') {
       bannerBg = Colors.indigo.shade50;
       textColor = Colors.indigo.shade800;
       icon = Icons.inventory_2_outlined;
-      subtitle = 'Farmer is harvesting and packaging your order.';
+      subtitle = _isFarmer
+          ? 'You are harvesting and packaging this order.'
+          : 'Farmer is harvesting and packaging your order.';
     } else if (order.status.toLowerCase() == 'confirmed') {
       bannerBg = Colors.blue.shade50;
       textColor = Colors.blue.shade800;
       icon = Icons.thumb_up_outlined;
-      subtitle = 'Order confirmed by grower. Preparing fulfillment.';
+      subtitle = _isFarmer
+          ? 'Order confirmed. Ready to start preparing.'
+          : 'Order confirmed by grower. Preparing fulfillment.';
     } else {
       bannerBg = const Color(0xFFFFF3E0);
       textColor = const Color(0xFFE65100);
       icon = Icons.hourglass_top_outlined;
-      subtitle = 'Sent to farmer. Awaiting grower confirmation.';
+      subtitle = _isFarmer
+          ? 'New order received from buyer. Awaiting your confirmation.'
+          : 'Sent to farmer. Awaiting grower confirmation.';
     }
 
     return Container(
@@ -275,11 +332,26 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
 
   Widget _buildTrackingTimeline(OrderModel order) {
     final steps = [
-      {'title': 'Order Placed', 'desc': 'Order transmitted to farmer'},
-      {'title': 'Confirmed', 'desc': 'Farmer confirmed harvest'},
-      {'title': 'Processing', 'desc': 'Harvesting & packaging'},
-      {'title': 'Out for Delivery', 'desc': 'On the way to your kitchen'},
-      {'title': 'Delivered', 'desc': 'Received & verified'},
+      {
+        'title': 'Order Placed',
+        'desc': _isFarmer ? 'Order received from buyer' : 'Order transmitted to farmer',
+      },
+      {
+        'title': 'Confirmed',
+        'desc': _isFarmer ? 'You confirmed the order' : 'Farmer confirmed harvest',
+      },
+      {
+        'title': 'Processing',
+        'desc': _isFarmer ? 'Harvesting & packaging' : 'Harvesting & packaging',
+      },
+      {
+        'title': 'Out for Delivery',
+        'desc': _isFarmer ? 'On the way to buyer' : 'On the way to your kitchen',
+      },
+      {
+        'title': 'Delivered',
+        'desc': _isFarmer ? 'Delivered & finalized' : 'Received & verified',
+      },
     ];
 
     final isCancelled = order.status.toLowerCase() == 'cancelled';
@@ -746,6 +818,160 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
   }
 
   Widget _buildBottomButtons(OrderModel order) {
+    if (_isFarmer) {
+      final status = order.status.toLowerCase();
+      return Column(
+        children: [
+          // Farmer order workflow action buttons
+          if (status == 'pending') ...[
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _changeStatus('cancelled'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red.shade700,
+                      side: BorderSide(color: Colors.red.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Decline Order'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _changeStatus('confirmed'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryGreen,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Accept Order'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ] else if (status == 'confirmed') ...[
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () => _changeStatus('processing'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryGreen,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.inventory_2_outlined, size: 18),
+                label: const Text(
+                  'Start Preparing Produce',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ] else if (status == 'processing') ...[
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () => _changeStatus('shipped'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryGreen,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.local_shipping_outlined, size: 18),
+                label: const Text(
+                  'Mark as Out for Delivery',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ] else if (status == 'shipped') ...[
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () => _changeStatus('delivered'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryGreen,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.check_circle_outline, size: 18),
+                label: const Text(
+                  'Complete Order (Delivered)',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+          // Farmer Chat Button
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                context.go(AppRoutes.farmerChat);
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: primaryGreen,
+                side: const BorderSide(color: primaryGreen),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              icon: const Icon(Icons.chat_outlined, size: 18),
+              label: const Text(
+                'Open Chats',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Back to Orders
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: TextButton.icon(
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go(AppRoutes.farmerOrders);
+                }
+              },
+              icon: const Icon(Icons.arrow_back_rounded, size: 18, color: Colors.grey),
+              label: const Text(
+                'Back to Order Management',
+                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       children: [
         SizedBox(

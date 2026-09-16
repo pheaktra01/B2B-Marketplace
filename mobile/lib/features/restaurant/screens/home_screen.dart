@@ -45,7 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String _buyerAddress = 'Phnom Penh';
   String? _avatarUrl;
   int _cartItemCount = 0;
-  int _unreadNotificationCount = 0;
 
   // Filters & Layout State
   int _selectedCategoryIndex = 0;
@@ -146,13 +145,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadUnreadNotifications() async {
     try {
-      final count = await _notificationService.getUnreadCount();
-      if (!mounted) return;
-      setState(() {
-        _unreadNotificationCount = count;
-      });
+      await _notificationService.getUnreadCount();
+      await _notificationService.connectToNotifications();
     } catch (e) {
-      debugPrint('Error loading notifications count: $e');
+      debugPrint('Error loading notifications: $e');
     }
   }
 
@@ -523,7 +519,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           // Avatar
           GestureDetector(
-            onTap: () => context.push(AppRoutes.restaurantProfile),
+            onTap: () => context.go(AppRoutes.restaurantProfile),
             child: Stack(
               children: [
                 Container(
@@ -641,33 +637,36 @@ class _HomeScreenState extends State<HomeScreen> {
                       });
                     },
                   ),
-                  if (_unreadNotificationCount > 0)
-                    Positioned(
-                      top: 4,
-                      right: 4,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.redAccent,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          _unreadNotificationCount > 9
-                              ? '9+'
-                              : '$_unreadNotificationCount',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
+                  ValueListenableBuilder<int>(
+                    valueListenable: NotificationService.unreadCountNotifier,
+                    builder: (context, unreadCount, _) {
+                      if (unreadCount <= 0) return const SizedBox.shrink();
+                      return Positioned(
+                        top: 4,
+                        right: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.redAccent,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            unreadCount > 9 ? '9+' : '$unreadCount',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
+                  ),
                 ],
               ),
 

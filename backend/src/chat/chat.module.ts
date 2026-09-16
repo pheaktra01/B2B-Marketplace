@@ -11,6 +11,7 @@ import { User } from '../users/entities/user.entity';
 import { NotificationModule } from 'src/notification/notification.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { ChatGateway } from './chat.gateway';
+import { OnlinePresenceService } from './online-presence.service';
 
 @Module({
   imports: [
@@ -32,10 +33,12 @@ import { ChatGateway } from './chat.gateway';
   providers: [
     ChatService,
     ChatGateway,
+    OnlinePresenceService,
   ],
 
   exports: [
     ChatService,
+    OnlinePresenceService,
   ],
 })
 export class ChatModule {}

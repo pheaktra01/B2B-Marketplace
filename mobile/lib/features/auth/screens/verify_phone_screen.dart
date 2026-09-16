@@ -5,6 +5,7 @@ import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class VerifyPhoneScreen extends StatefulWidget {
@@ -47,14 +48,14 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
   bool _isLoading = false;
 
-  String get buttonText {
+  String _getButtonText(AppLocalizations l10n) {
     switch (widget.type) {
       case VerificationType.login:
-        return "ចូលប្រើប្រាស់";
+        return l10n.login;
       case VerificationType.signup:
-        return "បង្កើតគណនី";
+        return l10n.createAccount;
       case VerificationType.forgotPassword:
-        return "កំណត់ពាក្យសម្ងាត់ឡើងវិញ";
+        return l10n.resetPassword;
     }
   }
 
@@ -90,6 +91,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const brandGreen = Color(0xFF0F6221);
     const inputFillColor = Color(0xFFF3F4F6);
 
@@ -162,7 +164,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
 
                       // --- Branding Title ---
                       Text(
-                        'ផ្សារកសិករ',
+                        l10n.farmersMarket,
                         style: TextStyle(
                           fontSize: isShortScreen ? 26 : 32,
                           fontWeight: FontWeight.bold,
@@ -171,10 +173,10 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'ការផ្ទៀងផ្ទាត់ទីផ្សារប្រកបដោយសុវត្ថិភាព',
+                      Text(
+                        l10n.secureVerification,
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14, color: Colors.black87),
+                        style: const TextStyle(fontSize: 14, color: Colors.black87),
                       ),
 
                       SizedBox(height: isShortScreen ? 20 : 32),
@@ -201,7 +203,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                           child: Column(
                             children: [
                               Text(
-                                'បញ្ចូលលេខកូដផ្ទៀងផ្ទាត់',
+                                l10n.enterVerificationCode,
                                 style: TextStyle(
                                   fontSize: isSmallScreen ? 19 : 22,
                                   fontWeight: FontWeight.bold,
@@ -209,7 +211,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                               ),
                               const SizedBox(height: 10),
                               Text(
-                                'យើងបានផ្ញើលេខកូដផ្ទៀងផ្ទាត់ ៦ខ្ទង់ ទៅកាន់\n${widget.phoneNumber}',
+                                l10n.weSentCodeTo(widget.phoneNumber),
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontSize: 13,
@@ -230,18 +232,18 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                     color: brandGreen.withValues(alpha: 0.25),
                                   ),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.lock_clock_outlined,
                                       size: 16,
                                       color: brandGreen,
                                     ),
-                                    SizedBox(width: 6),
+                                    const SizedBox(width: 6),
                                     Text(
-                                      'លេខកូដសាកល្បង / OTP: 123456',
-                                      style: TextStyle(
+                                      '${l10n.verificationCode} / OTP: 123456',
+                                      style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                         color: brandGreen,
@@ -406,7 +408,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        buttonText,
+                                        _getButtonText(l10n),
                                         style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -425,9 +427,9 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                               SizedBox(height: isShortScreen ? 20 : 28),
 
                               // --- Resend Verification Section ---
-                              const Text(
-                                'មិនទាន់បានទទួលលេខកូដមែនទេ?',
-                                style: TextStyle(
+                              Text(
+                                l10n.didntReceiveCode,
+                                style: const TextStyle(
                                   color: Colors.black54,
                                   fontSize: 13,
                                 ),
@@ -440,9 +442,9 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                     _controllers[i].text = staticOtp[i];
                                   }
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('លេខកូដផ្ទៀងផ្ទាត់របស់អ្នកគឺ: 123456'),
-                                      duration: Duration(seconds: 3),
+                                    SnackBar(
+                                      content: Text(l10n.yourOtpCodeIs(staticOtp)),
+                                      duration: const Duration(seconds: 3),
                                     ),
                                   );
                                 },
@@ -451,9 +453,9 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                   size: 16,
                                   color: brandGreen,
                                 ),
-                                label: const Text(
-                                  'ផ្ញើលេខកូដឡើងវិញ',
-                                  style: TextStyle(
+                                label: Text(
+                                  l10n.resendCode,
+                                  style: const TextStyle(
                                     color: brandGreen,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
@@ -471,9 +473,9 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                       context.go(AppRoutes.login);
                                     }
                                   },
-                                  child: const Text(
-                                    'លេខទូរស័ព្ទមិនត្រឹមត្រូវ? ផ្លាស់ប្តូរលេខ',
-                                    style: TextStyle(
+                                  child: Text(
+                                    l10n.wrongNumberChange,
+                                    style: const TextStyle(
                                       color: brandGreen,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,

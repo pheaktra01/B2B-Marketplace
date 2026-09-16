@@ -759,7 +759,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get viewPhoto => 'មើលរូបថត';
 
   @override
-  String get changePhoto => 'ប្តូររូបថត';
+  String get changePhoto => 'ផ្លាស់ប្តូររូបថត';
 
   @override
   String get avatarUpdated => 'រូបប្រវត្តិរូបត្រូវបានធ្វើបច្ចុប្បន្នភាព!';
@@ -913,4 +913,255 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get selectLanguage => 'ជ្រើសរើសភាសា';
+
+  @override
+  String get dontHaveAccount => 'មិនទាន់មានគណនីមែនទេ? ';
+
+  @override
+  String get createNewAccount => 'បង្កើតគណនីថ្មី';
+
+  @override
+  String get alreadyHaveAccount => 'មានគណនីរួចហើយមែនទេ? ';
+
+  @override
+  String get backToLogin => 'ត្រឡប់ទៅចូលគណនីវិញ';
+
+  @override
+  String get forgotPasswordTitle => 'ភ្លេចពាក្យសម្ងាត់';
+
+  @override
+  String get forgotPasswordInstruction =>
+      'សូមបញ្ចូលលេខទូរស័ព្ទដែលភ្ជាប់ជាមួយគណនីរបស់អ្នក។ យើងនឹងផ្ញើកូដដើម្បីកំណត់ពាក្យសម្ងាត់ឡើងវិញ។';
+
+  @override
+  String get send => 'ផ្ញើ';
+
+  @override
+  String get sendCode => 'ផ្ញើកូដ';
+
+  @override
+  String get phoneHint => '០១២៣៤៥៦៧៨ ឬ +85512345678';
+
+  @override
+  String get unableToRequestOtp => 'មិនអាចស្នើសុំលេខកូដបានទេ';
+
+  @override
+  String get howToUseApp => 'តើអ្នកចង់ប្រើប្រាស់ផ្សារកសិករយ៉ាងដូចម្តេច?';
+
+  @override
+  String get roleSelectionDescription =>
+      'ចូលរួមជាមួយបណ្តាញកសិកម្មឈានមុខគេរបស់យើង។ សូមជ្រើសរើសតួនាទីរបស់អ្នកដើម្បីចាប់ផ្តើម។';
+
+  @override
+  String get iAmRestaurant => 'ខ្ញុំជាភោជនីយដ្ឋាន';
+
+  @override
+  String get restaurantRoleDescription =>
+      'បញ្ជាទិញគ្រឿងផ្សំស្រស់ៗដោយផ្ទាល់ពីផលិតករក្នុងស្រុក ជាមួយនឹងសេវាដឹកជញ្ជូនដែលទុកចិត្តបាន។';
+
+  @override
+  String get buyerTag => 'អ្នកទិញ';
+
+  @override
+  String get chefTag => 'ចុងភៅ';
+
+  @override
+  String get iAmFarmer => 'ខ្ញុំជាកសិករ';
+
+  @override
+  String get farmerRoleDescription =>
+      'ដាក់លក់ផលដំណាំដ៏សសម្បូរបែបរបស់អ្នកទៅកាន់ភោជនីយដ្ឋានធំៗ និងគ្រប់គ្រងការបញ្ជាទិញបោះដុំ។';
+
+  @override
+  String get sellerTag => 'អ្នកលក់';
+
+  @override
+  String get producerTag => 'ផលិតករ';
+
+  @override
+  String get continueForward => 'បន្តទៅមុខ';
+
+  @override
+  String get signUpAsFarmer => 'ចុះឈ្មោះជា៖ កសិករ (Farmer)';
+
+  @override
+  String get signUpAsRestaurant => 'ចុះឈ្មោះជា៖ ភោជនីយដ្ឋាន (Restaurant)';
+
+  @override
+  String get createYourAccount => 'បង្កើតគណនីរបស់អ្នក';
+
+  @override
+  String get signUpSubtitle => 'ចូលរួមជាមួយបណ្តាញពាណិជ្ជកម្មកសិកម្មឈានមុខគេ';
+
+  @override
+  String get fullName => 'ឈ្មោះពេញ';
+
+  @override
+  String get enterFullName => 'បញ្ចូលឈ្មោះពេញ';
+
+  @override
+  String get pleaseEnterFullName => 'សូមបញ្ចូលឈ្មោះពេញ';
+
+  @override
+  String get confirmPassword => 'ផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់';
+
+  @override
+  String get reEnterPassword => 'បញ្ចូលពាក្យសម្ងាត់ម្តងទៀត';
+
+  @override
+  String get pleaseConfirmPassword => 'សូមបញ្ជាក់ពាក្យសម្ងាត់របស់អ្នក';
+
+  @override
+  String get passwordsDoNotMatch => 'ពាក្យសម្ងាត់មិនត្រូវគ្នាទេ';
+
+  @override
+  String get passwordLengthHint => 'យ៉ាងហោចណាស់ ៦ ខ្ទង់';
+
+  @override
+  String get agreeToTerms => 'ខ្ញុំយល់ព្រមតាម';
+
+  @override
+  String get termsOfService => 'លក្ខខណ្ឌប្រើប្រាស់';
+
+  @override
+  String get andWord => 'និង';
+
+  @override
+  String get mustAgreeToTerms => 'សូមយល់ព្រមតាមលក្ខខណ្ឌ និងគោលការណ៍ឯកជនភាព';
+
+  @override
+  String get createAccount => 'បង្កើតគណនី';
+
+  @override
+  String get secureVerification => 'ការផ្ទៀងផ្ទាត់ទីផ្សារប្រកបដោយសុវត្ថិភាព';
+
+  @override
+  String get enterVerificationCode => 'បញ្ចូលលេខកូដផ្ទៀងផ្ទាត់';
+
+  @override
+  String weSentCodeTo(String phone) {
+    return 'យើងបានផ្ញើលេខកូដផ្ទៀងផ្ទាត់ ៦ខ្ទង់ ទៅកាន់\n$phone';
+  }
+
+  @override
+  String get verificationCode => 'លេខកូដផ្ទៀងផ្ទាត់';
+
+  @override
+  String get enter6DigitCode => 'សូមបញ្ចូលលេខកូដ ៦ ខ្ទង់';
+
+  @override
+  String get verify => 'ផ្ទៀងផ្ទាត់';
+
+  @override
+  String get didntReceiveCode => 'មិនទទួលបានលេខកូដ? ';
+
+  @override
+  String get resendCode => 'ផ្ញើម្តងទៀត';
+
+  @override
+  String resendIn(int seconds) {
+    return 'ផ្ញើម្តងទៀតក្នុង $secondsវិ';
+  }
+
+  @override
+  String get verificationSuccess => 'ផ្ទៀងផ្ទាត់លេខទូរស័ព្ទដោយជោគជ័យ';
+
+  @override
+  String get invalidOtp => 'លេខកូដមិនត្រឹមត្រូវ ឬផុតកំណត់';
+
+  @override
+  String get wrongNumberChange => 'លេខទូរស័ព្ទមិនត្រឹមត្រូវ? ផ្លាស់ប្តូរលេខ';
+
+  @override
+  String yourOtpCodeIs(String otp) {
+    return 'លេខកូដផ្ទៀងផ្ទាត់របស់អ្នកគឺ: $otp';
+  }
+
+  @override
+  String get resetPassword => 'កំណត់ពាក្យសម្ងាត់ឡើងវិញ';
+
+  @override
+  String get resetPasswordDescription =>
+      'សូមបង្កើតពាក្យសម្ងាត់ផ្ទាល់ខ្លួនដែលអ្នកមិនបានប្រើប្រាស់នៅកន្លែងផ្សេង។';
+
+  @override
+  String get newPassword => 'ពាក្យសម្ងាត់ថ្មី';
+
+  @override
+  String get enterNewPassword => 'បញ្ចូលពាក្យសម្ងាត់ថ្មី';
+
+  @override
+  String get confirmNewPassword => 'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី';
+
+  @override
+  String get pleaseEnterNewPassword => 'សូមបញ្ចូលពាក្យសម្ងាត់ថ្មី';
+
+  @override
+  String get passwordResetSuccess => 'កំណត់ពាក្យសម្ងាត់ឡើងវិញដោយជោគជ័យ';
+
+  @override
+  String get help => 'ជំនួយ';
+
+  @override
+  String get accountCreatedSuccess => 'គណនីបានបង្កើតជោគជ័យ';
+
+  @override
+  String get setupYourProfile => 'រៀបចំកម្រងព័ត៌មានរបស់អ្នក';
+
+  @override
+  String setupProfileSubtitle(String role) {
+    return 'បន្ថែមរូបតំណាង និងព័ត៌មាន$roleរបស់អ្នក ដើម្បីបង្កើនទំនុកចិត្តលើទីផ្សារ';
+  }
+
+  @override
+  String get chooseAvatar => 'ជ្រើសរើសរូបតំណាង (Avatar)';
+
+  @override
+  String get farm => 'កសិដ្ឋាន';
+
+  @override
+  String get restaurant => 'ភោជនីយដ្ឋាន';
+
+  @override
+  String nameOfRole(String role) {
+    return 'ឈ្មោះ$role';
+  }
+
+  @override
+  String get farmerNameHint => 'ឧ. កសិដ្ឋានធម្មជាតិបាត់ដំបង';
+
+  @override
+  String get restaurantNameHint => 'ឧ. ភោជនីយដ្ឋានខ្មែរអង្គរ';
+
+  @override
+  String get addressLocation => 'អាសយដ្ឋាន / ទីតាំង';
+
+  @override
+  String get addressHint => 'ឧ. រាជធានីភ្នំពេញ ឬខេត្ត...';
+
+  @override
+  String get shortBio => 'ការពិពណ៌នាសង្ខេប';
+
+  @override
+  String get farmerBioHint => 'រៀបរាប់ខ្លីៗអំពីកសិផលដែលអ្នកដាំដុះ...';
+
+  @override
+  String get restaurantBioHint =>
+      'រៀបរាប់ខ្លីៗអំពីមុខម្ហូប ឬសេចក្តីត្រូវការរបស់អ្នក...';
+
+  @override
+  String get saveAndStart => 'រក្សាទុក និងចាប់ផ្តើម';
+
+  @override
+  String get skipForNow => 'រំលងពេលនេះ (បំពេញនៅពេលក្រោយ)';
+
+  @override
+  String failedToPickImage(String error) {
+    return 'មិនអាចជ្រើសរើសរូបភាពបានទេ: $error';
+  }
+
+  @override
+  String failedToSaveProfile(String error) {
+    return 'មានបញ្ហាក្នុងការរក្សាទុកព័ត៌មាន: $error';
+  }
 }

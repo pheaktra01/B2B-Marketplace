@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class SetupProfileScreen extends StatefulWidget {
   final String role;
@@ -59,8 +60,13 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('មិនអាចជ្រើសរើសរូបភាពបានទេ: $e')),
+        SnackBar(
+          content: Text(
+            l10n?.failedToPickImage(e.toString()) ?? 'Failed to pick image: $e',
+          ),
+        ),
       );
     }
   }
@@ -80,6 +86,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
     });
 
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
 
     try {
       // 1. Upload avatar if selected
@@ -115,7 +122,12 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
     } catch (e) {
       if (!mounted) return;
       messenger.showSnackBar(
-        SnackBar(content: Text('មានបញ្ហាក្នុងការរក្សាទុកព័ត៌មាន: $e')),
+        SnackBar(
+          content: Text(
+            l10n?.failedToSaveProfile(e.toString()) ??
+                'Failed to save profile: $e',
+          ),
+        ),
       );
       // Still allow proceeding even if optional profile update encountered an issue
       _navigateToDashboard();
@@ -130,13 +142,14 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const brandGreen = Color(0xFF0F6221);
     const bgLight = Color(0xFFF8FAFC);
     const textDark = Color(0xFF0F172A);
     const textMuted = Color(0xFF64748B);
     const borderColor = Color(0xFFE2E8F0);
 
-    final titleRole = isFarmer ? 'កសិដ្ឋាន' : 'ភោជនីយដ្ឋាន';
+    final titleRole = isFarmer ? l10n.farm : l10n.restaurant;
 
     return Scaffold(
       backgroundColor: bgLight,
@@ -190,18 +203,18 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                               color: brandGreen.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.check_circle_outline,
                                   size: 16,
                                   color: brandGreen,
                                 ),
-                                SizedBox(width: 6),
+                                const SizedBox(width: 6),
                                 Text(
-                                  'គណនីបានបង្កើតជោគជ័យ',
-                                  style: TextStyle(
+                                  l10n.accountCreatedSuccess,
+                                  style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: brandGreen,
@@ -214,10 +227,10 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                           const SizedBox(height: 16),
 
                           // Heading
-                          const Text(
-                            'រៀបចំកម្រងព័ត៌មានរបស់អ្នក',
+                          Text(
+                            l10n.setupYourProfile,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
                               color: textDark,
@@ -225,7 +238,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'បន្ថែមរូបតំណាង និងព័ត៌មាន$titleRoleរបស់អ្នក ដើម្បីបង្កើនទំនុកចិត្តលើទីផ្សារ',
+                            l10n.setupProfileSubtitle(titleRole),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               fontSize: 13,
@@ -305,8 +318,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                             onTap: _pickImage,
                             child: Text(
                               _imageFile != null
-                                  ? 'ផ្លាស់ប្តូររូបថត'
-                                  : 'ជ្រើសរើសរូបតំណាង (Avatar)',
+                                  ? l10n.changePhoto
+                                  : l10n.chooseAvatar,
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -319,10 +332,10 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
 
                           // Business / Enterprise Name Input
                           _buildTextField(
-                            label: 'ឈ្មោះ$titleRole',
+                            label: l10n.nameOfRole(titleRole),
                             hint: isFarmer
-                                ? 'ឧ. កសិដ្ឋានធម្មជាតិបាត់ដំបង'
-                                : 'ឧ. ភោជនីយដ្ឋានខ្មែរអង្គរ',
+                                ? l10n.farmerNameHint
+                                : l10n.restaurantNameHint,
                             icon: isFarmer
                                 ? Icons.agriculture_outlined
                                 : Icons.storefront_outlined,
@@ -333,8 +346,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
 
                           // Address Input
                           _buildTextField(
-                            label: 'អាសយដ្ឋាន / ទីតាំង',
-                            hint: 'ឧ. រាជធានីភ្នំពេញ ឬខេត្ត...',
+                            label: l10n.addressLocation,
+                            hint: l10n.addressHint,
                             icon: Icons.location_on_outlined,
                             controller: _addressController,
                           ),
@@ -343,10 +356,10 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
 
                           // Bio / Description Input
                           _buildTextField(
-                            label: 'ការពិពណ៌នាសង្ខេប',
+                            label: l10n.shortBio,
                             hint: isFarmer
-                                ? 'រៀបរាប់ខ្លីៗអំពីកសិផលដែលអ្នកដាំដុះ...'
-                                : 'រៀបរាប់ខ្លីៗអំពីមុខម្ហូប ឬសេចក្តីត្រូវការរបស់អ្នក...',
+                                ? l10n.farmerBioHint
+                                : l10n.restaurantBioHint,
                             icon: Icons.notes_outlined,
                             controller: _bioController,
                             maxLines: 3,
@@ -377,18 +390,18 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : const Row(
+                                  : Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          'រក្សាទុក និងចាប់ផ្តើម',
-                                          style: TextStyle(
+                                          l10n.saveAndStart,
+                                          style: const TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        SizedBox(width: 8),
-                                        Icon(
+                                        const SizedBox(width: 8),
+                                        const Icon(
                                           Icons.arrow_forward,
                                           size: 18,
                                         ),
@@ -402,9 +415,9 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                           // Skip button
                           TextButton(
                             onPressed: _isLoading ? null : _navigateToDashboard,
-                            child: const Text(
-                              'រំលងពេលនេះ (បំពេញនៅពេលក្រោយ)',
-                              style: TextStyle(
+                            child: Text(
+                              l10n.skipForNow,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 color: textMuted,
                                 fontWeight: FontWeight.w500,

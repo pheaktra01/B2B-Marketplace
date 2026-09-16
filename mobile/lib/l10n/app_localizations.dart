@@ -1787,6 +1787,468 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Language'**
   String get selectLanguage;
+
+  /// No description provided for @dontHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? '**
+  String get dontHaveAccount;
+
+  /// No description provided for @createNewAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Account'**
+  String get createNewAccount;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? '**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @backToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Login'**
+  String get backToLogin;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the phone number associated with your account. We\'ll send an OTP code to reset your password.'**
+  String get forgotPasswordInstruction;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Code'**
+  String get sendCode;
+
+  /// No description provided for @phoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'012345678 or +85512345678'**
+  String get phoneHint;
+
+  /// No description provided for @unableToRequestOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to request OTP'**
+  String get unableToRequestOtp;
+
+  /// No description provided for @howToUseApp.
+  ///
+  /// In en, this message translates to:
+  /// **'How would you like to use PsarKasekor?'**
+  String get howToUseApp;
+
+  /// No description provided for @roleSelectionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Join our leading agricultural network. Please choose your role to get started.'**
+  String get roleSelectionDescription;
+
+  /// No description provided for @iAmRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'I am a Restaurant'**
+  String get iAmRestaurant;
+
+  /// No description provided for @restaurantRoleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Order fresh ingredients directly from local producers with reliable delivery.'**
+  String get restaurantRoleDescription;
+
+  /// No description provided for @buyerTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Buyer'**
+  String get buyerTag;
+
+  /// No description provided for @chefTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Chef'**
+  String get chefTag;
+
+  /// No description provided for @iAmFarmer.
+  ///
+  /// In en, this message translates to:
+  /// **'I am a Farmer'**
+  String get iAmFarmer;
+
+  /// No description provided for @farmerRoleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell your bountiful harvest to major restaurants and manage wholesale orders.'**
+  String get farmerRoleDescription;
+
+  /// No description provided for @sellerTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Seller'**
+  String get sellerTag;
+
+  /// No description provided for @producerTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Producer'**
+  String get producerTag;
+
+  /// No description provided for @continueForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueForward;
+
+  /// No description provided for @signUpAsFarmer.
+  ///
+  /// In en, this message translates to:
+  /// **'Registering as: Farmer'**
+  String get signUpAsFarmer;
+
+  /// No description provided for @signUpAsRestaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Registering as: Restaurant'**
+  String get signUpAsRestaurant;
+
+  /// No description provided for @createYourAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Your Account'**
+  String get createYourAccount;
+
+  /// No description provided for @signUpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join the leading agricultural trade network'**
+  String get signUpSubtitle;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullName;
+
+  /// No description provided for @enterFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter full name'**
+  String get enterFullName;
+
+  /// No description provided for @pleaseEnterFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your full name'**
+  String get pleaseEnterFullName;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPassword;
+
+  /// No description provided for @reEnterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter password'**
+  String get reEnterPassword;
+
+  /// No description provided for @pleaseConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get pleaseConfirmPassword;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @passwordLengthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 6 characters'**
+  String get passwordLengthHint;
+
+  /// No description provided for @agreeToTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the'**
+  String get agreeToTerms;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get termsOfService;
+
+  /// No description provided for @andWord.
+  ///
+  /// In en, this message translates to:
+  /// **'and'**
+  String get andWord;
+
+  /// No description provided for @mustAgreeToTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Please accept the terms and privacy policy'**
+  String get mustAgreeToTerms;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get createAccount;
+
+  /// No description provided for @secureVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Marketplace Verification'**
+  String get secureVerification;
+
+  /// No description provided for @enterVerificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Verification Code'**
+  String get enterVerificationCode;
+
+  /// No description provided for @weSentCodeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a 6-digit verification code to\n{phone}'**
+  String weSentCodeTo(String phone);
+
+  /// No description provided for @verificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Code'**
+  String get verificationCode;
+
+  /// No description provided for @enter6DigitCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the 6-digit code'**
+  String get enter6DigitCode;
+
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verify;
+
+  /// No description provided for @didntReceiveCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t receive code? '**
+  String get didntReceiveCode;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend'**
+  String get resendCode;
+
+  /// No description provided for @resendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in {seconds}s'**
+  String resendIn(int seconds);
+
+  /// No description provided for @verificationSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone verified successfully'**
+  String get verificationSuccess;
+
+  /// No description provided for @invalidOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid or expired OTP'**
+  String get invalidOtp;
+
+  /// No description provided for @wrongNumberChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect phone number? Change number'**
+  String get wrongNumberChange;
+
+  /// No description provided for @yourOtpCodeIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Your verification code is: {otp}'**
+  String yourOtpCodeIs(String otp);
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPassword;
+
+  /// No description provided for @resetPasswordDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Please create a new password that you don\'t use elsewhere.'**
+  String get resetPasswordDescription;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @enterNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter new password'**
+  String get enterNewPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @pleaseEnterNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a new password'**
+  String get pleaseEnterNewPassword;
+
+  /// No description provided for @passwordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset successfully'**
+  String get passwordResetSuccess;
+
+  /// No description provided for @help.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get help;
+
+  /// No description provided for @accountCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created successfully'**
+  String get accountCreatedSuccess;
+
+  /// No description provided for @setupYourProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Up Your Profile'**
+  String get setupYourProfile;
+
+  /// No description provided for @setupProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an avatar and your {role} information to build trust in the marketplace'**
+  String setupProfileSubtitle(String role);
+
+  /// No description provided for @chooseAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Avatar'**
+  String get chooseAvatar;
+
+  /// No description provided for @farm.
+  ///
+  /// In en, this message translates to:
+  /// **'Farm'**
+  String get farm;
+
+  /// No description provided for @restaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get restaurant;
+
+  /// No description provided for @nameOfRole.
+  ///
+  /// In en, this message translates to:
+  /// **'{role} Name'**
+  String nameOfRole(String role);
+
+  /// No description provided for @farmerNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Battambang Organic Farm'**
+  String get farmerNameHint;
+
+  /// No description provided for @restaurantNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Angkor Khmer Restaurant'**
+  String get restaurantNameHint;
+
+  /// No description provided for @addressLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Address / Location'**
+  String get addressLocation;
+
+  /// No description provided for @addressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Phnom Penh or Province...'**
+  String get addressHint;
+
+  /// No description provided for @shortBio.
+  ///
+  /// In en, this message translates to:
+  /// **'Short Bio / Description'**
+  String get shortBio;
+
+  /// No description provided for @farmerBioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Briefly describe the agricultural produce you grow...'**
+  String get farmerBioHint;
+
+  /// No description provided for @restaurantBioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Briefly describe your cuisine or ingredient needs...'**
+  String get restaurantBioHint;
+
+  /// No description provided for @saveAndStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & Start'**
+  String get saveAndStart;
+
+  /// No description provided for @skipForNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now (complete later)'**
+  String get skipForNow;
+
+  /// No description provided for @failedToPickImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to pick image: {error}'**
+  String failedToPickImage(String error);
+
+  /// No description provided for @failedToSaveProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save profile: {error}'**
+  String failedToSaveProfile(String error);
 }
 
 class _AppLocalizationsDelegate

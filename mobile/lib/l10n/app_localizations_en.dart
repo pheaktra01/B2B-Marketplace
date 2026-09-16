@@ -912,4 +912,256 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectLanguage => 'Select Language';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account? ';
+
+  @override
+  String get createNewAccount => 'Create New Account';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
+
+  @override
+  String get backToLogin => 'Back to Login';
+
+  @override
+  String get forgotPasswordTitle => 'Forgot Password';
+
+  @override
+  String get forgotPasswordInstruction =>
+      'Enter the phone number associated with your account. We\'ll send an OTP code to reset your password.';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get sendCode => 'Send Code';
+
+  @override
+  String get phoneHint => '012345678 or +85512345678';
+
+  @override
+  String get unableToRequestOtp => 'Unable to request OTP';
+
+  @override
+  String get howToUseApp => 'How would you like to use PsarKasekor?';
+
+  @override
+  String get roleSelectionDescription =>
+      'Join our leading agricultural network. Please choose your role to get started.';
+
+  @override
+  String get iAmRestaurant => 'I am a Restaurant';
+
+  @override
+  String get restaurantRoleDescription =>
+      'Order fresh ingredients directly from local producers with reliable delivery.';
+
+  @override
+  String get buyerTag => 'Buyer';
+
+  @override
+  String get chefTag => 'Chef';
+
+  @override
+  String get iAmFarmer => 'I am a Farmer';
+
+  @override
+  String get farmerRoleDescription =>
+      'Sell your bountiful harvest to major restaurants and manage wholesale orders.';
+
+  @override
+  String get sellerTag => 'Seller';
+
+  @override
+  String get producerTag => 'Producer';
+
+  @override
+  String get continueForward => 'Continue';
+
+  @override
+  String get signUpAsFarmer => 'Registering as: Farmer';
+
+  @override
+  String get signUpAsRestaurant => 'Registering as: Restaurant';
+
+  @override
+  String get createYourAccount => 'Create Your Account';
+
+  @override
+  String get signUpSubtitle => 'Join the leading agricultural trade network';
+
+  @override
+  String get fullName => 'Full Name';
+
+  @override
+  String get enterFullName => 'Enter full name';
+
+  @override
+  String get pleaseEnterFullName => 'Please enter your full name';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get reEnterPassword => 'Re-enter password';
+
+  @override
+  String get pleaseConfirmPassword => 'Please confirm your password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get passwordLengthHint => 'At least 6 characters';
+
+  @override
+  String get agreeToTerms => 'I agree to the';
+
+  @override
+  String get termsOfService => 'Terms of Service';
+
+  @override
+  String get andWord => 'and';
+
+  @override
+  String get mustAgreeToTerms => 'Please accept the terms and privacy policy';
+
+  @override
+  String get createAccount => 'Create Account';
+
+  @override
+  String get secureVerification => 'Secure Marketplace Verification';
+
+  @override
+  String get enterVerificationCode => 'Enter Verification Code';
+
+  @override
+  String weSentCodeTo(String phone) {
+    return 'We sent a 6-digit verification code to\n$phone';
+  }
+
+  @override
+  String get verificationCode => 'Verification Code';
+
+  @override
+  String get enter6DigitCode => 'Please enter the 6-digit code';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get didntReceiveCode => 'Didn\'t receive code? ';
+
+  @override
+  String get resendCode => 'Resend';
+
+  @override
+  String resendIn(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
+  String get verificationSuccess => 'Phone verified successfully';
+
+  @override
+  String get invalidOtp => 'Invalid or expired OTP';
+
+  @override
+  String get wrongNumberChange => 'Incorrect phone number? Change number';
+
+  @override
+  String yourOtpCodeIs(String otp) {
+    return 'Your verification code is: $otp';
+  }
+
+  @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get resetPasswordDescription =>
+      'Please create a new password that you don\'t use elsewhere.';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get enterNewPassword => 'Enter new password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get pleaseEnterNewPassword => 'Please enter a new password';
+
+  @override
+  String get passwordResetSuccess => 'Password reset successfully';
+
+  @override
+  String get help => 'Help';
+
+  @override
+  String get accountCreatedSuccess => 'Account created successfully';
+
+  @override
+  String get setupYourProfile => 'Set Up Your Profile';
+
+  @override
+  String setupProfileSubtitle(String role) {
+    return 'Add an avatar and your $role information to build trust in the marketplace';
+  }
+
+  @override
+  String get chooseAvatar => 'Choose Avatar';
+
+  @override
+  String get farm => 'Farm';
+
+  @override
+  String get restaurant => 'Restaurant';
+
+  @override
+  String nameOfRole(String role) {
+    return '$role Name';
+  }
+
+  @override
+  String get farmerNameHint => 'e.g. Battambang Organic Farm';
+
+  @override
+  String get restaurantNameHint => 'e.g. Angkor Khmer Restaurant';
+
+  @override
+  String get addressLocation => 'Address / Location';
+
+  @override
+  String get addressHint => 'e.g. Phnom Penh or Province...';
+
+  @override
+  String get shortBio => 'Short Bio / Description';
+
+  @override
+  String get farmerBioHint =>
+      'Briefly describe the agricultural produce you grow...';
+
+  @override
+  String get restaurantBioHint =>
+      'Briefly describe your cuisine or ingredient needs...';
+
+  @override
+  String get saveAndStart => 'Save & Start';
+
+  @override
+  String get skipForNow => 'Skip for now (complete later)';
+
+  @override
+  String failedToPickImage(String error) {
+    return 'Failed to pick image: $error';
+  }
+
+  @override
+  String failedToSaveProfile(String error) {
+    return 'Failed to save profile: $error';
+  }
 }

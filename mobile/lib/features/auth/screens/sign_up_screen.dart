@@ -5,6 +5,7 @@ import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
 import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class SignUpScreen extends StatefulWidget {
   final String selectedRole;
@@ -49,6 +50,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const brandGreen = Color(0xFF0F6221);
     const bgLight = Color(0xFFF8FAFC);
     const borderColor = Color(0xFFE2E8F0);
@@ -136,9 +138,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       backgroundImage: const AssetImage('assets/logo01.png'),
                                     ),
                                     const SizedBox(height: 14),
-                                    const Text(
-                                      'ផ្សារកសិករ',
-                                      style: TextStyle(
+                                    Text(
+                                      l10n.farmersMarket,
+                                      style: const TextStyle(
                                         fontSize: 30,
                                         fontWeight: FontWeight.bold,
                                         color: brandGreen,
@@ -146,10 +148,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       ),
                                     ),
                                     const SizedBox(height: 6),
-                                    const Text(
-                                      'ទីផ្សារផលិតផលកសិកម្មស្រស់សម្រាប់\nអាជីវកម្មផ្ទះបាយអាជីព',
+                                    Text(
+                                      l10n.farmersMarketDescription,
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 14, color: Colors.black87, height: 1.3),
+                                      style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.3),
                                     ),
 
                                     const SizedBox(height: 20),
@@ -172,8 +174,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           const SizedBox(width: 6),
                                           Text(
                                             widget.selectedRole == 'farmer'
-                                                ? 'ចុះឈ្មោះជា៖ កសិករ (Farmer)'
-                                                : 'ចុះឈ្មោះជា៖ ភោជនីយដ្ឋាន (Restaurant)',
+                                                ? l10n.signUpAsFarmer
+                                                : l10n.signUpAsRestaurant,
                                             style: const TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.bold,
@@ -186,15 +188,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                                     const SizedBox(height: 14),
 
-                                    const Text(
-                                      'បង្កើតគណនីរបស់អ្នក',
-                                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                    Text(
+                                      l10n.createYourAccount,
+                                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                                     ),
                                     const SizedBox(height: 4),
-                                    const Text(
-                                      'ចូលរួមជាមួយបណ្តាញពាណិជ្ជកម្មកសិកម្មឈានមុខគេ',
+                                    Text(
+                                      l10n.signUpSubtitle,
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 13, color: Colors.black54, height: 1.3),
+                                      style: const TextStyle(fontSize: 13, color: Colors.black54, height: 1.3),
                                     ),
 
                                     const SizedBox(height: 24),
@@ -206,13 +208,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         children: [
                                           Expanded(
                                             child: _buildInputField(
-                                              label: 'ឈ្មោះពេញ',
-                                              hint: 'បញ្ចូលឈ្មោះពេញ',
+                                              label: l10n.fullName,
+                                              hint: l10n.enterFullName,
                                               prefixIcon: Icons.person_outline,
                                               controller: _nameController,
                                               validator: (value) {
                                                 if (value == null || value.trim().isEmpty) {
-                                                  return 'សូមបញ្ចូលឈ្មោះពេញ';
+                                                  return l10n.pleaseEnterFullName;
                                                 }
                                                 return null;
                                               },
@@ -222,19 +224,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           const SizedBox(width: 16),
                                           Expanded(
                                             child: _buildInputField(
-                                              label: 'លេខទូរស័ព្ទ',
-                                              hint: '012345678',
+                                              label: l10n.phoneNumber,
+                                              hint: l10n.phoneHint,
                                               prefixIcon: Icons.phone_outlined,
                                               controller: _phoneController,
                                               keyboardType: TextInputType.phone,
                                               validator: (value) {
                                                 final cleaned = (value ?? '').replaceAll(RegExp(r'\s+'), '');
                                                 if (cleaned.isEmpty) {
-                                                  return 'សូមបញ្ចូលលេខទូរស័ព្ទ';
+                                                  return l10n.pleaseEnterPhoneNumber;
                                                 }
 
                                                 if (!RegExp(r'^(0|\+855)\d{7,9}$').hasMatch(cleaned)) {
-                                                  return 'លេខទូរស័ព្ទមិនត្រឹមត្រូវ';
+                                                  return l10n.invalidPhoneNumber;
                                                 }
 
                                                 return null;
@@ -249,18 +251,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         children: [
                                           Expanded(
                                             child: _buildInputField(
-                                              label: 'ពាក្យសម្ងាត់',
-                                              hint: 'ពាក្យសម្ងាត់',
+                                              label: l10n.password,
+                                              hint: l10n.password,
                                               prefixIcon: Icons.lock_outline,
                                               controller: _passwordController,
                                               obscureText: _obscurePassword,
                                               validator: (value) {
                                                 if (value == null || value.isEmpty) {
-                                                  return 'សូមបញ្ចូលពាក្យសម្ងាត់';
+                                                  return l10n.pleaseEnterPassword;
                                                 }
 
-                                                if (value.length < 8) {
-                                                  return 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ';
+                                                if (value.length < 6) {
+                                                  return l10n.passwordMinLength;
                                                 }
                                                 return null;
                                               },
@@ -279,18 +281,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           const SizedBox(width: 16),
                                           Expanded(
                                             child: _buildInputField(
-                                              label: 'បញ្ជាក់ពាក្យសម្ងាត់',
-                                              hint: 'បញ្ជាក់ពាក្យសម្ងាត់',
+                                              label: l10n.confirmPassword,
+                                              hint: l10n.reEnterPassword,
                                               prefixIcon: Icons.lock_outline,
                                               controller: _confirmPasswordController,
                                               obscureText: _obscureConfirmPassword,
                                               validator: (value) {
                                                 if (value == null || value.isEmpty) {
-                                                  return 'សូមបញ្ជាក់ពាក្យសម្ងាត់';
+                                                  return l10n.pleaseConfirmPassword;
                                                 }
 
                                                 if (value != _passwordController.text) {
-                                                  return 'ពាក្យសម្ងាត់មិនត្រូវគ្នា';
+                                                  return l10n.passwordsDoNotMatch;
                                                 }
                                                 return null;
                                               },
@@ -312,32 +314,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ] else ...[
                                       // Single-column mobile view
                                       _buildInputField(
-                                        label: 'ឈ្មោះពេញ',
-                                        hint: 'បញ្ចូលឈ្មោះពេញរបស់អ្នក',
+                                        label: l10n.fullName,
+                                        hint: l10n.enterFullName,
                                         prefixIcon: Icons.person_outline,
                                         controller: _nameController,
                                         validator: (value) {
                                           if (value == null || value.trim().isEmpty) {
-                                            return 'សូមបញ្ចូលឈ្មោះពេញ';
+                                            return l10n.pleaseEnterFullName;
                                           }
                                           return null;
                                         },
                                         fillColor: inputFill,
                                       ),
                                       _buildInputField(
-                                        label: 'លេខទូរស័ព្ទ',
-                                        hint: '012345678',
+                                        label: l10n.phoneNumber,
+                                        hint: l10n.phoneHint,
                                         prefixIcon: Icons.phone_outlined,
                                         controller: _phoneController,
                                         keyboardType: TextInputType.phone,
                                         validator: (value) {
                                           final cleaned = (value ?? '').replaceAll(RegExp(r'\s+'), '');
                                           if (cleaned.isEmpty) {
-                                            return 'សូមបញ្ចូលលេខទូរស័ព្ទ';
+                                            return l10n.pleaseEnterPhoneNumber;
                                           }
 
                                           if (!RegExp(r'^(0|\+855)\d{7,9}$').hasMatch(cleaned)) {
-                                            return 'លេខទូរស័ព្ទមិនត្រឹមត្រូវ';
+                                            return l10n.invalidPhoneNumber;
                                           }
 
                                           return null;
@@ -345,18 +347,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         fillColor: inputFill,
                                       ),
                                       _buildInputField(
-                                        label: 'ពាក្យសម្ងាត់',
-                                        hint: 'ពាក្យសម្ងាត់',
+                                        label: l10n.password,
+                                        hint: l10n.password,
                                         prefixIcon: Icons.lock_outline,
                                         controller: _passwordController,
                                         obscureText: _obscurePassword,
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'សូមបញ្ចូលពាក្យសម្ងាត់';
+                                            return l10n.pleaseEnterPassword;
                                           }
 
-                                          if (value.length < 8) {
-                                            return 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ';
+                                          if (value.length < 6) {
+                                            return l10n.passwordMinLength;
                                           }
 
                                           return null;
@@ -373,18 +375,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         ),
                                       ),
                                       _buildInputField(
-                                        label: 'បញ្ជាក់ពាក្យសម្ងាត់',
-                                        hint: 'បញ្ជាក់ពាក្យសម្ងាត់',
+                                        label: l10n.confirmPassword,
+                                        hint: l10n.reEnterPassword,
                                         prefixIcon: Icons.lock_outline,
                                         controller: _confirmPasswordController,
                                         obscureText: _obscureConfirmPassword,
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'សូមបញ្ជាក់ពាក្យសម្ងាត់';
+                                            return l10n.pleaseConfirmPassword;
                                           }
 
                                           if (value != _passwordController.text) {
-                                            return 'ពាក្យសម្ងាត់មិនត្រូវគ្នា';
+                                            return l10n.passwordsDoNotMatch;
                                           }
 
                                           return null;
@@ -420,22 +422,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         const SizedBox(width: 10),
                                         Expanded(
                                           child: RichText(
-                                            text: const TextSpan(
-                                              style: TextStyle(color: Colors.black87, fontSize: 13, height: 1.4),
+                                            text: TextSpan(
+                                              style: const TextStyle(color: Colors.black87, fontSize: 13, height: 1.4),
                                               children: [
-                                                TextSpan(text: 'ខ្ញុំយល់ព្រមតាម '),
+                                                TextSpan(text: '${l10n.agreeToTerms} '),
                                                 TextSpan(
-                                                  text: 'លក្ខខណ្ឌប្រើប្រាស់',
-                                                  style: TextStyle(
+                                                  text: l10n.termsOfService,
+                                                  style: const TextStyle(
                                                     color: brandGreen,
                                                     fontWeight: FontWeight.w600,
                                                     decoration: TextDecoration.underline,
                                                   ),
                                                 ),
-                                                TextSpan(text: ' និង '),
+                                                TextSpan(text: ' ${l10n.andWord} '),
                                                 TextSpan(
-                                                  text: 'គោលការណ៍ឯកជនភាព។',
-                                                  style: TextStyle(
+                                                  text: l10n.privacyPolicy,
+                                                  style: const TextStyle(
                                                     color: brandGreen,
                                                     fontWeight: FontWeight.w600,
                                                     decoration: TextDecoration.underline,
@@ -531,12 +533,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                   }
                                                 }
                                               },
-                                        child: const Row(
+                                        child: Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              'ចុះឈ្មោះ',
-                                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                              l10n.signup,
+                                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),
@@ -549,9 +551,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        const Text(
-                                          'មានគណនីរួចហើយមែនទេ? ',
-                                          style: TextStyle(
+                                        Text(
+                                          l10n.alreadyHaveAccount,
+                                          style: const TextStyle(
                                             color: Colors.black54,
                                             fontSize: 14,
                                           ),
@@ -564,9 +566,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                               context.go(AppRoutes.login);
                                             }
                                           },
-                                          child: const Text(
-                                            'ចូលគណនី',
-                                            style: TextStyle(
+                                          child: Text(
+                                            l10n.login,
+                                            style: const TextStyle(
                                               color: brandGreen,
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String phoneNumber;
@@ -56,6 +57,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const brandGreen = Color(0xFF0F6221);
     const inputFillColor = Color(0xFFF3F4F6);
 
@@ -83,9 +85,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               backgroundImage: const AssetImage('assets/logo01.png'),
                             ),
                             const SizedBox(width: 8),
-                            const Text(
-                              'ផ្សារកសិករ',
-                              style: TextStyle(
+                            Text(
+                              l10n.farmersMarket,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: brandGreen,
@@ -101,9 +103,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               onPressed: () {
                                 // Support action
                               },
-                              child: const Text(
-                                'ជំនួយ',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.help,
+                                style: const TextStyle(
                                   color: brandGreen,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -156,21 +158,21 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Align(
+                                Align(
                                   alignment: Alignment.center,
                                   child: Text(
-                                    'កំណត់ពាក្យសម្ងាត់ឡើងវិញ',
-                                    style: TextStyle(
+                                    l10n.resetPassword,
+                                    style: const TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-                                const Text(
-                                  'សូមបង្កើតពាក្យសម្ងាត់ផ្ទាល់ខ្លួនដែលអ្នកមិនបានប្រើប្រាស់នៅកន្លែងផ្សេង។',
+                                Text(
+                                  l10n.resetPasswordDescription,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.black54,
                                     height: 1.4,
@@ -180,9 +182,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 const SizedBox(height: 28),
 
                                 // --- New Password Field ---
-                                const Text(
-                                  'ពាក្យសម្ងាត់ថ្មី',
-                                  style: TextStyle(
+                                Text(
+                                  l10n.newPassword,
+                                  style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black87,
@@ -194,7 +196,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   controller: _passwordController,
                                   obscureText: _obscurePassword,
                                   decoration: _buildInputDecoration(
-                                    hint: 'បញ្ចូលពាក្យសម្ងាត់ថ្មី',
+                                    hint: l10n.enterNewPassword,
                                     prefixIcon: Icons.lock_outline,
                                     fillColor: inputFillColor,
                                     suffixIcon: IconButton(
@@ -214,9 +216,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 const SizedBox(height: 20),
 
                                 // --- Confirm Password Field ---
-                                const Text(
-                                  'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី',
-                                  style: TextStyle(
+                                Text(
+                                  l10n.confirmNewPassword,
+                                  style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black87,
@@ -228,7 +230,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   controller: _confirmPasswordController,
                                   obscureText: _obscureConfirmPassword,
                                   decoration: _buildInputDecoration(
-                                    hint: 'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី',
+                                    hint: l10n.confirmNewPassword,
                                     prefixIcon: Icons.verified_user_outlined,
                                     fillColor: inputFillColor,
                                     suffixIcon: IconButton(
@@ -245,7 +247,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   ),
                                   validator: (value) {
                                     if (value != _passwordController.text) {
-                                      return 'ពាក្យសម្ងាត់មិនត្រូវគ្នាតែមួយទេ';
+                                      return l10n.passwordsDoNotMatch;
                                     }
                                     return null;
                                   },
@@ -342,18 +344,18 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                               }
                                             }
                                           },
-                                    child: const Row(
+                                    child: Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Text(
-                                          'កំណត់ពាក្យសម្ងាត់ឡើងវិញ',
-                                          style: TextStyle(
+                                          l10n.resetPassword,
+                                          style: const TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        SizedBox(width: 8),
-                                        Icon(Icons.arrow_forward_ios, size: 16),
+                                        const SizedBox(width: 8),
+                                        const Icon(Icons.arrow_forward_ios, size: 16),
                                       ],
                                     ),
                                   ),

@@ -429,5 +429,137 @@
   "logoutFailed": "Logout failed",
   "logoutError": "Logout error",
   "selectLanguage": "Select Language",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+
+  "dontHaveAccount": "Don't have an account? ",
+  "createNewAccount": "Create New Account",
+  "alreadyHaveAccount": "Already have an account? ",
+  "backToLogin": "Back to Login",
+  "forgotPasswordTitle": "Forgot Password",
+  "forgotPasswordInstruction": "Enter the phone number associated with your account. We'll send an OTP code to reset your password.",
+  "send": "Send",
+  "sendCode": "Send Code",
+  "phoneHint": "012345678 or +85512345678",
+  "unableToRequestOtp": "Unable to request OTP",
+
+  "howToUseApp": "How would you like to use PsarKasekor?",
+  "roleSelectionDescription": "Join our leading agricultural network. Please choose your role to get started.",
+  "iAmRestaurant": "I am a Restaurant",
+  "restaurantRoleDescription": "Order fresh ingredients directly from local producers with reliable delivery.",
+  "buyerTag": "Buyer",
+  "chefTag": "Chef",
+  "iAmFarmer": "I am a Farmer",
+  "farmerRoleDescription": "Sell your bountiful harvest to major restaurants and manage wholesale orders.",
+  "sellerTag": "Seller",
+  "producerTag": "Producer",
+  "continueForward": "Continue",
+
+  "signUpAsFarmer": "Registering as: Farmer",
+  "signUpAsRestaurant": "Registering as: Restaurant",
+  "createYourAccount": "Create Your Account",
+  "signUpSubtitle": "Join the leading agricultural trade network",
+  "fullName": "Full Name",
+  "enterFullName": "Enter full name",
+  "pleaseEnterFullName": "Please enter your full name",
+  "confirmPassword": "Confirm Password",
+  "reEnterPassword": "Re-enter password",
+  "pleaseConfirmPassword": "Please confirm your password",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "passwordLengthHint": "At least 6 characters",
+  "agreeToTerms": "I agree to the",
+  "termsOfService": "Terms of Service",
+  "andWord": "and",
+  "mustAgreeToTerms": "Please accept the terms and privacy policy",
+  "createAccount": "Create Account",
+
+  "secureVerification": "Secure Marketplace Verification",
+  "enterVerificationCode": "Enter Verification Code",
+  "weSentCodeTo": "We sent a 6-digit verification code to\n{phone}",
+  "@weSentCodeTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "verificationCode": "Verification Code",
+  "enter6DigitCode": "Please enter the 6-digit code",
+  "verify": "Verify",
+  "didntReceiveCode": "Didn't receive code? ",
+  "resendCode": "Resend",
+  "resendIn": "Resend in {seconds}s",
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "verificationSuccess": "Phone verified successfully",
+  "invalidOtp": "Invalid or expired OTP",
+  "wrongNumberChange": "Incorrect phone number? Change number",
+  "yourOtpCodeIs": "Your verification code is: {otp}",
+  "@yourOtpCodeIs": {
+    "placeholders": {
+      "otp": {
+        "type": "String"
+      }
+    }
+  },
+
+  "resetPassword": "Reset Password",
+  "resetPasswordDescription": "Please create a new password that you don't use elsewhere.",
+  "newPassword": "New Password",
+  "enterNewPassword": "Enter new password",
+  "confirmNewPassword": "Confirm New Password",
+  "pleaseEnterNewPassword": "Please enter a new password",
+  "passwordResetSuccess": "Password reset successfully",
+  "help": "Help",
+
+  "accountCreatedSuccess": "Account created successfully",
+  "setupYourProfile": "Set Up Your Profile",
+  "setupProfileSubtitle": "Add an avatar and your {role} information to build trust in the marketplace",
+  "@setupProfileSubtitle": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseAvatar": "Choose Avatar",
+  "farm": "Farm",
+  "restaurant": "Restaurant",
+  "nameOfRole": "{role} Name",
+  "@nameOfRole": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "farmerNameHint": "e.g. Battambang Organic Farm",
+  "restaurantNameHint": "e.g. Angkor Khmer Restaurant",
+  "addressLocation": "Address / Location",
+  "addressHint": "e.g. Phnom Penh or Province...",
+  "shortBio": "Short Bio / Description",
+  "farmerBioHint": "Briefly describe the agricultural produce you grow...",
+  "restaurantBioHint": "Briefly describe your cuisine or ingredient needs...",
+  "saveAndStart": "Save & Start",
+  "skipForNow": "Skip for now (complete later)",
+  "failedToPickImage": "Failed to pick image: {error}",
+  "@failedToPickImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveProfile": "Failed to save profile: {error}",
+  "@failedToSaveProfile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

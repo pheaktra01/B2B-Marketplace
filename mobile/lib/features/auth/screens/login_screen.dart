@@ -448,9 +448,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                         alignment: WrapAlignment.center,
                                         crossAxisAlignment: WrapCrossAlignment.center,
                                         children: [
-                                          const Text(
-                                            'មិនទាន់មានគណនីមែនទេ? ',
-                                            style: TextStyle(
+                                          Text(
+                                            l10n.dontHaveAccount,
+                                            style: const TextStyle(
                                               color: textMuted,
                                               fontSize: 14,
                                             ),
@@ -459,9 +459,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                             onTap: () {
                                               context.push(AppRoutes.roleSelection);
                                             },
-                                            child: const Text(
-                                              'បង្កើតគណនីថ្មី',
-                                              style: TextStyle(
+                                            child: Text(
+                                              l10n.createNewAccount,
+                                              style: const TextStyle(
                                                 color: primaryGreen,
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.bold,

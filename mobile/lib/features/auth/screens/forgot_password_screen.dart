@@ -5,6 +5,7 @@ import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
 import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -30,6 +31,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const brandGreen = Color(0xFF0F6221);
     const inputFillColor = Color(0xFFF3F4F6);
 
@@ -95,9 +97,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             backgroundImage: const AssetImage('assets/logo01.png'),
                           ),
                           const SizedBox(height: 12),
-                          const Text(
-                            'ផ្សារកសិករ',
-                            style: TextStyle(
+                          Text(
+                            l10n.farmersMarket,
+                            style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
                               color: brandGreen,
@@ -105,10 +107,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
-                            'ផ្សារផលិតផលកសិកម្មស្រស់ៗសម្រាប់\nចុងភៅអាជីព។',
+                          Text(
+                            l10n.farmersMarketDescription,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               color: Colors.black87,
                               height: 1.3,
@@ -142,21 +144,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Align(
+                              Align(
                                 alignment: Alignment.center,
                                 child: Text(
-                                  'ភ្លេចពាក្យសម្ងាត់',
-                                  style: TextStyle(
+                                  l10n.forgotPasswordTitle,
+                                  style: const TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              const Text(
-                                "សូមបញ្ចូលអាសយដ្ឋានអ៊ីមែល ឬលេខទូរស័ព្ទដែលភ្ជាប់ជាមួយគណនីរបស់អ្នក។ យើងនឹងផ្ញើតំណ ឬកូដដើម្បីកំណត់ពាក្យសម្ងាត់ឡើងវិញ។",
+                              Text(
+                                l10n.forgotPasswordInstruction,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 14,
                                   color: Colors.black54,
                                   height: 1.4,
@@ -165,9 +167,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               const SizedBox(height: 24),
 
                               // --- Input Field ---
-                              const Text(
-                                'លេខទូរស័ព្ទ',
-                                style: TextStyle(
+                              Text(
+                                l10n.phoneNumber,
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black87,
@@ -178,13 +180,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 controller: _identifierController,
                                 keyboardType: TextInputType.phone,
                                 decoration: InputDecoration(
-                                  hintText: '០១២៣៤៥៦៧៨៩ ឬ +855123456789',
+                                  hintText: l10n.phoneHint,
                                   hintStyle: const TextStyle(
                                     color: Colors.black38,
                                     fontSize: 14,
                                   ),
                                   prefixIcon: const Icon(
-                                    Icons.mail_outline,
+                                    Icons.phone_outlined,
                                     color: Colors.black45,
                                     size: 20,
                                   ),
@@ -215,11 +217,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
-                                    return 'សូមបញ្ចូលលេខទូរស័ព្ទរបស់អ្នក';
+                                    return l10n.pleaseEnterPhoneNumber;
                                   }
 
                                   if (!RegExp(r'^(0|\+855)\d{8,9}$').hasMatch(value.trim())) {
-                                    return 'លេខទូរស័ព្ទមិនត្រឹមត្រូវ';
+                                    return l10n.invalidPhoneNumber;
                                   }
 
                                   return null;
@@ -283,7 +285,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                               messenger.showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                    data['message']?.toString() ?? 'Unable to request OTP',
+                                                    data['message']?.toString() ?? l10n.unableToRequestOtp,
                                                   ),
                                                 ),
                                               );
@@ -295,7 +297,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                                             messenger.showSnackBar(
                                               SnackBar(
-                                                content: Text('Unable to request OTP: $error'),
+                                                content: Text('${l10n.unableToRequestOtp}: $error'),
                                               ),
                                             );
                                           } finally {
@@ -306,18 +308,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                             }
                                           }
                                         },
-                                  child: const Row(
+                                  child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'ផ្ញើ',
-                                        style: TextStyle(
+                                        l10n.send,
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      SizedBox(width: 8),
-                                      Icon(Icons.arrow_forward_ios, size: 16),
+                                      const SizedBox(width: 8),
+                                      const Icon(Icons.arrow_forward_ios, size: 16),
                                     ],
                                   ),
                                 ),
@@ -344,9 +346,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             size: 18,
                             color: Colors.black54,
                           ),
-                          label: const Text(
-                            'ត្រឡប់ទៅទំព័រចូលប្រើប្រាស់',
-                            style: TextStyle(
+                          label: Text(
+                            l10n.backToLogin,
+                            style: const TextStyle(
                               color: Colors.black87,
                               fontWeight: FontWeight.w600,
                               fontSize: 14,

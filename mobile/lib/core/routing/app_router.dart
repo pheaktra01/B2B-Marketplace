@@ -62,26 +62,33 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.splash,
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              'Route not found: ${state.uri.toString()}',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.go(AppRoutes.splash),
-              child: const Text('Go to Home'),
-            ),
-          ],
+    errorBuilder: (context, state) {
+      final path = state.uri.toString();
+      if (path.contains('settings')) {
+        final isRestaurant = path.contains('restaurant');
+        return FarmerSettingsScreen(isRestaurant: isRestaurant);
+      }
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                'Route not found: ${state.uri.toString()}',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => context.go(AppRoutes.splash),
+                child: const Text('Go to Home'),
+              ),
+            ],
+          ),
         ),
-      ),
-    ),
+      );
+    },
     routes: [
       GoRoute(
         path: '/',
@@ -258,7 +265,53 @@ class AppRouter {
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,
         path: AppRoutes.farmerSettings,
-        builder: (context, state) => const FarmerSettingsScreen(),
+        builder: (context, state) {
+          final isRestaurant = state.uri.queryParameters['role'] == 'restaurant' ||
+              (state.extra is Map &&
+                  (state.extra as Map)['isRestaurant'] == true);
+          return FarmerSettingsScreen(isRestaurant: isRestaurant);
+        },
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: AppRoutes.restaurantSettings,
+        builder: (context, state) =>
+            const FarmerSettingsScreen(isRestaurant: true),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: AppRoutes.farmerOrderDetail,
+        builder: (context, state) {
+          final args = state.extra;
+          String? orderId;
+          OrderModel? initialOrder;
+
+          if (args is OrderTrackingArgs) {
+            orderId = args.orderId;
+            if (args.order is OrderModel) {
+              initialOrder = args.order as OrderModel;
+            }
+          } else if (args is OrderModel) {
+            orderId = args.id;
+            initialOrder = args;
+          } else if (args is String && args.isNotEmpty) {
+            orderId = args;
+          } else if (args is Map) {
+            orderId = args['orderId']?.toString() ?? args['id']?.toString();
+          }
+
+          orderId ??= state.uri.queryParameters['orderId'] ??
+              state.uri.queryParameters['id'];
+
+          if (orderId != null && orderId.isNotEmpty) {
+            return OrderDetailTrackingScreen(
+              orderId: orderId,
+              initialOrder: initialOrder,
+            );
+          }
+
+          return const FarmerOrderManagementScreen();
+        },
       ),
 
       // ======================================================

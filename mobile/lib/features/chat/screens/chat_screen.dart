@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/features/chat/models/conversation_model.dart';
@@ -33,6 +34,14 @@ class _ChatScreenState extends State<ChatScreen> {
   io.Socket? _socket;
   List<ChatMessage> _messages = [];
 
+  late String _participantName;
+  String? _participantAvatarUrl;
+  late bool _isOnline;
+
+  bool _isOtherTyping = false;
+  Timer? _typingTimer;
+  Timer? _otherTypingDebounceTimer;
+
   bool _isLoadingInitial = true;
   bool _isLoadingOlder = false;
   bool _hasMore = true;
@@ -41,9 +50,42 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _showNewMessagePill = false;
   int _unseenNewMessages = 0;
 
+  static bool _isGenericName(String name) {
+    final lower = name.trim().toLowerCase();
+    return lower.isEmpty ||
+        lower == 'new message' ||
+        lower == 'new messages' ||
+        lower == 'new photo message' ||
+        lower == 'new order chat' ||
+        lower == 'chat' ||
+        lower == 'notification';
+  }
+
+  String _cleanInitialName(String name) {
+    var cleaned = name.trim();
+    if (cleaned.startsWith('New Messages from ')) {
+      cleaned = cleaned.replaceFirst('New Messages from ', '').trim();
+    }
+    if (_isGenericName(cleaned)) {
+      return '';
+    }
+    return cleaned;
+  }
+
+  String get _displayParticipantName {
+    if (_participantName.trim().isNotEmpty) {
+      return _participantName;
+    }
+    return 'Chat';
+  }
+
   @override
   void initState() {
     super.initState();
+
+    _participantName = _cleanInitialName(widget.participantName);
+    _participantAvatarUrl = widget.participantAvatarUrl;
+    _isOnline = widget.isOnline;
 
     _messageController.addListener(_onTextChanged);
     _messagesScrollController.addListener(_onScroll);
@@ -61,9 +103,21 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _onTextChanged() {
-    final hasText = _messageController.text.trim().isNotEmpty;
+    final text = _messageController.text;
+    final hasText = text.trim().isNotEmpty;
     if (hasText != _hasText) {
       setState(() => _hasText = hasText);
+    }
+
+    if (hasText) {
+      _chatService.emitTyping(_socket, widget.conversationId);
+      _typingTimer?.cancel();
+      _typingTimer = Timer(const Duration(milliseconds: 1800), () {
+        _chatService.emitStopTyping(_socket, widget.conversationId);
+      });
+    } else {
+      _typingTimer?.cancel();
+      _chatService.emitStopTyping(_socket, widget.conversationId);
     }
   }
 
@@ -96,6 +150,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _loadInitialData() async {
     setState(() => _isLoadingInitial = true);
+
+    // Fetch conversation details (real participant name and avatar) asynchronously
+    _loadConversationDetails();
+
     try {
       final prefs = await SharedPreferences.getInstance();
       _currentUserId = prefs.getString('userId');
@@ -131,6 +189,32 @@ class _ChatScreenState extends State<ChatScreen> {
       if (mounted) {
         setState(() => _isLoadingInitial = false);
       }
+    }
+  }
+
+  Future<void> _loadConversationDetails() async {
+    try {
+      final data = await _chatService.getConversation(widget.conversationId);
+      final participant = data['participant'] as Map<String, dynamic>?;
+      if (participant != null && mounted) {
+        final name = participant['name']?.toString().trim();
+        final avatar = participant['avatarUrl']?.toString().trim();
+        final isOnline = participant['isOnline'] == true;
+
+        setState(() {
+          if (name != null && name.isNotEmpty && !_isGenericName(name)) {
+            _participantName = name;
+          }
+          if (avatar != null && avatar.isNotEmpty) {
+            _participantAvatarUrl = avatar;
+          }
+          if (isOnline) {
+            _isOnline = true;
+          }
+        });
+      }
+    } catch (error) {
+      debugPrint('Error loading conversation details: $error');
     }
   }
 
@@ -192,7 +276,7 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       _socket = await _chatService.connectToConversation(
         widget.conversationId,
-        (data) {
+        onMessage: (data) {
           final message = ChatMessage.fromJson(data);
           if (!mounted) return;
 
@@ -241,6 +325,50 @@ class _ChatScreenState extends State<ChatScreen> {
             }
           }
         },
+        onMessagesRead: (data) {
+          if (!mounted) return;
+          final readerId = data['readerId']?.toString();
+          if (readerId == _currentUserId) return;
+          final lastReadAtStr = data['lastReadAt']?.toString();
+          final lastReadAt = DateTime.tryParse(lastReadAtStr ?? '');
+
+          setState(() {
+            _messages = _messages.map((m) {
+              if (m.senderId == _currentUserId && m.status != 'read') {
+                if (lastReadAt == null ||
+                    (m.createdAt != null && !m.createdAt!.isAfter(lastReadAt))) {
+                  return m.copyWith(status: 'read');
+                }
+              }
+              return m;
+            }).toList();
+          });
+        },
+        onTyping: (userId) {
+          if (userId == _currentUserId) return;
+          if (!mounted) return;
+          _otherTypingDebounceTimer?.cancel();
+          setState(() => _isOtherTyping = true);
+          if (_isNearBottom()) {
+            _scrollToBottom();
+          }
+          _otherTypingDebounceTimer = Timer(const Duration(seconds: 3), () {
+            if (mounted && _isOtherTyping) {
+              setState(() => _isOtherTyping = false);
+            }
+          });
+        },
+        onStopTyping: (userId) {
+          if (userId == _currentUserId) return;
+          if (!mounted) return;
+          _otherTypingDebounceTimer?.cancel();
+          setState(() => _isOtherTyping = false);
+        },
+        onUserStatusChanged: (userId, isOnline) {
+          if (userId == _currentUserId) return;
+          if (!mounted) return;
+          setState(() => _isOnline = isOnline);
+        },
       );
     } catch (error) {
       debugPrint('Realtime chat unavailable: $error');
@@ -264,6 +392,8 @@ class _ChatScreenState extends State<ChatScreen> {
     );
 
     // 1. Clear input & reset button state immediately
+    _typingTimer?.cancel();
+    _chatService.emitStopTyping(_socket, widget.conversationId);
     _messageController.clear();
     setState(() {
       _hasText = false;
@@ -337,6 +467,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _typingTimer?.cancel();
+    _otherTypingDebounceTimer?.cancel();
+    _chatService.emitStopTyping(_socket, widget.conversationId);
     _socket?.disconnect();
     _socket?.dispose();
     _messageController.removeListener(_onTextChanged);
@@ -406,7 +539,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   width: 11,
                   height: 11,
                   decoration: BoxDecoration(
-                    color: widget.isOnline ? const Color(0xFF12B76A) : const Color(0xFF98A2B3),
+                    color: _isOtherTyping || _isOnline
+                        ? const Color(0xFF12B76A)
+                        : const Color(0xFF98A2B3),
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                   ),
@@ -421,7 +556,7 @@ class _ChatScreenState extends State<ChatScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  widget.participantName,
+                  _displayParticipantName,
                   style: const TextStyle(
                     color: Color(0xFF1D2939),
                     fontSize: 15.5,
@@ -432,11 +567,18 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 const SizedBox(height: 1),
                 Text(
-                  widget.isOnline ? 'Online' : 'Offline',
+                  _isOtherTyping
+                      ? 'typing...'
+                      : (_isOnline ? 'Online' : 'Offline'),
                   style: TextStyle(
-                    color: widget.isOnline ? const Color(0xFF0C6B2D) : const Color(0xFF667085),
+                    color: _isOtherTyping || _isOnline
+                        ? const Color(0xFF0C6B2D)
+                        : const Color(0xFF667085),
                     fontSize: 11.5,
-                    fontWeight: FontWeight.w500,
+                    fontWeight:
+                        _isOtherTyping ? FontWeight.w700 : FontWeight.w500,
+                    fontStyle:
+                        _isOtherTyping ? FontStyle.italic : FontStyle.normal,
                   ),
                 ),
               ],
@@ -462,19 +604,28 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildParticipantAvatar({double radius = 18}) {
-    final rawAvatarUrl = widget.participantAvatarUrl;
+    final rawAvatarUrl = _participantAvatarUrl;
     if (rawAvatarUrl == null || rawAvatarUrl.isEmpty) {
+      final initial = _participantName.trim().isNotEmpty
+          ? _participantName.trim()[0].toUpperCase()
+          : '';
       return CircleAvatar(
         radius: radius,
         backgroundColor: const Color(0xFFE8EFE6),
-        child: Text(
-          widget.participantName.isNotEmpty ? widget.participantName[0].toUpperCase() : 'U',
-          style: const TextStyle(
-            color: Color(0xFF0C6B2D),
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
-        ),
+        child: initial.isNotEmpty
+            ? Text(
+                initial,
+                style: TextStyle(
+                  color: const Color(0xFF0C6B2D),
+                  fontWeight: FontWeight.bold,
+                  fontSize: radius * 0.78,
+                ),
+              )
+            : Icon(
+                Icons.person_rounded,
+                color: const Color(0xFF0C6B2D),
+                size: radius * 1.1,
+              ),
       );
     }
 
@@ -597,11 +748,20 @@ class _ChatScreenState extends State<ChatScreen> {
             message: msg.content,
             time: _formatMessageTime(msg.createdAt),
             status: msg.status,
-            avatarUrl: widget.participantAvatarUrl,
-            participantName: widget.participantName,
+            avatarUrl: _participantAvatarUrl,
+            participantName: _displayParticipantName,
           ),
         );
       }
+    }
+
+    if (_isOtherTyping) {
+      widgets.add(
+        _TypingIndicatorBubble(
+          avatarUrl: _participantAvatarUrl,
+          participantName: _displayParticipantName,
+        ),
+      );
     }
 
     return widgets;
@@ -660,7 +820,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Reach out to ${widget.participantName} about farm produce, negotiated prices, or delivery schedules.',
+              'Reach out to $_displayParticipantName about farm produce, negotiated prices, or delivery schedules.',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 13,
@@ -1139,6 +1299,137 @@ class _MessageBubble extends StatelessWidget {
         color: Colors.white70,
       );
     }
+  }
+}
+
+// Realtime Typing Indicator Bubble Component
+class _TypingIndicatorBubble extends StatefulWidget {
+  final String? avatarUrl;
+  final String participantName;
+
+  const _TypingIndicatorBubble({
+    required this.avatarUrl,
+    required this.participantName,
+  });
+
+  @override
+  State<_TypingIndicatorBubble> createState() => _TypingIndicatorBubbleState();
+}
+
+class _TypingIndicatorBubbleState extends State<_TypingIndicatorBubble>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _buildSmallAvatar(),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF2F4F7),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+                bottomLeft: Radius.circular(4),
+                bottomRight: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(3, (index) {
+                return AnimatedBuilder(
+                  animation: _animController,
+                  builder: (context, child) {
+                    final progress =
+                        ((_animController.value - (index * 0.2)) % 1.0 + 1.0) % 1.0;
+                    final bounce =
+                        (progress < 0.5 ? progress : (1.0 - progress)) * 2;
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                      width: 6,
+                      height: 6 + (bounce * 4),
+                      decoration: BoxDecoration(
+                        color: Color.lerp(
+                          const Color(0xFF98A2B3),
+                          const Color(0xFF0C6B2D),
+                          bounce,
+                        ),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    );
+                  },
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSmallAvatar() {
+    final avatar = widget.avatarUrl;
+    if (avatar == null || avatar.isEmpty) {
+      return CircleAvatar(
+        radius: 13,
+        backgroundColor: const Color(0xFFE8EFE6),
+        child: Text(
+          widget.participantName.isNotEmpty
+              ? widget.participantName[0].toUpperCase()
+              : 'U',
+          style: const TextStyle(
+            color: Color(0xFF0C6B2D),
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+    }
+
+    if (avatar == 'assets/default_avatar.jpg' || avatar.startsWith('assets/')) {
+      return CircleAvatar(
+        radius: 13,
+        backgroundColor: const Color(0xFFE4E7EC),
+        backgroundImage: AssetImage(avatar),
+      );
+    }
+
+    final fullUrl = ApiConstants.imageUrl(avatar);
+    if (fullUrl.startsWith('http')) {
+      return CircleAvatar(
+        radius: 13,
+        backgroundColor: const Color(0xFFE4E7EC),
+        backgroundImage: NetworkImage(fullUrl),
+        onBackgroundImageError: (_, _) {},
+      );
+    }
+
+    return const CircleAvatar(
+      radius: 13,
+      backgroundColor: Color(0xFFE4E7EC),
+      backgroundImage: AssetImage('assets/default_avatar.jpg'),
+    );
   }
 }
 

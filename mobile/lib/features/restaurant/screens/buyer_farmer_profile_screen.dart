@@ -6,9 +6,11 @@ import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/chat/services/chat_service.dart';
+import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
+import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 
 class BuyerFarmerProfileScreen extends StatefulWidget {
   final String farmerId;
@@ -431,17 +433,20 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
 
     return Scaffold(
       backgroundColor: pageBg,
+      appBar: const FarmerAppBar(
+        isRestaurant: true,
+        showBack: true,
+      ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             // Profile Header & Actions
             SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  // Cover Photo with Navigation Actions and Overlapping Avatar
-                  Stack(
-                    clipBehavior: Clip.none,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Cover Photo
                       Container(
@@ -479,86 +484,20 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                         ),
                       ),
 
-                      // Navigation Actions (Back and Share buttons)
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: SafeArea(
-                          bottom: false,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor:
-                                      Colors.black.withValues(alpha: 0.35),
-                                  child: IconButton(
-                                    icon: const Icon(Icons.arrow_back,
-                                        color: Colors.white, size: 20),
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                  ),
-                                ),
-                                CircleAvatar(
-                                  backgroundColor:
-                                      Colors.black.withValues(alpha: 0.35),
-                                  child: IconButton(
-                                    icon: const Icon(Icons.share_outlined,
-                                        color: Colors.white, size: 20),
-                                    onPressed: _shareFarmerProfile,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Avatar Overlapping Cover Bottom Edge
-                      Positioned(
-                        bottom: -38,
-                        left: 20,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 4),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: CircleAvatar(
-                            radius: 38,
-                            backgroundColor: lightGreenBg,
-                            backgroundImage: _avatarUrl != null
-                                ? NetworkImage(_avatarUrl!)
-                                : const AssetImage('assets/default_avatar.jpg') as ImageProvider,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Profile Info Card & Actions
-                  Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Space for the overlapping avatar + Verified Producer Badge aligned right
-                        SizedBox(
-                          height: 44,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
+                      // Profile Info Card & Actions
+                      Container(
+                        color: Colors.white,
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Space for the overlapping avatar + Verified Producer Badge aligned right
+                            SizedBox(
+                              height: 44,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
                               if (_isVerified)
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -753,7 +692,50 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                   ),
                 ],
               ),
-            ),
+
+              // Floating Share button on top right of cover
+              Positioned(
+                top: 12,
+                right: 12,
+                child: CircleAvatar(
+                  backgroundColor: Colors.black.withValues(alpha: 0.35),
+                  child: IconButton(
+                    icon: const Icon(Icons.share_outlined,
+                        color: Colors.white, size: 20),
+                    onPressed: _shareFarmerProfile,
+                  ),
+                ),
+              ),
+
+              // Avatar Overlapping Cover Bottom Edge (Rendered in FRONT of white info card)
+              Positioned(
+                top: 200 - 40,
+                left: 20,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.18),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 38,
+                    backgroundColor: lightGreenBg,
+                    backgroundImage: _avatarUrl != null
+                        ? NetworkImage(_avatarUrl!)
+                        : const AssetImage('assets/default_avatar.jpg')
+                            as ImageProvider,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
 
             // Sticky Tab Bar
             SliverPersistentHeader(
@@ -785,6 +767,9 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
             _buildAboutTab(),
           ],
         ),
+      ),
+      bottomNavigationBar: const RestaurantBottomNavBar(
+        currentIndex: 0,
       ),
     );
   }

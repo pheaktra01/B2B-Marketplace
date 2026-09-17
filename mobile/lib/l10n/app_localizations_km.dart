@@ -296,7 +296,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get sellingPricePerKg => 'តម្លៃលក់ក្នុងមួយគីឡូក្រាម';
 
   @override
-  String get perKg => '\$ / គីឡូក្រាម';
+  String get perKg => '/ គ.ក្រ';
 
   @override
   String get availableQuantity => 'បរិមាណដែលមាន';
@@ -308,7 +308,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get harvestDate => 'កាលបរិច្ឆេទប្រមូលផល';
 
   @override
-  String get availableUntil => 'មានរហូតដល់';
+  String get availableUntil => 'មានលក់រហូតដល់';
 
   @override
   String get selectDate => 'ជ្រើសរើសកាលបរិច្ឆេទ';
@@ -1594,4 +1594,158 @@ class AppLocalizationsKm extends AppLocalizations {
   String failedToSaveProfile(String error) {
     return 'មានបញ្ហាក្នុងការរក្សាទុកព័ត៌មាន: $error';
   }
+
+  @override
+  String get favoriteProducts => 'ផលិតផលពេញចិត្ត';
+
+  @override
+  String get noFavoritesYet => 'មិនទាន់មានផលិតផលពេញចិត្តនៅឡើយទេ';
+
+  @override
+  String get favoritesEmptySubtitle =>
+      'ចុចលើរូបបេះដូងលើផលិតផលណាមួយក្នុងទីផ្សារដើម្បីរក្សាទុកនៅទីនេះ សម្រាប់បញ្ជាទិញឡើងវិញបានរហ័ស។';
+
+  @override
+  String get browseProduce => 'ស្វែងរកផលិតផល';
+
+  @override
+  String get removedFromFavorites => 'បានដកចេញពីផលិតផលពេញចិត្ត';
+
+  @override
+  String get addedToFavorites => 'បានបន្ថែមទៅផលិតផលពេញចិត្ត';
+
+  @override
+  String get couldNotLoadFavorites => 'មិនអាចផ្ទុកផលិតផលពេញចិត្តបានទេ';
+
+  @override
+  String failedAddToCart(String error) {
+    return 'មិនអាចបន្ថែមទៅកន្ត្រក: $error';
+  }
+
+  @override
+  String addedProduceToCart(String name) {
+    return 'បានបន្ថែម $name ទៅកន្ត្រក';
+  }
+
+  @override
+  String minOrderLabel(String minOrder) {
+    return 'អប្បបរមា: $minOrder';
+  }
+
+  @override
+  String lowStockCount(String count) {
+    return 'ស្តុកជិតអស់ ($count គ.ក្រ)';
+  }
+
+  @override
+  String inStockCount(String count) {
+    return 'មានក្នុងស្តុក ($count គ.ក្រ)';
+  }
+
+  @override
+  String get productLinkCopied => 'បានចម្លងតំណភ្ជាប់ផលិតផលទៅក្ដារតម្បៀតខ្ទាស់!';
+
+  @override
+  String get enterOrderQuantity => 'បញ្ចូលបរិមាណបញ្ជាទិញ';
+
+  @override
+  String minOrderAvailableStock(String min, String stock) {
+    return 'ការបញ្ជាទិញអប្បបរមា: $min គ.ក្រ\nស្តុកដែលមាន: $stock គ.ក្រ';
+  }
+
+  @override
+  String get apply => 'អនុវត្ត';
+
+  @override
+  String minOrderQuantityIs(String min) {
+    return 'បរិមាណបញ្ជាទិញអប្បបរមាគឺ $min គ.ក្រ';
+  }
+
+  @override
+  String cannotExceedStock(String stock) {
+    return 'មិនអាចលើសពីស្តុកដែលមានចំនួន $stock គ.ក្រ បានទេ';
+  }
+
+  @override
+  String adjustedToMaxStock(String stock) {
+    return 'បានកែសម្រួលទៅស្តុកអតិបរមាដែលមាន: $stock គ.ក្រ';
+  }
+
+  @override
+  String addedProductToCart(String quantity, String product) {
+    return 'បានបន្ថែម $quantity គ.ក្រ $product ទៅកន្ត្រក';
+  }
+
+  @override
+  String get viewCart => 'មើលកន្ត្រក';
+
+  @override
+  String get wholesaleUnitPrice => 'តម្លៃឯកតាបោះដុំ';
+
+  @override
+  String minimumWholesaleOrder(String min) {
+    return 'ការបញ្ជាទិញដុំអប្បបរមា: $min គ.ក្រ';
+  }
+
+  @override
+  String get orderQuantityHeader => 'បរិមាណបញ្ជាទិញ';
+
+  @override
+  String get resetToMin => 'កំណត់ទៅអប្បបរមា';
+
+  @override
+  String get priceEstimate => 'ការប៉ាន់ស្មានតម្លៃ';
+
+  @override
+  String produceSubtotalCalc(String quantity, String price) {
+    return 'សរុបរងផលិតផល ($quantity គ.ក្រ × \$$price)';
+  }
+
+  @override
+  String get estimatedDeliveryFee => 'ថ្លៃដឹកជញ្ជូនប៉ាន់ស្មាន';
+
+  @override
+  String get freeDelivery => 'ឥតគិតថ្លៃ';
+
+  @override
+  String get estimatedTotal => 'សរុបប៉ាន់ស្មាន';
+
+  @override
+  String get farmerAndProducer => 'កសិករ និងអ្នកផលិត';
+
+  @override
+  String get verifiedLocalProducer => 'អ្នកផលិតក្នុងស្រុកដែលបានផ្ទៀងផ្ទាត់';
+
+  @override
+  String get chatAction => 'ជជែក';
+
+  @override
+  String get harvestAndLogistics => 'ការប្រមូលផល និងដឹកជញ្ជូន';
+
+  @override
+  String get farmOrigin => 'ប្រភពកសិដ្ឋាន';
+
+  @override
+  String get productDescriptionHeader => 'ការពិពណ៌នាផលិតផល';
+
+  @override
+  String get moreFromThisFarm => 'ផលិតផលផ្សេងទៀតពីកសិដ្ឋាននេះ';
+
+  @override
+  String itemsCount(int count) {
+    return '$count មុខ';
+  }
+
+  @override
+  String kgLeftCount(String quantity) {
+    return 'នៅសល់ $quantity គ.ក្រ';
+  }
+
+  @override
+  String totalKg(String quantity) {
+    return 'សរុប ($quantity គ.ក្រ)';
+  }
+
+  @override
+  String get buyNow => 'ទិញភ្លាមៗ';
 }

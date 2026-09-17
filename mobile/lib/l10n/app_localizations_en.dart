@@ -296,7 +296,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sellingPricePerKg => 'Selling Price per kg';
 
   @override
-  String get perKg => '\$ / kg';
+  String get perKg => '/ kg';
 
   @override
   String get availableQuantity => 'Available Quantity';
@@ -1592,4 +1592,158 @@ class AppLocalizationsEn extends AppLocalizations {
   String failedToSaveProfile(String error) {
     return 'Failed to save profile: $error';
   }
+
+  @override
+  String get favoriteProducts => 'Favorite Products';
+
+  @override
+  String get noFavoritesYet => 'No favorite products yet';
+
+  @override
+  String get favoritesEmptySubtitle =>
+      'Tap the heart icon on any produce in the marketplace\nto save it here for fast kitchen re-ordering.';
+
+  @override
+  String get browseProduce => 'Browse Produce';
+
+  @override
+  String get removedFromFavorites => 'Removed from favorites';
+
+  @override
+  String get addedToFavorites => 'Added to Favorites';
+
+  @override
+  String get couldNotLoadFavorites => 'Could not load favorites';
+
+  @override
+  String failedAddToCart(String error) {
+    return 'Failed to add to cart: $error';
+  }
+
+  @override
+  String addedProduceToCart(String name) {
+    return 'Added $name to cart';
+  }
+
+  @override
+  String minOrderLabel(String minOrder) {
+    return 'Min: $minOrder';
+  }
+
+  @override
+  String lowStockCount(String count) {
+    return 'Low Stock ($count kg)';
+  }
+
+  @override
+  String inStockCount(String count) {
+    return 'In Stock ($count kg)';
+  }
+
+  @override
+  String get productLinkCopied => 'Product link copied to clipboard!';
+
+  @override
+  String get enterOrderQuantity => 'Enter Order Quantity';
+
+  @override
+  String minOrderAvailableStock(String min, String stock) {
+    return 'Minimum order: $min kg\nAvailable stock: $stock kg';
+  }
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String minOrderQuantityIs(String min) {
+    return 'Minimum order quantity is $min kg';
+  }
+
+  @override
+  String cannotExceedStock(String stock) {
+    return 'Cannot exceed available stock of $stock kg';
+  }
+
+  @override
+  String adjustedToMaxStock(String stock) {
+    return 'Adjusted to maximum available stock: $stock kg';
+  }
+
+  @override
+  String addedProductToCart(String quantity, String product) {
+    return 'Added $quantity kg $product to cart';
+  }
+
+  @override
+  String get viewCart => 'VIEW CART';
+
+  @override
+  String get wholesaleUnitPrice => 'WHOLESALE UNIT PRICE';
+
+  @override
+  String minimumWholesaleOrder(String min) {
+    return 'Min. wholesale order: $min kg';
+  }
+
+  @override
+  String get orderQuantityHeader => 'ORDER QUANTITY';
+
+  @override
+  String get resetToMin => 'Reset to Min';
+
+  @override
+  String get priceEstimate => 'PRICE ESTIMATE';
+
+  @override
+  String produceSubtotalCalc(String quantity, String price) {
+    return 'Produce Subtotal ($quantity kg × \$$price)';
+  }
+
+  @override
+  String get estimatedDeliveryFee => 'Estimated Delivery Fee';
+
+  @override
+  String get freeDelivery => 'Free';
+
+  @override
+  String get estimatedTotal => 'Estimated Total';
+
+  @override
+  String get farmerAndProducer => 'FARMER & PRODUCER';
+
+  @override
+  String get verifiedLocalProducer => 'Verified Local Producer';
+
+  @override
+  String get chatAction => 'Chat';
+
+  @override
+  String get harvestAndLogistics => 'HARVEST & LOGISTICS';
+
+  @override
+  String get farmOrigin => 'Farm Origin';
+
+  @override
+  String get productDescriptionHeader => 'PRODUCT DESCRIPTION';
+
+  @override
+  String get moreFromThisFarm => 'More From This Farm';
+
+  @override
+  String itemsCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String kgLeftCount(String quantity) {
+    return '$quantity kg left';
+  }
+
+  @override
+  String totalKg(String quantity) {
+    return 'TOTAL ($quantity kg)';
+  }
+
+  @override
+  String get buyNow => 'Buy Now';
 }

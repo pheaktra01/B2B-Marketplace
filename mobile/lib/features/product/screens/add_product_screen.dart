@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/services/product_service.dart';
@@ -549,6 +550,12 @@ class _AddProductFlowScreenState extends State<AddProductFlowScreen> {
           ),
         ),
         centerTitle: true,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            child: AuthLanguageSwitch(),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(

@@ -460,7 +460,7 @@ class ProductCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                'Min: $minOrder',
+                l10n.minOrderLabel(minOrder!),
                 style: const TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,

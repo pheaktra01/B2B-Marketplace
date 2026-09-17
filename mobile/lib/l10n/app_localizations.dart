@@ -641,7 +641,7 @@ abstract class AppLocalizations {
   /// No description provided for @perKg.
   ///
   /// In en, this message translates to:
-  /// **'\$ / kg'**
+  /// **'/ kg'**
   String get perKg;
 
   /// No description provided for @availableQuantity.
@@ -3041,6 +3041,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to save profile: {error}'**
   String failedToSaveProfile(String error);
+
+  /// No description provided for @favoriteProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite Products'**
+  String get favoriteProducts;
+
+  /// No description provided for @noFavoritesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorite products yet'**
+  String get noFavoritesYet;
+
+  /// No description provided for @favoritesEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart icon on any produce in the marketplace\nto save it here for fast kitchen re-ordering.'**
+  String get favoritesEmptySubtitle;
+
+  /// No description provided for @browseProduce.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Produce'**
+  String get browseProduce;
+
+  /// No description provided for @removedFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get removedFromFavorites;
+
+  /// No description provided for @addedToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to Favorites'**
+  String get addedToFavorites;
+
+  /// No description provided for @couldNotLoadFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load favorites'**
+  String get couldNotLoadFavorites;
+
+  /// No description provided for @failedAddToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add to cart: {error}'**
+  String failedAddToCart(String error);
+
+  /// No description provided for @addedProduceToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {name} to cart'**
+  String addedProduceToCart(String name);
+
+  /// No description provided for @minOrderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Min: {minOrder}'**
+  String minOrderLabel(String minOrder);
+
+  /// No description provided for @lowStockCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Stock ({count} kg)'**
+  String lowStockCount(String count);
+
+  /// No description provided for @inStockCount.
+  ///
+  /// In en, this message translates to:
+  /// **'In Stock ({count} kg)'**
+  String inStockCount(String count);
+
+  /// No description provided for @productLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Product link copied to clipboard!'**
+  String get productLinkCopied;
+
+  /// No description provided for @enterOrderQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Order Quantity'**
+  String get enterOrderQuantity;
+
+  /// No description provided for @minOrderAvailableStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum order: {min} kg\nAvailable stock: {stock} kg'**
+  String minOrderAvailableStock(String min, String stock);
+
+  /// No description provided for @apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get apply;
+
+  /// No description provided for @minOrderQuantityIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum order quantity is {min} kg'**
+  String minOrderQuantityIs(String min);
+
+  /// No description provided for @cannotExceedStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot exceed available stock of {stock} kg'**
+  String cannotExceedStock(String stock);
+
+  /// No description provided for @adjustedToMaxStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjusted to maximum available stock: {stock} kg'**
+  String adjustedToMaxStock(String stock);
+
+  /// No description provided for @addedProductToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {quantity} kg {product} to cart'**
+  String addedProductToCart(String quantity, String product);
+
+  /// No description provided for @viewCart.
+  ///
+  /// In en, this message translates to:
+  /// **'VIEW CART'**
+  String get viewCart;
+
+  /// No description provided for @wholesaleUnitPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'WHOLESALE UNIT PRICE'**
+  String get wholesaleUnitPrice;
+
+  /// No description provided for @minimumWholesaleOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. wholesale order: {min} kg'**
+  String minimumWholesaleOrder(String min);
+
+  /// No description provided for @orderQuantityHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'ORDER QUANTITY'**
+  String get orderQuantityHeader;
+
+  /// No description provided for @resetToMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Min'**
+  String get resetToMin;
+
+  /// No description provided for @priceEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'PRICE ESTIMATE'**
+  String get priceEstimate;
+
+  /// No description provided for @produceSubtotalCalc.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce Subtotal ({quantity} kg × \${price})'**
+  String produceSubtotalCalc(String quantity, String price);
+
+  /// No description provided for @estimatedDeliveryFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Delivery Fee'**
+  String get estimatedDeliveryFee;
+
+  /// No description provided for @freeDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get freeDelivery;
+
+  /// No description provided for @estimatedTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Total'**
+  String get estimatedTotal;
+
+  /// No description provided for @farmerAndProducer.
+  ///
+  /// In en, this message translates to:
+  /// **'FARMER & PRODUCER'**
+  String get farmerAndProducer;
+
+  /// No description provided for @verifiedLocalProducer.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Local Producer'**
+  String get verifiedLocalProducer;
+
+  /// No description provided for @chatAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get chatAction;
+
+  /// No description provided for @harvestAndLogistics.
+  ///
+  /// In en, this message translates to:
+  /// **'HARVEST & LOGISTICS'**
+  String get harvestAndLogistics;
+
+  /// No description provided for @farmOrigin.
+  ///
+  /// In en, this message translates to:
+  /// **'Farm Origin'**
+  String get farmOrigin;
+
+  /// No description provided for @productDescriptionHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'PRODUCT DESCRIPTION'**
+  String get productDescriptionHeader;
+
+  /// No description provided for @moreFromThisFarm.
+  ///
+  /// In en, this message translates to:
+  /// **'More From This Farm'**
+  String get moreFromThisFarm;
+
+  /// No description provided for @itemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String itemsCount(int count);
+
+  /// No description provided for @kgLeftCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{quantity} kg left'**
+  String kgLeftCount(String quantity);
+
+  /// No description provided for @totalKg.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL ({quantity} kg)'**
+  String totalKg(String quantity);
+
+  /// No description provided for @buyNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy Now'**
+  String get buyNow;
 }
 
 class _AppLocalizationsDelegate

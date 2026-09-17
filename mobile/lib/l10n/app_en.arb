@@ -758,5 +758,164 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "favoriteProducts": "Favorite Products",
+  "noFavoritesYet": "No favorite products yet",
+  "favoritesEmptySubtitle": "Tap the heart icon on any produce in the marketplace\nto save it here for fast kitchen re-ordering.",
+  "browseProduce": "Browse Produce",
+  "removedFromFavorites": "Removed from favorites",
+  "addedToFavorites": "Added to Favorites",
+  "couldNotLoadFavorites": "Could not load favorites",
+  "failedAddToCart": "Failed to add to cart: {error}",
+  "@failedAddToCart": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "addedProduceToCart": "Added {name} to cart",
+  "@addedProduceToCart": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "minOrderLabel": "Min: {minOrder}",
+  "@minOrderLabel": {
+    "placeholders": {
+      "minOrder": {
+        "type": "String"
+      }
+    }
+  },
+  "lowStockCount": "Low Stock ({count} kg)",
+  "@lowStockCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "inStockCount": "In Stock ({count} kg)",
+  "@inStockCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "productLinkCopied": "Product link copied to clipboard!",
+  "enterOrderQuantity": "Enter Order Quantity",
+  "minOrderAvailableStock": "Minimum order: {min} kg\nAvailable stock: {stock} kg",
+  "@minOrderAvailableStock": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "stock": {
+        "type": "String"
+      }
+    }
+  },
+  "apply": "Apply",
+  "minOrderQuantityIs": "Minimum order quantity is {min} kg",
+  "@minOrderQuantityIs": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "cannotExceedStock": "Cannot exceed available stock of {stock} kg",
+  "@cannotExceedStock": {
+    "placeholders": {
+      "stock": {
+        "type": "String"
+      }
+    }
+  },
+  "adjustedToMaxStock": "Adjusted to maximum available stock: {stock} kg",
+  "@adjustedToMaxStock": {
+    "placeholders": {
+      "stock": {
+        "type": "String"
+      }
+    }
+  },
+  "addedProductToCart": "Added {quantity} kg {product} to cart",
+  "@addedProductToCart": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "viewCart": "VIEW CART",
+  "wholesaleUnitPrice": "WHOLESALE UNIT PRICE",
+  "perKg": "/ kg",
+  "minimumWholesaleOrder": "Min. wholesale order: {min} kg",
+  "@minimumWholesaleOrder": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "orderQuantityHeader": "ORDER QUANTITY",
+  "resetToMin": "Reset to Min",
+  "priceEstimate": "PRICE ESTIMATE",
+  "produceSubtotalCalc": "Produce Subtotal ({quantity} kg × ${price})",
+  "@produceSubtotalCalc": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "estimatedDeliveryFee": "Estimated Delivery Fee",
+  "freeDelivery": "Free",
+  "estimatedTotal": "Estimated Total",
+  "farmerAndProducer": "FARMER & PRODUCER",
+  "verifiedLocalProducer": "Verified Local Producer",
+  "chatAction": "Chat",
+  "harvestAndLogistics": "HARVEST & LOGISTICS",
+  "harvestDate": "Harvest Date",
+  "availableUntil": "Available Until",
+  "farmOrigin": "Farm Origin",
+  "productDescriptionHeader": "PRODUCT DESCRIPTION",
+  "moreFromThisFarm": "More From This Farm",
+  "itemsCount": "{count} items",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kgLeftCount": "{quantity} kg left",
+  "@kgLeftCount": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+  "totalKg": "TOTAL ({quantity} kg)",
+  "@totalKg": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+  "buyNow": "Buy Now"
 }

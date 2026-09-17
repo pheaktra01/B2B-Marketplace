@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class FavoriteProductsScreen extends StatefulWidget {
   const FavoriteProductsScreen({super.key});
@@ -61,10 +63,11 @@ class _FavoriteProductsScreenState extends State<FavoriteProductsScreen> {
     await FavoritesService.toggleFavorite(productId);
 
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Removed from favorites'),
-          duration: Duration(seconds: 1),
+        SnackBar(
+          content: Text(l10n?.removedFromFavorites ?? 'Removed from favorites'),
+          duration: const Duration(seconds: 1),
           backgroundColor: Colors.black87,
           behavior: SnackBarBehavior.floating,
         ),
@@ -83,9 +86,11 @@ class _FavoriteProductsScreenState extends State<FavoriteProductsScreen> {
       );
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        final name = product['name']?.toString() ?? 'produce';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Added ${product['name'] ?? 'produce'} to cart'),
+            content: Text(l10n?.addedProduceToCart(name) ?? 'Added $name to cart'),
             backgroundColor: primaryGreen,
             duration: const Duration(seconds: 1),
             behavior: SnackBarBehavior.floating,
@@ -94,9 +99,10 @@ class _FavoriteProductsScreenState extends State<FavoriteProductsScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to add to cart: $e'),
+            content: Text(l10n?.failedAddToCart(e.toString()) ?? 'Failed to add to cart: $e'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -144,6 +150,8 @@ class _FavoriteProductsScreenState extends State<FavoriteProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: pageBgColor,
       appBar: AppBar(
@@ -153,25 +161,31 @@ class _FavoriteProductsScreenState extends State<FavoriteProductsScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'Favorite Products',
-          style: TextStyle(
+        title: Text(
+          l10n?.favoriteProducts ?? 'Favorite Products',
+          style: const TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
         centerTitle: false,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            child: AuthLanguageSwitch(),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadFavorites,
         color: primaryGreen,
-        child: _buildBody(),
+        child: _buildBody(l10n),
       ),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(AppLocalizations? l10n) {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: primaryGreen),
@@ -187,9 +201,9 @@ class _FavoriteProductsScreenState extends State<FavoriteProductsScreen> {
             children: [
               Icon(Icons.error_outline, size: 48, color: Colors.red.shade400),
               const SizedBox(height: 12),
-              const Text(
-                'Could not load favorites',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Text(
+                l10n?.couldNotLoadFavorites ?? 'Could not load favorites',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Text(
@@ -202,7 +216,7 @@ class _FavoriteProductsScreenState extends State<FavoriteProductsScreen> {
                 onPressed: _loadFavorites,
                 style: ElevatedButton.styleFrom(backgroundColor: primaryGreen),
                 child:
-                    const Text('Retry', style: TextStyle(color: Colors.white)),
+                    Text(l10n?.retry ?? 'Retry', style: const TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -231,13 +245,14 @@ class _FavoriteProductsScreenState extends State<FavoriteProductsScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'No favorite products yet',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                l10n?.noFavoritesYet ?? 'No favorite products yet',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Tap the heart icon on any produce in the marketplace\nto save it here for fast kitchen re-ordering.',
+                l10n?.favoritesEmptySubtitle ??
+                    'Tap the heart icon on any produce in the marketplace\nto save it here for fast kitchen re-ordering.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,
@@ -258,9 +273,9 @@ class _FavoriteProductsScreenState extends State<FavoriteProductsScreen> {
                   ),
                 ),
                 icon: const Icon(Icons.storefront_outlined, size: 18),
-                label: const Text(
-                  'Browse Produce',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                label: Text(
+                  l10n?.browseProduce ?? 'Browse Produce',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ),
             ],

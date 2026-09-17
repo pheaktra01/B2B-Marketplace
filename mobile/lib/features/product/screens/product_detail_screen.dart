@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/chat/services/chat_service.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Map<String, dynamic> product;
@@ -268,9 +270,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final isFav = await FavoritesService.toggleFavorite(_productId);
     if (!mounted) return;
     setState(() => _isFavorite = isFav);
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(isFav ? 'Added to Favorites' : 'Removed from Favorites'),
+        content: Text(isFav
+            ? (l10n?.addedToFavorites ?? 'Added to Favorites')
+            : (l10n?.removedFromFavorites ?? 'Removed from Favorites')),
         duration: const Duration(seconds: 1),
         backgroundColor: isFav ? primaryGreen : Colors.grey.shade800,
         behavior: SnackBarBehavior.floating,
@@ -282,10 +287,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     Clipboard.setData(ClipboardData(
       text: 'Check out $_productName on B2B Marketplace at \$${_pricePerKg.toStringAsFixed(2)}/kg!',
     ));
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Product link copied to clipboard!'),
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text(l10n?.productLinkCopied ?? 'Product link copied to clipboard!'),
+        duration: const Duration(seconds: 2),
         backgroundColor: primaryGreen,
         behavior: SnackBarBehavior.floating,
       ),
@@ -295,21 +301,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void _showQuantityInputDialog() {
     final controller =
         TextEditingController(text: _orderQuantity.toStringAsFixed(0));
+    final l10n = AppLocalizations.of(context);
 
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Enter Order Quantity',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        title: Text(
+          l10n?.enterOrderQuantity ?? 'Enter Order Quantity',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Minimum order: ${_minOrder.toStringAsFixed(0)} kg\nAvailable stock: ${_availableQuantity.toStringAsFixed(0)} kg',
+              l10n?.minOrderAvailableStock(
+                    _minOrder.toStringAsFixed(0),
+                    _availableQuantity.toStringAsFixed(0),
+                  ) ??
+                  'Minimum order: ${_minOrder.toStringAsFixed(0)} kg\nAvailable stock: ${_availableQuantity.toStringAsFixed(0)} kg',
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600, height: 1.4),
             ),
             const SizedBox(height: 16),
@@ -331,7 +342,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey.shade700)),
+            child: Text(l10n?.cancel ?? 'Cancel', style: TextStyle(color: Colors.grey.shade700)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -340,7 +351,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 if (val < _minOrder) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Minimum order quantity is ${_minOrder.toStringAsFixed(0)} kg'),
+                      content: Text(
+                        l10n?.minOrderQuantityIs(_minOrder.toStringAsFixed(0)) ??
+                            'Minimum order quantity is ${_minOrder.toStringAsFixed(0)} kg',
+                      ),
                       backgroundColor: Colors.orange.shade800,
                     ),
                   );
@@ -349,7 +363,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 if (val > _availableQuantity && _availableQuantity > 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Cannot exceed available stock of ${_availableQuantity.toStringAsFixed(0)} kg'),
+                      content: Text(
+                        l10n?.cannotExceedStock(_availableQuantity.toStringAsFixed(0)) ??
+                            'Cannot exceed available stock of ${_availableQuantity.toStringAsFixed(0)} kg',
+                      ),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -363,7 +380,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               backgroundColor: primaryGreen,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Apply'),
+            child: Text(l10n?.apply ?? 'Apply'),
           ),
         ],
       ),
@@ -374,9 +391,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final next = _orderQuantity + amount;
     if (_availableQuantity > 0 && next > _availableQuantity) {
       setState(() => _orderQuantity = _availableQuantity);
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Adjusted to maximum available stock: ${_availableQuantity.toStringAsFixed(0)} kg'),
+          content: Text(
+            l10n?.adjustedToMaxStock(_availableQuantity.toStringAsFixed(0)) ??
+                'Adjusted to maximum available stock: ${_availableQuantity.toStringAsFixed(0)} kg',
+          ),
           duration: const Duration(seconds: 1),
           behavior: SnackBarBehavior.floating,
         ),
@@ -404,14 +425,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       );
       if (!mounted) return;
       setState(() => _isInCart = true);
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Added ${_orderQuantity.toStringAsFixed(0)} kg $_productName to cart'),
+          content: Text(
+            l10n?.addedProductToCart(
+                  _orderQuantity.toStringAsFixed(0),
+                  _productName,
+                ) ??
+                'Added ${_orderQuantity.toStringAsFixed(0)} kg $_productName to cart',
+          ),
           backgroundColor: primaryGreen,
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
           action: SnackBarAction(
-            label: 'VIEW CART',
+            label: l10n?.viewCart ?? 'VIEW CART',
             textColor: Colors.white,
             onPressed: () => context.push(AppRoutes.restaurantCart),
           ),
@@ -550,6 +578,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: pageBgColor,
       appBar: AppBar(
@@ -571,6 +601,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
         centerTitle: true,
         actions: [
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+            child: AuthLanguageSwitch(),
+          ),
           IconButton(
             icon: const Icon(Icons.share_outlined, color: Colors.black87),
             onPressed: _shareProduct,
@@ -587,53 +621,53 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Swipeable Hero Image Gallery
-            _buildHeroImageGallery(),
+            _buildHeroImageGallery(l10n),
 
             const SizedBox(height: 16),
 
             // 2. Title & Trust Badges
-            _buildTitleAndBadges(),
+            _buildTitleAndBadges(l10n),
 
             const SizedBox(height: 16),
 
             // 3. Wholesale Pricing Card
-            _buildPricingCard(),
+            _buildPricingCard(l10n),
 
             const SizedBox(height: 16),
 
             // 4. Interactive Wholesale Quantity Selector & Presets
-            _buildWholesaleQuantitySelector(),
+            _buildWholesaleQuantitySelector(l10n),
 
             const SizedBox(height: 16),
 
             // 5. Dynamic Price & Order Summary Card
-            _buildOrderSummaryCard(),
+            _buildOrderSummaryCard(l10n),
 
             const SizedBox(height: 16),
 
             // 6. Farmer / Seller Profile Card
-            _buildFarmerProfileCard(),
+            _buildFarmerProfileCard(l10n),
 
             const SizedBox(height: 16),
 
             // 7. Product Details & Harvest Info
-            _buildProductInfoCard(),
+            _buildProductInfoCard(l10n),
 
             const SizedBox(height: 16),
 
             // 8. Description
-            _buildDescriptionCard(),
+            _buildDescriptionCard(l10n),
 
             const SizedBox(height: 20),
 
             // 9. More Produce From This Farm
-            if (_relatedProducts.isNotEmpty) _buildRelatedProduceSection(),
+            if (_relatedProducts.isNotEmpty) _buildRelatedProduceSection(l10n),
 
             const SizedBox(height: 30),
           ],
         ),
       ),
-      bottomNavigationBar: _buildDualBottomBar(),
+      bottomNavigationBar: _buildDualBottomBar(l10n),
     );
   }
 
@@ -641,7 +675,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   // WIDGET BUILDERS
   // ==========================================================
 
-  Widget _buildHeroImageGallery() {
+  Widget _buildHeroImageGallery(AppLocalizations? l10n) {
     final images = _productImages;
 
     return Column(
@@ -723,9 +757,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     Text(
                       _isAvailable
                           ? (_availableQuantity < 20
-                              ? 'Low Stock (${_availableQuantity.toStringAsFixed(0)} kg)'
-                              : 'In Stock (${_availableQuantity.toStringAsFixed(0)} kg)')
-                          : 'Out of Stock',
+                              ? (l10n?.lowStockCount(
+                                      _availableQuantity.toStringAsFixed(0)) ??
+                                  'Low Stock (${_availableQuantity.toStringAsFixed(0)} kg)')
+                              : (l10n?.inStockCount(
+                                      _availableQuantity.toStringAsFixed(0)) ??
+                                  'In Stock (${_availableQuantity.toStringAsFixed(0)} kg)'))
+                          : (l10n?.outOfStock ?? 'Out of Stock'),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -834,7 +872,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildTitleAndBadges() {
+  Widget _buildTitleAndBadges(AppLocalizations? l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -872,7 +910,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               textColor: Colors.grey.shade800,
             ),
             _buildPillBadge(
-              label: 'Min: ${_minOrder.toStringAsFixed(0)} kg',
+              label: l10n?.minOrderLabel(_minOrder.toStringAsFixed(0)) ??
+                  'Min: ${_minOrder.toStringAsFixed(0)} kg',
               icon: Icons.shopping_basket_outlined,
               bgColor: Colors.orange.shade50,
               textColor: Colors.orange.shade900,
@@ -913,7 +952,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildPricingCard() {
+  Widget _buildPricingCard(AppLocalizations? l10n) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -927,9 +966,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'WHOLESALE UNIT PRICE',
-                style: TextStyle(
+              Text(
+                l10n?.wholesaleUnitPrice ?? 'WHOLESALE UNIT PRICE',
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.6,
@@ -951,7 +990,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '/ kg',
+                    l10n?.perKg ?? '/ kg',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade700,
@@ -978,7 +1017,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  'Minimum: ${_minOrder.toStringAsFixed(0)} kg',
+                  l10n?.minimumWholesaleOrder(_minOrder.toStringAsFixed(0)) ??
+                      'Minimum: ${_minOrder.toStringAsFixed(0)} kg',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -987,7 +1027,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Delivery: ${_deliveryFee > 0 ? '\$${_deliveryFee.toStringAsFixed(2)}' : 'Free'}',
+                  'Delivery: ${_deliveryFee > 0 ? '\$${_deliveryFee.toStringAsFixed(2)}' : (l10n?.freeDelivery ?? 'Free')}',
                   style: TextStyle(
                     fontSize: 11,
                     color: Colors.grey.shade600,
@@ -1001,7 +1041,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildWholesaleQuantitySelector() {
+  Widget _buildWholesaleQuantitySelector(AppLocalizations? l10n) {
     final canDecrease = _orderQuantity > _minOrder;
     final canIncrease =
         _availableQuantity <= 0 || _orderQuantity < _availableQuantity;
@@ -1019,9 +1059,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'ORDER QUANTITY',
-                style: TextStyle(
+              Text(
+                l10n?.orderQuantityHeader ?? 'ORDER QUANTITY',
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.6,
@@ -1029,7 +1069,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
               ),
               Text(
-                'Min. wholesale order: ${_minOrder.toStringAsFixed(0)} kg',
+                l10n?.minimumWholesaleOrder(_minOrder.toStringAsFixed(0)) ??
+                    'Min. wholesale order: ${_minOrder.toStringAsFixed(0)} kg',
                 style: TextStyle(
                   fontSize: 11,
                   color: Colors.grey.shade600,
@@ -1118,7 +1159,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 _buildQuickPresetChip('+100 kg', () => _addPresetQuantity(100)),
                 const SizedBox(width: 8),
                 ActionChip(
-                  label: const Text('Reset to Min'),
+                  label: Text(l10n?.resetToMin ?? 'Reset to Min'),
                   labelStyle: const TextStyle(
                       fontSize: 11, fontWeight: FontWeight.bold, color: primaryGreen),
                   backgroundColor: lightGreenBg,
@@ -1157,7 +1198,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildOrderSummaryCard() {
+  Widget _buildOrderSummaryCard(AppLocalizations? l10n) {
     final subtotal = _pricePerKg * _orderQuantity;
     final total = subtotal + _deliveryFee;
 
@@ -1171,9 +1212,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'PRICE ESTIMATE',
-            style: TextStyle(
+          Text(
+            l10n?.priceEstimate ?? 'PRICE ESTIMATE',
+            style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.6,
@@ -1185,7 +1226,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Produce Subtotal (${_orderQuantity.toStringAsFixed(0)} kg × \$${_pricePerKg.toStringAsFixed(2)})',
+                l10n?.produceSubtotalCalc(_orderQuantity.toStringAsFixed(0), _pricePerKg.toStringAsFixed(2)) ??
+                    'Produce Subtotal (${_orderQuantity.toStringAsFixed(0)} kg × \$${_pricePerKg.toStringAsFixed(2)})',
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
               ),
               Text(
@@ -1202,13 +1244,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Estimated Delivery Fee',
+                l10n?.estimatedDeliveryFee ?? 'Estimated Delivery Fee',
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
               ),
               Text(
                 _deliveryFee > 0
                     ? '\$${_deliveryFee.toStringAsFixed(2)}'
-                    : 'Free',
+                    : (l10n?.freeDelivery ?? 'Free'),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
@@ -1224,9 +1266,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Estimated Total',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              Text(
+                l10n?.estimatedTotal ?? 'Estimated Total',
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               Text(
                 '\$${total.toStringAsFixed(2)}',
@@ -1265,7 +1307,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildFarmerProfileCard() {
+  Widget _buildFarmerProfileCard(AppLocalizations? l10n) {
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
@@ -1284,9 +1326,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'FARMER & PRODUCER',
-                    style: TextStyle(
+                  Text(
+                    l10n?.farmerAndProducer ?? 'FARMER & PRODUCER',
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.6,
@@ -1294,17 +1336,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   Row(
-                    children: const [
+                    children: [
                       Text(
-                        'View Profile',
-                        style: TextStyle(
+                        l10n?.viewProfile ?? 'View Profile',
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: primaryGreen,
                         ),
                       ),
-                      SizedBox(width: 3),
-                      Icon(Icons.chevron_right, size: 16, color: primaryGreen),
+                      const SizedBox(width: 3),
+                      const Icon(Icons.chevron_right, size: 16, color: primaryGreen),
                     ],
                   ),
                 ],
@@ -1339,13 +1381,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.verified, color: primaryGreen, size: 14),
-                            SizedBox(width: 4),
+                            const Icon(Icons.verified, color: primaryGreen, size: 14),
+                            const SizedBox(width: 4),
                             Text(
-                              'Verified Local Producer',
-                              style: TextStyle(
+                              l10n?.verifiedLocalProducer ?? 'Verified Local Producer',
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: primaryGreen,
@@ -1359,7 +1401,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ElevatedButton.icon(
                     onPressed: _isContactingFarmer ? null : _contactFarmer,
                     icon: const Icon(Icons.chat_outlined, size: 16),
-                    label: const Text('Chat'),
+                    label: Text(l10n?.chatAction ?? 'Chat'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: lightGreenBg,
                       foregroundColor: primaryGreen,
@@ -1380,7 +1422,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildProductInfoCard() {
+  Widget _buildProductInfoCard(AppLocalizations? l10n) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1391,9 +1433,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'HARVEST & LOGISTICS',
-            style: TextStyle(
+          Text(
+            l10n?.harvestAndLogistics ?? 'HARVEST & LOGISTICS',
+            style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.6,
@@ -1402,15 +1444,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
           const SizedBox(height: 12),
           if (_harvestDate.isNotEmpty)
-            _buildInfoRow(Icons.calendar_today_outlined, 'Harvest Date', _harvestDate),
+            _buildInfoRow(Icons.calendar_today_outlined, l10n?.harvestDate ?? 'Harvest Date', _harvestDate),
           if (_availableUntil.isNotEmpty) ...[
             const SizedBox(height: 10),
-            _buildInfoRow(Icons.event_available_outlined, 'Available Until', _availableUntil),
+            _buildInfoRow(Icons.event_available_outlined, l10n?.availableUntil ?? 'Available Until', _availableUntil),
           ],
           const SizedBox(height: 10),
-          _buildInfoRow(Icons.local_shipping_outlined, 'Delivery Method', _deliveryMethod),
+          _buildInfoRow(Icons.local_shipping_outlined, l10n?.deliveryMethod ?? 'Delivery Method', _deliveryMethod),
           const SizedBox(height: 10),
-          _buildInfoRow(Icons.location_on_outlined, 'Farm Origin', _location),
+          _buildInfoRow(Icons.location_on_outlined, l10n?.farmOrigin ?? 'Farm Origin', _location),
         ],
       ),
     );
@@ -1445,7 +1487,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildDescriptionCard() {
+  Widget _buildDescriptionCard(AppLocalizations? l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -1457,9 +1499,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'PRODUCT DESCRIPTION',
-            style: TextStyle(
+          Text(
+            l10n?.productDescriptionHeader ?? 'PRODUCT DESCRIPTION',
+            style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.6,
@@ -1504,7 +1546,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return '';
   }
 
-  Widget _buildRelatedProduceSection() {
+  Widget _buildRelatedProduceSection(AppLocalizations? l10n) {
     if (_relatedProducts.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -1515,16 +1557,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'More From This Farm',
-              style: TextStyle(
+            Text(
+              l10n?.moreFromThisFarm ?? 'More From This Farm',
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),
             ),
             Text(
-              '${_relatedProducts.length} items',
+              l10n?.itemsCount(_relatedProducts.length) ??
+                  '${_relatedProducts.length} items',
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
           ],
@@ -1538,7 +1581,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               final item = _relatedProducts[index];
-              return _buildRelatedProductCard(item);
+              return _buildRelatedProductCard(item, l10n);
             },
           ),
         ),
@@ -1546,7 +1589,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildRelatedProductCard(Map<String, dynamic> item) {
+  Widget _buildRelatedProductCard(
+      Map<String, dynamic> item, AppLocalizations? l10n) {
     final name = item['name']?.toString() ?? 'Produce';
     final imgUrl = _getProductImageUrl(item);
     final priceStr = _formatRelatedPrice(item['price']);
@@ -1637,9 +1681,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       ),
                                     ),
                                     const SizedBox(width: 4),
-                                    const Text(
-                                      'In Stock',
-                                      style: TextStyle(
+                                    Text(
+                                      l10n?.inStock ?? 'In Stock',
+                                      style: const TextStyle(
                                         fontSize: 9,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.green,
@@ -1684,7 +1728,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'Min: $minOrder kg',
+                              l10n?.minOrderLabel(minOrder) ??
+                                  'Min: $minOrder kg',
                               style: const TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
@@ -1730,7 +1775,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       children: [
                         Flexible(
                           child: Text(
-                            '$quantity kg left',
+                            l10n?.kgLeftCount(quantity) ?? '$quantity kg left',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -1756,10 +1801,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     if (mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text('Added $name to cart'),
+                                          content: Text(
+                                              l10n?.addedProduceToCart(name) ??
+                                                  'Added $name to cart'),
                                           duration: const Duration(seconds: 2),
                                           action: SnackBarAction(
-                                            label: 'VIEW CART',
+                                            label: l10n?.viewCart ?? 'VIEW CART',
                                             textColor: Colors.white,
                                             onPressed: () => context
                                                 .push(AppRoutes.restaurantCart),
@@ -1771,8 +1818,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     if (mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content:
-                                              Text('Failed to add to cart: $e'),
+                                          content: Text(
+                                              '${l10n?.failedAddToCart ?? "Failed to add to cart"}: $e'),
                                           backgroundColor: Colors.red.shade700,
                                         ),
                                       );
@@ -1810,7 +1857,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildDualBottomBar() {
+  Widget _buildDualBottomBar(AppLocalizations? l10n) {
     final subtotal = _pricePerKg * _orderQuantity;
     final canOrder = _isAvailable &&
         _orderQuantity >= _minOrder &&
@@ -1839,7 +1886,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'TOTAL (${_orderQuantity.toStringAsFixed(0)} kg)',
+                    l10n?.totalKg(_orderQuantity.toStringAsFixed(0)) ??
+                        'TOTAL (${_orderQuantity.toStringAsFixed(0)} kg)',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -1888,7 +1936,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       )
                     : Icon(_isInCart ? Icons.shopping_cart : Icons.add_shopping_cart, size: 18),
                 label: Text(
-                  _isInCart ? 'In Cart' : 'Add to Cart',
+                  _isInCart
+                      ? (l10n?.inCart ?? 'In Cart')
+                      : (l10n?.addToCart ?? 'Add to Cart'),
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
               ),
@@ -1921,9 +1971,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                       )
                     : const Icon(Icons.bolt, size: 18),
-                label: const Text(
-                  'Buy Now',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                label: Text(
+                  l10n?.buyNow ?? 'Buy Now',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
               ),
             ),

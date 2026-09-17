@@ -1404,6 +1404,354 @@ abstract class AppLocalizations {
   /// **'Order #{number}'**
   String orderNumber(Object number);
 
+  /// No description provided for @unableToLoadNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load notifications'**
+  String get unableToLoadNotifications;
+
+  /// No description provided for @notificationRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification removed'**
+  String get notificationRemoved;
+
+  /// No description provided for @clearAllNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all notifications?'**
+  String get clearAllNotificationsTitle;
+
+  /// No description provided for @clearAllNotificationsContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently remove all your notifications.'**
+  String get clearAllNotificationsContent;
+
+  /// No description provided for @clearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get clearAll;
+
+  /// No description provided for @allNotificationsCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'All notifications cleared'**
+  String get allNotificationsCleared;
+
+  /// No description provided for @clearAllNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all notifications'**
+  String get clearAllNotifications;
+
+  /// No description provided for @sendTestNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Test Notification'**
+  String get sendTestNotification;
+
+  /// No description provided for @testNotificationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Test notification sent! Check your lock screen & status bar.'**
+  String get testNotificationSent;
+
+  /// No description provided for @noNotificationsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get noNotificationsYet;
+
+  /// No description provided for @noNotificationsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You will receive real-time updates here for orders, messages, stock, payments, and account activities.'**
+  String get noNotificationsDescription;
+
+  /// No description provided for @noCategoryNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'No {category} notifications'**
+  String noCategoryNotifications(String category);
+
+  /// No description provided for @categoryNotificationsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} NOTIFICATIONS'**
+  String categoryNotificationsHeader(String category);
+
+  /// No description provided for @securityAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Alert'**
+  String get securityAlert;
+
+  /// No description provided for @newLoginDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'A new login was detected on your account.'**
+  String get newLoginDetected;
+
+  /// No description provided for @securityAlertNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'If this was you, you can safely ignore this notice. If you did not log in recently, we recommend reviewing your profile or updating your security credentials.'**
+  String get securityAlertNotice;
+
+  /// No description provided for @dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
+
+  /// No description provided for @viewProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'View Profile'**
+  String get viewProfile;
+
+  /// No description provided for @notifCategoryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get notifCategoryAll;
+
+  /// No description provided for @notifCategoryOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get notifCategoryOrders;
+
+  /// No description provided for @notifCategoryMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get notifCategoryMessages;
+
+  /// No description provided for @notifCategoryPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get notifCategoryPayments;
+
+  /// No description provided for @notifCategoryStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock'**
+  String get notifCategoryStock;
+
+  /// No description provided for @notifCategoryAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get notifCategoryAccount;
+
+  /// No description provided for @notifCategorySystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get notifCategorySystem;
+
+  /// No description provided for @justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d ago'**
+  String daysAgo(int days);
+
+  /// No description provided for @view.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get view;
+
+  /// No description provided for @tagOrderPlaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Placed'**
+  String get tagOrderPlaced;
+
+  /// No description provided for @tagNewOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'New Order'**
+  String get tagNewOrder;
+
+  /// No description provided for @tagAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get tagAccepted;
+
+  /// No description provided for @tagRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get tagRejected;
+
+  /// No description provided for @tagReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get tagReady;
+
+  /// No description provided for @tagCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get tagCompleted;
+
+  /// No description provided for @tagCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get tagCancelled;
+
+  /// No description provided for @tagOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get tagOrder;
+
+  /// No description provided for @tagPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get tagPhoto;
+
+  /// No description provided for @tagOrderChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Chat'**
+  String get tagOrderChat;
+
+  /// No description provided for @tagChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get tagChat;
+
+  /// No description provided for @tagPaymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Failed'**
+  String get tagPaymentFailed;
+
+  /// No description provided for @tagPaymentDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Done'**
+  String get tagPaymentDone;
+
+  /// No description provided for @tagPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get tagPayment;
+
+  /// No description provided for @tagOutOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of Stock'**
+  String get tagOutOfStock;
+
+  /// No description provided for @tagLowStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Stock'**
+  String get tagLowStock;
+
+  /// No description provided for @tagPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Published'**
+  String get tagPublished;
+
+  /// No description provided for @tagUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get tagUpdated;
+
+  /// No description provided for @tagInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get tagInventory;
+
+  /// No description provided for @tagSecurityAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Alert'**
+  String get tagSecurityAlert;
+
+  /// No description provided for @tagDeviceLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Login'**
+  String get tagDeviceLogin;
+
+  /// No description provided for @tagPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get tagPassword;
+
+  /// No description provided for @tagPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get tagPhone;
+
+  /// No description provided for @tagAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get tagAccount;
+
+  /// No description provided for @tagAnnouncement.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement'**
+  String get tagAnnouncement;
+
+  /// No description provided for @tagMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get tagMaintenance;
+
+  /// No description provided for @tagNewFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'New Feature'**
+  String get tagNewFeature;
+
+  /// No description provided for @tagPolicyUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Policy Update'**
+  String get tagPolicyUpdate;
+
+  /// No description provided for @tagInterruption.
+  ///
+  /// In en, this message translates to:
+  /// **'Interruption'**
+  String get tagInterruption;
+
+  /// No description provided for @tagNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice'**
+  String get tagNotice;
+
   /// No description provided for @allMessages.
   ///
   /// In en, this message translates to:

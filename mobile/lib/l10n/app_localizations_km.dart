@@ -722,6 +722,190 @@ class AppLocalizationsKm extends AppLocalizations {
   }
 
   @override
+  String get unableToLoadNotifications => 'មិនអាចទាញយកការជូនដំណឹងបានទេ';
+
+  @override
+  String get notificationRemoved => 'បានលុបការជូនដំណឹង';
+
+  @override
+  String get clearAllNotificationsTitle => 'សម្អាតការជូនដំណឹងទាំងអស់?';
+
+  @override
+  String get clearAllNotificationsContent =>
+      'វានឹងលុបការជូនដំណឹងទាំងអស់របស់អ្នកជាអចិន្ត្រៃយ៍។';
+
+  @override
+  String get clearAll => 'សម្អាតទាំងអស់';
+
+  @override
+  String get allNotificationsCleared => 'បានសម្អាតការជូនដំណឹងទាំងអស់';
+
+  @override
+  String get clearAllNotifications => 'សម្អាតការជូនដំណឹងទាំងអស់';
+
+  @override
+  String get sendTestNotification => 'ផ្ញើការជូនដំណឹងសាកល្បង';
+
+  @override
+  String get testNotificationSent =>
+      'បានផ្ញើការជូនដំណឹងសាកល្បង! សូមពិនិត្យមើលអេក្រង់ចាក់សោ និងរបារស្ថានភាពរបស់អ្នក។';
+
+  @override
+  String get noNotificationsYet => 'មិនទាន់មានការជូនដំណឹងនៅឡើយទេ';
+
+  @override
+  String get noNotificationsDescription =>
+      'អ្នកនឹងទទួលបានការអាប់ដេតតាមពេលវេលាជាក់ស្តែងនៅទីនេះ សម្រាប់ការបញ្ជាទិញ សារ ស្តុក ការទូទាត់ និងសកម្មភាពគណនី។';
+
+  @override
+  String noCategoryNotifications(String category) {
+    return 'មិនមានការជូនដំណឹង $category ទេ';
+  }
+
+  @override
+  String categoryNotificationsHeader(String category) {
+    return 'ការជូនដំណឹង $category';
+  }
+
+  @override
+  String get securityAlert => 'ការដាស់តឿនសុវត្ថិភាព';
+
+  @override
+  String get newLoginDetected => 'បានរកឃើញការចូលថ្មីនៅលើគណនីរបស់អ្នក។';
+
+  @override
+  String get securityAlertNotice =>
+      'ប្រសិនបើនេះជាអ្នក អ្នកអាចរំលងការជូនដំណឹងនេះដោយសុវត្ថិភាព។ ប្រសិនបើអ្នកមិនបានចូលថ្មីៗនេះទេ យើងណែនាំឱ្យពិនិត្យមើលប្រវត្តិរូបរបស់អ្នក ឬផ្លាស់ប្តូរពាក្យសម្ងាត់សុវត្ថិភាព។';
+
+  @override
+  String get dismiss => 'បិទ';
+
+  @override
+  String get viewProfile => 'មើលប្រវត្តិរូប';
+
+  @override
+  String get notifCategoryAll => 'ទាំងអស់';
+
+  @override
+  String get notifCategoryOrders => 'ការបញ្ជាទិញ';
+
+  @override
+  String get notifCategoryMessages => 'សារ';
+
+  @override
+  String get notifCategoryPayments => 'ការទូទាត់';
+
+  @override
+  String get notifCategoryStock => 'ស្តុក';
+
+  @override
+  String get notifCategoryAccount => 'គណនី';
+
+  @override
+  String get notifCategorySystem => 'ប្រព័ន្ធ';
+
+  @override
+  String get justNow => 'អម្បាញ់មិញ';
+
+  @override
+  String daysAgo(int days) {
+    return '$daysថ្ងៃមុន';
+  }
+
+  @override
+  String get view => 'មើល';
+
+  @override
+  String get tagOrderPlaced => 'បានបញ្ជាទិញ';
+
+  @override
+  String get tagNewOrder => 'ការបញ្ជាទិញថ្មី';
+
+  @override
+  String get tagAccepted => 'បានទទួលយក';
+
+  @override
+  String get tagRejected => 'បានបដិសេធ';
+
+  @override
+  String get tagReady => 'រួចរាល់';
+
+  @override
+  String get tagCompleted => 'បានបញ្ចប់';
+
+  @override
+  String get tagCancelled => 'បានបោះបង់';
+
+  @override
+  String get tagOrder => 'ការបញ្ជាទិញ';
+
+  @override
+  String get tagPhoto => 'រូបថត';
+
+  @override
+  String get tagOrderChat => 'ការសន្ទនាការបញ្ជាទិញ';
+
+  @override
+  String get tagChat => 'ការសន្ទនា';
+
+  @override
+  String get tagPaymentFailed => 'ការទូទាត់បរាជ័យ';
+
+  @override
+  String get tagPaymentDone => 'ការទូទាត់ជោគជ័យ';
+
+  @override
+  String get tagPayment => 'ការទូទាត់';
+
+  @override
+  String get tagOutOfStock => 'អស់ពីស្តុក';
+
+  @override
+  String get tagLowStock => 'ស្តុកតិច';
+
+  @override
+  String get tagPublished => 'បានផ្សព្វផ្សាយ';
+
+  @override
+  String get tagUpdated => 'បានកែប្រែ';
+
+  @override
+  String get tagInventory => 'សារពើភ័ណ្ឌ';
+
+  @override
+  String get tagSecurityAlert => 'ការដាស់តឿនសុវត្ថិភាព';
+
+  @override
+  String get tagDeviceLogin => 'ការចូលឧបករណ៍';
+
+  @override
+  String get tagPassword => 'ពាក្យសម្ងាត់';
+
+  @override
+  String get tagPhone => 'លេខទូរស័ព្ទ';
+
+  @override
+  String get tagAccount => 'គណនី';
+
+  @override
+  String get tagAnnouncement => 'សេចក្តីប្រកាស';
+
+  @override
+  String get tagMaintenance => 'ការថែទាំ';
+
+  @override
+  String get tagNewFeature => 'មុខងារថ្មី';
+
+  @override
+  String get tagPolicyUpdate => 'ការអាប់ដេតគោលការណ៍';
+
+  @override
+  String get tagInterruption => 'ការរំខាន';
+
+  @override
+  String get tagNotice => 'ការជូនដំណឹង';
+
+  @override
   String get allMessages => 'សារទាំងអស់';
 
   @override

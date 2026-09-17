@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/notification/models/notification_model.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class NotificationCard extends StatelessWidget {
   final NotificationModel notification;
@@ -15,287 +16,319 @@ class NotificationCard extends StatelessWidget {
 
   static const Color primaryGreen = Color(0xFF1B5E20);
 
-  _NotificationStyle _getStyle(String type) {
+  _NotificationStyle _getStyle(String type, AppLocalizations? l10n) {
     final lower = type.toLowerCase();
 
     // 1. Order Notifications
     if (lower == 'order_placed') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.shopping_cart_outlined,
-        color: Color(0xFF0284C7),
-        bgColor: Color(0xFFF0F9FF),
-        tag: 'Order Placed',
+        color: const Color(0xFF0284C7),
+        bgColor: const Color(0xFFF0F9FF),
+        tag: l10n?.tagOrderPlaced ?? 'Order Placed',
       );
     }
     if (lower == 'order_created') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.add_shopping_cart_rounded,
-        color: Color(0xFFEA580C),
-        bgColor: Color(0xFFFFF7ED),
-        tag: 'New Order',
+        color: const Color(0xFFEA580C),
+        bgColor: const Color(0xFFFFF7ED),
+        tag: l10n?.tagNewOrder ?? 'New Order',
       );
     }
     if (lower == 'order_accepted') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.check_circle_outline_rounded,
-        color: Color(0xFF16A34A),
-        bgColor: Color(0xFFF0FDF4),
-        tag: 'Accepted',
+        color: const Color(0xFF16A34A),
+        bgColor: const Color(0xFFF0FDF4),
+        tag: l10n?.tagAccepted ?? 'Accepted',
       );
     }
     if (lower == 'order_rejected') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.highlight_off_rounded,
-        color: Color(0xFFDC2626),
-        bgColor: Color(0xFFFEF2F2),
-        tag: 'Rejected',
+        color: const Color(0xFFDC2626),
+        bgColor: const Color(0xFFFEF2F2),
+        tag: l10n?.tagRejected ?? 'Rejected',
       );
     }
     if (lower == 'order_ready') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.inventory_rounded,
-        color: Color(0xFF4F46E5),
-        bgColor: Color(0xFFEEF2FF),
-        tag: 'Ready',
+        color: const Color(0xFF4F46E5),
+        bgColor: const Color(0xFFEEF2FF),
+        tag: l10n?.tagReady ?? 'Ready',
       );
     }
     if (lower == 'order_completed') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.task_alt_rounded,
-        color: Color(0xFF059669),
-        bgColor: Color(0xFFECFDF5),
-        tag: 'Completed',
+        color: const Color(0xFF059669),
+        bgColor: const Color(0xFFECFDF5),
+        tag: l10n?.tagCompleted ?? 'Completed',
       );
     }
     if (lower == 'order_cancelled') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.cancel_outlined,
-        color: Color(0xFFDC2626),
-        bgColor: Color(0xFFFEF2F2),
-        tag: 'Cancelled',
+        color: const Color(0xFFDC2626),
+        bgColor: const Color(0xFFFEF2F2),
+        tag: l10n?.tagCancelled ?? 'Cancelled',
       );
     }
     if (lower.contains('order')) {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.local_shipping_outlined,
-        color: Color(0xFFEA580C),
-        bgColor: Color(0xFFFFF7ED),
-        tag: 'Order',
+        color: const Color(0xFFEA580C),
+        bgColor: const Color(0xFFFFF7ED),
+        tag: l10n?.tagOrder ?? 'Order',
       );
     }
 
     // 2. Chat Notifications
     if (lower == 'chat_image') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.image_outlined,
-        color: Color(0xFF2563EB),
-        bgColor: Color(0xFFEFF6FF),
-        tag: 'Photo',
+        color: const Color(0xFF2563EB),
+        bgColor: const Color(0xFFEFF6FF),
+        tag: l10n?.tagPhoto ?? 'Photo',
       );
     }
     if (lower == 'chat_order') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.forum_outlined,
-        color: Color(0xFF7C3AED),
-        bgColor: Color(0xFFF5F3FF),
-        tag: 'Order Chat',
+        color: const Color(0xFF7C3AED),
+        bgColor: const Color(0xFFF5F3FF),
+        tag: l10n?.tagOrderChat ?? 'Order Chat',
       );
     }
     if (lower.contains('message') || lower.contains('chat')) {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.chat_bubble_outline_rounded,
-        color: Color(0xFF2563EB),
-        bgColor: Color(0xFFEFF6FF),
-        tag: 'Chat',
+        color: const Color(0xFF2563EB),
+        bgColor: const Color(0xFFEFF6FF),
+        tag: l10n?.tagChat ?? 'Chat',
       );
     }
 
     // 3. Payment Notifications
     if (lower == 'payment_failed') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.error_outline_rounded,
-        color: Color(0xFFDC2626),
-        bgColor: Color(0xFFFEF2F2),
-        tag: 'Payment Failed',
+        color: const Color(0xFFDC2626),
+        bgColor: const Color(0xFFFEF2F2),
+        tag: l10n?.tagPaymentFailed ?? 'Payment Failed',
       );
     }
     if (lower == 'payment_success' || lower == 'payment_completed') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.check_circle_outline_rounded,
-        color: Color(0xFF059669),
-        bgColor: Color(0xFFECFDF5),
-        tag: 'Payment Done',
+        color: const Color(0xFF059669),
+        bgColor: const Color(0xFFECFDF5),
+        tag: l10n?.tagPaymentDone ?? 'Payment Done',
       );
     }
     if (lower.contains('payment')) {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.account_balance_wallet_outlined,
-        color: Color(0xFF059669),
-        bgColor: Color(0xFFECFDF5),
-        tag: 'Payment',
+        color: const Color(0xFF059669),
+        bgColor: const Color(0xFFECFDF5),
+        tag: l10n?.tagPayment ?? 'Payment',
       );
     }
 
     // 4. Product & Stock Notifications
     if (lower == 'product_out_of_stock' || lower.contains('out_of_stock')) {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.remove_shopping_cart_outlined,
-        color: Color(0xFFDC2626),
-        bgColor: Color(0xFFFEF2F2),
-        tag: 'Out of Stock',
+        color: const Color(0xFFDC2626),
+        bgColor: const Color(0xFFFEF2F2),
+        tag: l10n?.tagOutOfStock ?? 'Out of Stock',
       );
     }
     if (lower == 'product_low_stock' || lower.contains('low_stock')) {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.warning_amber_rounded,
-        color: Color(0xFFD97706),
-        bgColor: Color(0xFFFFFBEB),
-        tag: 'Low Stock',
+        color: const Color(0xFFD97706),
+        bgColor: const Color(0xFFFFFBEB),
+        tag: l10n?.tagLowStock ?? 'Low Stock',
       );
     }
     if (lower == 'product_published') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.storefront_outlined,
-        color: Color(0xFF059669),
-        bgColor: Color(0xFFECFDF5),
-        tag: 'Published',
+        color: const Color(0xFF059669),
+        bgColor: const Color(0xFFECFDF5),
+        tag: l10n?.tagPublished ?? 'Published',
       );
     }
     if (lower == 'product_updated') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.edit_note_rounded,
-        color: Color(0xFF9333EA),
-        bgColor: Color(0xFFFAF5FF),
-        tag: 'Updated',
+        color: const Color(0xFF9333EA),
+        bgColor: const Color(0xFFFAF5FF),
+        tag: l10n?.tagUpdated ?? 'Updated',
       );
     }
     if (lower.contains('product') || lower.contains('inventory') || lower.contains('stock')) {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.inventory_2_outlined,
-        color: Color(0xFF9333EA),
-        bgColor: Color(0xFFFAF5FF),
-        tag: 'Inventory',
+        color: const Color(0xFF9333EA),
+        bgColor: const Color(0xFFFAF5FF),
+        tag: l10n?.tagInventory ?? 'Inventory',
       );
     }
 
     // 5. Account & Security Notifications
     if (lower == 'account_security_alert') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.security_rounded,
-        color: Color(0xFFDC2626),
-        bgColor: Color(0xFFFEF2F2),
-        tag: 'Security Alert',
+        color: const Color(0xFFDC2626),
+        bgColor: const Color(0xFFFEF2F2),
+        tag: l10n?.tagSecurityAlert ?? 'Security Alert',
       );
     }
     if (lower == 'account_login') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.devices_rounded,
-        color: Color(0xFF0284C7),
-        bgColor: Color(0xFFF0F9FF),
-        tag: 'Device Login',
+        color: const Color(0xFF0284C7),
+        bgColor: const Color(0xFFF0F9FF),
+        tag: l10n?.tagDeviceLogin ?? 'Device Login',
       );
     }
     if (lower == 'account_password_changed') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.vpn_key_outlined,
-        color: Color(0xFF0D9488),
-        bgColor: Color(0xFFF0FDFA),
-        tag: 'Password',
+        color: const Color(0xFF0D9488),
+        bgColor: const Color(0xFFF0FDFA),
+        tag: l10n?.tagPassword ?? 'Password',
       );
     }
     if (lower == 'account_phone_changed') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.phone_android_rounded,
-        color: Color(0xFF4F46E5),
-        bgColor: Color(0xFFEEF2FF),
-        tag: 'Phone',
+        color: const Color(0xFF4F46E5),
+        bgColor: const Color(0xFFEEF2FF),
+        tag: l10n?.tagPhone ?? 'Phone',
       );
     }
     if (lower.contains('account') || lower.contains('profile')) {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.person_outline_rounded,
-        color: Color(0xFF0D9488),
-        bgColor: Color(0xFFF0FDFA),
-        tag: 'Account',
+        color: const Color(0xFF0D9488),
+        bgColor: const Color(0xFFF0FDFA),
+        tag: l10n?.tagAccount ?? 'Account',
       );
     }
 
     // 6. System Notifications
     if (lower == 'system_announcement') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.campaign_outlined,
-        color: Color(0xFF7C3AED),
-        bgColor: Color(0xFFF5F3FF),
-        tag: 'Announcement',
+        color: const Color(0xFF7C3AED),
+        bgColor: const Color(0xFFF5F3FF),
+        tag: l10n?.tagAnnouncement ?? 'Announcement',
       );
     }
     if (lower == 'system_maintenance') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.build_circle_outlined,
-        color: Color(0xFFEA580C),
-        bgColor: Color(0xFFFFF7ED),
-        tag: 'Maintenance',
+        color: const Color(0xFFEA580C),
+        bgColor: const Color(0xFFFFF7ED),
+        tag: l10n?.tagMaintenance ?? 'Maintenance',
       );
     }
     if (lower == 'system_new_feature') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.auto_awesome_rounded,
-        color: Color(0xFFD946EF),
-        bgColor: Color(0xFFFDF4FF),
-        tag: 'New Feature',
+        color: const Color(0xFFD946EF),
+        bgColor: const Color(0xFFFDF4FF),
+        tag: l10n?.tagNewFeature ?? 'New Feature',
       );
     }
     if (lower == 'system_policy_update') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.gavel_rounded,
-        color: Color(0xFF475569),
-        bgColor: Color(0xFFF8FAFC),
-        tag: 'Policy Update',
+        color: const Color(0xFF475569),
+        bgColor: const Color(0xFFF8FAFC),
+        tag: l10n?.tagPolicyUpdate ?? 'Policy Update',
       );
     }
     if (lower == 'system_interruption') {
-      return const _NotificationStyle(
+      return _NotificationStyle(
         icon: Icons.warning_amber_rounded,
-        color: Color(0xFFDC2626),
-        bgColor: Color(0xFFFEF2F2),
-        tag: 'Interruption',
+        color: const Color(0xFFDC2626),
+        bgColor: const Color(0xFFFEF2F2),
+        tag: l10n?.tagInterruption ?? 'Interruption',
       );
     }
 
-    return const _NotificationStyle(
+    return _NotificationStyle(
       icon: Icons.notifications_none_rounded,
-      color: Color(0xFF0D9488),
-      bgColor: Color(0xFFF0FDFA),
-      tag: 'Notice',
+      color: const Color(0xFF0D9488),
+      bgColor: const Color(0xFFF0FDFA),
+      tag: l10n?.tagNotice ?? 'Notice',
     );
   }
 
-  String _formatTimeAgo(DateTime? date) {
+  String _formatTimeAgo(DateTime? date, AppLocalizations? l10n) {
     if (date == null) return '';
     final now = DateTime.now();
     final difference = now.difference(date.toLocal());
 
     if (difference.inSeconds < 60) {
-      return 'Just now';
+      return l10n?.justNow ?? 'Just now';
     } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
+      return l10n?.minutesAgo(difference.inMinutes) ?? '${difference.inMinutes}m ago';
     } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
+      return l10n?.hoursAgo(difference.inHours) ?? '${difference.inHours}h ago';
     } else if (difference.inDays == 1) {
-      return 'Yesterday';
+      return l10n?.yesterday ?? 'Yesterday';
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
+      return l10n?.daysAgo(difference.inDays) ?? '${difference.inDays}d ago';
     } else {
       final local = date.toLocal();
       return '${local.month}/${local.day}/${local.year}';
     }
   }
 
+  String _getLocalizedTitle(String title, String type, AppLocalizations? l10n) {
+    if (l10n == null) return title;
+    final lower = title.trim().toLowerCase();
+    if (lower == 'notification') return l10n.notifications;
+    if (lower == 'new order' || lower.startsWith('new order #')) {
+      final match = RegExp(r'#(\w+)').firstMatch(title);
+      if (match != null) {
+        return l10n.newOrder(match.group(1)!);
+      }
+      return l10n.tagNewOrder;
+    }
+    if (lower == 'order placed') return l10n.tagOrderPlaced;
+    if (lower == 'order accepted') return l10n.tagAccepted;
+    if (lower == 'order rejected') return l10n.tagRejected;
+    if (lower == 'order ready' || lower == 'order ready for pickup') return l10n.tagReady;
+    if (lower == 'order completed') return l10n.tagCompleted;
+    if (lower == 'order cancelled') return l10n.tagCancelled;
+    if (lower == 'order delivered') return l10n.orderDelivered;
+    if (lower == 'new message' || lower == 'new messages') return l10n.tagChat;
+    if (lower == 'payment successful' || lower == 'payment completed') return l10n.tagPaymentDone;
+    if (lower == 'payment received') return l10n.paymentReceived;
+    if (lower == 'payment failed') return l10n.tagPaymentFailed;
+    if (lower == 'product low stock' || lower == 'low stock alert') return l10n.tagLowStock;
+    if (lower == 'product out of stock' || lower == 'out of stock alert') return l10n.tagOutOfStock;
+    if (lower == 'system update') return l10n.systemUpdate;
+    if (lower == 'system maintenance') return l10n.tagMaintenance;
+    if (lower == 'security alert' || lower.contains('new login')) return l10n.securityAlert;
+    return title;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final style = _getStyle(notification.type);
+    final l10n = AppLocalizations.of(context);
+    final style = _getStyle(notification.type, l10n);
     final isUnread = !notification.isRead;
-    final timeStr = _formatTimeAgo(notification.createdAt);
+    final timeStr = _formatTimeAgo(notification.createdAt, l10n);
+    final displayTitle = _getLocalizedTitle(notification.title, notification.type, l10n);
 
     Widget cardContent = Container(
       decoration: BoxDecoration(
@@ -359,7 +392,7 @@ class NotificationCard extends StatelessWidget {
                               children: [
                                 Flexible(
                                   child: Text(
-                                    notification.title,
+                                    displayTitle,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -450,8 +483,8 @@ class NotificationCard extends StatelessWidget {
                             Row(
                               children: [
                                 Text(
-                                  'View',
-                                  style: TextStyle(
+                                  l10n?.view ?? 'View',
+                                  style: const TextStyle(
                                     fontSize: 11,
                                     color: primaryGreen,
                                     fontWeight: FontWeight.w600,
@@ -490,14 +523,14 @@ class NotificationCard extends StatelessWidget {
           ),
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.delete_outline_rounded, color: Colors.white, size: 24),
-              SizedBox(width: 4),
+              const Icon(Icons.delete_outline_rounded, color: Colors.white, size: 24),
+              const SizedBox(width: 4),
               Text(
-                'Delete',
-                style: TextStyle(
+                l10n?.delete ?? 'Delete',
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,

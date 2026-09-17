@@ -721,6 +721,190 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get unableToLoadNotifications => 'Unable to load notifications';
+
+  @override
+  String get notificationRemoved => 'Notification removed';
+
+  @override
+  String get clearAllNotificationsTitle => 'Clear all notifications?';
+
+  @override
+  String get clearAllNotificationsContent =>
+      'This will permanently remove all your notifications.';
+
+  @override
+  String get clearAll => 'Clear All';
+
+  @override
+  String get allNotificationsCleared => 'All notifications cleared';
+
+  @override
+  String get clearAllNotifications => 'Clear all notifications';
+
+  @override
+  String get sendTestNotification => 'Send Test Notification';
+
+  @override
+  String get testNotificationSent =>
+      'Test notification sent! Check your lock screen & status bar.';
+
+  @override
+  String get noNotificationsYet => 'No notifications yet';
+
+  @override
+  String get noNotificationsDescription =>
+      'You will receive real-time updates here for orders, messages, stock, payments, and account activities.';
+
+  @override
+  String noCategoryNotifications(String category) {
+    return 'No $category notifications';
+  }
+
+  @override
+  String categoryNotificationsHeader(String category) {
+    return '$category NOTIFICATIONS';
+  }
+
+  @override
+  String get securityAlert => 'Security Alert';
+
+  @override
+  String get newLoginDetected => 'A new login was detected on your account.';
+
+  @override
+  String get securityAlertNotice =>
+      'If this was you, you can safely ignore this notice. If you did not log in recently, we recommend reviewing your profile or updating your security credentials.';
+
+  @override
+  String get dismiss => 'Dismiss';
+
+  @override
+  String get viewProfile => 'View Profile';
+
+  @override
+  String get notifCategoryAll => 'All';
+
+  @override
+  String get notifCategoryOrders => 'Orders';
+
+  @override
+  String get notifCategoryMessages => 'Messages';
+
+  @override
+  String get notifCategoryPayments => 'Payments';
+
+  @override
+  String get notifCategoryStock => 'Stock';
+
+  @override
+  String get notifCategoryAccount => 'Account';
+
+  @override
+  String get notifCategorySystem => 'System';
+
+  @override
+  String get justNow => 'Just now';
+
+  @override
+  String daysAgo(int days) {
+    return '${days}d ago';
+  }
+
+  @override
+  String get view => 'View';
+
+  @override
+  String get tagOrderPlaced => 'Order Placed';
+
+  @override
+  String get tagNewOrder => 'New Order';
+
+  @override
+  String get tagAccepted => 'Accepted';
+
+  @override
+  String get tagRejected => 'Rejected';
+
+  @override
+  String get tagReady => 'Ready';
+
+  @override
+  String get tagCompleted => 'Completed';
+
+  @override
+  String get tagCancelled => 'Cancelled';
+
+  @override
+  String get tagOrder => 'Order';
+
+  @override
+  String get tagPhoto => 'Photo';
+
+  @override
+  String get tagOrderChat => 'Order Chat';
+
+  @override
+  String get tagChat => 'Chat';
+
+  @override
+  String get tagPaymentFailed => 'Payment Failed';
+
+  @override
+  String get tagPaymentDone => 'Payment Done';
+
+  @override
+  String get tagPayment => 'Payment';
+
+  @override
+  String get tagOutOfStock => 'Out of Stock';
+
+  @override
+  String get tagLowStock => 'Low Stock';
+
+  @override
+  String get tagPublished => 'Published';
+
+  @override
+  String get tagUpdated => 'Updated';
+
+  @override
+  String get tagInventory => 'Inventory';
+
+  @override
+  String get tagSecurityAlert => 'Security Alert';
+
+  @override
+  String get tagDeviceLogin => 'Device Login';
+
+  @override
+  String get tagPassword => 'Password';
+
+  @override
+  String get tagPhone => 'Phone';
+
+  @override
+  String get tagAccount => 'Account';
+
+  @override
+  String get tagAnnouncement => 'Announcement';
+
+  @override
+  String get tagMaintenance => 'Maintenance';
+
+  @override
+  String get tagNewFeature => 'New Feature';
+
+  @override
+  String get tagPolicyUpdate => 'Policy Update';
+
+  @override
+  String get tagInterruption => 'Interruption';
+
+  @override
+  String get tagNotice => 'Notice';
+
+  @override
   String get allMessages => 'All Messages';
 
   @override

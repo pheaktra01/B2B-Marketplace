@@ -347,6 +347,85 @@
   "minutesAgo": "{minutes}m ago",
   "hoursAgo": "{hours}h ago",
   "orderNumber": "Order #{number}",
+  "unableToLoadNotifications": "Unable to load notifications",
+  "notificationRemoved": "Notification removed",
+  "clearAllNotificationsTitle": "Clear all notifications?",
+  "clearAllNotificationsContent": "This will permanently remove all your notifications.",
+  "clearAll": "Clear All",
+  "allNotificationsCleared": "All notifications cleared",
+  "clearAllNotifications": "Clear all notifications",
+  "sendTestNotification": "Send Test Notification",
+  "testNotificationSent": "Test notification sent! Check your lock screen & status bar.",
+  "noNotificationsYet": "No notifications yet",
+  "noNotificationsDescription": "You will receive real-time updates here for orders, messages, stock, payments, and account activities.",
+  "noCategoryNotifications": "No {category} notifications",
+  "@noCategoryNotifications": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryNotificationsHeader": "{category} NOTIFICATIONS",
+  "@categoryNotificationsHeader": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "securityAlert": "Security Alert",
+  "newLoginDetected": "A new login was detected on your account.",
+  "securityAlertNotice": "If this was you, you can safely ignore this notice. If you did not log in recently, we recommend reviewing your profile or updating your security credentials.",
+  "dismiss": "Dismiss",
+  "viewProfile": "View Profile",
+  "notifCategoryAll": "All",
+  "notifCategoryOrders": "Orders",
+  "notifCategoryMessages": "Messages",
+  "notifCategoryPayments": "Payments",
+  "notifCategoryStock": "Stock",
+  "notifCategoryAccount": "Account",
+  "notifCategorySystem": "System",
+  "justNow": "Just now",
+  "daysAgo": "{days}d ago",
+  "@daysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "view": "View",
+  "tagOrderPlaced": "Order Placed",
+  "tagNewOrder": "New Order",
+  "tagAccepted": "Accepted",
+  "tagRejected": "Rejected",
+  "tagReady": "Ready",
+  "tagCompleted": "Completed",
+  "tagCancelled": "Cancelled",
+  "tagOrder": "Order",
+  "tagPhoto": "Photo",
+  "tagOrderChat": "Order Chat",
+  "tagChat": "Chat",
+  "tagPaymentFailed": "Payment Failed",
+  "tagPaymentDone": "Payment Done",
+  "tagPayment": "Payment",
+  "tagOutOfStock": "Out of Stock",
+  "tagLowStock": "Low Stock",
+  "tagPublished": "Published",
+  "tagUpdated": "Updated",
+  "tagInventory": "Inventory",
+  "tagSecurityAlert": "Security Alert",
+  "tagDeviceLogin": "Device Login",
+  "tagPassword": "Password",
+  "tagPhone": "Phone",
+  "tagAccount": "Account",
+  "tagAnnouncement": "Announcement",
+  "tagMaintenance": "Maintenance",
+  "tagNewFeature": "New Feature",
+  "tagPolicyUpdate": "Policy Update",
+  "tagInterruption": "Interruption",
+  "tagNotice": "Notice",
 
   "allMessages": "All Messages",
   "restaurants": "Restaurants",

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/notification/models/notification_model.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:mobile/features/notification/services/push_notification_service.dart';
@@ -184,11 +185,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     try {
       await _service.deleteNotification(notification.id);
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Notification removed'),
+          SnackBar(
+            content: Text(l10n?.notificationRemoved ?? 'Notification removed'),
             behavior: SnackBarBehavior.floating,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -203,21 +205,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Future<void> _clearAllNotifications() async {
+    final l10n = AppLocalizations.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Clear all notifications?'),
-        content: const Text('This will permanently remove all your notifications.'),
+        title: Text(l10n?.clearAllNotificationsTitle ?? 'Clear all notifications?'),
+        content: Text(l10n?.clearAllNotificationsContent ?? 'This will permanently remove all your notifications.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: Text(l10n?.cancel ?? 'Cancel', style: const TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Clear All', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(l10n?.clearAll ?? 'Clear All', style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -233,11 +236,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     try {
       await _service.deleteAllNotifications();
       if (mounted) {
+        final currentL10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('All notifications cleared'),
+          SnackBar(
+            content: Text(currentL10n?.allNotificationsCleared ?? 'All notifications cleared'),
             behavior: SnackBarBehavior.floating,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -362,7 +366,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        final timeStr = _dateLabel(notification.createdAt, AppLocalizations.of(context)!);
+        final l10n = AppLocalizations.of(ctx);
+        final timeStr = _dateLabel(notification.createdAt, l10n);
         return Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -411,7 +416,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          notification.title,
+                          notification.title.isNotEmpty
+                              ? notification.title
+                              : (l10n?.securityAlert ?? 'Security Alert'),
                           style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.bold,
@@ -448,7 +455,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     Text(
                       notification.message.isNotEmpty
                           ? notification.message
-                          : 'A new login was detected on your account.',
+                          : (l10n?.newLoginDetected ?? 'A new login was detected on your account.'),
                       style: const TextStyle(
                         fontSize: 14,
                         color: Color(0xFF334155),
@@ -467,7 +474,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'If this was you, you can safely ignore this notice. If you did not log in recently, we recommend reviewing your profile or updating your security credentials.',
+                            l10n?.securityAlertNotice ??
+                                'If this was you, you can safely ignore this notice. If you did not log in recently, we recommend reviewing your profile or updating your security credentials.',
                             style: TextStyle(
                               fontSize: 12.5,
                               color: Colors.grey.shade700,
@@ -494,7 +502,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         ),
                       ),
                       child: Text(
-                        'Dismiss',
+                        l10n?.dismiss ?? 'Dismiss',
                         style: TextStyle(
                           color: Colors.grey.shade700,
                           fontWeight: FontWeight.w600,
@@ -522,9 +530,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'View Profile',
-                        style: TextStyle(
+                      child: Text(
+                        l10n?.viewProfile ?? 'View Profile',
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -539,14 +547,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  String _dateLabel(DateTime? date, AppLocalizations l10n) {
+  String _dateLabel(DateTime? date, AppLocalizations? l10n) {
     if (date == null) return '';
     final now = DateTime.now();
     final local = date.toLocal();
     final today = DateTime(now.year, now.month, now.day);
     final day = DateTime(local.year, local.month, local.day);
-    if (day == today) return l10n.today;
-    if (day == today.subtract(const Duration(days: 1))) return l10n.yesterday;
+    if (day == today) return l10n?.today ?? 'TODAY';
+    if (day == today.subtract(const Duration(days: 1))) return l10n?.yesterday ?? 'YESTERDAY';
     return '${local.month}/${local.day}/${local.year}';
   }
 
@@ -577,8 +585,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ),
         actions: [
+          // Quick Language Switch Toggle Pill
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+            child: AuthLanguageSwitch(),
+          ),
           IconButton(
-            tooltip: 'Send Test Notification',
+            tooltip: l10n.sendTestNotification,
             icon: const Icon(Icons.notifications_active_outlined, color: primaryGreen),
             onPressed: () async {
               await PushNotificationService.showTestNotification(
@@ -588,9 +601,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Test notification sent! Check your lock screen & status bar.'),
+                  SnackBar(
+                    content: Text(l10n.testNotificationSent),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -636,7 +648,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   children: [
                     Icon(Icons.delete_sweep_outlined, size: 18, color: _notifications.isNotEmpty ? Colors.red : Colors.grey),
                     const SizedBox(width: 8),
-                    const Text('Clear all notifications', style: TextStyle(color: Colors.red)),
+                    Text(l10n.clearAllNotifications, style: const TextStyle(color: Colors.red)),
                   ],
                 ),
               ),
@@ -654,14 +666,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(_errorMessage!),
+                      Text(l10n.unableToLoadNotifications),
                       const SizedBox(height: 8),
                       TextButton(
                         onPressed: () {
                           setState(() => _isLoading = true);
                           _loadNotifications();
                         },
-                        child: const Text('Retry'),
+                        child: Text(l10n.tryAgain),
                       ),
                     ],
                   ),
@@ -687,9 +699,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            const Text(
-                              'No notifications yet',
-                              style: TextStyle(
+                            Text(
+                              l10n.noNotificationsYet,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF111827),
@@ -697,7 +709,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'You will receive real-time updates here for orders, messages, stock, payments, and account activities.',
+                              l10n.noNotificationsDescription,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 13,
@@ -731,7 +743,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return Column(
       children: [
         // Category filter bar
-        _buildCategoryFilters(_notifications),
+        _buildCategoryFilters(_notifications, l10n),
 
         // Notification list
         Expanded(
@@ -752,7 +764,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'No ${_categoryLabel(_selectedCategory)} notifications',
+                            l10n.noCategoryNotifications(_categoryLabel(_selectedCategory, l10n)),
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -774,7 +786,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '${_categoryLabel(_selectedCategory).toUpperCase()} NOTIFICATIONS',
+                            l10n.categoryNotificationsHeader(
+                              _categoryLabel(_selectedCategory, l10n).toUpperCase(),
+                            ),
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -840,34 +854,34 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  String _categoryLabel(String key) {
+  String _categoryLabel(String key, AppLocalizations l10n) {
     switch (key) {
       case 'orders':
-        return 'Orders';
+        return l10n.notifCategoryOrders;
       case 'messages':
-        return 'Messages';
+        return l10n.notifCategoryMessages;
       case 'payments':
-        return 'Payments';
+        return l10n.notifCategoryPayments;
       case 'products':
-        return 'Stock';
+        return l10n.notifCategoryStock;
       case 'account':
-        return 'Account';
+        return l10n.notifCategoryAccount;
       case 'system':
-        return 'System';
+        return l10n.notifCategorySystem;
       default:
-        return 'All';
+        return l10n.notifCategoryAll;
     }
   }
 
-  Widget _buildCategoryFilters(List<NotificationModel> allNotifications) {
+  Widget _buildCategoryFilters(List<NotificationModel> allNotifications, AppLocalizations l10n) {
     final categories = [
-      ('all', 'All', Icons.all_inbox_rounded),
-      ('orders', 'Orders', Icons.shopping_bag_outlined),
-      ('messages', 'Messages', Icons.chat_bubble_outline_rounded),
-      ('payments', 'Payments', Icons.account_balance_wallet_outlined),
-      ('products', 'Stock', Icons.inventory_2_outlined),
-      ('account', 'Account', Icons.security_rounded),
-      ('system', 'System', Icons.campaign_outlined),
+      ('all', l10n.notifCategoryAll, Icons.all_inbox_rounded),
+      ('orders', l10n.notifCategoryOrders, Icons.shopping_bag_outlined),
+      ('messages', l10n.notifCategoryMessages, Icons.chat_bubble_outline_rounded),
+      ('payments', l10n.notifCategoryPayments, Icons.account_balance_wallet_outlined),
+      ('products', l10n.notifCategoryStock, Icons.inventory_2_outlined),
+      ('account', l10n.notifCategoryAccount, Icons.security_rounded),
+      ('system', l10n.notifCategorySystem, Icons.campaign_outlined),
     ];
 
     return Container(

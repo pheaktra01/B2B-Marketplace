@@ -905,6 +905,250 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tagNotice => 'Notice';
 
   @override
+  String get myOrders => 'My Orders';
+
+  @override
+  String get orderFilterAll => 'All';
+
+  @override
+  String get orderFilterActive => 'Active';
+
+  @override
+  String get orderFilterDelivered => 'Delivered';
+
+  @override
+  String get orderFilterCancelled => 'Cancelled';
+
+  @override
+  String get couldNotLoadOrders => 'Could not load your orders';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get noOrdersFound => 'No orders found';
+
+  @override
+  String get noOrdersYet => 'You have not placed any orders yet.';
+
+  @override
+  String noFilteredOrders(String filter) {
+    return 'No $filter orders available.';
+  }
+
+  @override
+  String get exploreFreshProduce => 'Explore Fresh Produce';
+
+  @override
+  String orderNumberLabel(String id) {
+    return 'Order #$id';
+  }
+
+  @override
+  String moreItemsCount(int count) {
+    return '+ $count more items';
+  }
+
+  @override
+  String get deliveryMethodPickup => 'PICKUP';
+
+  @override
+  String get deliveryMethodDelivery => 'DELIVERY';
+
+  @override
+  String get totalColon => 'Total: ';
+
+  @override
+  String get orderStatusPending => 'Pending Confirmation';
+
+  @override
+  String get orderStatusConfirmed => 'Confirmed';
+
+  @override
+  String get orderStatusProcessing => 'Processing';
+
+  @override
+  String get orderStatusShipped => 'Out for Delivery';
+
+  @override
+  String get orderStatusDelivered => 'Delivered';
+
+  @override
+  String get orderStatusCancelled => 'Cancelled';
+
+  @override
+  String get orderTracking => 'Order Tracking';
+
+  @override
+  String get failedToLoadOrderDetails => 'Failed to load order details';
+
+  @override
+  String get orderNotFound => 'Order not found';
+
+  @override
+  String orderStatusUpdated(String status) {
+    return 'Order status updated to $status';
+  }
+
+  @override
+  String unableToUpdateOrder(String error) {
+    return 'Unable to update order: $error';
+  }
+
+  @override
+  String get orderCancelledSubtitle => 'This order was cancelled.';
+
+  @override
+  String get orderDeliveredFarmerSubtitle =>
+      'Order delivered and completed successfully.';
+
+  @override
+  String get orderDeliveredRestaurantSubtitle =>
+      'Delivered to your kitchen successfully.';
+
+  @override
+  String get orderShippedFarmerSubtitle =>
+      'Produce is out for delivery to the restaurant.';
+
+  @override
+  String get orderShippedRestaurantSubtitle =>
+      'Produce is in transit to your kitchen.';
+
+  @override
+  String get orderProcessingFarmerSubtitle =>
+      'You are harvesting and packaging this order.';
+
+  @override
+  String get orderProcessingRestaurantSubtitle =>
+      'Farmer is harvesting and packaging your order.';
+
+  @override
+  String get orderConfirmedFarmerSubtitle =>
+      'Order confirmed. Ready to start preparing.';
+
+  @override
+  String get orderConfirmedRestaurantSubtitle =>
+      'Order confirmed by grower. Preparing fulfillment.';
+
+  @override
+  String get orderPendingFarmerSubtitle =>
+      'New order received from buyer. Awaiting your confirmation.';
+
+  @override
+  String get orderPendingRestaurantSubtitle =>
+      'Sent to farmer. Awaiting grower confirmation.';
+
+  @override
+  String get orderProgress => 'Order Progress';
+
+  @override
+  String get orderPlacedStep => 'Order Placed';
+
+  @override
+  String get orderPlacedFarmerDesc => 'Order received from buyer';
+
+  @override
+  String get orderPlacedRestaurantDesc => 'Order transmitted to farmer';
+
+  @override
+  String get confirmedStep => 'Confirmed';
+
+  @override
+  String get confirmedFarmerDesc => 'You confirmed the order';
+
+  @override
+  String get confirmedRestaurantDesc => 'Farmer confirmed harvest';
+
+  @override
+  String get processingStep => 'Processing';
+
+  @override
+  String get processingDesc => 'Harvesting & packaging';
+
+  @override
+  String get outForDeliveryStep => 'Out for Delivery';
+
+  @override
+  String get outForDeliveryFarmerDesc => 'On the way to buyer';
+
+  @override
+  String get outForDeliveryRestaurantDesc => 'On the way to your kitchen';
+
+  @override
+  String get deliveredStep => 'Delivered';
+
+  @override
+  String get deliveredFarmerDesc => 'Delivered & finalized';
+
+  @override
+  String get deliveredRestaurantDesc => 'Received & verified';
+
+  @override
+  String get deliveryDetails => 'Delivery Details';
+
+  @override
+  String get destinationAddress => 'Destination Address';
+
+  @override
+  String get defaultRestaurantAddress => 'Default Restaurant Kitchen Address';
+
+  @override
+  String get orderedAt => 'Ordered At';
+
+  @override
+  String get itemsInThisOrder => 'Items in this Order';
+
+  @override
+  String orderItemsCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String get paymentBreakdown => 'Payment Breakdown';
+
+  @override
+  String get subtotal => 'Subtotal';
+
+  @override
+  String get transactionFee => 'Transaction Fee (5%)';
+
+  @override
+  String get totalAmount => 'Total Amount';
+
+  @override
+  String get paymentKhqr => 'Payment: KHQR (Bakong)';
+
+  @override
+  String get paymentCash => 'Payment: Cash on Delivery';
+
+  @override
+  String get declineOrder => 'Decline Order';
+
+  @override
+  String get acceptOrder => 'Accept Order';
+
+  @override
+  String get startPreparingProduce => 'Start Preparing Produce';
+
+  @override
+  String get markAsOutForDelivery => 'Mark as Out for Delivery';
+
+  @override
+  String get completeOrderDelivered => 'Complete Order (Delivered)';
+
+  @override
+  String get openChats => 'Open Chats';
+
+  @override
+  String get backToOrderManagement => 'Back to Order Management';
+
+  @override
+  String get messageGrowerFarmer => 'Message Grower / Farmer';
+
+  @override
+  String get backToMarketplace => 'Back to Marketplace';
+
+  @override
   String get allMessages => 'All Messages';
 
   @override

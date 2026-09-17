@@ -1752,6 +1752,450 @@ abstract class AppLocalizations {
   /// **'Notice'**
   String get tagNotice;
 
+  /// No description provided for @myOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'My Orders'**
+  String get myOrders;
+
+  /// No description provided for @orderFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get orderFilterAll;
+
+  /// No description provided for @orderFilterActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get orderFilterActive;
+
+  /// No description provided for @orderFilterDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get orderFilterDelivered;
+
+  /// No description provided for @orderFilterCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get orderFilterCancelled;
+
+  /// No description provided for @couldNotLoadOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your orders'**
+  String get couldNotLoadOrders;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @noOrdersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders found'**
+  String get noOrdersFound;
+
+  /// No description provided for @noOrdersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not placed any orders yet.'**
+  String get noOrdersYet;
+
+  /// No description provided for @noFilteredOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'No {filter} orders available.'**
+  String noFilteredOrders(String filter);
+
+  /// No description provided for @exploreFreshProduce.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore Fresh Produce'**
+  String get exploreFreshProduce;
+
+  /// No description provided for @orderNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Order #{id}'**
+  String orderNumberLabel(String id);
+
+  /// No description provided for @moreItemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {count} more items'**
+  String moreItemsCount(int count);
+
+  /// No description provided for @deliveryMethodPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'PICKUP'**
+  String get deliveryMethodPickup;
+
+  /// No description provided for @deliveryMethodDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'DELIVERY'**
+  String get deliveryMethodDelivery;
+
+  /// No description provided for @totalColon.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: '**
+  String get totalColon;
+
+  /// No description provided for @orderStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Confirmation'**
+  String get orderStatusPending;
+
+  /// No description provided for @orderStatusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get orderStatusConfirmed;
+
+  /// No description provided for @orderStatusProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get orderStatusProcessing;
+
+  /// No description provided for @orderStatusShipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for Delivery'**
+  String get orderStatusShipped;
+
+  /// No description provided for @orderStatusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get orderStatusDelivered;
+
+  /// No description provided for @orderStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get orderStatusCancelled;
+
+  /// No description provided for @orderTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Tracking'**
+  String get orderTracking;
+
+  /// No description provided for @failedToLoadOrderDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load order details'**
+  String get failedToLoadOrderDetails;
+
+  /// No description provided for @orderNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Order not found'**
+  String get orderNotFound;
+
+  /// No description provided for @orderStatusUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Order status updated to {status}'**
+  String orderStatusUpdated(String status);
+
+  /// No description provided for @unableToUpdateOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to update order: {error}'**
+  String unableToUpdateOrder(String error);
+
+  /// No description provided for @orderCancelledSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This order was cancelled.'**
+  String get orderCancelledSubtitle;
+
+  /// No description provided for @orderDeliveredFarmerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order delivered and completed successfully.'**
+  String get orderDeliveredFarmerSubtitle;
+
+  /// No description provided for @orderDeliveredRestaurantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered to your kitchen successfully.'**
+  String get orderDeliveredRestaurantSubtitle;
+
+  /// No description provided for @orderShippedFarmerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce is out for delivery to the restaurant.'**
+  String get orderShippedFarmerSubtitle;
+
+  /// No description provided for @orderShippedRestaurantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce is in transit to your kitchen.'**
+  String get orderShippedRestaurantSubtitle;
+
+  /// No description provided for @orderProcessingFarmerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You are harvesting and packaging this order.'**
+  String get orderProcessingFarmerSubtitle;
+
+  /// No description provided for @orderProcessingRestaurantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Farmer is harvesting and packaging your order.'**
+  String get orderProcessingRestaurantSubtitle;
+
+  /// No description provided for @orderConfirmedFarmerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order confirmed. Ready to start preparing.'**
+  String get orderConfirmedFarmerSubtitle;
+
+  /// No description provided for @orderConfirmedRestaurantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order confirmed by grower. Preparing fulfillment.'**
+  String get orderConfirmedRestaurantSubtitle;
+
+  /// No description provided for @orderPendingFarmerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New order received from buyer. Awaiting your confirmation.'**
+  String get orderPendingFarmerSubtitle;
+
+  /// No description provided for @orderPendingRestaurantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to farmer. Awaiting grower confirmation.'**
+  String get orderPendingRestaurantSubtitle;
+
+  /// No description provided for @orderProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Progress'**
+  String get orderProgress;
+
+  /// No description provided for @orderPlacedStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Placed'**
+  String get orderPlacedStep;
+
+  /// No description provided for @orderPlacedFarmerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Order received from buyer'**
+  String get orderPlacedFarmerDesc;
+
+  /// No description provided for @orderPlacedRestaurantDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Order transmitted to farmer'**
+  String get orderPlacedRestaurantDesc;
+
+  /// No description provided for @confirmedStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get confirmedStep;
+
+  /// No description provided for @confirmedFarmerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You confirmed the order'**
+  String get confirmedFarmerDesc;
+
+  /// No description provided for @confirmedRestaurantDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Farmer confirmed harvest'**
+  String get confirmedRestaurantDesc;
+
+  /// No description provided for @processingStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get processingStep;
+
+  /// No description provided for @processingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvesting & packaging'**
+  String get processingDesc;
+
+  /// No description provided for @outForDeliveryStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for Delivery'**
+  String get outForDeliveryStep;
+
+  /// No description provided for @outForDeliveryFarmerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way to buyer'**
+  String get outForDeliveryFarmerDesc;
+
+  /// No description provided for @outForDeliveryRestaurantDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way to your kitchen'**
+  String get outForDeliveryRestaurantDesc;
+
+  /// No description provided for @deliveredStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get deliveredStep;
+
+  /// No description provided for @deliveredFarmerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered & finalized'**
+  String get deliveredFarmerDesc;
+
+  /// No description provided for @deliveredRestaurantDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Received & verified'**
+  String get deliveredRestaurantDesc;
+
+  /// No description provided for @deliveryDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Details'**
+  String get deliveryDetails;
+
+  /// No description provided for @destinationAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination Address'**
+  String get destinationAddress;
+
+  /// No description provided for @defaultRestaurantAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Default Restaurant Kitchen Address'**
+  String get defaultRestaurantAddress;
+
+  /// No description provided for @orderedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Ordered At'**
+  String get orderedAt;
+
+  /// No description provided for @itemsInThisOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Items in this Order'**
+  String get itemsInThisOrder;
+
+  /// No description provided for @orderItemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String orderItemsCount(int count);
+
+  /// No description provided for @paymentBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Breakdown'**
+  String get paymentBreakdown;
+
+  /// No description provided for @subtotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtotal'**
+  String get subtotal;
+
+  /// No description provided for @transactionFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Fee (5%)'**
+  String get transactionFee;
+
+  /// No description provided for @totalAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Amount'**
+  String get totalAmount;
+
+  /// No description provided for @paymentKhqr.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment: KHQR (Bakong)'**
+  String get paymentKhqr;
+
+  /// No description provided for @paymentCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment: Cash on Delivery'**
+  String get paymentCash;
+
+  /// No description provided for @declineOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline Order'**
+  String get declineOrder;
+
+  /// No description provided for @acceptOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept Order'**
+  String get acceptOrder;
+
+  /// No description provided for @startPreparingProduce.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Preparing Produce'**
+  String get startPreparingProduce;
+
+  /// No description provided for @markAsOutForDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Out for Delivery'**
+  String get markAsOutForDelivery;
+
+  /// No description provided for @completeOrderDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Order (Delivered)'**
+  String get completeOrderDelivered;
+
+  /// No description provided for @openChats.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Chats'**
+  String get openChats;
+
+  /// No description provided for @backToOrderManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Order Management'**
+  String get backToOrderManagement;
+
+  /// No description provided for @messageGrowerFarmer.
+  ///
+  /// In en, this message translates to:
+  /// **'Message Grower / Farmer'**
+  String get messageGrowerFarmer;
+
+  /// No description provided for @backToMarketplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Marketplace'**
+  String get backToMarketplace;
+
   /// No description provided for @allMessages.
   ///
   /// In en, this message translates to:

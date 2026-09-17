@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class RestaurantOrdersScreen extends StatefulWidget {
   const RestaurantOrdersScreen({super.key});
@@ -112,8 +114,24 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
     }
   }
 
+  String _getFilterLabel(int index, AppLocalizations l10n) {
+    switch (index) {
+      case 1:
+        return l10n.orderFilterActive;
+      case 2:
+        return l10n.orderFilterDelivered;
+      case 3:
+        return l10n.orderFilterCancelled;
+      case 0:
+      default:
+        return l10n.orderFilterAll;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: pageBgColor,
       appBar: AppBar(
@@ -123,24 +141,30 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          'My Orders',
-          style: TextStyle(
+        title: Text(
+          l10n.myOrders,
+          style: const TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            child: AuthLanguageSwitch(),
+          ),
+        ],
         centerTitle: false,
       ),
       body: Column(
         children: [
-          _buildFilterTabs(),
+          _buildFilterTabs(l10n),
           Expanded(
             child: RefreshIndicator(
               onRefresh: _loadOrders,
               color: primaryGreen,
-              child: _buildBody(),
+              child: _buildBody(l10n),
             ),
           ),
         ],
@@ -148,7 +172,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
     );
   }
 
-  Widget _buildFilterTabs() {
+  Widget _buildFilterTabs(AppLocalizations l10n) {
     return Container(
       height: 48,
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -161,7 +185,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
           final isSelected = _selectedFilter == index;
           return ChoiceChip(
             label: Text(
-              _filters[index],
+              _getFilterLabel(index, l10n),
               style: TextStyle(
                 color: isSelected ? Colors.white : Colors.grey.shade800,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
@@ -191,7 +215,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(AppLocalizations l10n) {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: primaryGreen),
@@ -208,9 +232,9 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
             children: [
               Icon(Icons.cloud_off_outlined, size: 54, color: Colors.grey.shade400),
               const SizedBox(height: 14),
-              const Text(
-                'Could not load your orders',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              Text(
+                l10n.couldNotLoadOrders,
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Text(
@@ -225,7 +249,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                   backgroundColor: primaryGreen,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Retry'),
+                child: Text(l10n.retry),
               ),
             ],
           ),
@@ -256,15 +280,15 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
-                'No orders found',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                l10n.noOrdersFound,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Text(
                 _selectedFilter == 0
-                    ? 'You have not placed any orders yet.'
-                    : 'No ${_filters[_selectedFilter].toLowerCase()} orders available.',
+                    ? l10n.noOrdersYet
+                    : l10n.noFilteredOrders(_getFilterLabel(_selectedFilter, l10n)),
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
@@ -279,7 +303,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                   ),
                 ),
                 icon: const Icon(Icons.storefront_outlined, size: 18),
-                label: const Text('Explore Fresh Produce'),
+                label: Text(l10n.exploreFreshProduce),
               ),
             ],
           ),
@@ -293,12 +317,12 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
       itemCount: filtered.length,
       separatorBuilder: (_, unused) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        return _buildOrderCard(filtered[index]);
+        return _buildOrderCard(filtered[index], l10n);
       },
     );
   }
 
-  Widget _buildOrderCard(OrderModel order) {
+  Widget _buildOrderCard(OrderModel order, AppLocalizations l10n) {
     final statusColor = _getStatusColor(order.status);
     final statusBg = _getStatusBgColor(order.status);
 
@@ -349,7 +373,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Order #${order.displayId}',
+                          l10n.orderNumberLabel(order.displayId),
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
@@ -365,7 +389,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        order.statusLabel,
+                        order.getLocalizedStatus(l10n),
                         style: TextStyle(
                           color: statusColor,
                           fontWeight: FontWeight.bold,
@@ -437,7 +461,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
-                        '+ ${order.items.length - 3} more items',
+                        l10n.moreItemsCount(order.items.length - 3),
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.grey.shade500,
@@ -469,7 +493,9 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            order.deliveryMethod.toUpperCase(),
+                            order.deliveryMethod.toLowerCase() == 'pickup'
+                                ? l10n.deliveryMethodPickup
+                                : l10n.deliveryMethodDelivery,
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
@@ -482,7 +508,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                     Row(
                       children: [
                         Text(
-                          'Total: ',
+                          l10n.totalColon,
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey.shade600,

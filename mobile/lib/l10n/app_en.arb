@@ -426,6 +426,124 @@
   "tagPolicyUpdate": "Policy Update",
   "tagInterruption": "Interruption",
   "tagNotice": "Notice",
+  "myOrders": "My Orders",
+  "orderFilterAll": "All",
+  "orderFilterActive": "Active",
+  "orderFilterDelivered": "Delivered",
+  "orderFilterCancelled": "Cancelled",
+  "couldNotLoadOrders": "Could not load your orders",
+  "retry": "Retry",
+  "noOrdersFound": "No orders found",
+  "noOrdersYet": "You have not placed any orders yet.",
+  "noFilteredOrders": "No {filter} orders available.",
+  "@noFilteredOrders": {
+    "placeholders": {
+      "filter": {
+        "type": "String"
+      }
+    }
+  },
+  "exploreFreshProduce": "Explore Fresh Produce",
+  "orderNumberLabel": "Order #{id}",
+  "@orderNumberLabel": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "moreItemsCount": "+ {count} more items",
+  "@moreItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deliveryMethodPickup": "PICKUP",
+  "deliveryMethodDelivery": "DELIVERY",
+  "totalColon": "Total: ",
+  "orderStatusPending": "Pending Confirmation",
+  "orderStatusConfirmed": "Confirmed",
+  "orderStatusProcessing": "Processing",
+  "orderStatusShipped": "Out for Delivery",
+  "orderStatusDelivered": "Delivered",
+  "orderStatusCancelled": "Cancelled",
+  "orderTracking": "Order Tracking",
+  "failedToLoadOrderDetails": "Failed to load order details",
+  "orderNotFound": "Order not found",
+  "orderStatusUpdated": "Order status updated to {status}",
+  "@orderStatusUpdated": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "unableToUpdateOrder": "Unable to update order: {error}",
+  "@unableToUpdateOrder": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "orderCancelledSubtitle": "This order was cancelled.",
+  "orderDeliveredFarmerSubtitle": "Order delivered and completed successfully.",
+  "orderDeliveredRestaurantSubtitle": "Delivered to your kitchen successfully.",
+  "orderShippedFarmerSubtitle": "Produce is out for delivery to the restaurant.",
+  "orderShippedRestaurantSubtitle": "Produce is in transit to your kitchen.",
+  "orderProcessingFarmerSubtitle": "You are harvesting and packaging this order.",
+  "orderProcessingRestaurantSubtitle": "Farmer is harvesting and packaging your order.",
+  "orderConfirmedFarmerSubtitle": "Order confirmed. Ready to start preparing.",
+  "orderConfirmedRestaurantSubtitle": "Order confirmed by grower. Preparing fulfillment.",
+  "orderPendingFarmerSubtitle": "New order received from buyer. Awaiting your confirmation.",
+  "orderPendingRestaurantSubtitle": "Sent to farmer. Awaiting grower confirmation.",
+  "orderProgress": "Order Progress",
+  "orderPlacedStep": "Order Placed",
+  "orderPlacedFarmerDesc": "Order received from buyer",
+  "orderPlacedRestaurantDesc": "Order transmitted to farmer",
+  "confirmedStep": "Confirmed",
+  "confirmedFarmerDesc": "You confirmed the order",
+  "confirmedRestaurantDesc": "Farmer confirmed harvest",
+  "processingStep": "Processing",
+  "processingDesc": "Harvesting & packaging",
+  "outForDeliveryStep": "Out for Delivery",
+  "outForDeliveryFarmerDesc": "On the way to buyer",
+  "outForDeliveryRestaurantDesc": "On the way to your kitchen",
+  "deliveredStep": "Delivered",
+  "deliveredFarmerDesc": "Delivered & finalized",
+  "deliveredRestaurantDesc": "Received & verified",
+  "deliveryDetails": "Delivery Details",
+  "deliveryMethod": "Delivery Method",
+  "destinationAddress": "Destination Address",
+  "defaultRestaurantAddress": "Default Restaurant Kitchen Address",
+  "orderedAt": "Ordered At",
+  "itemsInThisOrder": "Items in this Order",
+  "orderItemsCount": "{count} items",
+  "@orderItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "paymentBreakdown": "Payment Breakdown",
+  "subtotal": "Subtotal",
+  "deliveryFee": "Delivery Fee",
+  "transactionFee": "Transaction Fee (5%)",
+  "totalAmount": "Total Amount",
+  "paymentKhqr": "Payment: KHQR (Bakong)",
+  "paymentCash": "Payment: Cash on Delivery",
+  "declineOrder": "Decline Order",
+  "acceptOrder": "Accept Order",
+  "startPreparingProduce": "Start Preparing Produce",
+  "markAsOutForDelivery": "Mark as Out for Delivery",
+  "completeOrderDelivered": "Complete Order (Delivered)",
+  "openChats": "Open Chats",
+  "backToOrderManagement": "Back to Order Management",
+  "messageGrowerFarmer": "Message Grower / Farmer",
+  "backToMarketplace": "Back to Marketplace",
 
   "allMessages": "All Messages",
   "restaurants": "Restaurants",

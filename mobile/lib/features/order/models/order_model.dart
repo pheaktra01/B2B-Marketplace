@@ -1,3 +1,5 @@
+import 'package:mobile/l10n/app_localizations.dart';
+
 class OrderModel {
   final String id;
   final String farmerId;
@@ -99,6 +101,25 @@ class OrderModel {
       case 'pending':
       default:
         return 'Pending Confirmation';
+    }
+  }
+
+  String getLocalizedStatus(AppLocalizations? l10n) {
+    if (l10n == null) return statusLabel;
+    switch (status.toLowerCase()) {
+      case 'confirmed':
+        return l10n.orderStatusConfirmed;
+      case 'processing':
+        return l10n.orderStatusProcessing;
+      case 'shipped':
+        return l10n.orderStatusShipped;
+      case 'delivered':
+        return l10n.orderStatusDelivered;
+      case 'cancelled':
+        return l10n.orderStatusCancelled;
+      case 'pending':
+      default:
+        return l10n.orderStatusPending;
     }
   }
 

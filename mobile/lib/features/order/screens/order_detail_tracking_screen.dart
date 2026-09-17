@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class OrderDetailTrackingScreen extends StatefulWidget {
   final String orderId;
@@ -63,14 +65,27 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
         _order = updated;
         _isLoading = false;
       });
+      final l10n = AppLocalizations.of(context);
+      final statusDisplay = updated.getLocalizedStatus(l10n);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Order status updated to ${updated.statusLabel}')),
+        SnackBar(
+          content: Text(
+            l10n?.orderStatusUpdated(statusDisplay) ??
+                'Order status updated to $statusDisplay',
+          ),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unable to update order: $e')),
+        SnackBar(
+          content: Text(
+            l10n?.unableToUpdateOrder(e.toString()) ??
+                'Unable to update order: $e',
+          ),
+        ),
       );
     }
   }
@@ -99,6 +114,8 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: pageBgColor,
       appBar: AppBar(
@@ -119,7 +136,10 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
           },
         ),
         title: Text(
-          _order != null ? 'Order #${_order!.displayId}' : 'Order Tracking',
+          _order != null
+              ? (l10n?.orderNumberLabel(_order!.displayId) ??
+                  'Order #${_order!.displayId}')
+              : (l10n?.orderTracking ?? 'Order Tracking'),
           style: const TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
@@ -128,17 +148,21 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
         ),
         centerTitle: false,
         actions: [
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+            child: AuthLanguageSwitch(),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh, color: primaryGreen),
             onPressed: _loadOrder,
           ),
         ],
       ),
-      body: _buildBody(),
+      body: _buildBody(l10n),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(AppLocalizations? l10n) {
     if (_isLoading && _order == null) {
       return const Center(
         child: CircularProgressIndicator(color: primaryGreen),
@@ -154,9 +178,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
             children: [
               Icon(Icons.error_outline, size: 50, color: Colors.red.shade400),
               const SizedBox(height: 12),
-              const Text(
-                'Failed to load order details',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Text(
+                l10n?.failedToLoadOrderDetails ?? 'Failed to load order details',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
@@ -168,7 +192,10 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
               ElevatedButton(
                 onPressed: _loadOrder,
                 style: ElevatedButton.styleFrom(backgroundColor: primaryGreen),
-                child: const Text('Retry', style: TextStyle(color: Colors.white)),
+                child: Text(
+                  l10n?.retry ?? 'Retry',
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -177,7 +204,7 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
     }
 
     if (_order == null) {
-      return const Center(child: Text('Order not found'));
+      return Center(child: Text(l10n?.orderNotFound ?? 'Order not found'));
     }
 
     final order = _order!;
@@ -192,32 +219,32 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Status Banner
-            _buildStatusHeader(order),
+            _buildStatusHeader(order, l10n),
 
             const SizedBox(height: 16),
 
             // Visual Tracking Stepper
-            _buildTrackingTimeline(order),
+            _buildTrackingTimeline(order, l10n),
 
             const SizedBox(height: 16),
 
             // Delivery Details Card
-            _buildDeliveryCard(order),
+            _buildDeliveryCard(order, l10n),
 
             const SizedBox(height: 16),
 
             // Order Items Card
-            _buildItemsCard(order),
+            _buildItemsCard(order, l10n),
 
             const SizedBox(height: 16),
 
             // Summary Breakdown Card
-            _buildFinancialSummary(order),
+            _buildFinancialSummary(order, l10n),
 
             const SizedBox(height: 24),
 
             // Action Buttons
-            _buildBottomButtons(order),
+            _buildBottomButtons(order, l10n),
 
             const SizedBox(height: 16),
           ],
@@ -226,7 +253,7 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
     );
   }
 
-  Widget _buildStatusHeader(OrderModel order) {
+  Widget _buildStatusHeader(OrderModel order, AppLocalizations? l10n) {
     final isCancelled = order.status.toLowerCase() == 'cancelled';
     final isDelivered = order.status.toLowerCase() == 'delivered';
 
@@ -239,42 +266,52 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
       bannerBg = Colors.red.shade50;
       textColor = Colors.red.shade800;
       icon = Icons.cancel_outlined;
-      subtitle = 'This order was cancelled.';
+      subtitle = l10n?.orderCancelledSubtitle ?? 'This order was cancelled.';
     } else if (isDelivered) {
       bannerBg = primaryGreen.withValues(alpha: 0.1);
       textColor = primaryGreen;
       icon = Icons.check_circle_outline;
       subtitle = _isFarmer
-          ? 'Order delivered and completed successfully.'
-          : 'Delivered to your kitchen successfully.';
+          ? (l10n?.orderDeliveredFarmerSubtitle ??
+              'Order delivered and completed successfully.')
+          : (l10n?.orderDeliveredRestaurantSubtitle ??
+              'Delivered to your kitchen successfully.');
     } else if (order.status.toLowerCase() == 'shipped') {
       bannerBg = Colors.teal.shade50;
       textColor = Colors.teal.shade800;
       icon = Icons.local_shipping_outlined;
       subtitle = _isFarmer
-          ? 'Produce is out for delivery to the restaurant.'
-          : 'Produce is in transit to your kitchen.';
+          ? (l10n?.orderShippedFarmerSubtitle ??
+              'Produce is out for delivery to the restaurant.')
+          : (l10n?.orderShippedRestaurantSubtitle ??
+              'Produce is in transit to your kitchen.');
     } else if (order.status.toLowerCase() == 'processing') {
       bannerBg = Colors.indigo.shade50;
       textColor = Colors.indigo.shade800;
       icon = Icons.inventory_2_outlined;
       subtitle = _isFarmer
-          ? 'You are harvesting and packaging this order.'
-          : 'Farmer is harvesting and packaging your order.';
+          ? (l10n?.orderProcessingFarmerSubtitle ??
+              'You are harvesting and packaging this order.')
+          : (l10n?.orderProcessingRestaurantSubtitle ??
+              'Farmer is harvesting and packaging your order.');
     } else if (order.status.toLowerCase() == 'confirmed') {
       bannerBg = Colors.blue.shade50;
       textColor = Colors.blue.shade800;
       icon = Icons.thumb_up_outlined;
       subtitle = _isFarmer
-          ? 'Order confirmed. Ready to start preparing.'
-          : 'Order confirmed by grower. Preparing fulfillment.';
+          ? (l10n?.orderConfirmedFarmerSubtitle ??
+              'Order confirmed. Ready to start preparing.')
+          : (l10n?.orderConfirmedRestaurantSubtitle ??
+              'Order confirmed by grower. Preparing fulfillment.');
     } else {
       bannerBg = const Color(0xFFFFF3E0);
       textColor = const Color(0xFFE65100);
       icon = Icons.hourglass_top_outlined;
       subtitle = _isFarmer
-          ? 'New order received from buyer. Awaiting your confirmation.'
-          : 'Sent to farmer. Awaiting grower confirmation.';
+          ? (l10n?.orderPendingFarmerSubtitle ??
+              'New order received from buyer. Awaiting your confirmation.')
+          : (l10n?.orderPendingRestaurantSubtitle ??
+              'Sent to farmer. Awaiting grower confirmation.');
     }
 
     return Container(
@@ -307,7 +344,7 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  order.statusLabel,
+                  order.getLocalizedStatus(l10n),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -330,27 +367,37 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
     );
   }
 
-  Widget _buildTrackingTimeline(OrderModel order) {
+  Widget _buildTrackingTimeline(OrderModel order, AppLocalizations? l10n) {
     final steps = [
       {
-        'title': 'Order Placed',
-        'desc': _isFarmer ? 'Order received from buyer' : 'Order transmitted to farmer',
+        'title': l10n?.orderPlacedStep ?? 'Order Placed',
+        'desc': _isFarmer
+            ? (l10n?.orderPlacedFarmerDesc ?? 'Order received from buyer')
+            : (l10n?.orderPlacedRestaurantDesc ??
+                'Order transmitted to farmer'),
       },
       {
-        'title': 'Confirmed',
-        'desc': _isFarmer ? 'You confirmed the order' : 'Farmer confirmed harvest',
+        'title': l10n?.confirmedStep ?? 'Confirmed',
+        'desc': _isFarmer
+            ? (l10n?.confirmedFarmerDesc ?? 'You confirmed the order')
+            : (l10n?.confirmedRestaurantDesc ?? 'Farmer confirmed harvest'),
       },
       {
-        'title': 'Processing',
-        'desc': _isFarmer ? 'Harvesting & packaging' : 'Harvesting & packaging',
+        'title': l10n?.processingStep ?? 'Processing',
+        'desc': l10n?.processingDesc ?? 'Harvesting & packaging',
       },
       {
-        'title': 'Out for Delivery',
-        'desc': _isFarmer ? 'On the way to buyer' : 'On the way to your kitchen',
+        'title': l10n?.outForDeliveryStep ?? 'Out for Delivery',
+        'desc': _isFarmer
+            ? (l10n?.outForDeliveryFarmerDesc ?? 'On the way to buyer')
+            : (l10n?.outForDeliveryRestaurantDesc ??
+                'On the way to your kitchen'),
       },
       {
-        'title': 'Delivered',
-        'desc': _isFarmer ? 'Delivered & finalized' : 'Received & verified',
+        'title': l10n?.deliveredStep ?? 'Delivered',
+        'desc': _isFarmer
+            ? (l10n?.deliveredFarmerDesc ?? 'Delivered & finalized')
+            : (l10n?.deliveredRestaurantDesc ?? 'Received & verified'),
       },
     ];
 
@@ -374,9 +421,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Order Progress',
-            style: TextStyle(
+          Text(
+            l10n?.orderProgress ?? 'Order Progress',
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
@@ -392,11 +439,13 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                  Icon(Icons.error_outline,
+                      color: Colors.red.shade700, size: 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'This order has been cancelled.',
+                      l10n?.orderCancelledSubtitle ??
+                          'This order has been cancelled.',
                       style: TextStyle(
                         color: Colors.red.shade800,
                         fontWeight: FontWeight.w600,
@@ -414,7 +463,8 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
               final isLast = index == steps.length - 1;
 
               Color dotColor = isDone ? primaryGreen : Colors.grey.shade300;
-              Color lineColor = index < currentStep ? primaryGreen : Colors.grey.shade200;
+              Color lineColor =
+                  index < currentStep ? primaryGreen : Colors.grey.shade200;
 
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -428,7 +478,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                         decoration: BoxDecoration(
                           color: isCurrent
                               ? primaryGreen
-                              : (isDone ? primaryGreen.withValues(alpha: 0.15) : Colors.grey.shade100),
+                              : (isDone
+                                  ? primaryGreen.withValues(alpha: 0.15)
+                                  : Colors.grey.shade100),
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: dotColor,
@@ -440,7 +492,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                               ? Icon(
                                   Icons.check,
                                   size: 13,
-                                  color: isCurrent ? Colors.white : primaryGreen,
+                                  color: isCurrent
+                                      ? Colors.white
+                                      : primaryGreen,
                                 )
                               : null,
                         ),
@@ -465,8 +519,12 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                             steps[index]['title']!,
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
-                              color: isDone ? Colors.black87 : Colors.grey.shade500,
+                              fontWeight: isCurrent
+                                  ? FontWeight.bold
+                                  : FontWeight.w600,
+                              color: isDone
+                                  ? Colors.black87
+                                  : Colors.grey.shade500,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -474,7 +532,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                             steps[index]['desc']!,
                             style: TextStyle(
                               fontSize: 11,
-                              color: isDone ? Colors.grey.shade600 : Colors.grey.shade400,
+                              color: isDone
+                                  ? Colors.grey.shade600
+                                  : Colors.grey.shade400,
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -490,7 +550,11 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
     );
   }
 
-  Widget _buildDeliveryCard(OrderModel order) {
+  Widget _buildDeliveryCard(OrderModel order, AppLocalizations? l10n) {
+    final methodLabel = order.deliveryMethod.toLowerCase() == 'pickup'
+        ? (l10n?.deliveryMethodPickup.toUpperCase() ?? 'PICKUP')
+        : (l10n?.deliveryMethodDelivery.toUpperCase() ?? 'DELIVERY');
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -508,9 +572,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Delivery Details',
-            style: TextStyle(
+          Text(
+            l10n?.deliveryDetails ?? 'Delivery Details',
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
@@ -519,22 +583,23 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
           const SizedBox(height: 14),
           _buildInfoRow(
             Icons.local_shipping_outlined,
-            'Delivery Method',
-            order.deliveryMethod.toUpperCase(),
+            l10n?.deliveryMethod ?? 'Delivery Method',
+            methodLabel,
           ),
           const SizedBox(height: 10),
           _buildInfoRow(
             Icons.location_on_outlined,
-            'Destination Address',
+            l10n?.destinationAddress ?? 'Destination Address',
             order.deliveryAddress.isNotEmpty
                 ? order.deliveryAddress
-                : 'Default Restaurant Kitchen Address',
+                : (l10n?.defaultRestaurantAddress ??
+                    'Default Restaurant Kitchen Address'),
           ),
           if (order.formattedDate.isNotEmpty) ...[
             const SizedBox(height: 10),
             _buildInfoRow(
               Icons.calendar_today_outlined,
-              'Ordered At',
+              l10n?.orderedAt ?? 'Ordered At',
               order.formattedDate,
             ),
           ],
@@ -543,7 +608,7 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
     );
   }
 
-  Widget _buildItemsCard(OrderModel order) {
+  Widget _buildItemsCard(OrderModel order, AppLocalizations? l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -564,9 +629,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Items in this Order',
-                style: TextStyle(
+              Text(
+                l10n?.itemsInThisOrder ?? 'Items in this Order',
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
@@ -579,7 +644,8 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '${order.items.length} items',
+                  l10n?.orderItemsCount(order.items.length) ??
+                      '${order.items.length} items',
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
@@ -655,7 +721,7 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
     );
   }
 
-  Widget _buildFinancialSummary(OrderModel order) {
+  Widget _buildFinancialSummary(OrderModel order, AppLocalizations? l10n) {
     final isKhqr = order.paymentMethod.toLowerCase() == 'khqr';
 
     return Container(
@@ -675,20 +741,25 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Payment Breakdown',
-            style: TextStyle(
+          Text(
+            l10n?.paymentBreakdown ?? 'Payment Breakdown',
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
           ),
           const SizedBox(height: 14),
-          _buildPriceRow('Subtotal', '\$${order.subtotal.toStringAsFixed(2)}'),
+          _buildPriceRow(
+              l10n?.subtotal ?? 'Subtotal', '\$${order.subtotal.toStringAsFixed(2)}'),
           const SizedBox(height: 8),
-          _buildPriceRow('Delivery Fee', '\$${order.deliveryFee.toStringAsFixed(2)}'),
+          _buildPriceRow(l10n?.deliveryFee ?? 'Delivery Fee',
+              '\$${order.deliveryFee.toStringAsFixed(2)}'),
           const SizedBox(height: 8),
-          _buildPriceRow('Transaction Fee (5%)', '\$${order.transactionFee.toStringAsFixed(2)}'),
+          _buildPriceRow(
+            '${l10n?.transactionFee ?? 'Transaction Fee'} (5%)',
+            '\$${order.transactionFee.toStringAsFixed(2)}',
+          ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Divider(height: 1),
@@ -696,9 +767,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Total Amount',
-                style: TextStyle(
+              Text(
+                l10n?.totalAmount ?? 'Total Amount',
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: primaryGreen,
@@ -732,7 +803,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  isKhqr ? 'Payment: KHQR (Bakong)' : 'Payment: Cash on Delivery',
+                  isKhqr
+                      ? (l10n?.paymentKhqr ?? 'Payment: KHQR (Bakong)')
+                      : (l10n?.paymentCash ?? 'Payment: Cash on Delivery'),
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -741,7 +814,8 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: order.paymentStatus.toLowerCase() == 'completed'
                         ? primaryGreen.withValues(alpha: 0.1)
@@ -817,7 +891,7 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
     );
   }
 
-  Widget _buildBottomButtons(OrderModel order) {
+  Widget _buildBottomButtons(OrderModel order, AppLocalizations? l10n) {
     if (_isFarmer) {
       final status = order.status.toLowerCase();
       return Column(
@@ -837,7 +911,7 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Decline Order'),
+                    child: Text(l10n?.declineOrder ?? 'Decline Order'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -853,7 +927,7 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text('Accept Order'),
+                    child: Text(l10n?.acceptOrder ?? 'Accept Order'),
                   ),
                 ),
               ],
@@ -874,9 +948,10 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                   ),
                 ),
                 icon: const Icon(Icons.inventory_2_outlined, size: 18),
-                label: const Text(
-                  'Start Preparing Produce',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                label: Text(
+                  l10n?.startPreparingProduce ?? 'Start Preparing Produce',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ),
             ),
@@ -896,9 +971,10 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                   ),
                 ),
                 icon: const Icon(Icons.local_shipping_outlined, size: 18),
-                label: const Text(
-                  'Mark as Out for Delivery',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                label: Text(
+                  l10n?.markAsOutForDelivery ?? 'Mark as Out for Delivery',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ),
             ),
@@ -918,9 +994,10 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                   ),
                 ),
                 icon: const Icon(Icons.check_circle_outline, size: 18),
-                label: const Text(
-                  'Complete Order (Delivered)',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                label: Text(
+                  l10n?.completeOrderDelivered ?? 'Complete Order (Delivered)',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ),
             ),
@@ -942,9 +1019,10 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                 ),
               ),
               icon: const Icon(Icons.chat_outlined, size: 18),
-              label: const Text(
-                'Open Chats',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              label: Text(
+                l10n?.openChats ?? 'Open Chats',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 14),
               ),
             ),
           ),
@@ -961,10 +1039,12 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                   context.go(AppRoutes.farmerOrders);
                 }
               },
-              icon: const Icon(Icons.arrow_back_rounded, size: 18, color: Colors.grey),
-              label: const Text(
-                'Back to Order Management',
-                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+              icon: const Icon(Icons.arrow_back_rounded,
+                  size: 18, color: Colors.grey),
+              label: Text(
+                l10n?.backToOrderManagement ?? 'Back to Order Management',
+                style: const TextStyle(
+                    color: Colors.grey, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -990,9 +1070,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
               ),
             ),
             icon: const Icon(Icons.chat_outlined, size: 18),
-            label: const Text(
-              'Message Grower / Farmer',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            label: Text(
+              l10n?.messageGrowerFarmer ?? 'Message Grower / Farmer',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
           ),
         ),
@@ -1010,9 +1090,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
               ),
             ),
             icon: const Icon(Icons.storefront_outlined, size: 18),
-            label: const Text(
-              'Back to Marketplace',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            label: Text(
+              l10n?.backToMarketplace ?? 'Back to Marketplace',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
           ),
         ),

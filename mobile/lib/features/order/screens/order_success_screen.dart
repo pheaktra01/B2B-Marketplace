@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
@@ -93,7 +94,17 @@ class OrderSuccessScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: pageBgColor,
-
+      appBar: AppBar(
+        backgroundColor: pageBgColor,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+            child: AuthLanguageSwitch(),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding:

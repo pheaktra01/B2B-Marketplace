@@ -349,7 +349,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get kampongCham => 'កំពង់ចាម';
 
   @override
-  String get deliveryMethod => 'វិធីសាស្ត្រដឹកជញ្ជូន';
+  String get deliveryMethod => 'វិធីសាស្រ្តដឹកជញ្ជូន';
 
   @override
   String get farmerDelivery => 'កសិករដឹកជញ្ជូន';
@@ -904,6 +904,252 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get tagNotice => 'ការជូនដំណឹង';
+
+  @override
+  String get myOrders => 'ការបញ្ជាទិញរបស់ខ្ញុំ';
+
+  @override
+  String get orderFilterAll => 'ទាំងអស់';
+
+  @override
+  String get orderFilterActive => 'សកម្ម';
+
+  @override
+  String get orderFilterDelivered => 'បានដឹកជញ្ជូន';
+
+  @override
+  String get orderFilterCancelled => 'បានបោះបង់';
+
+  @override
+  String get couldNotLoadOrders => 'មិនអាចទាញយកការបញ្ជាទិញរបស់អ្នកបានទេ';
+
+  @override
+  String get retry => 'ព្យាយាមម្តងទៀត';
+
+  @override
+  String get noOrdersFound => 'រកមិនឃើញការបញ្ជាទិញទេ';
+
+  @override
+  String get noOrdersYet => 'អ្នកមិនទាន់បានធ្វើការបញ្ជាទិញណាមួយនៅឡើយទេ។';
+
+  @override
+  String noFilteredOrders(String filter) {
+    return 'មិនមានការបញ្ជាទិញ $filter ទេ។';
+  }
+
+  @override
+  String get exploreFreshProduce => 'រុករកកសិផលស្រស់ៗ';
+
+  @override
+  String orderNumberLabel(String id) {
+    return 'ការបញ្ជាទិញ #$id';
+  }
+
+  @override
+  String moreItemsCount(int count) {
+    return '+ $count មុខទំនិញទៀត';
+  }
+
+  @override
+  String get deliveryMethodPickup => 'មកយកផ្ទាល់';
+
+  @override
+  String get deliveryMethodDelivery => 'ដឹកជញ្ជូន';
+
+  @override
+  String get totalColon => 'សរុប៖ ';
+
+  @override
+  String get orderStatusPending => 'រង់ចាំការបញ្ជាក់';
+
+  @override
+  String get orderStatusConfirmed => 'បានបញ្ជាក់';
+
+  @override
+  String get orderStatusProcessing => 'កំពុងរៀបចំ';
+
+  @override
+  String get orderStatusShipped => 'កំពុងដឹកជញ្ជូន';
+
+  @override
+  String get orderStatusDelivered => 'បានដឹកជញ្ជូន';
+
+  @override
+  String get orderStatusCancelled => 'បានបោះបង់';
+
+  @override
+  String get orderTracking => 'ការតាមដានការបញ្ជាទិញ';
+
+  @override
+  String get failedToLoadOrderDetails =>
+      'មិនអាចទាញយកព័ត៌មានលម្អិតនៃការបញ្ជាទិញបានទេ';
+
+  @override
+  String get orderNotFound => 'រកមិនឃើញការបញ្ជាទិញទេ';
+
+  @override
+  String orderStatusUpdated(String status) {
+    return 'ស្ថានភាពការបញ្ជាទិញត្រូវបានអាប់ដេតទៅ $status';
+  }
+
+  @override
+  String unableToUpdateOrder(String error) {
+    return 'មិនអាចអាប់ដេតការបញ្ជាទិញបានទេ៖ $error';
+  }
+
+  @override
+  String get orderCancelledSubtitle => 'ការបញ្ជាទិញនេះត្រូវបានបោះបង់។';
+
+  @override
+  String get orderDeliveredFarmerSubtitle =>
+      'ការបញ្ជាទិញត្រូវបានដឹកជញ្ជូន និងបញ្ចប់ដោយជោគជ័យ។';
+
+  @override
+  String get orderDeliveredRestaurantSubtitle =>
+      'បានដឹកជញ្ជូនទៅកាន់ផ្ទះបាយរបស់អ្នកដោយជោគជ័យ។';
+
+  @override
+  String get orderShippedFarmerSubtitle =>
+      'កសិផលកំពុងត្រូវបានដឹកជញ្ជូនទៅកាន់ភោជនីយដ្ឋាន។';
+
+  @override
+  String get orderShippedRestaurantSubtitle =>
+      'កសិផលកំពុងដឹកជញ្ជូនមកកាន់ផ្ទះបាយរបស់អ្នក។';
+
+  @override
+  String get orderProcessingFarmerSubtitle =>
+      'អ្នកកំពុងប្រមូលផល និងវេចខ្ចប់ការបញ្ជាទិញនេះ។';
+
+  @override
+  String get orderProcessingRestaurantSubtitle =>
+      'កសិករកំពុងប្រមូលផល និងវេចខ្ចប់ការបញ្ជាទិញរបស់អ្នក។';
+
+  @override
+  String get orderConfirmedFarmerSubtitle =>
+      'បានបញ្ជាក់ការបញ្ជាទិញ។ រួចរាល់ក្នុងការចាប់ផ្តើមរៀបចំ។';
+
+  @override
+  String get orderConfirmedRestaurantSubtitle =>
+      'បានបញ្ជាក់ដោយកសិករ។ កំពុងរៀបចំការបំពេញតាមការបញ្ជាទិញ។';
+
+  @override
+  String get orderPendingFarmerSubtitle =>
+      'បានទទួលការបញ្ជាទិញថ្មីពីអ្នកទិញ។ កំពុងរង់ចាំការបញ្ជាក់របស់អ្នក។';
+
+  @override
+  String get orderPendingRestaurantSubtitle =>
+      'បានផ្ញើទៅកសិករ។ កំពុងរង់ចាំការបញ្ជាក់ពីកសិករ។';
+
+  @override
+  String get orderProgress => 'ដំណើរការនៃការបញ្ជាទិញ';
+
+  @override
+  String get orderPlacedStep => 'បានបញ្ជាទិញ';
+
+  @override
+  String get orderPlacedFarmerDesc => 'បានទទួលការបញ្ជាទិញពីអ្នកទិញ';
+
+  @override
+  String get orderPlacedRestaurantDesc => 'ការបញ្ជាទិញត្រូវបានផ្ញើទៅកសិករ';
+
+  @override
+  String get confirmedStep => 'បានបញ្ជាក់';
+
+  @override
+  String get confirmedFarmerDesc => 'អ្នកបានបញ្ជាក់ការបញ្ជាទិញ';
+
+  @override
+  String get confirmedRestaurantDesc => 'កសិករបានបញ្ជាក់ការប្រមូលផល';
+
+  @override
+  String get processingStep => 'កំពុងរៀបចំ';
+
+  @override
+  String get processingDesc => 'កំពុងប្រមូលផល និងវេចខ្ចប់';
+
+  @override
+  String get outForDeliveryStep => 'កំពុងដឹកជញ្ជូន';
+
+  @override
+  String get outForDeliveryFarmerDesc => 'កំពុងធ្វើដំណើរទៅកាន់អ្នកទិញ';
+
+  @override
+  String get outForDeliveryRestaurantDesc =>
+      'កំពុងធ្វើដំណើរមកកាន់ផ្ទះបាយរបស់អ្នក';
+
+  @override
+  String get deliveredStep => 'បានដឹកជញ្ជូន';
+
+  @override
+  String get deliveredFarmerDesc => 'បានដឹកជញ្ជូន និងបញ្ចប់';
+
+  @override
+  String get deliveredRestaurantDesc => 'បានទទួល និងផ្ទៀងផ្ទាត់';
+
+  @override
+  String get deliveryDetails => 'ព័ត៌មានលម្អិតនៃការដឹកជញ្ជូន';
+
+  @override
+  String get destinationAddress => 'អាសយដ្ឋានគោលដៅ';
+
+  @override
+  String get defaultRestaurantAddress => 'អាសយដ្ឋានផ្ទះបាយភោជនីយដ្ឋានលំនាំដើម';
+
+  @override
+  String get orderedAt => 'កាលបរិច្ឆេទបញ្ជាទិញ';
+
+  @override
+  String get itemsInThisOrder => 'មុខទំនិញក្នុងការបញ្ជាទិញនេះ';
+
+  @override
+  String orderItemsCount(int count) {
+    return '$count មុខទំនិញ';
+  }
+
+  @override
+  String get paymentBreakdown => 'ការបែងចែកការទូទាត់';
+
+  @override
+  String get subtotal => 'សរុបរង';
+
+  @override
+  String get transactionFee => 'ថ្លៃប្រតិបត្តិការ (5%)';
+
+  @override
+  String get totalAmount => 'ចំនួនទឹកប្រាក់សរុប';
+
+  @override
+  String get paymentKhqr => 'ការទូទាត់៖ KHQR (បាគង)';
+
+  @override
+  String get paymentCash => 'ការទូទាត់៖ ទូទាត់ពេលទំនិញដល់';
+
+  @override
+  String get declineOrder => 'បដិសេធការបញ្ជាទិញ';
+
+  @override
+  String get acceptOrder => 'ទទួលយកការបញ្ជាទិញ';
+
+  @override
+  String get startPreparingProduce => 'ចាប់ផ្តើមរៀបចំកសិផល';
+
+  @override
+  String get markAsOutForDelivery => 'សម្គាល់ថាកំពុងដឹកជញ្ជូន';
+
+  @override
+  String get completeOrderDelivered => 'បញ្ចប់ការបញ្ជាទិញ (បានដឹកជញ្ជូន)';
+
+  @override
+  String get openChats => 'បើកការជជែក';
+
+  @override
+  String get backToOrderManagement => 'ត្រឡប់ទៅការគ្រប់គ្រងការបញ្ជាទិញ';
+
+  @override
+  String get messageGrowerFarmer => 'ផ្ញើសារទៅកាន់កសិករ';
+
+  @override
+  String get backToMarketplace => 'ត្រឡប់ទៅទីផ្សារ';
 
   @override
   String get allMessages => 'សារទាំងអស់';

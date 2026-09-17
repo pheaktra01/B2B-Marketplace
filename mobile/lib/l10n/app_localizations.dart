@@ -305,7 +305,7 @@ abstract class AppLocalizations {
   /// No description provided for @orders.
   ///
   /// In en, this message translates to:
-  /// **'Orders'**
+  /// **'ORDERS'**
   String get orders;
 
   /// No description provided for @insights.
@@ -3015,7 +3015,7 @@ abstract class AppLocalizations {
   /// No description provided for @restaurantBioHint.
   ///
   /// In en, this message translates to:
-  /// **'Briefly describe your cuisine or ingredient needs...'**
+  /// **'Describe your cuisine style, farm-to-table preferences, and fresh ingredient needs...'**
   String get restaurantBioHint;
 
   /// No description provided for @saveAndStart.
@@ -3287,6 +3287,456 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Buy Now'**
   String get buyNow;
+
+  /// No description provided for @updateProfilePicture.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Profile Picture'**
+  String get updateProfilePicture;
+
+  /// No description provided for @updateCoverBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Cover Banner'**
+  String get updateCoverBanner;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get takePhoto;
+
+  /// No description provided for @useDeviceCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your device camera'**
+  String get useDeviceCamera;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Gallery'**
+  String get chooseFromGallery;
+
+  /// No description provided for @selectExistingPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an existing photo'**
+  String get selectExistingPhoto;
+
+  /// No description provided for @failedPickImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to pick image: {error}'**
+  String failedPickImage(String error);
+
+  /// No description provided for @failedSaveProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save profile: {error}'**
+  String failedSaveProfile(String error);
+
+  /// No description provided for @editFarmProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Farm Profile'**
+  String get editFarmProfile;
+
+  /// No description provided for @editRestaurantProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Restaurant Profile'**
+  String get editRestaurantProfile;
+
+  /// No description provided for @manageFarmIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your farm identity & contact information'**
+  String get manageFarmIdentity;
+
+  /// No description provided for @manageRestaurantDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your restaurant details & delivery address'**
+  String get manageRestaurantDetails;
+
+  /// No description provided for @farmAndBusinessDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Farm & Business Details'**
+  String get farmAndBusinessDetails;
+
+  /// No description provided for @restaurantBrandIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Brand & Identity'**
+  String get restaurantBrandIdentity;
+
+  /// No description provided for @restaurantBusinessName.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant / Business Name'**
+  String get restaurantBusinessName;
+
+  /// No description provided for @displayedOnMarketplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Displayed prominently on marketplace listings'**
+  String get displayedOnMarketplace;
+
+  /// No description provided for @publicRestaurantName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your public restaurant or kitchen business name'**
+  String get publicRestaurantName;
+
+  /// No description provided for @ownerContactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner / Contact Person Name'**
+  String get ownerContactName;
+
+  /// No description provided for @managerContactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Manager / Contact Person Name'**
+  String get managerContactName;
+
+  /// No description provided for @pleaseEnterContactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a contact name'**
+  String get pleaseEnterContactName;
+
+  /// No description provided for @contactAndLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact & Location'**
+  String get contactAndLocation;
+
+  /// No description provided for @phoneNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumberLabel;
+
+  /// No description provided for @pleaseEnterPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a contact phone number'**
+  String get pleaseEnterPhone;
+
+  /// No description provided for @farmLocationOrigin.
+  ///
+  /// In en, this message translates to:
+  /// **'Farm Location / Origin'**
+  String get farmLocationOrigin;
+
+  /// No description provided for @restaurantDeliveryAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant / Delivery Address'**
+  String get restaurantDeliveryAddress;
+
+  /// No description provided for @helpsLocateProduce.
+  ///
+  /// In en, this message translates to:
+  /// **'Helps restaurants locate local farm produce'**
+  String get helpsLocateProduce;
+
+  /// No description provided for @usedAsDeliveryAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Used as primary delivery address for produce orders'**
+  String get usedAsDeliveryAddress;
+
+  /// No description provided for @sustainabilityStory.
+  ///
+  /// In en, this message translates to:
+  /// **'Sustainability & Farm Story'**
+  String get sustainabilityStory;
+
+  /// No description provided for @restaurantBioNeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Bio & Sourcing Needs'**
+  String get restaurantBioNeeds;
+
+  /// No description provided for @farmStoryQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Farm Story & Produce Quality'**
+  String get farmStoryQuality;
+
+  /// No description provided for @restaurantDescConcept.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant Description & Concept'**
+  String get restaurantDescConcept;
+
+  /// No description provided for @farmStoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your farming practices, organic cultivation, harvest frequency...'**
+  String get farmStoryHint;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @photosAndBranding.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos & Branding'**
+  String get photosAndBranding;
+
+  /// No description provided for @tapToChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to change'**
+  String get tapToChange;
+
+  /// No description provided for @cover.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get cover;
+
+  /// No description provided for @profileAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Avatar'**
+  String get profileAvatar;
+
+  /// No description provided for @clickToReplacePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to replace photo'**
+  String get clickToReplacePhoto;
+
+  /// No description provided for @spent.
+  ///
+  /// In en, this message translates to:
+  /// **'SPENT'**
+  String get spent;
+
+  /// No description provided for @favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'FAVORITES'**
+  String get favorites;
+
+  /// No description provided for @businessProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Profile'**
+  String get businessProfile;
+
+  /// No description provided for @orderHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Order History'**
+  String get orderHistory;
+
+  /// No description provided for @favoritesProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites Product'**
+  String get favoritesProduct;
+
+  /// No description provided for @paymentMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Methods'**
+  String get paymentMethods;
+
+  /// No description provided for @analytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get analytics;
+
+  /// No description provided for @logOutConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out of your account?'**
+  String get logOutConfirmMessage;
+
+  /// No description provided for @restaurantProfileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant profile updated successfully! 🍽️'**
+  String get restaurantProfileUpdated;
+
+  /// No description provided for @farmProfileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Farm profile updated successfully! 🌾'**
+  String get farmProfileUpdated;
+
+  /// No description provided for @verifiedRestaurantBuyer.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Restaurant Buyer'**
+  String get verifiedRestaurantBuyer;
+
+  /// No description provided for @managerContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Manager / Contact'**
+  String get managerContact;
+
+  /// No description provided for @contactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Phone'**
+  String get contactPhone;
+
+  /// No description provided for @deliveryAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Address'**
+  String get deliveryAddress;
+
+  /// No description provided for @aboutKitchenConcept.
+  ///
+  /// In en, this message translates to:
+  /// **'About Kitchen & Concept'**
+  String get aboutKitchenConcept;
+
+  /// No description provided for @accountRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Role'**
+  String get accountRole;
+
+  /// No description provided for @commercialRestaurantBuyer.
+  ///
+  /// In en, this message translates to:
+  /// **'Commercial Restaurant & Kitchen Buyer'**
+  String get commercialRestaurantBuyer;
+
+  /// No description provided for @editBusinessDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Business Details'**
+  String get editBusinessDetails;
+
+  /// No description provided for @notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get notSet;
+
+  /// No description provided for @purchasingAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchasing Analytics'**
+  String get purchasingAnalytics;
+
+  /// No description provided for @analyticsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-time spending & ordering metrics for your restaurant.'**
+  String get analyticsSubtitle;
+
+  /// No description provided for @avgOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'AVG ORDER'**
+  String get avgOrder;
+
+  /// No description provided for @orderStatusOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Status Overview'**
+  String get orderStatusOverview;
+
+  /// No description provided for @activeInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Active / In Progress'**
+  String get activeInProgress;
+
+  /// No description provided for @deliveredCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered & Completed'**
+  String get deliveredCompleted;
+
+  /// No description provided for @cancelledStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get cancelledStatus;
+
+  /// No description provided for @viewAllOrdersHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'View All Orders in History'**
+  String get viewAllOrdersHistory;
+
+  /// No description provided for @preferredPaymentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your preferred default payment method for faster checkout.'**
+  String get preferredPaymentSubtitle;
+
+  /// No description provided for @khqrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'KHQR (Bakong / QR Pay)'**
+  String get khqrTitle;
+
+  /// No description provided for @khqrSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan & pay instantly with any Cambodian banking app (ABA, ACLEDA, Canadia, Wing, etc.)'**
+  String get khqrSubtitle;
+
+  /// No description provided for @khqrBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant • Recommended'**
+  String get khqrBadge;
+
+  /// No description provided for @codTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on Delivery (COD)'**
+  String get codTitle;
+
+  /// No description provided for @codSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay cash upon receiving and inspecting produce directly at your kitchen.'**
+  String get codSubtitle;
+
+  /// No description provided for @codBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay on Arrival'**
+  String get codBadge;
+
+  /// No description provided for @paymentSecurityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments are processed securely through the National Bank of Cambodia Bakong network and direct verified vendor settlement.'**
+  String get paymentSecurityNote;
+
+  /// No description provided for @confirmPreferredMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Preferred Method'**
+  String get confirmPreferredMethod;
+
+  /// No description provided for @defaultPaymentSetTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Default payment method set to {method}'**
+  String defaultPaymentSetTo(String method);
 }
 
 class _AppLocalizationsDelegate

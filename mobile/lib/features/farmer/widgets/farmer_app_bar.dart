@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/farmer/screens/farmer_settings_screen.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
@@ -146,6 +147,10 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
       actions:
           widget.actions ??
           [
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 2),
+              child: AuthLanguageSwitch(),
+            ),
             Stack(
               clipBehavior: Clip.none,
               children: [

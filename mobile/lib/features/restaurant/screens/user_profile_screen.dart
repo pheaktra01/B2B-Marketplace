@@ -13,6 +13,7 @@ import 'package:mobile/features/order/services/order_service.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
 import 'package:mobile/features/profile/widgets/edit_profile_bottom_sheet.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -153,9 +154,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         }
       });
 
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Restaurant profile updated successfully! 🍽️'),
+        SnackBar(
+          content: Text(l10n?.restaurantProfileUpdated ??
+              'Restaurant profile updated successfully! 🍽️'),
           backgroundColor: primaryGreen,
           behavior: SnackBarBehavior.floating,
         ),
@@ -216,6 +219,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: pageBgColor,
       appBar: FarmerAppBar(
@@ -330,12 +334,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               const SizedBox(height: 20),
 
               // 3. Stats Row (Orders, Spent, Favorites)
-              _buildStatsRow(),
+              _buildStatsRow(l10n),
 
               const SizedBox(height: 24),
 
               // 4. Menu Options List Card
-              _buildMenuList(),
+              _buildMenuList(l10n),
 
               const SizedBox(height: 28),
 
@@ -361,9 +365,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                             color: primaryGreen,
                           ),
                         )
-                      : const Text(
-                          'Log Out',
-                          style: TextStyle(
+                      : Text(
+                          l10n?.logOut ?? 'Log Out',
+                          style: const TextStyle(
                             color: primaryGreen,
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
@@ -487,7 +491,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(AppLocalizations? l10n) {
     final spentDisplay = _isLoadingStats
         ? '...'
         : (_totalSpent >= 1000
@@ -499,7 +503,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         Expanded(
           child: _buildStatCard(
             _isLoadingStats ? '...' : '$_ordersCount',
-            'ORDERS',
+            l10n?.orders.toUpperCase() ?? 'ORDERS',
             onTap: () => context
                 .push(AppRoutes.restaurantOrders)
                 .then((_) => _loadStatsAndPreferences()),
@@ -509,7 +513,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         Expanded(
           child: _buildStatCard(
             spentDisplay,
-            'SPENT',
+            l10n?.spent.toUpperCase() ?? 'SPENT',
             onTap: _showAnalyticsBottomSheet,
           ),
         ),
@@ -517,7 +521,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         Expanded(
           child: _buildStatCard(
             _isLoadingStats ? '...' : '$_favoritesCount',
-            'FAVORITES',
+            l10n?.favorites.toUpperCase() ?? 'FAVORITES',
             onTap: () => context
                 .push(AppRoutes.restaurantFavorites)
                 .then((_) => _loadStatsAndPreferences()),
@@ -551,19 +555,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               Text(
                 value,
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: primaryGreen,
+                  color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade600,
-                  letterSpacing: 0.6,
+                  color: Colors.grey.shade500,
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
@@ -573,36 +577,42 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildMenuList() {
+  Widget _buildMenuList(AppLocalizations? l10n) {
     final menuItems = [
       {
+        'key': 'business_profile',
         'icon': Icons.business_center_outlined,
-        'title': 'Business Profile',
+        'title': l10n?.businessProfile ?? 'Business Profile',
         'badge': null,
       },
       {
+        'key': 'order_history',
         'icon': Icons.receipt_long_outlined,
-        'title': 'Order History',
+        'title': l10n?.orderHistory ?? 'Order History',
         'badge': _ordersCount > 0 ? '$_ordersCount' : null,
       },
       {
+        'key': 'favorites_product',
         'icon': Icons.favorite_border_rounded,
-        'title': 'Favorites Product',
+        'title': l10n?.favoritesProduct ?? 'Favorites Product',
         'badge': _favoritesCount > 0 ? '$_favoritesCount' : null,
       },
       {
+        'key': 'payment_methods',
         'icon': Icons.payment_outlined,
-        'title': 'Payment Methods',
+        'title': l10n?.paymentMethods ?? 'Payment Methods',
         'badge': _preferredPaymentMethod == 'khqr' ? 'KHQR' : 'COD',
       },
       {
+        'key': 'analytics',
         'icon': Icons.bar_chart_outlined,
-        'title': 'Analytics',
+        'title': l10n?.analytics ?? 'Analytics',
         'badge': null,
       },
       {
+        'key': 'settings',
         'icon': Icons.settings_outlined,
-        'title': 'Settings',
+        'title': l10n?.settings ?? 'Settings',
         'badge': null,
       },
     ];
@@ -687,22 +697,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     ],
                   ),
                   onTap: () {
-                    final title = item['title'] as String;
-                    if (title == 'Business Profile') {
+                    final key = item['key'] as String;
+                    if (key == 'business_profile') {
                       _showBusinessProfileBottomSheet();
-                    } else if (title == 'Order History') {
+                    } else if (key == 'order_history') {
                       context
                           .push(AppRoutes.restaurantOrders)
                           .then((_) => _loadStatsAndPreferences());
-                    } else if (title == 'Favorites Product') {
+                    } else if (key == 'favorites_product') {
                       context
                           .push(AppRoutes.restaurantFavorites)
                           .then((_) => _loadStatsAndPreferences());
-                    } else if (title == 'Payment Methods') {
+                    } else if (key == 'payment_methods') {
                       _showPaymentMethodsBottomSheet();
-                    } else if (title == 'Analytics') {
+                    } else if (key == 'analytics') {
                       _showAnalyticsBottomSheet();
-                    } else if (title == 'Settings') {
+                    } else if (key == 'settings') {
                       Navigator.of(context, rootNavigator: true)
                           .push(
                             MaterialPageRoute(
@@ -733,6 +743,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   // --- BUSINESS PROFILE SHEET ---
 
   void _showBusinessProfileBottomSheet() {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -766,9 +777,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Business Profile',
-                  style: TextStyle(
+                Text(
+                  l10n?.businessProfile ?? 'Business Profile',
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
@@ -820,14 +831,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                             color: primaryGreen.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.verified, color: primaryGreen, size: 14),
-                              SizedBox(width: 4),
+                              const Icon(Icons.verified, color: primaryGreen, size: 14),
+                              const SizedBox(width: 4),
                               Text(
-                                'Verified Restaurant Buyer',
-                                style: TextStyle(
+                                l10n?.verifiedRestaurantBuyer ?? 'Verified Restaurant Buyer',
+                                style: const TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: primaryGreen,
@@ -845,36 +856,36 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             const SizedBox(height: 16),
             _buildBusinessDetailItem(
               Icons.storefront_outlined,
-              'Business Name',
+              l10n?.restaurantBusinessName ?? 'Business Name',
               (_businessName != null && _businessName!.isNotEmpty)
                   ? _businessName!
                   : _displayName,
             ),
             _buildBusinessDetailItem(
               Icons.person_outline_rounded,
-              'Manager / Contact',
+              l10n?.managerContact ?? 'Manager / Contact',
               _displayName,
             ),
             _buildBusinessDetailItem(
               Icons.phone_outlined,
-              'Contact Phone',
-              _phone.isNotEmpty ? _phone : 'Not set',
+              l10n?.contactPhone ?? 'Contact Phone',
+              _phone.isNotEmpty ? _phone : (l10n?.notSet ?? 'Not set'),
             ),
             _buildBusinessDetailItem(
               Icons.location_on_outlined,
-              'Delivery Address',
-              _address.isNotEmpty ? _address : 'Not set',
+              l10n?.deliveryAddress ?? 'Delivery Address',
+              _address.isNotEmpty ? _address : (l10n?.notSet ?? 'Not set'),
             ),
             if (_bio.isNotEmpty)
               _buildBusinessDetailItem(
                 Icons.notes_rounded,
-                'About Kitchen & Concept',
+                l10n?.aboutKitchenConcept ?? 'About Kitchen & Concept',
                 _bio,
               ),
             _buildBusinessDetailItem(
               Icons.badge_outlined,
-              'Account Role',
-              'Commercial Restaurant & Kitchen Buyer',
+              l10n?.accountRole ?? 'Account Role',
+              l10n?.commercialRestaurantBuyer ?? 'Commercial Restaurant & Kitchen Buyer',
             ),
             const SizedBox(height: 20),
             SizedBox(
@@ -885,7 +896,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   _editProfile();
                 },
                 icon: const Icon(Icons.edit_outlined, size: 18),
-                label: const Text('Edit Business Details'),
+                label: Text(l10n?.editBusinessDetails ?? 'Edit Business Details'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryGreen,
                   foregroundColor: Colors.white,
@@ -944,6 +955,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   // --- PAYMENT METHODS SHEET ---
 
   Future<void> _showPaymentMethodsBottomSheet() async {
+    final l10n = AppLocalizations.of(context);
     final prefs = await SharedPreferences.getInstance();
     String selectedMethod =
         prefs.getString('preferred_payment_method') ?? 'khqr';
@@ -984,9 +996,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Payment Methods',
-                    style: TextStyle(
+                  Text(
+                    l10n?.paymentMethods ?? 'Payment Methods',
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
@@ -1000,7 +1012,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Select your preferred default payment method for faster checkout.',
+                l10n?.preferredPaymentSubtitle ??
+                    'Select your preferred default payment method for faster checkout.',
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey.shade600,
@@ -1009,12 +1022,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               const SizedBox(height: 18),
               // Option 1: KHQR
               _buildPaymentOptionTile(
-                title: 'KHQR (Bakong / QR Pay)',
-                subtitle:
+                title: l10n?.khqrTitle ?? 'KHQR (Bakong / QR Pay)',
+                subtitle: l10n?.khqrSubtitle ??
                     'Scan & pay instantly with any Cambodian banking app (ABA, ACLEDA, Canadia, Wing, etc.)',
                 icon: Icons.qr_code_2_rounded,
                 isSelected: selectedMethod == 'khqr',
-                badgeText: 'Instant • Recommended',
+                badgeText: l10n?.khqrBadge ?? 'Instant • Recommended',
                 onTap: () async {
                   setModalState(() => selectedMethod = 'khqr');
                   await prefs.setString('preferred_payment_method', 'khqr');
@@ -1026,12 +1039,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               const SizedBox(height: 12),
               // Option 2: Cash on Delivery
               _buildPaymentOptionTile(
-                title: 'Cash on Delivery (COD)',
-                subtitle:
+                title: l10n?.codTitle ?? 'Cash on Delivery (COD)',
+                subtitle: l10n?.codSubtitle ??
                     'Pay cash upon receiving and inspecting produce directly at your kitchen.',
                 icon: Icons.payments_outlined,
                 isSelected: selectedMethod == 'cod',
-                badgeText: 'Pay on Arrival',
+                badgeText: l10n?.codBadge ?? 'Pay on Arrival',
                 onTap: () async {
                   setModalState(() => selectedMethod = 'cod');
                   await prefs.setString('preferred_payment_method', 'cod');
@@ -1057,7 +1070,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Payments are processed securely through the National Bank of Cambodia Bakong network and direct verified vendor settlement.',
+                        l10n?.paymentSecurityNote ??
+                            'Payments are processed securely through the National Bank of Cambodia Bakong network and direct verified vendor settlement.',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade700,
@@ -1074,10 +1088,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(bottomSheetContext);
+                    final methodName = selectedMethod == 'khqr'
+                        ? 'KHQR (Bakong)'
+                        : 'Cash on Delivery';
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'Default payment method set to ${selectedMethod == 'khqr' ? 'KHQR (Bakong)' : 'Cash on Delivery'}',
+                          l10n?.defaultPaymentSetTo(methodName) ??
+                              'Default payment method set to $methodName',
                         ),
                         backgroundColor: primaryGreen,
                         behavior: SnackBarBehavior.floating,
@@ -1093,7 +1111,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Confirm Preferred Method'),
+                  child: Text(l10n?.confirmPreferredMethod ?? 'Confirm Preferred Method'),
                 ),
               ),
             ],
@@ -1206,6 +1224,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   // --- ANALYTICS SHEET ---
 
   void _showAnalyticsBottomSheet() {
+    final l10n = AppLocalizations.of(context);
     final completedOrders = _ordersList
         .where((o) =>
             o.status.toLowerCase() == 'delivered' ||
@@ -1259,9 +1278,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Purchasing Analytics',
-                  style: TextStyle(
+                Text(
+                  l10n?.purchasingAnalytics ?? 'Purchasing Analytics',
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
@@ -1275,7 +1294,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Real-time spending & ordering metrics for your restaurant.',
+              l10n?.analyticsSubtitle ??
+                  'Real-time spending & ordering metrics for your restaurant.',
               style: TextStyle(
                 fontSize: 13,
                 color: Colors.grey.shade600,
@@ -1287,7 +1307,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               children: [
                 Expanded(
                   child: _buildAnalyticsMetricCard(
-                    title: 'TOTAL SPENT',
+                    title: l10n?.spent.toUpperCase() ?? 'TOTAL SPENT',
                     value: '\$${_totalSpent.toStringAsFixed(2)}',
                     icon: Icons.account_balance_wallet_outlined,
                     color: primaryGreen,
@@ -1296,7 +1316,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _buildAnalyticsMetricCard(
-                    title: 'ORDERS',
+                    title: l10n?.orders.toUpperCase() ?? 'ORDERS',
                     value: '$_ordersCount',
                     icon: Icons.receipt_long_outlined,
                     color: const Color(0xFF2E7D32),
@@ -1305,7 +1325,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _buildAnalyticsMetricCard(
-                    title: 'AVG ORDER',
+                    title: l10n?.avgOrder ?? 'AVG ORDER',
                     value: '\$${avgOrderVal.toStringAsFixed(1)}',
                     icon: Icons.trending_up,
                     color: const Color(0xFF1565C0),
@@ -1314,9 +1334,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ],
             ),
             const SizedBox(height: 18),
-            const Text(
-              'Order Status Overview',
-              style: TextStyle(
+            Text(
+              l10n?.orderStatusOverview ?? 'Order Status Overview',
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
@@ -1333,21 +1353,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               child: Column(
                 children: [
                   _buildAnalyticsStatusRow(
-                    label: 'Active / In Progress',
+                    label: l10n?.activeInProgress ?? 'Active / In Progress',
                     count: activeOrders,
                     total: _ordersCount,
                     color: const Color(0xFFF59E0B),
                   ),
                   const SizedBox(height: 10),
                   _buildAnalyticsStatusRow(
-                    label: 'Delivered & Completed',
+                    label: l10n?.deliveredCompleted ?? 'Delivered & Completed',
                     count: completedOrders,
                     total: _ordersCount,
                     color: const Color(0xFF10B981),
                   ),
                   const SizedBox(height: 10),
                   _buildAnalyticsStatusRow(
-                    label: 'Cancelled',
+                    label: l10n?.cancelledStatus ?? 'Cancelled',
                     count: cancelledOrders,
                     total: _ordersCount,
                     color: const Color(0xFFEF4444),
@@ -1366,7 +1386,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       .then((_) => _loadStatsAndPreferences());
                 },
                 icon: const Icon(Icons.history, size: 18),
-                label: const Text('View All Orders in History'),
+                label: Text(l10n?.viewAllOrdersHistory ?? 'View All Orders in History'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryGreen,
                   foregroundColor: Colors.white,
@@ -1473,6 +1493,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> _handleLogout() async {
     if (_isLoggingOut) return;
+    final l10n = AppLocalizations.of(context);
 
     final bool? confirmed = await showDialog<bool>(
       context: context,
@@ -1481,13 +1502,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text(
-            'Log Out',
-            style: TextStyle(fontWeight: FontWeight.bold),
+          title: Text(
+            l10n?.logOut ?? 'Log Out',
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          content: const Text(
-            'Are you sure you want to log out of your account?',
-            style: TextStyle(fontSize: 14, color: Colors.black87),
+          content: Text(
+            l10n?.logOutConfirmMessage ??
+                'Are you sure you want to log out of your account?',
+            style: const TextStyle(fontSize: 14, color: Colors.black87),
           ),
           actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           actions: [
@@ -1496,7 +1518,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 Navigator.pop(dialogContext, false);
               },
               child: Text(
-                'Cancel',
+                l10n?.cancel ?? 'Cancel',
                 style: TextStyle(
                   color: Colors.grey.shade700,
                   fontWeight: FontWeight.w600,
@@ -1515,9 +1537,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
-                'Log Out',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              child: Text(
+                l10n?.logOut ?? 'Log Out',
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],

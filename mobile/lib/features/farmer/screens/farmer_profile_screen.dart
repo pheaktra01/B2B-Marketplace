@@ -326,9 +326,12 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
         }
       });
 
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Farm profile updated successfully! 🌾'),
+        SnackBar(
+          content: Text(
+            l10n?.farmProfileUpdated ?? 'Farm profile updated successfully! 🌾',
+          ),
           backgroundColor: primaryGreen,
           behavior: SnackBarBehavior.floating,
         ),

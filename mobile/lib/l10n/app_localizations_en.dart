@@ -118,7 +118,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addProduct => 'Add Product';
 
   @override
-  String get orders => 'Orders';
+  String get orders => 'ORDERS';
 
   @override
   String get insights => 'Insights';
@@ -1575,7 +1575,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get restaurantBioHint =>
-      'Briefly describe your cuisine or ingredient needs...';
+      'Describe your cuisine style, farm-to-table preferences, and fresh ingredient needs...';
 
   @override
   String get saveAndStart => 'Save & Start';
@@ -1746,4 +1746,250 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get buyNow => 'Buy Now';
+
+  @override
+  String get updateProfilePicture => 'Update Profile Picture';
+
+  @override
+  String get updateCoverBanner => 'Update Cover Banner';
+
+  @override
+  String get takePhoto => 'Take Photo';
+
+  @override
+  String get useDeviceCamera => 'Use your device camera';
+
+  @override
+  String get chooseFromGallery => 'Choose from Gallery';
+
+  @override
+  String get selectExistingPhoto => 'Select an existing photo';
+
+  @override
+  String failedPickImage(String error) {
+    return 'Failed to pick image: $error';
+  }
+
+  @override
+  String failedSaveProfile(String error) {
+    return 'Failed to save profile: $error';
+  }
+
+  @override
+  String get editFarmProfile => 'Edit Farm Profile';
+
+  @override
+  String get editRestaurantProfile => 'Edit Restaurant Profile';
+
+  @override
+  String get manageFarmIdentity =>
+      'Manage your farm identity & contact information';
+
+  @override
+  String get manageRestaurantDetails =>
+      'Manage your restaurant details & delivery address';
+
+  @override
+  String get farmAndBusinessDetails => 'Farm & Business Details';
+
+  @override
+  String get restaurantBrandIdentity => 'Restaurant Brand & Identity';
+
+  @override
+  String get restaurantBusinessName => 'Restaurant / Business Name';
+
+  @override
+  String get displayedOnMarketplace =>
+      'Displayed prominently on marketplace listings';
+
+  @override
+  String get publicRestaurantName =>
+      'Your public restaurant or kitchen business name';
+
+  @override
+  String get ownerContactName => 'Owner / Contact Person Name';
+
+  @override
+  String get managerContactName => 'Manager / Contact Person Name';
+
+  @override
+  String get pleaseEnterContactName => 'Please enter a contact name';
+
+  @override
+  String get contactAndLocation => 'Contact & Location';
+
+  @override
+  String get phoneNumberLabel => 'Phone Number';
+
+  @override
+  String get pleaseEnterPhone => 'Please enter a contact phone number';
+
+  @override
+  String get farmLocationOrigin => 'Farm Location / Origin';
+
+  @override
+  String get restaurantDeliveryAddress => 'Restaurant / Delivery Address';
+
+  @override
+  String get helpsLocateProduce =>
+      'Helps restaurants locate local farm produce';
+
+  @override
+  String get usedAsDeliveryAddress =>
+      'Used as primary delivery address for produce orders';
+
+  @override
+  String get sustainabilityStory => 'Sustainability & Farm Story';
+
+  @override
+  String get restaurantBioNeeds => 'Restaurant Bio & Sourcing Needs';
+
+  @override
+  String get farmStoryQuality => 'Farm Story & Produce Quality';
+
+  @override
+  String get restaurantDescConcept => 'Restaurant Description & Concept';
+
+  @override
+  String get farmStoryHint =>
+      'Describe your farming practices, organic cultivation, harvest frequency...';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get photosAndBranding => 'Photos & Branding';
+
+  @override
+  String get tapToChange => 'Tap to change';
+
+  @override
+  String get cover => 'Cover';
+
+  @override
+  String get profileAvatar => 'Profile Avatar';
+
+  @override
+  String get clickToReplacePhoto => 'Click to replace photo';
+
+  @override
+  String get spent => 'SPENT';
+
+  @override
+  String get favorites => 'FAVORITES';
+
+  @override
+  String get businessProfile => 'Business Profile';
+
+  @override
+  String get orderHistory => 'Order History';
+
+  @override
+  String get favoritesProduct => 'Favorites Product';
+
+  @override
+  String get paymentMethods => 'Payment Methods';
+
+  @override
+  String get analytics => 'Analytics';
+
+  @override
+  String get logOutConfirmMessage =>
+      'Are you sure you want to log out of your account?';
+
+  @override
+  String get restaurantProfileUpdated =>
+      'Restaurant profile updated successfully! 🍽️';
+
+  @override
+  String get farmProfileUpdated => 'Farm profile updated successfully! 🌾';
+
+  @override
+  String get verifiedRestaurantBuyer => 'Verified Restaurant Buyer';
+
+  @override
+  String get managerContact => 'Manager / Contact';
+
+  @override
+  String get contactPhone => 'Contact Phone';
+
+  @override
+  String get deliveryAddress => 'Delivery Address';
+
+  @override
+  String get aboutKitchenConcept => 'About Kitchen & Concept';
+
+  @override
+  String get accountRole => 'Account Role';
+
+  @override
+  String get commercialRestaurantBuyer =>
+      'Commercial Restaurant & Kitchen Buyer';
+
+  @override
+  String get editBusinessDetails => 'Edit Business Details';
+
+  @override
+  String get notSet => 'Not set';
+
+  @override
+  String get purchasingAnalytics => 'Purchasing Analytics';
+
+  @override
+  String get analyticsSubtitle =>
+      'Real-time spending & ordering metrics for your restaurant.';
+
+  @override
+  String get avgOrder => 'AVG ORDER';
+
+  @override
+  String get orderStatusOverview => 'Order Status Overview';
+
+  @override
+  String get activeInProgress => 'Active / In Progress';
+
+  @override
+  String get deliveredCompleted => 'Delivered & Completed';
+
+  @override
+  String get cancelledStatus => 'Cancelled';
+
+  @override
+  String get viewAllOrdersHistory => 'View All Orders in History';
+
+  @override
+  String get preferredPaymentSubtitle =>
+      'Select your preferred default payment method for faster checkout.';
+
+  @override
+  String get khqrTitle => 'KHQR (Bakong / QR Pay)';
+
+  @override
+  String get khqrSubtitle =>
+      'Scan & pay instantly with any Cambodian banking app (ABA, ACLEDA, Canadia, Wing, etc.)';
+
+  @override
+  String get khqrBadge => 'Instant • Recommended';
+
+  @override
+  String get codTitle => 'Cash on Delivery (COD)';
+
+  @override
+  String get codSubtitle =>
+      'Pay cash upon receiving and inspecting produce directly at your kitchen.';
+
+  @override
+  String get codBadge => 'Pay on Arrival';
+
+  @override
+  String get paymentSecurityNote =>
+      'Payments are processed securely through the National Bank of Cambodia Bakong network and direct verified vendor settlement.';
+
+  @override
+  String get confirmPreferredMethod => 'Confirm Preferred Method';
+
+  @override
+  String defaultPaymentSetTo(String method) {
+    return 'Default payment method set to $method';
+  }
 }

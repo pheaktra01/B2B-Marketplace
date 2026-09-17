@@ -2,7 +2,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/core/constants/api_constants.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 /// Modal bottom sheet for updating Farmer and Restaurant profile details,
 /// including avatars, cover photos, business names, contact info, location, and bio.
@@ -142,6 +144,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
   }
 
   Future<void> _pickImage({required bool isAvatar}) async {
+    final l10n = AppLocalizations.of(context);
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       backgroundColor: Colors.white,
@@ -156,7 +159,9 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isAvatar ? 'Update Profile Picture' : 'Update Cover Banner',
+                isAvatar
+                    ? (l10n?.updateProfilePicture ?? 'Update Profile Picture')
+                    : (l10n?.updateCoverBanner ?? 'Update Cover Banner'),
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
@@ -174,11 +179,12 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                   ),
                   child: Icon(Icons.camera_alt_rounded, color: primaryColor),
                 ),
-                title: const Text(
-                  'Take Photo',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                title: Text(
+                  l10n?.takePhoto ?? 'Take Photo',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                subtitle: const Text('Use your device camera'),
+                subtitle:
+                    Text(l10n?.useDeviceCamera ?? 'Use your device camera'),
                 onTap: () => Navigator.pop(ctx, ImageSource.camera),
               ),
               const Divider(height: 1),
@@ -192,11 +198,12 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                   ),
                   child: Icon(Icons.photo_library_rounded, color: primaryColor),
                 ),
-                title: const Text(
-                  'Choose from Gallery',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                title: Text(
+                  l10n?.chooseFromGallery ?? 'Choose from Gallery',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                subtitle: const Text('Select an existing photo'),
+                subtitle: Text(
+                    l10n?.selectExistingPhoto ?? 'Select an existing photo'),
                 onTap: () => Navigator.pop(ctx, ImageSource.gallery),
               ),
             ],
@@ -230,12 +237,15 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image: $e')),
+        SnackBar(
+            content: Text(l10n?.failedPickImage(e.toString()) ??
+                'Failed to pick image: $e')),
       );
     }
   }
 
   Future<void> _handleSave() async {
+    final l10n = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -255,7 +265,8 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
         );
         final data = res['data'];
         if (data is Map && data['avatarUrl'] != null) {
-          updatedAvatarUrl = ApiConstants.imageUrl(data['avatarUrl'].toString());
+          updatedAvatarUrl =
+              ApiConstants.imageUrl(data['avatarUrl'].toString());
         }
       }
 
@@ -311,7 +322,8 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to save profile: $error'),
+          content: Text(l10n?.failedSaveProfile(error.toString()) ??
+              'Failed to save profile: $error'),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
         ),
@@ -321,6 +333,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final maxHeight = MediaQuery.of(context).size.height * 0.92;
 
@@ -372,8 +385,9 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                     children: [
                       Text(
                         widget.isFarmer
-                            ? 'Edit Farm Profile'
-                            : 'Edit Restaurant Profile',
+                            ? (l10n?.editFarmProfile ?? 'Edit Farm Profile')
+                            : (l10n?.editRestaurantProfile ??
+                                'Edit Restaurant Profile'),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -382,8 +396,10 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                       ),
                       Text(
                         widget.isFarmer
-                            ? 'Manage your farm identity & contact information'
-                            : 'Manage your restaurant details & delivery address',
+                            ? (l10n?.manageFarmIdentity ??
+                                'Manage your farm identity & contact information')
+                            : (l10n?.manageRestaurantDetails ??
+                                'Manage your restaurant details & delivery address'),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,
@@ -392,8 +408,13 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                     ],
                   ),
                 ),
+                const Padding(
+                  padding: EdgeInsets.only(right: 4),
+                  child: AuthLanguageSwitch(),
+                ),
                 IconButton(
-                  onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                  onPressed:
+                      _isSubmitting ? null : () => Navigator.pop(context),
                   icon: const Icon(Icons.close_rounded),
                   color: Colors.grey.shade600,
                   splashRadius: 20,
@@ -414,14 +435,16 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Media Section (Cover + Overlapping Avatar)
-                    _buildMediaPreviewSection(),
+                    _buildMediaPreviewSection(l10n),
                     const SizedBox(height: 24),
 
                     // Section 1: Business Identity
                     _buildSectionTitle(
                       title: widget.isFarmer
-                          ? 'Farm & Business Details'
-                          : 'Restaurant Brand & Identity',
+                          ? (l10n?.farmAndBusinessDetails ??
+                              'Farm & Business Details')
+                          : (l10n?.restaurantBrandIdentity ??
+                              'Restaurant Brand & Identity'),
                       icon: widget.isFarmer
                           ? Icons.storefront_rounded
                           : Icons.dining_rounded,
@@ -431,8 +454,9 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                     _buildTextField(
                       controller: _businessNameController,
                       label: widget.isFarmer
-                          ? 'Farm / Producer Name'
-                          : 'Restaurant / Business Name',
+                          ? (l10n?.farmProducerName ?? 'Farm / Producer Name')
+                          : (l10n?.restaurantBusinessName ??
+                              'Restaurant / Business Name'),
                       hint: widget.isFarmer
                           ? 'e.g., Battambang Green Valley Farm'
                           : 'e.g., Siem Reap Kitchen & Grill',
@@ -440,21 +464,26 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                           ? Icons.agriculture_outlined
                           : Icons.storefront_outlined,
                       helperText: widget.isFarmer
-                          ? 'Displayed prominently on marketplace listings'
-                          : 'Your public restaurant or kitchen business name',
+                          ? (l10n?.displayedOnMarketplace ??
+                              'Displayed prominently on marketplace listings')
+                          : (l10n?.publicRestaurantName ??
+                              'Your public restaurant or kitchen business name'),
                     ),
                     const SizedBox(height: 16),
 
                     _buildTextField(
                       controller: _nameController,
                       label: widget.isFarmer
-                          ? 'Owner / Contact Person Name'
-                          : 'Manager / Contact Person Name',
+                          ? (l10n?.ownerContactName ??
+                              'Owner / Contact Person Name')
+                          : (l10n?.managerContactName ??
+                              'Manager / Contact Person Name'),
                       hint: 'e.g., Sokha Chen',
                       prefixIcon: Icons.person_outline_rounded,
                       validator: (val) {
                         if (val == null || val.trim().isEmpty) {
-                          return 'Please enter a contact name';
+                          return l10n?.pleaseEnterContactName ??
+                              'Please enter a contact name';
                         }
                         return null;
                       },
@@ -463,20 +492,21 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
 
                     // Section 2: Contact & Location
                     _buildSectionTitle(
-                      title: 'Contact & Location',
+                      title: l10n?.contactAndLocation ?? 'Contact & Location',
                       icon: Icons.contact_phone_outlined,
                     ),
                     const SizedBox(height: 12),
 
                     _buildTextField(
                       controller: _phoneController,
-                      label: 'Phone Number',
+                      label: l10n?.phoneNumberLabel ?? 'Phone Number',
                       hint: 'e.g., 012 345 678',
                       prefixIcon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
                       validator: (val) {
                         if (val == null || val.trim().isEmpty) {
-                          return 'Please enter a contact phone number';
+                          return l10n?.pleaseEnterPhone ??
+                              'Please enter a contact phone number';
                         }
                         return null;
                       },
@@ -486,23 +516,29 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                     _buildTextField(
                       controller: _addressController,
                       label: widget.isFarmer
-                          ? 'Farm Location / Origin'
-                          : 'Restaurant / Delivery Address',
+                          ? (l10n?.farmLocationOrigin ??
+                              'Farm Location / Origin')
+                          : (l10n?.restaurantDeliveryAddress ??
+                              'Restaurant / Delivery Address'),
                       hint: widget.isFarmer
                           ? 'e.g., Dambae, Tboung Khmum, Cambodia'
                           : 'e.g., Street 240, Daun Penh, Phnom Penh',
                       prefixIcon: Icons.location_on_outlined,
                       helperText: widget.isFarmer
-                          ? 'Helps restaurants locate local farm produce'
-                          : 'Used as primary delivery address for produce orders',
+                          ? (l10n?.helpsLocateProduce ??
+                              'Helps restaurants locate local farm produce')
+                          : (l10n?.usedAsDeliveryAddress ??
+                              'Used as primary delivery address for produce orders'),
                     ),
                     const SizedBox(height: 24),
 
                     // Section 3: Story / Bio
                     _buildSectionTitle(
                       title: widget.isFarmer
-                          ? 'Sustainability & Farm Story'
-                          : 'Restaurant Bio & Sourcing Needs',
+                          ? (l10n?.sustainabilityStory ??
+                              'Sustainability & Farm Story')
+                          : (l10n?.restaurantBioNeeds ??
+                              'Restaurant Bio & Sourcing Needs'),
                       icon: Icons.auto_stories_outlined,
                     ),
                     const SizedBox(height: 12),
@@ -510,11 +546,15 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                     _buildTextField(
                       controller: _bioController,
                       label: widget.isFarmer
-                          ? 'Farm Story & Produce Quality'
-                          : 'Restaurant Description & Concept',
+                          ? (l10n?.farmStoryQuality ??
+                              'Farm Story & Produce Quality')
+                          : (l10n?.restaurantDescConcept ??
+                              'Restaurant Description & Concept'),
                       hint: widget.isFarmer
-                          ? 'Describe your farming practices, organic cultivation, harvest frequency...'
-                          : 'Describe your cuisine style, farm-to-table preferences, and fresh ingredient needs...',
+                          ? (l10n?.farmStoryHint ??
+                              'Describe your farming practices, organic cultivation, harvest frequency...')
+                          : (l10n?.restaurantBioHint ??
+                              'Describe your cuisine style, farm-to-table preferences, and fresh ingredient needs...'),
                       prefixIcon: Icons.notes_rounded,
                       maxLines: 4,
                       maxLength: 400,
@@ -538,7 +578,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                               ),
                             ),
                             child: Text(
-                              'Cancel',
+                              l10n?.cancel ?? 'Cancel',
                               style: TextStyle(
                                 color: Colors.grey.shade700,
                                 fontWeight: FontWeight.w600,
@@ -572,17 +612,17 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                                       ),
                                     ),
                                   )
-                                : const Row(
+                                : Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.check_circle_outline_rounded,
                                         size: 19,
                                       ),
-                                      SizedBox(width: 8),
+                                      const SizedBox(width: 8),
                                       Text(
-                                        'Save Changes',
-                                        style: TextStyle(
+                                        l10n?.saveChanges ?? 'Save Changes',
+                                        style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 15,
                                         ),
@@ -624,7 +664,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
     );
   }
 
-  Widget _buildMediaPreviewSection() {
+  Widget _buildMediaPreviewSection(AppLocalizations? l10n) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
@@ -638,16 +678,16 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Photos & Branding',
-                style: TextStyle(
+              Text(
+                l10n?.photosAndBranding ?? 'Photos & Branding',
+                style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                   color: Color(0xFF424242),
                 ),
               ),
               Text(
-                'Tap to change',
+                l10n?.tapToChange ?? 'Tap to change',
                 style: TextStyle(
                   fontSize: 11,
                   color: Colors.grey.shade500,
@@ -722,18 +762,18 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                                 color: Colors.black.withValues(alpha: 0.65),
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.camera_alt_rounded,
                                     color: Colors.white,
                                     size: 13,
                                   ),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 4),
                                   Text(
-                                    'Cover',
-                                    style: TextStyle(
+                                    l10n?.cover ?? 'Cover',
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
@@ -824,7 +864,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Profile Avatar',
+                        l10n?.profileAvatar ?? 'Profile Avatar',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -832,7 +872,7 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                         ),
                       ),
                       Text(
-                        'Click to replace photo',
+                        l10n?.clickToReplacePhoto ?? 'Click to replace photo',
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.grey.shade600,

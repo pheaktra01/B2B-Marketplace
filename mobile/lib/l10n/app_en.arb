@@ -917,5 +917,105 @@
       }
     }
   },
-  "buyNow": "Buy Now"
+  "buyNow": "Buy Now",
+  "updateProfilePicture": "Update Profile Picture",
+  "updateCoverBanner": "Update Cover Banner",
+  "takePhoto": "Take Photo",
+  "useDeviceCamera": "Use your device camera",
+  "chooseFromGallery": "Choose from Gallery",
+  "selectExistingPhoto": "Select an existing photo",
+  "failedPickImage": "Failed to pick image: {error}",
+  "@failedPickImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedSaveProfile": "Failed to save profile: {error}",
+  "@failedSaveProfile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "editFarmProfile": "Edit Farm Profile",
+  "editRestaurantProfile": "Edit Restaurant Profile",
+  "manageFarmIdentity": "Manage your farm identity & contact information",
+  "manageRestaurantDetails": "Manage your restaurant details & delivery address",
+  "farmAndBusinessDetails": "Farm & Business Details",
+  "restaurantBrandIdentity": "Restaurant Brand & Identity",
+  "farmProducerName": "Farm / Producer Name",
+  "restaurantBusinessName": "Restaurant / Business Name",
+  "displayedOnMarketplace": "Displayed prominently on marketplace listings",
+  "publicRestaurantName": "Your public restaurant or kitchen business name",
+  "ownerContactName": "Owner / Contact Person Name",
+  "managerContactName": "Manager / Contact Person Name",
+  "pleaseEnterContactName": "Please enter a contact name",
+  "contactAndLocation": "Contact & Location",
+  "phoneNumberLabel": "Phone Number",
+  "pleaseEnterPhone": "Please enter a contact phone number",
+  "farmLocationOrigin": "Farm Location / Origin",
+  "restaurantDeliveryAddress": "Restaurant / Delivery Address",
+  "helpsLocateProduce": "Helps restaurants locate local farm produce",
+  "usedAsDeliveryAddress": "Used as primary delivery address for produce orders",
+  "sustainabilityStory": "Sustainability & Farm Story",
+  "restaurantBioNeeds": "Restaurant Bio & Sourcing Needs",
+  "farmStoryQuality": "Farm Story & Produce Quality",
+  "restaurantDescConcept": "Restaurant Description & Concept",
+  "farmStoryHint": "Describe your farming practices, organic cultivation, harvest frequency...",
+  "restaurantBioHint": "Describe your cuisine style, farm-to-table preferences, and fresh ingredient needs...",
+  "saveChanges": "Save Changes",
+  "photosAndBranding": "Photos & Branding",
+  "tapToChange": "Tap to change",
+  "cover": "Cover",
+  "profileAvatar": "Profile Avatar",
+  "clickToReplacePhoto": "Click to replace photo",
+  "orders": "ORDERS",
+  "spent": "SPENT",
+  "favorites": "FAVORITES",
+  "businessProfile": "Business Profile",
+  "orderHistory": "Order History",
+  "favoritesProduct": "Favorites Product",
+  "paymentMethods": "Payment Methods",
+  "analytics": "Analytics",
+  "logOut": "Log Out",
+  "logOutConfirmMessage": "Are you sure you want to log out of your account?",
+  "restaurantProfileUpdated": "Restaurant profile updated successfully! 🍽️",
+  "farmProfileUpdated": "Farm profile updated successfully! 🌾",
+  "verifiedRestaurantBuyer": "Verified Restaurant Buyer",
+  "managerContact": "Manager / Contact",
+  "contactPhone": "Contact Phone",
+  "deliveryAddress": "Delivery Address",
+  "aboutKitchenConcept": "About Kitchen & Concept",
+  "accountRole": "Account Role",
+  "commercialRestaurantBuyer": "Commercial Restaurant & Kitchen Buyer",
+  "editBusinessDetails": "Edit Business Details",
+  "notSet": "Not set",
+  "purchasingAnalytics": "Purchasing Analytics",
+  "analyticsSubtitle": "Real-time spending & ordering metrics for your restaurant.",
+  "avgOrder": "AVG ORDER",
+  "orderStatusOverview": "Order Status Overview",
+  "activeInProgress": "Active / In Progress",
+  "deliveredCompleted": "Delivered & Completed",
+  "cancelledStatus": "Cancelled",
+  "viewAllOrdersHistory": "View All Orders in History",
+  "preferredPaymentSubtitle": "Select your preferred default payment method for faster checkout.",
+  "khqrTitle": "KHQR (Bakong / QR Pay)",
+  "khqrSubtitle": "Scan & pay instantly with any Cambodian banking app (ABA, ACLEDA, Canadia, Wing, etc.)",
+  "khqrBadge": "Instant • Recommended",
+  "codTitle": "Cash on Delivery (COD)",
+  "codSubtitle": "Pay cash upon receiving and inspecting produce directly at your kitchen.",
+  "codBadge": "Pay on Arrival",
+  "paymentSecurityNote": "Payments are processed securely through the National Bank of Cambodia Bakong network and direct verified vendor settlement.",
+  "confirmPreferredMethod": "Confirm Preferred Method",
+  "defaultPaymentSetTo": "Default payment method set to {method}",
+  "@defaultPaymentSetTo": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  }
 }

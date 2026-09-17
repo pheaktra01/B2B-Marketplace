@@ -1577,7 +1577,7 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get restaurantBioHint =>
-      'រៀបរាប់ខ្លីៗអំពីមុខម្ហូប ឬសេចក្តីត្រូវការរបស់អ្នក...';
+      'រៀបរាប់ពីរចនាប័ទ្មម្ហូប តម្រូវការបន្លែផ្លែឈើស្រស់...';
 
   @override
   String get saveAndStart => 'រក្សាទុក និងចាប់ផ្តើម';
@@ -1748,4 +1748,248 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get buyNow => 'ទិញភ្លាមៗ';
+
+  @override
+  String get updateProfilePicture => 'ផ្លាស់ប្តូររូបភាពប្រវត្តិរូប';
+
+  @override
+  String get updateCoverBanner => 'ផ្លាស់ប្តូររូបភាពផ្ទាំងខាងក្រោយ';
+
+  @override
+  String get takePhoto => 'ថតរូប';
+
+  @override
+  String get useDeviceCamera => 'ប្រើម៉ាស៊ីនថតទូរស័ព្ទរបស់អ្នក';
+
+  @override
+  String get chooseFromGallery => 'ជ្រើសរើសពីរូបភាព';
+
+  @override
+  String get selectExistingPhoto => 'ជ្រើសរើសរូបថតដែលមានស្រាប់';
+
+  @override
+  String failedPickImage(String error) {
+    return 'មិនអាចជ្រើសរូបភាពបានទេ៖ $error';
+  }
+
+  @override
+  String failedSaveProfile(String error) {
+    return 'មិនអាចរក្សាទុកប្រវត្តិរូបបានទេ៖ $error';
+  }
+
+  @override
+  String get editFarmProfile => 'កែប្រែប្រវត្តិរូបកសិដ្ឋាន';
+
+  @override
+  String get editRestaurantProfile => 'កែប្រែប្រវត្តិរូបភោជនីយដ្ឋាន';
+
+  @override
+  String get manageFarmIdentity =>
+      'គ្រប់គ្រងព័ត៌មានកសិដ្ឋាន និងទំនាក់ទំនងរបស់អ្នក';
+
+  @override
+  String get manageRestaurantDetails =>
+      'គ្រប់គ្រងព័ត៌មានភោជនីយដ្ឋាន និងអាសយដ្ឋានដឹកជញ្ជូន';
+
+  @override
+  String get farmAndBusinessDetails => 'ព័ត៌មានកសិដ្ឋាន និងអាជីវកម្ម';
+
+  @override
+  String get restaurantBrandIdentity => 'អត្តសញ្ញាណ និងម៉ាកយីហោភោជនីយដ្ឋាន';
+
+  @override
+  String get restaurantBusinessName => 'ឈ្មោះភោជនីយដ្ឋាន / អាជីវកម្ម';
+
+  @override
+  String get displayedOnMarketplace => 'បង្ហាញយ៉ាងច្បាស់លើបញ្ជីទីផ្សារ';
+
+  @override
+  String get publicRestaurantName =>
+      'ឈ្មោះអាជីវកម្មភោជនីយដ្ឋានជាសាធារណៈរបស់អ្នក';
+
+  @override
+  String get ownerContactName => 'ឈ្មោះម្ចាស់ / អ្នកទំនាក់ទំនង';
+
+  @override
+  String get managerContactName => 'ឈ្មោះអ្នកគ្រប់គ្រង / អ្នកទំនាក់ទំនង';
+
+  @override
+  String get pleaseEnterContactName => 'សូមបញ្ចូលឈ្មោះអ្នកទំនាក់ទំនង';
+
+  @override
+  String get contactAndLocation => 'ទំនាក់ទំនង និងទីតាំង';
+
+  @override
+  String get phoneNumberLabel => 'លេខទូរស័ព្ទ';
+
+  @override
+  String get pleaseEnterPhone => 'សូមបញ្ចូលលេខទូរស័ព្ទទំនាក់ទំនង';
+
+  @override
+  String get farmLocationOrigin => 'ទីតាំងកសិដ្ឋាន / ប្រភពដើម';
+
+  @override
+  String get restaurantDeliveryAddress => 'អាសយដ្ឋានភោជនីយដ្ឋាន / ដឹកជញ្ជូន';
+
+  @override
+  String get helpsLocateProduce => 'ជួយភោជនីយដ្ឋានស្វែងរកកសិផលក្នុងតំបន់';
+
+  @override
+  String get usedAsDeliveryAddress =>
+      'ប្រើជាអាសយដ្ឋានដឹកជញ្ជូនចម្បងសម្រាប់ការបញ្ជាទិញកសិផល';
+
+  @override
+  String get sustainabilityStory => 'និរន្តរភាព និងរឿងរ៉ាវកសិដ្ឋាន';
+
+  @override
+  String get restaurantBioNeeds => 'ជីវប្រវត្តិភោជនីយដ្ឋាន និងតម្រូវការទិញ';
+
+  @override
+  String get farmStoryQuality => 'រឿងរ៉ាវកសិដ្ឋាន និងគុណភាពផលិតផល';
+
+  @override
+  String get restaurantDescConcept => 'ការពិពណ៌នា និងគំនិតភោជនីយដ្ឋាន';
+
+  @override
+  String get farmStoryHint =>
+      'រៀបរាប់ពីការអនុវត្តកសិកម្ម ការដាំដុះធម្មជាតិ ភាពញឹកញាប់នៃការប្រមូលផល...';
+
+  @override
+  String get saveChanges => 'រក្សាទុកការផ្លាស់ប្តូរ';
+
+  @override
+  String get photosAndBranding => 'រូបថត និងម៉ាកយីហោ';
+
+  @override
+  String get tapToChange => 'ចុចដើម្បីផ្លាស់ប្តូរ';
+
+  @override
+  String get cover => 'ផ្ទាំងខាងក្រោយ';
+
+  @override
+  String get profileAvatar => 'រូបតំណាងប្រវត្តិរូប';
+
+  @override
+  String get clickToReplacePhoto => 'ចុចដើម្បីប្តូររូបថត';
+
+  @override
+  String get spent => 'ចំណាយសរុប';
+
+  @override
+  String get favorites => 'ពេញចិត្ត';
+
+  @override
+  String get businessProfile => 'ប្រវត្តិរូបអាជីវកម្ម';
+
+  @override
+  String get orderHistory => 'ប្រវត្តិការបញ្ជាទិញ';
+
+  @override
+  String get favoritesProduct => 'កសិផលពេញចិត្ត';
+
+  @override
+  String get paymentMethods => 'វិធីសាស្ត្រទូទាត់';
+
+  @override
+  String get analytics => 'ស្ថិតិវិភាគ';
+
+  @override
+  String get logOutConfirmMessage => 'តើអ្នកពិតជាចង់ចាកចេញពីគណនីរបស់អ្នកមែនទេ?';
+
+  @override
+  String get restaurantProfileUpdated =>
+      'បានធ្វើបច្ចុប្បន្នភាពប្រវត្តិរូបភោជនីយដ្ឋានដោយជោគជ័យ! 🍽️';
+
+  @override
+  String get farmProfileUpdated =>
+      'បានធ្វើបច្ចុប្បន្នភាពប្រវត្តិរូបកសិដ្ឋានដោយជោគជ័យ! 🌾';
+
+  @override
+  String get verifiedRestaurantBuyer => 'អ្នកទិញភោជនីយដ្ឋានបានផ្ទៀងផ្ទាត់';
+
+  @override
+  String get managerContact => 'អ្នកគ្រប់គ្រង / ទំនាក់ទំនង';
+
+  @override
+  String get contactPhone => 'លេខទូរស័ព្ទទំនាក់ទំនង';
+
+  @override
+  String get deliveryAddress => 'អាសយដ្ឋានដឹកជញ្ជូន';
+
+  @override
+  String get aboutKitchenConcept => 'អំពីផ្ទះបាយ និងគំនិតច្នៃប្រឌិត';
+
+  @override
+  String get accountRole => 'តួនាទីគណនី';
+
+  @override
+  String get commercialRestaurantBuyer =>
+      'អ្នកទិញពាណិជ្ជកម្មភោជនីយដ្ឋាន និងផ្ទះបាយ';
+
+  @override
+  String get editBusinessDetails => 'កែប្រែព័ត៌មានលម្អិតអាជីវកម្ម';
+
+  @override
+  String get notSet => 'មិនទាន់កំណត់';
+
+  @override
+  String get purchasingAnalytics => 'ស្ថិតិការទិញ';
+
+  @override
+  String get analyticsSubtitle =>
+      'ទិន្នន័យចំណាយ និងការបញ្ជាទិញតាមពេលវេលាជាក់ស្តែងសម្រាប់ភោជនីយដ្ឋានរបស់អ្នក';
+
+  @override
+  String get avgOrder => 'ការបញ្ជាទិញមធ្យម';
+
+  @override
+  String get orderStatusOverview => 'ទិដ្ឋភាពទូទៅនៃស្ថានភាពបញ្ជាទិញ';
+
+  @override
+  String get activeInProgress => 'កំពុងដំណើរការ';
+
+  @override
+  String get deliveredCompleted => 'បានដឹកជញ្ជូន និងរួចរាល់';
+
+  @override
+  String get cancelledStatus => 'បានបោះបង់';
+
+  @override
+  String get viewAllOrdersHistory => 'មើលការបញ្ជាទិញទាំងអស់ក្នុងប្រវត្តិ';
+
+  @override
+  String get preferredPaymentSubtitle =>
+      'ជ្រើសរើសវិធីសាស្ត្រទូទាត់លំនាំដើមរបស់អ្នកសម្រាប់ការទូទាត់លឿនជាងមុន';
+
+  @override
+  String get khqrTitle => 'KHQR (បាគង / ស្កេនទូទាត់ QR)';
+
+  @override
+  String get khqrSubtitle =>
+      'ស្កេន និងទូទាត់ភ្លាមៗជាមួយកម្មវិធីធនាគារកម្ពុជាណាមួយ (ABA, ACLEDA, Canadia, Wing, etc.)';
+
+  @override
+  String get khqrBadge => 'ភ្លាមៗ • ណែនាំ';
+
+  @override
+  String get codTitle => 'ទូទាត់ពេលទទួលទំនិញ (COD)';
+
+  @override
+  String get codSubtitle =>
+      'ទូទាត់ជាសាច់ប្រាក់បន្ទាប់ពីទទួលបាន និងត្រួតពិនិត្យកសិផលផ្ទាល់នៅផ្ទះបាយរបស់អ្នក';
+
+  @override
+  String get codBadge => 'ទូទាត់ពេលមកដល់';
+
+  @override
+  String get paymentSecurityNote =>
+      'ការទូទាត់ត្រូវបានដំណើរការដោយសុវត្ថិភាពតាមរយៈបណ្តាញបាគងនៃធនាគារជាតិនៃកម្ពុជា និងការទូទាត់ផ្ទាល់ជាមួយអ្នកលក់ដែលបានផ្ទៀងផ្ទាត់';
+
+  @override
+  String get confirmPreferredMethod => 'បញ្ជាក់វិធីសាស្ត្រដែលពេញចិត្ត';
+
+  @override
+  String defaultPaymentSetTo(String method) {
+    return 'វិធីសាស្ត្រទូទាត់លំនាំដើមត្រូវបានកំណត់ជា $method';
+  }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
@@ -97,8 +96,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ),
                         Row(
                           children: [
-                            const AuthLanguageSwitch(),
-                            const SizedBox(width: 8),
                             TextButton(
                               onPressed: () {
                                 // Support action

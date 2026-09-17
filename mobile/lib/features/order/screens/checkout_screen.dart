@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/cart/models/cart_model.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/order/models/order_model.dart';
@@ -230,12 +229,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             fontSize: 19,
           ),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            child: AuthLanguageSwitch(),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

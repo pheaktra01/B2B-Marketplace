@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/chat/services/chat_service.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
@@ -601,10 +600,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
         centerTitle: true,
         actions: [
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-            child: AuthLanguageSwitch(),
-          ),
           IconButton(
             icon: const Icon(Icons.share_outlined, color: Colors.black87),
             onPressed: _shareProduct,

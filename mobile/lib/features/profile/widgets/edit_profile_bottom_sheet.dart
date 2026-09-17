@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/core/constants/api_constants.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
@@ -407,10 +406,6 @@ class _EditProfileBottomSheetState extends State<EditProfileBottomSheet> {
                       ),
                     ],
                   ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(right: 4),
-                  child: AuthLanguageSwitch(),
                 ),
                 IconButton(
                   onPressed:

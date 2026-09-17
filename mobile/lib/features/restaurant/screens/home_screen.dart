@@ -6,7 +6,6 @@ import 'package:mobile/core/search/marketplace_search_bar.dart';
 import 'package:mobile/core/search/marketplace_search_filter.dart';
 import 'package:mobile/core/search/paginated_search_controller.dart';
 import 'package:mobile/core/search/pagination_loading_indicator.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
@@ -614,14 +613,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Header Actions (Language Switch, Favorites, Notifications, Cart)
+          // Header Actions (Favorites, Notifications, Cart)
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const AuthLanguageSwitch(),
-
-              const SizedBox(width: 6),
-
               // Favorites Button
               _buildHeaderIconButton(
                 icon: Icons.favorite_border_rounded,

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/notification/models/notification_model.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:mobile/features/notification/services/push_notification_service.dart';
@@ -585,11 +584,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ),
         actions: [
-          // Quick Language Switch Toggle Pill
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-            child: AuthLanguageSwitch(),
-          ),
           IconButton(
             tooltip: l10n.sendTestNotification,
             icon: const Icon(Icons.notifications_active_outlined, color: primaryGreen),

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -115,11 +114,10 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // --- Top Header (Back Button & Language Switch) ---
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (showBackButton)
+                      // --- Top Header (Back Button) ---
+                      if (showBackButton)
+                        Row(
+                          children: [
                             Material(
                               color: Colors.white,
                               shape: const CircleBorder(),
@@ -138,12 +136,9 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                   }
                                 },
                               ),
-                            )
-                          else
-                            const SizedBox.shrink(),
-                          const AuthLanguageSwitch(),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
                       SizedBox(height: isShortScreen ? 12 : 16),
 
                       // --- Green Padlock Security Icon ---

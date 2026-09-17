@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
 import 'package:mobile/l10n/app_localizations.dart';
@@ -148,10 +147,6 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
         ),
         centerTitle: false,
         actions: [
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-            child: AuthLanguageSwitch(),
-          ),
           IconButton(
             icon: const Icon(Icons.refresh, color: primaryGreen),
             onPressed: _loadOrder,

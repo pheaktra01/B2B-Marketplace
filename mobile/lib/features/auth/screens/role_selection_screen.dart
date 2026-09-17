@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
 class RoleSelectionScreen extends StatefulWidget {
@@ -53,7 +52,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                     children: [
                       // --- Header (Back Button & Language Switch) ---
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Material(
                             color: Colors.white,
@@ -74,7 +72,6 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                               },
                             ),
                           ),
-                          const AuthLanguageSwitch(),
                         ],
                       ),
 

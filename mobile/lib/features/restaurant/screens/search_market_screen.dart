@@ -910,7 +910,6 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
       primaryColor: primaryGreen,
       showBackButton: context.canPop(),
       onBackTap: () => context.pop(),
-      showLanguageSwitch: true,
       showFilterButton: true,
       activeFilterCount: _activeFilterCount,
       onFilterTap: _showFilters,

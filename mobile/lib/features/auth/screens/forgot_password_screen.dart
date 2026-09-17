@@ -4,7 +4,6 @@ import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/auth/screens/verify_phone_screen.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -62,7 +61,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     children: [
                       // --- Top Bar (Back Button & Language Switch) ---
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Material(
                             color: Colors.white,
@@ -83,7 +81,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               },
                             ),
                           ),
-                          const AuthLanguageSwitch(),
                         ],
                       ),
                       const SizedBox(height: 16),

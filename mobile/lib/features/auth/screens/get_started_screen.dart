@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
 class GetStartedScreen extends StatelessWidget {
@@ -69,29 +68,22 @@ class GetStartedScreen extends StatelessWidget {
                       0,
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Image.asset(
-                              'assets/logo01.png',
-                              width: isDesktop ? 92 : 50,
-                              height: isDesktop ? 92 : 50,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              'PsarKasekor',
-                              style: TextStyle(
-                                fontSize: isDesktop ? 38 : 30,
-                                fontWeight: FontWeight.w700,
-                                color: primaryGreen,
-                                height: 1,
-                              ),
-                            ),
-                          ],
+                        Image.asset(
+                          'assets/logo01.png',
+                          width: isDesktop ? 92 : 50,
+                          height: isDesktop ? 92 : 50,
                         ),
-                        const AuthLanguageSwitch(),
+                        const SizedBox(width: 10),
+                        Text(
+                          'PsarKasekor',
+                          style: TextStyle(
+                            fontSize: isDesktop ? 38 : 30,
+                            fontWeight: FontWeight.w700,
+                            color: primaryGreen,
+                            height: 1,
+                          ),
+                        ),
                       ],
                     ),
                   ),

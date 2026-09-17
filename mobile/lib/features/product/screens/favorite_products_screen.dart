@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
@@ -170,12 +169,6 @@ class _FavoriteProductsScreenState extends State<FavoriteProductsScreen> {
           ),
         ),
         centerTitle: false,
-        actions: const [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-            child: AuthLanguageSwitch(),
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadFavorites,

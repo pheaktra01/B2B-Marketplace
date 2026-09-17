@@ -1992,4 +1992,216 @@ class AppLocalizationsEn extends AppLocalizations {
   String defaultPaymentSetTo(String method) {
     return 'Default payment method set to $method';
   }
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navSearch => 'Search';
+
+  @override
+  String get navOrders => 'Orders';
+
+  @override
+  String get navChat => 'Chat';
+
+  @override
+  String get navProfile => 'Profile';
+
+  @override
+  String get searchProduceHint => 'Search vegetables, fruits, farm name...';
+
+  @override
+  String get directFarmSourcing => 'DIRECT FARM SOURCING';
+
+  @override
+  String get heroBannerTitle => 'Fresh Morning Harvest,\nZero Middleman Markup';
+
+  @override
+  String get heroBannerSubtitle =>
+      'Order before 11:00 AM for same-day kitchen delivery.';
+
+  @override
+  String get browseWholesaleMarket => 'Browse Wholesale Market';
+
+  @override
+  String get categoriesLabel => 'CATEGORIES';
+
+  @override
+  String get trustedFarmersTitle => 'Trusted Farmers';
+
+  @override
+  String get exploreAll => 'Explore All';
+
+  @override
+  String get farmProduce => 'Farm Produce';
+
+  @override
+  String get sort => 'Sort';
+
+  @override
+  String get newestHarvest => 'Newest Harvest';
+
+  @override
+  String get priceLowToHigh => 'Price: Low to High';
+
+  @override
+  String get priceHighToLow => 'Price: High to Low';
+
+  @override
+  String get lowestMoq => 'Lowest Minimum Order';
+
+  @override
+  String get noProduceFound => 'No Produce Found';
+
+  @override
+  String get noProduceFoundSubtitle =>
+      'Try adjusting your search keywords, category, or filter chips.';
+
+  @override
+  String get resetAllFilters => 'Reset All Filters';
+
+  @override
+  String get unableToLoadProduce => 'Unable to load market produce';
+
+  @override
+  String addedToCart(String product) {
+    return 'Added $product to cart';
+  }
+
+  @override
+  String get filterOrganicGap => 'Organic / GAP';
+
+  @override
+  String get filterInStock => 'In Stock';
+
+  @override
+  String get filterLowMoq => 'Low MOQ (≤10kg)';
+
+  @override
+  String get filterTopFarmers => 'Top Farmers';
+
+  @override
+  String get categoryAll => 'All';
+
+  @override
+  String get categoryVegetables => 'Vegetables';
+
+  @override
+  String get categoryFruits => 'Fruits';
+
+  @override
+  String get categoryHerbsSpices => 'Herbs & Spices';
+
+  @override
+  String get categorySeafood => 'Seafood';
+
+  @override
+  String get categoryMeatPoultry => 'Meat & Poultry';
+
+  @override
+  String get categoryRiceGrains => 'Rice & Grains';
+
+  @override
+  String get searchMarketHint => 'Search products, farms, or locations...';
+
+  @override
+  String get filterAndSort => 'Filter & Sort Produce';
+
+  @override
+  String get resetAll => 'Reset All';
+
+  @override
+  String get sortProduceBy => 'SORT PRODUCE BY';
+
+  @override
+  String get relevance => 'Relevance';
+
+  @override
+  String get qualityCertification => 'QUALITY & CERTIFICATION';
+
+  @override
+  String get originProvince => 'ORIGIN / PROVINCE';
+
+  @override
+  String get maxMoqTitle => 'MAXIMUM MINIMUM ORDER (MOQ)';
+
+  @override
+  String applyFiltersCount(int count) {
+    return 'Apply Filters ($count Results)';
+  }
+
+  @override
+  String get recentSearches => 'Recent Searches';
+
+  @override
+  String get popularSearches => 'Popular Searches';
+
+  @override
+  String get browseCategories => 'Browse Categories';
+
+  @override
+  String get showAll => 'Show All';
+
+  @override
+  String get tabAll => 'All';
+
+  @override
+  String tabProducts(int count) {
+    return 'Products ($count)';
+  }
+
+  @override
+  String tabFarmers(int count) {
+    return 'Farmers ($count)';
+  }
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get contactFarmer => 'Contact Farmer';
+
+  @override
+  String get sendMessage => 'Send Message';
+
+  @override
+  String get callFarmer => 'Call Farmer';
+
+  @override
+  String get copyPhoneNumber => 'Copy Phone Number';
+
+  @override
+  String phoneCopiedToClipboard(String phone) {
+    return 'Phone number $phone copied to clipboard!';
+  }
+
+  @override
+  String get shareFarmerProfile => 'Share Farm Profile';
+
+  @override
+  String get profileLinkCopied => 'Farmer profile link copied to clipboard!';
+
+  @override
+  String get tabAvailableProduce => 'Available Produce';
+
+  @override
+  String get tabAboutFarm => 'About Farm & Story';
+
+  @override
+  String get noProduceAvailable => 'No produce available right now';
+
+  @override
+  String get noPhoneProvided => 'No phone number provided yet';
+
+  @override
+  String get farmStory => 'Farm Story';
+
+  @override
+  String get produceOfferings => 'Produce Offerings';
+
+  @override
+  String operatedBy(String name) {
+    return 'Operated by $name';
+  }
 }

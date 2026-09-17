@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class SearchMarketScreen extends StatefulWidget {
   const SearchMarketScreen({super.key});
@@ -95,6 +97,43 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  String _getCategoryTitle(String key, AppLocalizations? l10n) {
+    switch (key.toLowerCase()) {
+      case 'all':
+        return l10n?.categoryAll ?? 'All';
+      case 'vegetables':
+        return l10n?.categoryVegetables ?? 'Vegetables';
+      case 'fruits':
+        return l10n?.categoryFruits ?? 'Fruits';
+      case 'herbs & spices':
+        return l10n?.categoryHerbsSpices ?? 'Herbs & Spices';
+      case 'seafood':
+        return l10n?.categorySeafood ?? 'Seafood';
+      case 'meat & poultry':
+        return l10n?.categoryMeatPoultry ?? 'Meat & Poultry';
+      case 'rice & grains':
+        return l10n?.categoryRiceGrains ?? 'Rice & Grains';
+      default:
+        return key;
+    }
+  }
+
+  String _getSortTitle(String key, AppLocalizations? l10n) {
+    switch (key) {
+      case 'newest':
+        return l10n?.newestHarvest ?? 'Newest Harvest';
+      case 'price_low':
+        return l10n?.priceLowToHigh ?? 'Price: Low to High';
+      case 'price_high':
+        return l10n?.priceHighToLow ?? 'Price: High to Low';
+      case 'moq_low':
+        return l10n?.lowestMoq ?? 'Lowest MOQ';
+      case 'relevance':
+      default:
+        return l10n?.relevance ?? 'Relevance';
+    }
   }
 
   // ==========================================================
@@ -332,293 +371,314 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => StatefulBuilder(
-        builder: (context, setSheetState) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: EdgeInsets.only(
-            top: 16,
-            left: 20,
-            right: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.85,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+        builder: (context, setSheetState) {
+          final l10n = AppLocalizations.of(context);
 
-              const SizedBox(height: 14),
+          String getConditionLabel(String cond) {
+            if (cond == 'All') return l10n?.categoryAll ?? 'All';
+            if (cond == 'Organic / GAP') return l10n?.filterOrganicGap ?? 'Organic / GAP';
+            if (cond == 'Fresh Harvest') return l10n?.newestHarvest ?? 'Fresh Harvest';
+            return cond;
+          }
 
-              // Header Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Filter & Sort Produce',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: textDark,
+          return Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: EdgeInsets.only(
+              top: 16,
+              left: 20,
+              right: 20,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            ),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Drag handle
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      setSheetState(() {
-                        _sortBy = 'relevance';
-                        _onlyAvailable = false;
-                        _selectedCondition = 'All';
-                        _selectedLocation = 'All';
-                        _maxMoq = null;
-                      });
-                      setState(() {});
-                    },
-                    child: const Text(
-                      'Reset All',
-                      style: TextStyle(
-                        color: accentOrange,
+                ),
+
+                const SizedBox(height: 14),
+
+                // Header Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n?.filterAndSort ?? 'Filter & Sort Produce',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: textDark,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        setSheetState(() {
+                          _sortBy = 'relevance';
+                          _onlyAvailable = false;
+                          _selectedCondition = 'All';
+                          _selectedLocation = 'All';
+                          _maxMoq = null;
+                        });
+                        setState(() {});
+                      },
+                      child: Text(
+                        l10n?.resetAll ?? 'Reset All',
+                        style: const TextStyle(
+                          color: accentOrange,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const Divider(height: 1),
+
+                // Scrollable Filter Sections
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 1. Sort Options
+                        _buildFilterSectionTitle(
+                          (l10n?.sortProduceBy ?? 'SORT PRODUCE BY').toUpperCase(),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _buildChoiceChip(
+                              label: l10n?.relevance ?? 'Relevance',
+                              selected: _sortBy == 'relevance',
+                              onSelected: (val) {
+                                setSheetState(() => _sortBy = 'relevance');
+                                setState(() {});
+                              },
+                            ),
+                            _buildChoiceChip(
+                              label: l10n?.newestHarvest ?? 'Newest Harvest',
+                              selected: _sortBy == 'newest',
+                              onSelected: (val) {
+                                setSheetState(() => _sortBy = 'newest');
+                                setState(() {});
+                              },
+                            ),
+                            _buildChoiceChip(
+                              label: l10n?.priceLowToHigh ?? 'Price: Low to High',
+                              selected: _sortBy == 'price_low',
+                              onSelected: (val) {
+                                setSheetState(() => _sortBy = 'price_low');
+                                setState(() {});
+                              },
+                            ),
+                            _buildChoiceChip(
+                              label: l10n?.priceHighToLow ?? 'Price: High to Low',
+                              selected: _sortBy == 'price_high',
+                              onSelected: (val) {
+                                setSheetState(() => _sortBy = 'price_high');
+                                setState(() {});
+                              },
+                            ),
+                            _buildChoiceChip(
+                              label: l10n?.lowestMoq ?? 'Lowest MOQ',
+                              selected: _sortBy == 'moq_low',
+                              onSelected: (val) {
+                                setSheetState(() => _sortBy = 'moq_low');
+                                setState(() {});
+                              },
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // 2. Condition / Quality
+                        _buildFilterSectionTitle(
+                          (l10n?.qualityCertification ?? 'QUALITY & CERTIFICATION').toUpperCase(),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            'All',
+                            'Organic / GAP',
+                            'Fresh Harvest',
+                          ].map((cond) {
+                            return _buildChoiceChip(
+                              label: getConditionLabel(cond),
+                              selected: _selectedCondition == cond,
+                              onSelected: (val) {
+                                setSheetState(() => _selectedCondition = cond);
+                                setState(() {});
+                              },
+                            );
+                          }).toList(),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // 3. Farm Location / Province
+                        _buildFilterSectionTitle(
+                          (l10n?.originProvince ?? 'ORIGIN / PROVINCE').toUpperCase(),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _provinces.map((prov) {
+                            final label = prov == 'All' ? (l10n?.categoryAll ?? 'All') : prov;
+                            return _buildChoiceChip(
+                              label: label,
+                              selected: _selectedLocation == prov,
+                              onSelected: (val) {
+                                setSheetState(() => _selectedLocation = prov);
+                                setState(() {});
+                              },
+                            );
+                          }).toList(),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // 4. Availability Switch
+                        _buildFilterSectionTitle('AVAILABILITY'),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: inputBg,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              l10n?.filterInStock ?? 'Ready in Stock Only',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: textDark,
+                              ),
+                            ),
+                            subtitle: const Text(
+                              'Hide out-of-stock items for immediate order dispatch',
+                              style: TextStyle(fontSize: 12, color: textMuted),
+                            ),
+                            activeTrackColor: primaryGreen,
+                            value: _onlyAvailable,
+                            onChanged: (val) {
+                              setSheetState(() => _onlyAvailable = val);
+                              setState(() {});
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // 5. Maximum Minimum Order (MOQ)
+                        _buildFilterSectionTitle(
+                          (l10n?.maxMoqTitle ?? 'MAXIMUM MINIMUM ORDER (MOQ)').toUpperCase(),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _buildChoiceChip(
+                              label: 'Any MOQ',
+                              selected: _maxMoq == null,
+                              onSelected: (val) {
+                                setSheetState(() => _maxMoq = null);
+                                setState(() {});
+                              },
+                            ),
+                            _buildChoiceChip(
+                              label: '≤ 5 kg',
+                              selected: _maxMoq == 5,
+                              onSelected: (val) {
+                                setSheetState(() => _maxMoq = 5);
+                                setState(() {});
+                              },
+                            ),
+                            _buildChoiceChip(
+                              label: '≤ 10 kg',
+                              selected: _maxMoq == 10,
+                              onSelected: (val) {
+                                setSheetState(() => _maxMoq = 10);
+                                setState(() {});
+                              },
+                            ),
+                            _buildChoiceChip(
+                              label: '≤ 25 kg',
+                              selected: _maxMoq == 25,
+                              onSelected: (val) {
+                                setSheetState(() => _maxMoq = 25);
+                                setState(() {});
+                              },
+                            ),
+                            _buildChoiceChip(
+                              label: '≤ 50 kg',
+                              selected: _maxMoq == 50,
+                              onSelected: (val) {
+                                setSheetState(() => _maxMoq = 50);
+                                setState(() {});
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Apply Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(sheetContext),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryGreen,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      l10n?.applyFiltersCount(_filteredProducts.length) ??
+                          'Apply Filters (${_filteredProducts.length} Results)',
+                      style: const TextStyle(
+                        fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                ],
-              ),
-
-              const Divider(height: 1),
-
-              // Scrollable Filter Sections
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 1. Sort Options
-                      _buildFilterSectionTitle('SORT PRODUCE BY'),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _buildChoiceChip(
-                            label: 'Relevance',
-                            selected: _sortBy == 'relevance',
-                            onSelected: (val) {
-                              setSheetState(() => _sortBy = 'relevance');
-                              setState(() {});
-                            },
-                          ),
-                          _buildChoiceChip(
-                            label: 'Newest Harvest',
-                            selected: _sortBy == 'newest',
-                            onSelected: (val) {
-                              setSheetState(() => _sortBy = 'newest');
-                              setState(() {});
-                            },
-                          ),
-                          _buildChoiceChip(
-                            label: 'Price: Low to High',
-                            selected: _sortBy == 'price_low',
-                            onSelected: (val) {
-                              setSheetState(() => _sortBy = 'price_low');
-                              setState(() {});
-                            },
-                          ),
-                          _buildChoiceChip(
-                            label: 'Price: High to Low',
-                            selected: _sortBy == 'price_high',
-                            onSelected: (val) {
-                              setSheetState(() => _sortBy = 'price_high');
-                              setState(() {});
-                            },
-                          ),
-                          _buildChoiceChip(
-                            label: 'Lowest MOQ',
-                            selected: _sortBy == 'moq_low',
-                            onSelected: (val) {
-                              setSheetState(() => _sortBy = 'moq_low');
-                              setState(() {});
-                            },
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // 2. Condition / Quality
-                      _buildFilterSectionTitle('QUALITY & CERTIFICATION'),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          'All',
-                          'Organic / GAP',
-                          'Fresh Harvest',
-                        ].map((cond) {
-                          return _buildChoiceChip(
-                            label: cond,
-                            selected: _selectedCondition == cond,
-                            onSelected: (val) {
-                              setSheetState(() => _selectedCondition = cond);
-                              setState(() {});
-                            },
-                          );
-                        }).toList(),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // 3. Farm Location / Province
-                      _buildFilterSectionTitle('ORIGIN / PROVINCE'),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: _provinces.map((prov) {
-                          return _buildChoiceChip(
-                            label: prov,
-                            selected: _selectedLocation == prov,
-                            onSelected: (val) {
-                              setSheetState(() => _selectedLocation = prov);
-                              setState(() {});
-                            },
-                          );
-                        }).toList(),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // 4. Availability Switch
-                      _buildFilterSectionTitle('AVAILABILITY'),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: inputBg,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text(
-                            'Ready in Stock Only',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: textDark,
-                            ),
-                          ),
-                          subtitle: const Text(
-                            'Hide out-of-stock items for immediate order dispatch',
-                            style: TextStyle(fontSize: 12, color: textMuted),
-                          ),
-                          activeTrackColor: primaryGreen,
-                          value: _onlyAvailable,
-                          onChanged: (val) {
-                            setSheetState(() => _onlyAvailable = val);
-                            setState(() {});
-                          },
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // 5. Maximum Minimum Order (MOQ)
-                      _buildFilterSectionTitle('MAXIMUM MINIMUM ORDER (MOQ)'),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _buildChoiceChip(
-                            label: 'Any MOQ',
-                            selected: _maxMoq == null,
-                            onSelected: (val) {
-                              setSheetState(() => _maxMoq = null);
-                              setState(() {});
-                            },
-                          ),
-                          _buildChoiceChip(
-                            label: '≤ 5 kg',
-                            selected: _maxMoq == 5,
-                            onSelected: (val) {
-                              setSheetState(() => _maxMoq = 5);
-                              setState(() {});
-                            },
-                          ),
-                          _buildChoiceChip(
-                            label: '≤ 10 kg',
-                            selected: _maxMoq == 10,
-                            onSelected: (val) {
-                              setSheetState(() => _maxMoq = 10);
-                              setState(() {});
-                            },
-                          ),
-                          _buildChoiceChip(
-                            label: '≤ 25 kg',
-                            selected: _maxMoq == 25,
-                            onSelected: (val) {
-                              setSheetState(() => _maxMoq = 25);
-                              setState(() {});
-                            },
-                          ),
-                          _buildChoiceChip(
-                            label: '≤ 50 kg',
-                            selected: _maxMoq == 50,
-                            onSelected: (val) {
-                              setSheetState(() => _maxMoq = 50);
-                              setState(() {});
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
                 ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Apply Button
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(sheetContext),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryGreen,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Apply Filters (${_filteredProducts.length} Results)',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -742,6 +802,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     final pid = product['id']?.toString() ?? '';
     if (pid.isEmpty) return;
 
+    final l10n = AppLocalizations.of(context);
     final minOrder = _toNumber(product['minOrder']);
     final orderQty = minOrder > 0 ? minOrder : 1.0;
 
@@ -764,7 +825,8 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Added ${product['name']} to cart',
+                  l10n?.addedToCart(product['name']?.toString() ?? '') ??
+                      'Added ${product['name']} to cart',
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
@@ -774,7 +836,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           action: SnackBarAction(
-            label: 'VIEW CART',
+            label: l10n?.viewCart ?? 'VIEW CART',
             textColor: Colors.amberAccent,
             onPressed: () => context.push(AppRoutes.restaurantCart),
           ),
@@ -785,7 +847,9 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to add to cart: $e'),
+          content: Text(
+            l10n?.failedAddToCart(e.toString()) ?? 'Failed to add to cart: $e',
+          ),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
         ),
@@ -801,6 +865,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final bool isSearching = _searchController.text.trim().isNotEmpty ||
         _selectedCategory != 'All' ||
         _activeFilterCount > 0;
@@ -818,7 +883,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: _buildSearchBar(),
+                  child: _buildSearchBar(l10n),
                 ),
               ),
 
@@ -827,7 +892,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: _buildActiveFilterChipsRow(),
+                    child: _buildActiveFilterChipsRow(l10n),
                   ),
                 ),
 
@@ -836,19 +901,19 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: _buildRecentSearchesSection(),
+                    child: _buildRecentSearchesSection(l10n),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: _buildPopularSearchesSection(),
+                    child: _buildPopularSearchesSection(l10n),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: _buildCategoriesSection(),
+                    child: _buildCategoriesSection(l10n),
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
@@ -858,7 +923,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: _buildTabSwitcher(),
+                  child: _buildTabSwitcher(l10n),
                 ),
               ),
 
@@ -866,12 +931,12 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-                  child: _buildResultHeader(),
+                  child: _buildResultHeader(l10n),
                 ),
               ),
 
               // Content Sliver
-              _buildContentSliver(),
+              _buildContentSliver(l10n),
 
               const SliverToBoxAdapter(child: SizedBox(height: 40)),
             ],
@@ -885,7 +950,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // SEARCH BAR & HEADER
   // ==========================================================
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(AppLocalizations? l10n) {
     final canPop = context.canPop();
 
     return Row(
@@ -932,9 +997,9 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
                     controller: _searchController,
                     onSubmitted: _addRecentSearch,
                     style: const TextStyle(fontSize: 14, color: textDark),
-                    decoration: const InputDecoration(
-                      hintText: 'Search products, farms, or locations...',
-                      hintStyle: TextStyle(fontSize: 13, color: textMuted),
+                    decoration: InputDecoration(
+                      hintText: l10n?.searchMarketHint ?? 'Search products, farms, or locations...',
+                      hintStyle: const TextStyle(fontSize: 13, color: textMuted),
                       border: InputBorder.none,
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
@@ -956,7 +1021,11 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
           ),
         ),
 
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
+
+        const AuthLanguageSwitch(),
+
+        const SizedBox(width: 8),
 
         // Filter Button with Badge
         Stack(
@@ -1020,7 +1089,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // ACTIVE FILTER CHIPS ROW
   // ==========================================================
 
-  Widget _buildActiveFilterChipsRow() {
+  Widget _buildActiveFilterChipsRow(AppLocalizations? l10n) {
     return SizedBox(
       height: 32,
       child: ListView(
@@ -1028,15 +1097,21 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
           if (_selectedCategory != 'All')
-            _buildActivePill('Category: $_selectedCategory', () {
-              setState(() => _selectedCategory = 'All');
-            }),
+            _buildActivePill(
+              '${l10n?.categoriesLabel ?? "Category"}: ${_getCategoryTitle(_selectedCategory, l10n)}',
+              () {
+                setState(() => _selectedCategory = 'All');
+              },
+            ),
           if (_sortBy != 'relevance')
-            _buildActivePill('Sort: $_sortBy', () {
-              setState(() => _sortBy = 'relevance');
-            }),
+            _buildActivePill(
+              '${l10n?.sort ?? "Sort"}: ${_getSortTitle(_sortBy, l10n)}',
+              () {
+                setState(() => _sortBy = 'relevance');
+              },
+            ),
           if (_onlyAvailable)
-            _buildActivePill('In Stock', () {
+            _buildActivePill(l10n?.filterInStock ?? 'In Stock', () {
               setState(() => _onlyAvailable = false);
             }),
           if (_selectedCondition != 'All')
@@ -1060,10 +1135,10 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  'Clear All',
-                  style: TextStyle(
+                  l10n?.clearAll ?? 'Clear All',
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: textDark,
@@ -1111,7 +1186,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // DISCOVERY SECTIONS (RECENT, POPULAR, CATEGORIES)
   // ==========================================================
 
-  Widget _buildRecentSearchesSection() {
+  Widget _buildRecentSearchesSection(AppLocalizations? l10n) {
     if (_recentSearches.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -1120,9 +1195,9 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Recent Searches',
-              style: TextStyle(
+            Text(
+              l10n?.recentSearches ?? 'Recent Searches',
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
                 color: textDark,
@@ -1130,9 +1205,9 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
             ),
             GestureDetector(
               onTap: () => setState(_recentSearches.clear),
-              child: const Text(
-                'Clear',
-                style: TextStyle(
+              child: Text(
+                l10n?.clear ?? 'Clear',
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: textMuted,
@@ -1176,13 +1251,13 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     );
   }
 
-  Widget _buildPopularSearchesSection() {
+  Widget _buildPopularSearchesSection(AppLocalizations? l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Popular Searches',
-          style: TextStyle(
+        Text(
+          l10n?.popularSearches ?? 'Popular Searches',
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
             color: textDark,
@@ -1218,16 +1293,16 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     );
   }
 
-  Widget _buildCategoriesSection() {
+  Widget _buildCategoriesSection(AppLocalizations? l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Browse Categories',
-              style: TextStyle(
+            Text(
+              l10n?.browseCategories ?? 'Browse Categories',
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
                 color: textDark,
@@ -1236,9 +1311,9 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
             if (_selectedCategory != 'All')
               GestureDetector(
                 onTap: () => setState(() => _selectedCategory = 'All'),
-                child: const Text(
-                  'Show All',
-                  style: TextStyle(
+                child: Text(
+                  l10n?.showAll ?? 'Show All',
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: primaryGreen,
@@ -1256,12 +1331,13 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
             separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final cat = _categories[index];
-              final name = cat['name'] as String;
+              final rawName = cat['name'] as String;
+              final displayName = _getCategoryTitle(rawName, l10n);
               final icon = cat['icon'] as IconData;
-              final isSelected = _selectedCategory == name;
+              final isSelected = _selectedCategory == rawName;
 
               return GestureDetector(
-                onTap: () => setState(() => _selectedCategory = name),
+                onTap: () => setState(() => _selectedCategory = rawName),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
@@ -1281,7 +1357,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        name,
+                        displayName,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
@@ -1303,7 +1379,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // TAB SWITCHER
   // ==========================================================
 
-  Widget _buildTabSwitcher() {
+  Widget _buildTabSwitcher(AppLocalizations? l10n) {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -1313,9 +1389,17 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
       ),
       child: Row(
         children: [
-          _buildTabItem(0, 'All'),
-          _buildTabItem(1, 'Products (${_filteredProducts.length})'),
-          _buildTabItem(2, 'Farmers (${_filteredFarmers.length})'),
+          _buildTabItem(0, l10n?.tabAll ?? 'All'),
+          _buildTabItem(
+            1,
+            l10n?.tabProducts(_filteredProducts.length) ??
+                'Products (${_filteredProducts.length})',
+          ),
+          _buildTabItem(
+            2,
+            l10n?.tabFarmers(_filteredFarmers.length) ??
+                'Farmers (${_filteredFarmers.length})',
+          ),
         ],
       ),
     );
@@ -1351,7 +1435,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // RESULTS HEADER
   // ==========================================================
 
-  Widget _buildResultHeader() {
+  Widget _buildResultHeader(AppLocalizations? l10n) {
     final count = _selectedTabIndex == 2
         ? _filteredFarmers.length
         : _filteredProducts.length;
@@ -1379,7 +1463,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
                     const Icon(Icons.sort_rounded, size: 14, color: primaryGreen),
                     const SizedBox(width: 4),
                     Text(
-                      'Sort: ${_getSortLabel()}',
+                      '${l10n?.sort ?? "Sort"}: ${_getSortTitle(_sortBy, l10n)}',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -1441,27 +1525,11 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     );
   }
 
-  String _getSortLabel() {
-    switch (_sortBy) {
-      case 'price_low':
-        return 'Price ↑';
-      case 'price_high':
-        return 'Price ↓';
-      case 'newest':
-        return 'Newest';
-      case 'moq_low':
-        return 'Low MOQ';
-      case 'relevance':
-      default:
-        return 'Relevance';
-    }
-  }
-
   // ==========================================================
   // MAIN CONTENT SLIVER
   // ==========================================================
 
-  Widget _buildContentSliver() {
+  Widget _buildContentSliver(AppLocalizations? l10n) {
     if (_isLoading) {
       return const SliverToBoxAdapter(
         child: Padding(
@@ -1475,7 +1543,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
     if (_errorMessage != null) {
       return SliverToBoxAdapter(
-        child: _buildErrorState(),
+        child: _buildErrorState(l10n),
       );
     }
 
@@ -1483,7 +1551,9 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     if (_selectedTabIndex == 2) {
       final farmers = _filteredFarmers;
       if (farmers.isEmpty) {
-        return SliverToBoxAdapter(child: _buildEmptyState('No farmers found'));
+        return SliverToBoxAdapter(
+          child: _buildEmptyState('No farmers found', l10n),
+        );
       }
       return SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1500,7 +1570,12 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     final products = _filteredProducts;
 
     if (products.isEmpty) {
-      return SliverToBoxAdapter(child: _buildEmptyState('No produce found'));
+      return SliverToBoxAdapter(
+        child: _buildEmptyState(
+          l10n?.noProduceFound ?? 'No produce found',
+          l10n,
+        ),
+      );
     }
 
     // Grid View
@@ -1922,7 +1997,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
     );
   }
 
-  Widget _buildEmptyState(String title) {
+  Widget _buildEmptyState(String title, AppLocalizations? l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
@@ -1942,10 +2017,11 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textDark),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Try adjusting your search query, location, or reset filters.',
+          Text(
+            l10n?.noProduceFoundSubtitle ??
+                'Try adjusting your search query, location, or reset filters.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: textMuted, fontSize: 13),
+            style: const TextStyle(color: textMuted, fontSize: 13),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -1955,14 +2031,14 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Reset All Filters'),
+            child: Text(l10n?.resetAllFilters ?? 'Reset All Filters'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildErrorState() {
+  Widget _buildErrorState(AppLocalizations? l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -1970,9 +2046,9 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
         children: [
           const Icon(Icons.cloud_off_rounded, size: 48, color: Colors.grey),
           const SizedBox(height: 12),
-          const Text(
-            'Unable to load market items',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          Text(
+            l10n?.unableToLoadProduce ?? 'Unable to load market items',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
           const SizedBox(height: 6),
           Text(
@@ -1984,7 +2060,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
           ElevatedButton(
             onPressed: _loadInitialData,
             style: ElevatedButton.styleFrom(backgroundColor: primaryGreen),
-            child: const Text('Try Again', style: TextStyle(color: Colors.white)),
+            child: Text(l10n?.retry ?? 'Try Again', style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),

@@ -1619,7 +1619,7 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String failedAddToCart(String error) {
-    return 'មិនអាចបន្ថែមទៅកន្ត្រក: $error';
+    return 'មិនអាចបន្ថែមទៅក្នុងកន្ត្រកបានទេ៖ $error';
   }
 
   @override
@@ -1991,5 +1991,219 @@ class AppLocalizationsKm extends AppLocalizations {
   @override
   String defaultPaymentSetTo(String method) {
     return 'វិធីសាស្ត្រទូទាត់លំនាំដើមត្រូវបានកំណត់ជា $method';
+  }
+
+  @override
+  String get navHome => 'ទំព័រដើម';
+
+  @override
+  String get navSearch => 'ស្វែងរក';
+
+  @override
+  String get navOrders => 'ការបញ្ជាទិញ';
+
+  @override
+  String get navChat => 'សារ';
+
+  @override
+  String get navProfile => 'គណនី';
+
+  @override
+  String get searchProduceHint => 'ស្វែងរកបន្លែ ផ្លែឈើ ឈ្មោះកសិដ្ឋាន...';
+
+  @override
+  String get directFarmSourcing => 'ប្រភពផ្ទាល់ពីកសិដ្ឋាន';
+
+  @override
+  String get heroBannerTitle =>
+      'ប្រមូលផលពេលព្រឹកស្រស់ៗ\nគ្មានការបូកតម្លៃពីឈ្មួញកណ្តាល';
+
+  @override
+  String get heroBannerSubtitle =>
+      'កម្ម៉ង់មុនម៉ោង ១១:០០ ព្រឹក សម្រាប់ការដឹកជញ្ជូនដល់ផ្ទះបាយក្នុងថ្ងៃតែមួយ។';
+
+  @override
+  String get browseWholesaleMarket => 'ស្វែងរកទីផ្សារលក់ដុំ';
+
+  @override
+  String get categoriesLabel => 'ប្រភេទ';
+
+  @override
+  String get trustedFarmersTitle => 'កសិករដែលគួរឱ្យទុកចិត្ត';
+
+  @override
+  String get exploreAll => 'ស្វែងរកទាំងអស់';
+
+  @override
+  String get farmProduce => 'ផលិតផលកសិដ្ឋាន';
+
+  @override
+  String get sort => 'តម្រៀប';
+
+  @override
+  String get newestHarvest => 'ការប្រមូលផលថ្មីៗបំផុត';
+
+  @override
+  String get priceLowToHigh => 'តម្លៃ៖ ទាបទៅខ្ពស់';
+
+  @override
+  String get priceHighToLow => 'តម្លៃ៖ ខ្ពស់ទៅទាប';
+
+  @override
+  String get lowestMoq => 'បរិមាណបញ្ជាទិញអប្បបរមាទាបបំផុត';
+
+  @override
+  String get noProduceFound => 'រកមិនឃើញផលិតផលទេ';
+
+  @override
+  String get noProduceFoundSubtitle =>
+      'សូមសាកល្បងកែប្រែពាក្យគន្លឹះស្វែងរក ប្រភេទ ឬតម្រង។';
+
+  @override
+  String get resetAllFilters => 'កំណត់តម្រងឡើងវិញទាំងអស់';
+
+  @override
+  String get unableToLoadProduce => 'មិនអាចទាញយកទិន្នន័យផលិតផលលើទីផ្សារបានទេ';
+
+  @override
+  String addedToCart(String product) {
+    return 'បានបន្ថែម $product ទៅក្នុងកន្ត្រក';
+  }
+
+  @override
+  String get filterOrganicGap => 'សរីរាង្គ / GAP';
+
+  @override
+  String get filterInStock => 'មានក្នុងស្តុក';
+
+  @override
+  String get filterLowMoq => 'MOQ ទាប (≤10kg)';
+
+  @override
+  String get filterTopFarmers => 'កសិករឆ្នើម';
+
+  @override
+  String get categoryAll => 'ទាំងអស់';
+
+  @override
+  String get categoryVegetables => 'បន្លែ';
+
+  @override
+  String get categoryFruits => 'ផ្លែឈើ';
+
+  @override
+  String get categoryHerbsSpices => 'គ្រឿងទេស';
+
+  @override
+  String get categorySeafood => 'គ្រឿងសមុទ្រ';
+
+  @override
+  String get categoryMeatPoultry => 'សាច់ និងបសុបក្សី';
+
+  @override
+  String get categoryRiceGrains => 'អង្ករ និងគ្រាប់ធញ្ញជាតិ';
+
+  @override
+  String get searchMarketHint => 'ស្វែងរកផលិតផល កសិដ្ឋាន ឬទីតាំង...';
+
+  @override
+  String get filterAndSort => 'តម្រង និងតម្រៀបផលិតផល';
+
+  @override
+  String get resetAll => 'កំណត់ឡើងវិញទាំងអស់';
+
+  @override
+  String get sortProduceBy => 'តម្រៀបផលិតផលតាម';
+
+  @override
+  String get relevance => 'ភាពពាក់ព័ន្ធ';
+
+  @override
+  String get qualityCertification => 'គុណភាព និងវិញ្ញាបនបត្រ';
+
+  @override
+  String get originProvince => 'ប្រភព / ខេត្ត';
+
+  @override
+  String get maxMoqTitle => 'បរិមាណបញ្ជាទិញអប្បបរមាអតិបរមា (MOQ)';
+
+  @override
+  String applyFiltersCount(int count) {
+    return 'អនុវត្តតម្រង ($count លទ្ធផល)';
+  }
+
+  @override
+  String get recentSearches => 'ការស្វែងរកថ្មីៗ';
+
+  @override
+  String get popularSearches => 'ការស្វែងរកពេញនិយម';
+
+  @override
+  String get browseCategories => 'ស្វែងរកតាមប្រភេទ';
+
+  @override
+  String get showAll => 'បង្ហាញទាំងអស់';
+
+  @override
+  String get tabAll => 'ទាំងអស់';
+
+  @override
+  String tabProducts(int count) {
+    return 'ផលិតផល ($count)';
+  }
+
+  @override
+  String tabFarmers(int count) {
+    return 'កសិករ ($count)';
+  }
+
+  @override
+  String get clear => 'សម្អាត';
+
+  @override
+  String get contactFarmer => 'ទាក់ទងកសិករ';
+
+  @override
+  String get sendMessage => 'ផ្ញើសារ';
+
+  @override
+  String get callFarmer => 'ទូរស័ព្ទទៅកសិករ';
+
+  @override
+  String get copyPhoneNumber => 'ចម្លងលេខទូរស័ព្ទ';
+
+  @override
+  String phoneCopiedToClipboard(String phone) {
+    return 'បានចម្លងលេខទូរស័ព្ទ $phone ទៅកាន់ក្ដារតម្បៀតខ្ទាស់!';
+  }
+
+  @override
+  String get shareFarmerProfile => 'ចែករំលែកប្រវត្តិរូបកសិដ្ឋាន';
+
+  @override
+  String get profileLinkCopied =>
+      'បានចម្លងតំណភ្ជាប់កសិករទៅកាន់ក្ដារតម្បៀតខ្ទាស់!';
+
+  @override
+  String get tabAvailableProduce => 'ផលិតផលដែលមាន';
+
+  @override
+  String get tabAboutFarm => 'អំពីកសិដ្ឋាន និងដំណើររឿង';
+
+  @override
+  String get noProduceAvailable => 'មិនទាន់មានផលិតផលនៅឡើយទេ';
+
+  @override
+  String get noPhoneProvided => 'មិនទាន់មានលេខទូរស័ព្ទនៅឡើយទេ';
+
+  @override
+  String get farmStory => 'ដំណើររឿងកសិដ្ឋាន';
+
+  @override
+  String get produceOfferings => 'ផលិតផលផ្តល់ជូន';
+
+  @override
+  String operatedBy(String name) {
+    return 'គ្រប់គ្រងដោយ $name';
   }
 }

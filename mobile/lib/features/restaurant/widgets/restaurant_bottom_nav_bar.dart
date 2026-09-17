@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class RestaurantBottomNavBar extends StatelessWidget {
   const RestaurantBottomNavBar({
@@ -18,7 +19,16 @@ class RestaurantBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final activeIndex = currentIndex ?? navigationShell?.currentIndex ?? 0;
+
+    final labels = [
+      l10n?.navHome ?? 'Home',
+      l10n?.navSearch ?? 'Search',
+      l10n?.navOrders ?? 'Orders',
+      l10n?.navChat ?? 'Chat',
+      l10n?.navProfile ?? 'Profile',
+    ];
 
     return BottomNavigationBar(
       currentIndex: activeIndex,
@@ -68,7 +78,7 @@ class RestaurantBottomNavBar extends StatelessWidget {
             ),
             child: Icon(_icons[index]),
           ),
-          label: _labels[index],
+          label: labels[index],
         );
       }),
     );
@@ -80,13 +90,5 @@ class RestaurantBottomNavBar extends StatelessWidget {
     Icons.shopping_bag_outlined,
     Icons.chat_bubble_outline,
     Icons.person_outline,
-  ];
-
-  static const List<String> _labels = [
-    'Home',
-    'Search',
-    'Orders',
-    'Chat',
-    'Profile',
   ];
 }

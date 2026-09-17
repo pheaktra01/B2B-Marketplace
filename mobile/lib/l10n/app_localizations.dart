@@ -3737,6 +3737,402 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Default payment method set to {method}'**
   String defaultPaymentSetTo(String method);
+
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @navSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get navSearch;
+
+  /// No description provided for @navOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get navOrders;
+
+  /// No description provided for @navChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get navChat;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get navProfile;
+
+  /// No description provided for @searchProduceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search vegetables, fruits, farm name...'**
+  String get searchProduceHint;
+
+  /// No description provided for @directFarmSourcing.
+  ///
+  /// In en, this message translates to:
+  /// **'DIRECT FARM SOURCING'**
+  String get directFarmSourcing;
+
+  /// No description provided for @heroBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh Morning Harvest,\nZero Middleman Markup'**
+  String get heroBannerTitle;
+
+  /// No description provided for @heroBannerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order before 11:00 AM for same-day kitchen delivery.'**
+  String get heroBannerSubtitle;
+
+  /// No description provided for @browseWholesaleMarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Wholesale Market'**
+  String get browseWholesaleMarket;
+
+  /// No description provided for @categoriesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'CATEGORIES'**
+  String get categoriesLabel;
+
+  /// No description provided for @trustedFarmersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted Farmers'**
+  String get trustedFarmersTitle;
+
+  /// No description provided for @exploreAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore All'**
+  String get exploreAll;
+
+  /// No description provided for @farmProduce.
+  ///
+  /// In en, this message translates to:
+  /// **'Farm Produce'**
+  String get farmProduce;
+
+  /// No description provided for @sort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get sort;
+
+  /// No description provided for @newestHarvest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest Harvest'**
+  String get newestHarvest;
+
+  /// No description provided for @priceLowToHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: Low to High'**
+  String get priceLowToHigh;
+
+  /// No description provided for @priceHighToLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Price: High to Low'**
+  String get priceHighToLow;
+
+  /// No description provided for @lowestMoq.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest Minimum Order'**
+  String get lowestMoq;
+
+  /// No description provided for @noProduceFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Produce Found'**
+  String get noProduceFound;
+
+  /// No description provided for @noProduceFoundSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your search keywords, category, or filter chips.'**
+  String get noProduceFoundSubtitle;
+
+  /// No description provided for @resetAllFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All Filters'**
+  String get resetAllFilters;
+
+  /// No description provided for @unableToLoadProduce.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load market produce'**
+  String get unableToLoadProduce;
+
+  /// No description provided for @addedToCart.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {product} to cart'**
+  String addedToCart(String product);
+
+  /// No description provided for @filterOrganicGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Organic / GAP'**
+  String get filterOrganicGap;
+
+  /// No description provided for @filterInStock.
+  ///
+  /// In en, this message translates to:
+  /// **'In Stock'**
+  String get filterInStock;
+
+  /// No description provided for @filterLowMoq.
+  ///
+  /// In en, this message translates to:
+  /// **'Low MOQ (≤10kg)'**
+  String get filterLowMoq;
+
+  /// No description provided for @filterTopFarmers.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Farmers'**
+  String get filterTopFarmers;
+
+  /// No description provided for @categoryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get categoryAll;
+
+  /// No description provided for @categoryVegetables.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegetables'**
+  String get categoryVegetables;
+
+  /// No description provided for @categoryFruits.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruits'**
+  String get categoryFruits;
+
+  /// No description provided for @categoryHerbsSpices.
+  ///
+  /// In en, this message translates to:
+  /// **'Herbs & Spices'**
+  String get categoryHerbsSpices;
+
+  /// No description provided for @categorySeafood.
+  ///
+  /// In en, this message translates to:
+  /// **'Seafood'**
+  String get categorySeafood;
+
+  /// No description provided for @categoryMeatPoultry.
+  ///
+  /// In en, this message translates to:
+  /// **'Meat & Poultry'**
+  String get categoryMeatPoultry;
+
+  /// No description provided for @categoryRiceGrains.
+  ///
+  /// In en, this message translates to:
+  /// **'Rice & Grains'**
+  String get categoryRiceGrains;
+
+  /// No description provided for @searchMarketHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search products, farms, or locations...'**
+  String get searchMarketHint;
+
+  /// No description provided for @filterAndSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter & Sort Produce'**
+  String get filterAndSort;
+
+  /// No description provided for @resetAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All'**
+  String get resetAll;
+
+  /// No description provided for @sortProduceBy.
+  ///
+  /// In en, this message translates to:
+  /// **'SORT PRODUCE BY'**
+  String get sortProduceBy;
+
+  /// No description provided for @relevance.
+  ///
+  /// In en, this message translates to:
+  /// **'Relevance'**
+  String get relevance;
+
+  /// No description provided for @qualityCertification.
+  ///
+  /// In en, this message translates to:
+  /// **'QUALITY & CERTIFICATION'**
+  String get qualityCertification;
+
+  /// No description provided for @originProvince.
+  ///
+  /// In en, this message translates to:
+  /// **'ORIGIN / PROVINCE'**
+  String get originProvince;
+
+  /// No description provided for @maxMoqTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'MAXIMUM MINIMUM ORDER (MOQ)'**
+  String get maxMoqTitle;
+
+  /// No description provided for @applyFiltersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Filters ({count} Results)'**
+  String applyFiltersCount(int count);
+
+  /// No description provided for @recentSearches.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Searches'**
+  String get recentSearches;
+
+  /// No description provided for @popularSearches.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Searches'**
+  String get popularSearches;
+
+  /// No description provided for @browseCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Categories'**
+  String get browseCategories;
+
+  /// No description provided for @showAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show All'**
+  String get showAll;
+
+  /// No description provided for @tabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get tabAll;
+
+  /// No description provided for @tabProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Products ({count})'**
+  String tabProducts(int count);
+
+  /// No description provided for @tabFarmers.
+  ///
+  /// In en, this message translates to:
+  /// **'Farmers ({count})'**
+  String tabFarmers(int count);
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @contactFarmer.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Farmer'**
+  String get contactFarmer;
+
+  /// No description provided for @sendMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Message'**
+  String get sendMessage;
+
+  /// No description provided for @callFarmer.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Farmer'**
+  String get callFarmer;
+
+  /// No description provided for @copyPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Phone Number'**
+  String get copyPhoneNumber;
+
+  /// No description provided for @phoneCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number {phone} copied to clipboard!'**
+  String phoneCopiedToClipboard(String phone);
+
+  /// No description provided for @shareFarmerProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Farm Profile'**
+  String get shareFarmerProfile;
+
+  /// No description provided for @profileLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Farmer profile link copied to clipboard!'**
+  String get profileLinkCopied;
+
+  /// No description provided for @tabAvailableProduce.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Produce'**
+  String get tabAvailableProduce;
+
+  /// No description provided for @tabAboutFarm.
+  ///
+  /// In en, this message translates to:
+  /// **'About Farm & Story'**
+  String get tabAboutFarm;
+
+  /// No description provided for @noProduceAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No produce available right now'**
+  String get noProduceAvailable;
+
+  /// No description provided for @noPhoneProvided.
+  ///
+  /// In en, this message translates to:
+  /// **'No phone number provided yet'**
+  String get noPhoneProvided;
+
+  /// No description provided for @farmStory.
+  ///
+  /// In en, this message translates to:
+  /// **'Farm Story'**
+  String get farmStory;
+
+  /// No description provided for @produceOfferings.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce Offerings'**
+  String get produceOfferings;
+
+  /// No description provided for @operatedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Operated by {name}'**
+  String operatedBy(String name);
 }
 
 class _AppLocalizationsDelegate

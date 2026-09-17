@@ -11,6 +11,7 @@ import 'package:mobile/features/product/services/favorites_service.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
 import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class BuyerFarmerProfileScreen extends StatefulWidget {
   final String farmerId;
@@ -83,6 +84,27 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  String _getCategoryTitle(String key, AppLocalizations? l10n) {
+    switch (key.toLowerCase()) {
+      case 'all':
+        return l10n?.categoryAll ?? 'All';
+      case 'vegetables':
+        return l10n?.categoryVegetables ?? 'Vegetables';
+      case 'fruits':
+        return l10n?.categoryFruits ?? 'Fruits';
+      case 'herbs & spices':
+        return l10n?.categoryHerbsSpices ?? 'Herbs & Spices';
+      case 'seafood':
+        return l10n?.categorySeafood ?? 'Seafood';
+      case 'meat & poultry':
+        return l10n?.categoryMeatPoultry ?? 'Meat & Poultry';
+      case 'rice & grains':
+        return l10n?.categoryRiceGrains ?? 'Rice & Grains';
+      default:
+        return key;
+    }
   }
 
   void _initializeFromInitialData() {
@@ -303,6 +325,7 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
   }
 
   void _showContactFarmerDialog() {
+    final l10n = AppLocalizations.of(context);
     final phone = _phone?.trim() ?? '';
     showModalBottomSheet<void>(
       context: context,
@@ -342,7 +365,7 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
               ),
               const SizedBox(height: 6),
               Text(
-                phone.isNotEmpty ? phone : 'No phone number provided yet',
+                phone.isNotEmpty ? phone : (l10n?.noPhoneProvided ?? 'No phone number provided yet'),
                 style: TextStyle(
                   fontSize: 15,
                   color: Colors.grey.shade700,
@@ -360,16 +383,18 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                       Navigator.pop(ctx);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Phone number $phone copied to clipboard!'),
+                          content: Text(
+                            l10n?.phoneCopiedToClipboard(phone) ?? 'Phone number $phone copied to clipboard!',
+                          ),
                           backgroundColor: primaryGreen,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
                     },
                     icon: const Icon(Icons.copy, size: 18),
-                    label: const Text(
-                      'Copy Phone Number',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    label: Text(
+                      l10n?.copyPhoneNumber ?? 'Copy Phone Number',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryGreen,
@@ -388,7 +413,7 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                 child: TextButton(
                   onPressed: () => Navigator.pop(ctx),
                   child: Text(
-                    'Cancel',
+                    l10n?.cancel ?? 'Cancel',
                     style: TextStyle(
                       color: Colors.grey.shade600,
                       fontWeight: FontWeight.w600,
@@ -404,6 +429,7 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
   }
 
   void _shareFarmerProfile() {
+    final l10n = AppLocalizations.of(context);
     final title = _businessName ?? _farmerName;
     Clipboard.setData(
       ClipboardData(
@@ -411,10 +437,12 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
       ),
     );
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Farmer profile link copied to clipboard!'),
+      SnackBar(
+        content: Text(
+          l10n?.profileLinkCopied ?? 'Farmer profile link copied to clipboard!',
+        ),
         backgroundColor: primaryGreen,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -422,13 +450,14 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final displayName = _businessName?.isNotEmpty == true
         ? _businessName!
         : (_farmerName.isNotEmpty ? _farmerName : 'Local Farm');
     final subtitleOwner = _businessName?.isNotEmpty == true &&
             _farmerName.isNotEmpty &&
             _farmerName != _businessName
-        ? 'Operated by $_farmerName'
+        ? (l10n?.operatedBy(_farmerName) ?? 'Operated by $_farmerName')
         : null;
 
     return Scaffold(
@@ -600,7 +629,7 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                                   label: Text(
                                     _isContacting
                                         ? 'Opening Chat...'
-                                        : 'Chat with Farmer',
+                                        : (l10n?.sendMessage ?? 'Chat with Farmer'),
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -626,9 +655,9 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                                   onPressed: _showContactFarmerDialog,
                                   icon: const Icon(Icons.phone_outlined,
                                       size: 18),
-                                  label: const Text(
-                                    'Contact',
-                                    style: TextStyle(
+                                  label: Text(
+                                    l10n?.contactFarmer ?? 'Contact',
+                                    style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -752,8 +781,8 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                     fontSize: 15,
                   ),
                   tabs: [
-                    Tab(text: 'Produce Catalog (${_allProducts.length})'),
-                    const Tab(text: 'About Farm'),
+                    Tab(text: '${l10n?.tabAvailableProduce ?? "Produce Catalog"} (${_allProducts.length})'),
+                    Tab(text: l10n?.tabAboutFarm ?? 'About Farm'),
                   ],
                 ),
               ),
@@ -763,8 +792,8 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
         body: TabBarView(
           controller: _tabController,
           children: [
-            _buildProductsTab(),
-            _buildAboutTab(),
+            _buildProductsTab(l10n),
+            _buildAboutTab(l10n),
           ],
         ),
       ),
@@ -838,7 +867,7 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
   // TAB 1: PRODUCE CATALOG
   // ==========================================================
 
-  Widget _buildProductsTab() {
+  Widget _buildProductsTab(AppLocalizations? l10n) {
     if (_isLoadingProducts) {
       return const Center(
         child: CircularProgressIndicator(color: primaryGreen),
@@ -866,7 +895,7 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                     controller: _searchController,
                     onChanged: (_) => _applyFilters(),
                     decoration: InputDecoration(
-                      hintText: 'Search within this farm...',
+                      hintText: l10n?.searchProduceHint ?? 'Search within this farm...',
                       hintStyle:
                           TextStyle(color: Colors.grey.shade400, fontSize: 13),
                       prefixIcon: Icon(Icons.search,
@@ -898,7 +927,7 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: ChoiceChip(
-                            label: Text(cat),
+                            label: Text(_getCategoryTitle(cat, l10n)),
                             selected: isSelected,
                             onSelected: (selected) {
                               if (selected) {
@@ -960,8 +989,8 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                     const SizedBox(height: 16),
                     Text(
                       _searchController.text.isNotEmpty
-                          ? 'No matching produce found'
-                          : 'No active produce listed yet',
+                          ? (l10n?.noProduceFound ?? 'No matching produce found')
+                          : (l10n?.noProduceAvailable ?? 'No active produce listed yet'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -971,8 +1000,9 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
                     const SizedBox(height: 6),
                     Text(
                       _searchController.text.isNotEmpty
-                          ? 'Try searching for something else'
-                          : 'This farmer has not published any available crops right now.',
+                          ? (l10n?.noProduceFoundSubtitle ?? 'Try searching for something else')
+                          : (l10n?.noProduceFoundSubtitle ??
+                              'This farmer has not published any available crops right now.'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
@@ -1204,7 +1234,7 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
   // TAB 2: ABOUT FARM
   // ==========================================================
 
-  Widget _buildAboutTab() {
+  Widget _buildAboutTab(AppLocalizations? l10n) {
     final bioText = _bio?.isNotEmpty == true
         ? _bio!
         : 'Dedicated local farmer committed to providing fresh, sustainable, and high-quality agricultural produce for professional restaurant kitchens and wholesale buyers.';
@@ -1215,9 +1245,9 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Bio / Story
-          const Text(
-            'About the Farm',
-            style: TextStyle(
+          Text(
+            l10n?.farmStory ?? 'About the Farm',
+            style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,
               color: Colors.black87,

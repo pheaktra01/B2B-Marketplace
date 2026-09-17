@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
+import 'package:mobile/l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -54,22 +56,58 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isGridView = true;
 
   final List<Map<String, dynamic>> _categories = [
-    {'name': 'All', 'icon': Icons.grid_view_rounded},
-    {'name': 'Vegetables', 'icon': Icons.eco_rounded},
-    {'name': 'Fruits', 'icon': Icons.apple_rounded},
-    {'name': 'Herbs & Spices', 'icon': Icons.grass_rounded},
-    {'name': 'Seafood', 'icon': Icons.set_meal_rounded},
-    {'name': 'Meat & Poultry', 'icon': Icons.egg_alt_rounded},
-    {'name': 'Rice & Grains', 'icon': Icons.grain_rounded},
+    {'key': 'all', 'name': 'All', 'icon': Icons.grid_view_rounded},
+    {'key': 'vegetables', 'name': 'Vegetables', 'icon': Icons.eco_rounded},
+    {'key': 'fruits', 'name': 'Fruits', 'icon': Icons.apple_rounded},
+    {'key': 'herbs_spices', 'name': 'Herbs & Spices', 'icon': Icons.grass_rounded},
+    {'key': 'seafood', 'name': 'Seafood', 'icon': Icons.set_meal_rounded},
+    {'key': 'meat_poultry', 'name': 'Meat & Poultry', 'icon': Icons.egg_alt_rounded},
+    {'key': 'rice_grains', 'name': 'Rice & Grains', 'icon': Icons.grain_rounded},
   ];
 
   final List<Map<String, dynamic>> _quickFilters = [
-    {'name': 'All', 'icon': null},
-    {'name': 'Organic / GAP', 'icon': Icons.verified_outlined},
-    {'name': 'In Stock', 'icon': Icons.check_circle_outline_rounded},
-    {'name': 'Low MOQ (≤10kg)', 'icon': Icons.inventory_2_outlined},
-    {'name': 'Top Farmers', 'icon': Icons.star_rounded},
+    {'key': 'all', 'name': 'All', 'icon': null},
+    {'key': 'organic', 'name': 'Organic / GAP', 'icon': Icons.verified_outlined},
+    {'key': 'in_stock', 'name': 'In Stock', 'icon': Icons.check_circle_outline_rounded},
+    {'key': 'low_moq', 'name': 'Low MOQ (≤10kg)', 'icon': Icons.inventory_2_outlined},
+    {'key': 'top_farmers', 'name': 'Top Farmers', 'icon': Icons.star_rounded},
   ];
+
+  String _getCategoryTitle(String key, AppLocalizations? l10n) {
+    switch (key) {
+      case 'vegetables':
+        return l10n?.categoryVegetables ?? 'Vegetables';
+      case 'fruits':
+        return l10n?.categoryFruits ?? 'Fruits';
+      case 'herbs_spices':
+        return l10n?.categoryHerbsSpices ?? 'Herbs & Spices';
+      case 'seafood':
+        return l10n?.categorySeafood ?? 'Seafood';
+      case 'meat_poultry':
+        return l10n?.categoryMeatPoultry ?? 'Meat & Poultry';
+      case 'rice_grains':
+        return l10n?.categoryRiceGrains ?? 'Rice & Grains';
+      case 'all':
+      default:
+        return l10n?.categoryAll ?? 'All';
+    }
+  }
+
+  String _getQuickFilterTitle(String key, AppLocalizations? l10n) {
+    switch (key) {
+      case 'organic':
+        return l10n?.filterOrganicGap ?? 'Organic / GAP';
+      case 'in_stock':
+        return l10n?.filterInStock ?? 'In Stock';
+      case 'low_moq':
+        return l10n?.filterLowMoq ?? 'Low MOQ (≤10kg)';
+      case 'top_farmers':
+        return l10n?.filterTopFarmers ?? 'Top Farmers';
+      case 'all':
+      default:
+        return l10n?.categoryAll ?? 'All';
+    }
+  }
 
   @override
   void initState() {
@@ -369,6 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _addToCart(Map<String, dynamic> product) async {
+    final l10n = AppLocalizations.of(context);
     final pid = product['id']?.toString() ?? '';
     if (pid.isEmpty) return;
 
@@ -388,6 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      final prodName = product['name']?.toString() ?? '';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -397,7 +437,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Added ${product['name']} to cart',
+                  l10n?.addedToCart(prodName) ?? 'Added $prodName to cart',
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
@@ -408,7 +448,7 @@ class _HomeScreenState extends State<HomeScreen> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           action: SnackBarAction(
-            label: 'VIEW CART',
+            label: l10n?.viewCart ?? 'VIEW CART',
             textColor: Colors.amberAccent,
             onPressed: () {
               context.push(AppRoutes.restaurantCart).then((_) => _loadCartCount());
@@ -421,7 +461,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to add to cart: $e'),
+          content: Text(
+            l10n?.failedAddToCart(e.toString()) ?? 'Failed to add to cart: $e',
+          ),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
         ),
@@ -437,6 +479,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: surfaceBg,
       body: SafeArea(
@@ -455,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                  child: _buildSearchBar(),
+                  child: _buildSearchBar(l10n),
                 ),
               ),
 
@@ -463,38 +507,38 @@ class _HomeScreenState extends State<HomeScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                  child: _buildHeroBanner(),
+                  child: _buildHeroBanner(l10n),
                 ),
               ),
 
               // 4. Categories Selector
               SliverToBoxAdapter(
-                child: _buildCategoriesSection(),
+                child: _buildCategoriesSection(l10n),
               ),
 
               // 5. Quick Quality Filter Chips
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(0, 14, 0, 16),
-                  child: _buildQuickFilterBar(),
+                  child: _buildQuickFilterBar(l10n),
                 ),
               ),
 
               // 6. Trusted Local Farmers Spotlight
               SliverToBoxAdapter(
-                child: _buildRecommendedFarmersSection(),
+                child: _buildRecommendedFarmersSection(l10n),
               ),
 
               // 7. Products Section Header (Count, Sort, Grid/List toggle)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-                  child: _buildProductHeaderBar(),
+                  child: _buildProductHeaderBar(l10n),
                 ),
               ),
 
               // 8. Products Feed (Grid or List)
-              _buildProductFeedSliver(),
+              _buildProductFeedSliver(l10n),
 
               // Bottom Padding
               const SliverToBoxAdapter(
@@ -609,10 +653,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Header Actions (Favorites, Notifications, Cart)
+          // Header Actions (Language Switch, Favorites, Notifications, Cart)
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const AuthLanguageSwitch(),
+
+              const SizedBox(width: 6),
+
               // Favorites Button
               _buildHeaderIconButton(
                 icon: Icons.favorite_border_rounded,
@@ -744,7 +792,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(AppLocalizations? l10n) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -768,12 +816,13 @@ class _HomeScreenState extends State<HomeScreen> {
             child: TextField(
               controller: _searchController,
               style: const TextStyle(fontSize: 14, color: textDark),
-              decoration: const InputDecoration(
-                hintText: 'Search vegetables, fruits, farm name...',
-                hintStyle: TextStyle(color: textMuted, fontSize: 14),
+              decoration: InputDecoration(
+                hintText: l10n?.searchProduceHint ??
+                    'Search vegetables, fruits, farm name...',
+                hintStyle: const TextStyle(color: textMuted, fontSize: 14),
                 border: InputBorder.none,
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
           ),
@@ -801,7 +850,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHeroBanner() {
+  Widget _buildHeroBanner(AppLocalizations? l10n) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -844,15 +893,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.bolt_rounded,
+                      const Icon(Icons.bolt_rounded,
                           color: Colors.amberAccent, size: 14),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
-                        'DIRECT FARM SOURCING',
-                        style: TextStyle(
+                        l10n?.directFarmSourcing ?? 'DIRECT FARM SOURCING',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
                           fontSize: 10,
@@ -863,9 +912,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'Fresh Morning Harvest,\nZero Middleman Markup',
-                  style: TextStyle(
+                Text(
+                  l10n?.heroBannerTitle ??
+                      'Fresh Morning Harvest,\nZero Middleman Markup',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -874,7 +924,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Order before 11:00 AM for same-day kitchen delivery.',
+                  l10n?.heroBannerSubtitle ??
+                      'Order before 11:00 AM for same-day kitchen delivery.',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.88),
                     fontSize: 12,
@@ -893,18 +944,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Browse Wholesale Market',
-                        style: TextStyle(
+                        l10n?.browseWholesaleMarket ?? 'Browse Wholesale Market',
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(width: 6),
-                      Icon(Icons.arrow_forward_rounded, size: 14),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.arrow_forward_rounded, size: 14),
                     ],
                   ),
                 ),
@@ -916,15 +967,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategoriesSection() {
+  Widget _buildCategoriesSection(AppLocalizations? l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'CATEGORIES',
-            style: TextStyle(
+            l10n?.categoriesLabel ?? 'CATEGORIES',
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
               color: textMuted,
@@ -943,6 +994,8 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, index) {
               final isSelected = _selectedCategoryIndex == index;
               final category = _categories[index];
+              final key = category['key'] as String? ?? 'all';
+              final title = _getCategoryTitle(key, l10n);
 
               return GestureDetector(
                 onTap: () {
@@ -981,7 +1034,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        category['name'] as String,
+                        title,
                         style: TextStyle(
                           color: isSelected ? Colors.white : textDark,
                           fontWeight:
@@ -1000,7 +1053,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildQuickFilterBar() {
+  Widget _buildQuickFilterBar(AppLocalizations? l10n) {
     return SizedBox(
       height: 34,
       child: ListView.separated(
@@ -1011,6 +1064,8 @@ class _HomeScreenState extends State<HomeScreen> {
         itemBuilder: (context, index) {
           final filter = _quickFilters[index];
           final name = filter['name'] as String;
+          final key = filter['key'] as String? ?? 'all';
+          final title = _getQuickFilterTitle(key, l10n);
           final icon = filter['icon'] as IconData?;
           final isSelected = _activeQuickFilter == name;
 
@@ -1042,7 +1097,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 5),
                   ],
                   Text(
-                    name,
+                    title,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight:
@@ -1059,7 +1114,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildRecommendedFarmersSection() {
+  Widget _buildRecommendedFarmersSection(AppLocalizations? l10n) {
     if (_recommendedFarmers.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -1070,14 +1125,14 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.verified_user_rounded,
+                  const Icon(Icons.verified_user_rounded,
                       color: primaryColor, size: 18),
-                  SizedBox(width: 6),
+                  const SizedBox(width: 6),
                   Text(
-                    'Trusted Farmers',
-                    style: TextStyle(
+                    l10n?.trustedFarmersTitle ?? 'Trusted Farmers',
+                    style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
                       color: textDark,
@@ -1087,9 +1142,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               GestureDetector(
                 onTap: () => context.push(AppRoutes.restaurantSearch),
-                child: const Text(
-                  'Explore All',
-                  style: TextStyle(
+                child: Text(
+                  l10n?.exploreAll ?? 'Explore All',
+                  style: const TextStyle(
                     color: primaryColor,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
@@ -1109,7 +1164,7 @@ class _HomeScreenState extends State<HomeScreen> {
             separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               final farmer = _recommendedFarmers[index];
-              return _buildFarmerSpotlightCard(farmer);
+              return _buildFarmerSpotlightCard(farmer, l10n);
             },
           ),
         ),
@@ -1118,7 +1173,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFarmerSpotlightCard(Map<String, dynamic> farmer) {
+  Widget _buildFarmerSpotlightCard(Map<String, dynamic> farmer, AppLocalizations? l10n) {
     final farmerId = farmer['id']?.toString() ?? '';
     final name = farmer['name']?.toString() ?? 'Farmer';
     final farmName = farmer['businessName']?.toString() ?? name;
@@ -1232,7 +1287,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      ordersCount > 0 ? '$ordersCount orders' : 'Verified Farm',
+                      ordersCount > 0
+                          ? '$ordersCount ${l10n?.orders ?? "orders"}'
+                          : (l10n?.verifiedProducer ?? 'Verified Farm'),
                       style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
@@ -1249,7 +1306,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProductHeaderBar() {
+  Widget _buildProductHeaderBar(AppLocalizations? l10n) {
     final count = _filteredProducts.length;
 
     return Row(
@@ -1257,9 +1314,9 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Row(
           children: [
-            const Text(
-              'Farm Produce',
-              style: TextStyle(
+            Text(
+              l10n?.farmProduce ?? 'Farm Produce',
+              style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w800,
                 color: textDark,
@@ -1288,50 +1345,50 @@ class _HomeScreenState extends State<HomeScreen> {
             // Sort Menu
             PopupMenuButton<String>(
               initialValue: _sortBy,
-              tooltip: 'Sort by',
+              tooltip: l10n?.sort ?? 'Sort',
               onSelected: (val) {
                 setState(() => _sortBy = val);
               },
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'newest',
                   child: Row(
                     children: [
-                      Icon(Icons.schedule_rounded, size: 16),
-                      SizedBox(width: 8),
-                      Text('Newest Harvest'),
+                      const Icon(Icons.schedule_rounded, size: 16),
+                      const SizedBox(width: 8),
+                      Text(l10n?.newestHarvest ?? 'Newest Harvest'),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'price_asc',
                   child: Row(
                     children: [
-                      Icon(Icons.arrow_upward_rounded, size: 16),
-                      SizedBox(width: 8),
-                      Text('Price: Low to High'),
+                      const Icon(Icons.arrow_upward_rounded, size: 16),
+                      const SizedBox(width: 8),
+                      Text(l10n?.priceLowToHigh ?? 'Price: Low to High'),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'price_desc',
                   child: Row(
                     children: [
-                      Icon(Icons.arrow_downward_rounded, size: 16),
-                      SizedBox(width: 8),
-                      Text('Price: High to Low'),
+                      const Icon(Icons.arrow_downward_rounded, size: 16),
+                      const SizedBox(width: 8),
+                      Text(l10n?.priceHighToLow ?? 'Price: High to Low'),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'moq_asc',
                   child: Row(
                     children: [
-                      Icon(Icons.inventory_2_outlined, size: 16),
-                      SizedBox(width: 8),
-                      Text('Lowest Minimum Order'),
+                      const Icon(Icons.inventory_2_outlined, size: 16),
+                      const SizedBox(width: 8),
+                      Text(l10n?.lowestMoq ?? 'Lowest Minimum Order'),
                     ],
                   ),
                 ),
@@ -1344,14 +1401,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.grey.shade300),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.sort_rounded, size: 15, color: textDark),
-                    SizedBox(width: 4),
+                    const Icon(Icons.sort_rounded, size: 15, color: textDark),
+                    const SizedBox(width: 4),
                     Text(
-                      'Sort',
-                      style: TextStyle(
+                      l10n?.sort ?? 'Sort',
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: textDark,
@@ -1417,7 +1474,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProductFeedSliver() {
+  Widget _buildProductFeedSliver(AppLocalizations? l10n) {
     if (_isLoading) {
       return const SliverToBoxAdapter(
         child: Padding(
@@ -1431,7 +1488,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (_errorMessage != null) {
       return SliverToBoxAdapter(
-        child: _buildErrorState(),
+        child: _buildErrorState(l10n),
       );
     }
 
@@ -1439,7 +1496,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (products.isEmpty) {
       return SliverToBoxAdapter(
-        child: _buildEmptyProductsState(),
+        child: _buildEmptyProductsState(l10n),
       );
     }
 
@@ -1793,7 +1850,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // EMPTY & ERROR STATES
   // ==========================================================
 
-  Widget _buildEmptyProductsState() {
+  Widget _buildEmptyProductsState(AppLocalizations? l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
@@ -1812,19 +1869,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'No Produce Found',
-            style: TextStyle(
+          Text(
+            l10n?.noProduceFound ?? 'No Produce Found',
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: textDark,
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Try adjusting your search keywords, category, or filter chips.',
+          Text(
+            l10n?.noProduceFoundSubtitle ?? 'Try adjusting your search keywords, category, or filter chips.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: textMuted, fontSize: 13),
+            style: const TextStyle(color: textMuted, fontSize: 13),
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
@@ -1836,7 +1893,7 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
             icon: const Icon(Icons.refresh_rounded, size: 16),
-            label: const Text('Reset All Filters'),
+            label: Text(l10n?.resetAllFilters ?? 'Reset All Filters'),
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,
               foregroundColor: Colors.white,
@@ -1851,7 +1908,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildErrorState() {
+  Widget _buildErrorState(AppLocalizations? l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
@@ -1859,9 +1916,9 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           const Icon(Icons.cloud_off_rounded, size: 48, color: Colors.grey),
           const SizedBox(height: 12),
-          const Text(
-            'Unable to load market produce',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          Text(
+            l10n?.unableToLoadProduce ?? 'Unable to load market produce',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
           const SizedBox(height: 6),
           Text(
@@ -1879,7 +1936,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text('Retry'),
+            child: Text(l10n?.retry ?? 'Retry'),
           ),
         ],
       ),

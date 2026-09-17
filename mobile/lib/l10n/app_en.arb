@@ -1017,5 +1017,129 @@
         "type": "String"
       }
     }
+  },
+
+  "navHome": "Home",
+  "navSearch": "Search",
+  "navOrders": "Orders",
+  "navChat": "Chat",
+  "navProfile": "Profile",
+
+  "searchProduceHint": "Search vegetables, fruits, farm name...",
+  "directFarmSourcing": "DIRECT FARM SOURCING",
+  "heroBannerTitle": "Fresh Morning Harvest,\nZero Middleman Markup",
+  "heroBannerSubtitle": "Order before 11:00 AM for same-day kitchen delivery.",
+  "browseWholesaleMarket": "Browse Wholesale Market",
+  "categoriesLabel": "CATEGORIES",
+  "trustedFarmersTitle": "Trusted Farmers",
+  "exploreAll": "Explore All",
+  "farmProduce": "Farm Produce",
+  "sort": "Sort",
+  "newestHarvest": "Newest Harvest",
+  "priceLowToHigh": "Price: Low to High",
+  "priceHighToLow": "Price: High to Low",
+  "lowestMoq": "Lowest Minimum Order",
+  "noProduceFound": "No Produce Found",
+  "noProduceFoundSubtitle": "Try adjusting your search keywords, category, or filter chips.",
+  "resetAllFilters": "Reset All Filters",
+  "unableToLoadProduce": "Unable to load market produce",
+  "retry": "Retry",
+  "addedToCart": "Added {product} to cart",
+  "@addedToCart": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
+  "viewCart": "VIEW CART",
+  "failedAddToCart": "Failed to add to cart: {error}",
+  "@failedAddToCart": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "filterOrganicGap": "Organic / GAP",
+  "filterInStock": "In Stock",
+  "filterLowMoq": "Low MOQ (≤10kg)",
+  "filterTopFarmers": "Top Farmers",
+
+  "categoryAll": "All",
+  "categoryVegetables": "Vegetables",
+  "categoryFruits": "Fruits",
+  "categoryHerbsSpices": "Herbs & Spices",
+  "categorySeafood": "Seafood",
+  "categoryMeatPoultry": "Meat & Poultry",
+  "categoryRiceGrains": "Rice & Grains",
+
+  "searchMarketHint": "Search products, farms, or locations...",
+  "filterAndSort": "Filter & Sort Produce",
+  "resetAll": "Reset All",
+  "sortProduceBy": "SORT PRODUCE BY",
+  "relevance": "Relevance",
+  "qualityCertification": "QUALITY & CERTIFICATION",
+  "originProvince": "ORIGIN / PROVINCE",
+  "maxMoqTitle": "MAXIMUM MINIMUM ORDER (MOQ)",
+  "applyFiltersCount": "Apply Filters ({count} Results)",
+  "@applyFiltersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recentSearches": "Recent Searches",
+  "popularSearches": "Popular Searches",
+  "browseCategories": "Browse Categories",
+  "showAll": "Show All",
+  "tabAll": "All",
+  "tabProducts": "Products ({count})",
+  "@tabProducts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tabFarmers": "Farmers ({count})",
+  "@tabFarmers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clearAll": "Clear All",
+  "clear": "Clear",
+
+  "contactFarmer": "Contact Farmer",
+  "sendMessage": "Send Message",
+  "callFarmer": "Call Farmer",
+  "copyPhoneNumber": "Copy Phone Number",
+  "phoneCopiedToClipboard": "Phone number {phone} copied to clipboard!",
+  "@phoneCopiedToClipboard": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "shareFarmerProfile": "Share Farm Profile",
+  "profileLinkCopied": "Farmer profile link copied to clipboard!",
+  "tabAvailableProduce": "Available Produce",
+  "tabAboutFarm": "About Farm & Story",
+  "noProduceAvailable": "No produce available right now",
+  "noPhoneProvided": "No phone number provided yet",
+  "farmStory": "Farm Story",
+  "produceOfferings": "Produce Offerings",
+  "operatedBy": "Operated by {name}",
+  "@operatedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

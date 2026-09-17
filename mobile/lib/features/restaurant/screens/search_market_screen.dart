@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
-import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
+import 'package:mobile/core/search/marketplace_search_bar.dart';
+import 'package:mobile/core/search/marketplace_search_filter.dart';
+import 'package:mobile/core/search/paginated_search_controller.dart';
+import 'package:mobile/core/search/pagination_loading_indicator.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
-import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
@@ -28,12 +30,14 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   static const Color textMuted = Color(0xFF64748B);
 
   // Controllers & Services
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  late final PaginatedSearchController _productSearchController =
+      PaginatedSearchController(limit: 12, autoLoad: false);
   final CartService _cartService = CartService();
   final UserService _userService = UserService();
 
   // State Data
-  List<Map<String, dynamic>> _products = [];
   List<Map<String, dynamic>> _farmers = [];
   Set<String> _favoriteIds = {};
   final List<String> _recentSearches = [];
@@ -86,17 +90,55 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_onSearchChanged);
+    _scrollController.addListener(_onScroll);
+    _productSearchController.addListener(_onProductControllerChanged);
     _loadInitialData();
   }
 
-  void _onSearchChanged() => setState(() {});
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (currentScroll >= maxScroll - 300) {
+      if (_selectedTabIndex != 2) {
+        _productSearchController.loadMore();
+      }
+    }
+  }
+
+  void _onProductControllerChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _productSearchController.removeListener(_onProductControllerChanged);
+    _productSearchController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _applyProductFilters() {
+    String? condition;
+    if (_selectedCondition == 'Organic / GAP') {
+      condition = 'organic';
+    } else if (_selectedCondition == 'Fresh Harvest') {
+      condition = 'fresh';
+    }
+
+    _productSearchController.updateFilter(
+      MarketplaceSearchFilter(
+        searchQuery: _searchController.text.trim(),
+        category: _selectedCategory == 'All' ? null : _selectedCategory,
+        condition: condition,
+        location: _selectedLocation == 'All' ? null : _selectedLocation,
+        maxMoq: _maxMoq,
+        inStockOnly: _onlyAvailable ? true : null,
+        sortBy: _sortBy,
+      ),
+    );
   }
 
   String _getCategoryTitle(String key, AppLocalizations? l10n) {
@@ -148,25 +190,21 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
 
     try {
       final results = await Future.wait([
-        ProductService.getAllProducts(),
         FavoritesService.getFavoriteIds(),
         _userService.getRecommendedFarmers(),
       ]);
 
       if (!mounted) return;
 
-      final productsData = results[0];
-      final favIdsData = results[1] as List<String>;
-      final farmersData = results[2] as List<Map<String, dynamic>>;
+      final favIdsData = results[0] as List<String>;
+      final farmersData = results[1] as List<Map<String, dynamic>>;
 
       setState(() {
-        _products = productsData
-            .map((item) => Map<String, dynamic>.from(item))
-            .toList();
         _favoriteIds = favIdsData.toSet();
         _farmers = farmersData;
         _isLoading = false;
       });
+      _applyProductFilters();
     } catch (e) {
       debugPrint('Load market products error: $e');
       if (!mounted) return;
@@ -174,6 +212,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
         _isLoading = false;
         _errorMessage = e.toString();
       });
+      _applyProductFilters();
     }
   }
 
@@ -181,114 +220,11 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // SEARCH & FILTER LOGIC
   // ==========================================================
 
-  int get _activeFilterCount {
-    int count = 0;
-    if (_sortBy != 'relevance') count++;
-    if (_onlyAvailable) count++;
-    if (_selectedCondition != 'All') count++;
-    if (_selectedLocation != 'All') count++;
-    if (_maxMoq != null) count++;
-    return count;
-  }
+  int get _activeFilterCount =>
+      _productSearchController.filter.activeFilterCount;
 
-  List<Map<String, dynamic>> get _filteredProducts {
-    final query = _searchController.text.trim().toLowerCase();
-    List<Map<String, dynamic>> list = List.from(_products);
-
-    // 1. Category Filter
-    if (_selectedCategory != 'All') {
-      list = list.where((p) {
-        final cat = p['category']?.toString().toLowerCase() ?? '';
-        return cat == _selectedCategory.toLowerCase();
-      }).toList();
-    }
-
-    // 2. Query Filter
-    if (query.isNotEmpty) {
-      list = list.where((p) {
-        final name = p['name']?.toString().toLowerCase() ?? '';
-        final desc = p['description']?.toString().toLowerCase() ?? '';
-        final cat = p['category']?.toString().toLowerCase() ?? '';
-        final loc = p['location']?.toString().toLowerCase() ?? '';
-        final farmer = _getFarmerName(p).toLowerCase();
-
-        return name.contains(query) ||
-            desc.contains(query) ||
-            cat.contains(query) ||
-            loc.contains(query) ||
-            farmer.contains(query);
-      }).toList();
-    }
-
-    // 3. Availability Filter
-    if (_onlyAvailable) {
-      list = list.where((p) {
-        final isAvail = p['isAvailable'] ?? true;
-        final qty = _toNumber(p['quantity']);
-        return isAvail && qty > 0;
-      }).toList();
-    }
-
-    // 4. Condition / Certification Filter
-    if (_selectedCondition == 'Organic / GAP') {
-      list = list.where((p) {
-        final cond = p['condition']?.toString().toLowerCase() ?? '';
-        final name = p['name']?.toString().toLowerCase() ?? '';
-        final desc = p['description']?.toString().toLowerCase() ?? '';
-        return cond.contains('organic') ||
-            cond.contains('gap') ||
-            name.contains('organic') ||
-            desc.contains('organic');
-      }).toList();
-    } else if (_selectedCondition == 'Fresh Harvest') {
-      list = list.where((p) {
-        final cond = p['condition']?.toString().toLowerCase() ?? '';
-        return cond.contains('fresh');
-      }).toList();
-    }
-
-    // 5. Location Filter
-    if (_selectedLocation != 'All') {
-      list = list.where((p) {
-        final loc = p['location']?.toString().toLowerCase() ?? '';
-        return loc.contains(_selectedLocation.toLowerCase());
-      }).toList();
-    }
-
-    // 6. Max MOQ Filter
-    if (_maxMoq != null) {
-      list = list.where((p) {
-        final moq = _toNumber(p['minOrder']);
-        return moq <= _maxMoq!;
-      }).toList();
-    }
-
-    // 7. Sorting
-    switch (_sortBy) {
-      case 'price_low':
-        list.sort((a, b) => _toNumber(a['price']).compareTo(_toNumber(b['price'])));
-        break;
-      case 'price_high':
-        list.sort((a, b) => _toNumber(b['price']).compareTo(_toNumber(a['price'])));
-        break;
-      case 'moq_low':
-        list.sort((a, b) => _toNumber(a['minOrder']).compareTo(_toNumber(b['minOrder'])));
-        break;
-      case 'newest':
-        list.sort((a, b) {
-          final dateA = DateTime.tryParse(a['createdAt']?.toString() ?? '') ?? DateTime(2000);
-          final dateB = DateTime.tryParse(b['createdAt']?.toString() ?? '') ?? DateTime(2000);
-          return dateB.compareTo(dateA);
-        });
-        break;
-      case 'relevance':
-      default:
-        // Default order
-        break;
-    }
-
-    return list;
-  }
+  List<Map<String, dynamic>> get _filteredProducts =>
+      _productSearchController.items;
 
   List<Map<String, dynamic>> get _filteredFarmers {
     final query = _searchController.text.trim().toLowerCase();
@@ -301,7 +237,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
       if (id.isNotEmpty) map[id] = Map<String, dynamic>.from(f);
     }
 
-    for (final p in _products) {
+    for (final p in _productSearchController.items) {
       final pub = p['publisher'];
       final fid = p['farmerId']?.toString() ?? (pub is Map ? pub['id']?.toString() : null);
       if (fid != null && fid.isNotEmpty && !map.containsKey(fid)) {
@@ -359,6 +295,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
       _maxMoq = null;
       _selectedCategory = 'All';
     });
+    _applyProductFilters();
   }
 
   // ==========================================================
@@ -435,6 +372,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
                           _maxMoq = null;
                         });
                         setState(() {});
+                        _applyProductFilters();
                       },
                       child: Text(
                         l10n?.resetAll ?? 'Reset All',
@@ -656,7 +594,10 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pop(sheetContext),
+                    onPressed: () {
+                      Navigator.pop(sheetContext);
+                      _applyProductFilters();
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryGreen,
                       foregroundColor: Colors.white,
@@ -877,6 +818,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
           color: primaryGreen,
           onRefresh: _loadInitialData,
           child: CustomScrollView(
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               // Search Header
@@ -938,6 +880,17 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               // Content Sliver
               _buildContentSliver(l10n),
 
+              // Pagination Loading Indicator
+              if (_selectedTabIndex != 2)
+                SliverToBoxAdapter(
+                  child: PaginationLoadingIndicator(
+                    isLoadingMore: _productSearchController.isLoadingMore,
+                    hasMore: _productSearchController.hasMore,
+                    itemCount: _filteredProducts.length,
+                    onRetry: _productSearchController.loadMore,
+                  ),
+                ),
+
               const SliverToBoxAdapter(child: SizedBox(height: 40)),
             ],
           ),
@@ -951,137 +904,26 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // ==========================================================
 
   Widget _buildSearchBar(AppLocalizations? l10n) {
-    final canPop = context.canPop();
-
-    return Row(
-      children: [
-        if (canPop) ...[
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: const Icon(Icons.arrow_back_rounded, color: textDark, size: 20),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-
-        Expanded(
-          child: Container(
-            height: 46,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.grey.shade200),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.search_rounded, color: primaryGreen, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    onSubmitted: _addRecentSearch,
-                    style: const TextStyle(fontSize: 14, color: textDark),
-                    decoration: InputDecoration(
-                      hintText: l10n?.searchMarketHint ?? 'Search products, farms, or locations...',
-                      hintStyle: const TextStyle(fontSize: 13, color: textMuted),
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ),
-                if (_searchController.text.isNotEmpty)
-                  GestureDetector(
-                    onTap: () {
-                      _searchController.clear();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      child: Icon(Icons.cancel_rounded, color: Colors.grey.shade400, size: 18),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(width: 8),
-
-        const AuthLanguageSwitch(),
-
-        const SizedBox(width: 8),
-
-        // Filter Button with Badge
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            GestureDetector(
-              onTap: _showFilters,
-              child: Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: _activeFilterCount > 0 ? primaryGreen : Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: _activeFilterCount > 0 ? primaryGreen : Colors.grey.shade200,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.tune_rounded,
-                  color: _activeFilterCount > 0 ? Colors.white : primaryGreen,
-                  size: 21,
-                ),
-              ),
-            ),
-            if (_activeFilterCount > 0)
-              Positioned(
-                top: -3,
-                right: -3,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: accentOrange,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                  child: Text(
-                    '$_activeFilterCount',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
+    return MarketplaceSearchBar(
+      controller: _searchController,
+      hintText: l10n?.searchMarketHint ?? 'Search products, farms, or locations...',
+      primaryColor: primaryGreen,
+      showBackButton: context.canPop(),
+      onBackTap: () => context.pop(),
+      showLanguageSwitch: true,
+      showFilterButton: true,
+      activeFilterCount: _activeFilterCount,
+      onFilterTap: _showFilters,
+      onChanged: (val) {
+        _productSearchController.onSearchQueryChanged(val);
+      },
+      onSubmitted: (val) {
+        _addRecentSearch(val);
+        _productSearchController.onSearchQueryChanged(val);
+      },
+      onClear: () {
+        _productSearchController.onSearchQueryChanged('');
+      },
     );
   }
 
@@ -1101,6 +943,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               '${l10n?.categoriesLabel ?? "Category"}: ${_getCategoryTitle(_selectedCategory, l10n)}',
               () {
                 setState(() => _selectedCategory = 'All');
+                _applyProductFilters();
               },
             ),
           if (_sortBy != 'relevance')
@@ -1108,23 +951,28 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               '${l10n?.sort ?? "Sort"}: ${_getSortTitle(_sortBy, l10n)}',
               () {
                 setState(() => _sortBy = 'relevance');
+                _applyProductFilters();
               },
             ),
           if (_onlyAvailable)
             _buildActivePill(l10n?.filterInStock ?? 'In Stock', () {
               setState(() => _onlyAvailable = false);
+              _applyProductFilters();
             }),
           if (_selectedCondition != 'All')
             _buildActivePill(_selectedCondition, () {
               setState(() => _selectedCondition = 'All');
+              _applyProductFilters();
             }),
           if (_selectedLocation != 'All')
             _buildActivePill(_selectedLocation, () {
               setState(() => _selectedLocation = 'All');
+              _applyProductFilters();
             }),
           if (_maxMoq != null)
             _buildActivePill('MOQ ≤ ${_maxMoq!.toInt()}kg', () {
               setState(() => _maxMoq = null);
+              _applyProductFilters();
             }),
           GestureDetector(
             onTap: _clearAllFilters,
@@ -1224,6 +1072,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
             return GestureDetector(
               onTap: () {
                 _searchController.text = search;
+                _applyProductFilters();
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -1269,7 +1118,10 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
           runSpacing: 8,
           children: _popularKeywords.map((kw) {
             return GestureDetector(
-              onTap: () => setState(() => _searchController.text = kw),
+              onTap: () {
+                setState(() => _searchController.text = kw);
+                _applyProductFilters();
+              },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
@@ -1310,7 +1162,10 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
             ),
             if (_selectedCategory != 'All')
               GestureDetector(
-                onTap: () => setState(() => _selectedCategory = 'All'),
+                onTap: () {
+                  setState(() => _selectedCategory = 'All');
+                  _applyProductFilters();
+                },
                 child: Text(
                   l10n?.showAll ?? 'Show All',
                   style: const TextStyle(
@@ -1337,7 +1192,10 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
               final isSelected = _selectedCategory == rawName;
 
               return GestureDetector(
-                onTap: () => setState(() => _selectedCategory = rawName),
+                onTap: () {
+                  setState(() => _selectedCategory = rawName);
+                  _applyProductFilters();
+                },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
@@ -1530,7 +1388,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
   // ==========================================================
 
   Widget _buildContentSliver(AppLocalizations? l10n) {
-    if (_isLoading) {
+    if (_isLoading || (_selectedTabIndex != 2 && _productSearchController.isLoading)) {
       return const SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 60),
@@ -1541,7 +1399,7 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
       );
     }
 
-    if (_errorMessage != null) {
+    if (_errorMessage != null || (_selectedTabIndex != 2 && _productSearchController.error != null)) {
       return SliverToBoxAdapter(
         child: _buildErrorState(l10n),
       );
@@ -2052,13 +1910,19 @@ class _SearchMarketScreenState extends State<SearchMarketScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            _errorMessage ?? '',
+            _productSearchController.error ?? _errorMessage ?? '',
             textAlign: TextAlign.center,
             style: const TextStyle(color: textMuted, fontSize: 12),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: _loadInitialData,
+            onPressed: () {
+              if (_selectedTabIndex != 2 && _productSearchController.error != null) {
+                _productSearchController.loadInitial();
+              } else {
+                _loadInitialData();
+              }
+            },
             style: ElevatedButton.styleFrom(backgroundColor: primaryGreen),
             child: Text(l10n?.retry ?? 'Try Again', style: const TextStyle(color: Colors.white)),
           ),

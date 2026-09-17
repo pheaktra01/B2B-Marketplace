@@ -5,8 +5,9 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile/core/constants/api_constants.dart';
+import 'package:mobile/core/search/marketplace_search_filter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductService {
   // ============================================================
@@ -288,6 +289,83 @@ class ProductService {
     }
 
     return data;
+  }
+
+  // ============================================================
+  // GET PAGINATED PRODUCTS (SEARCH & FILTER)
+  // ============================================================
+
+  static Future<Map<String, dynamic>> getPaginatedProducts({
+    required int page,
+    int limit = 12,
+    MarketplaceSearchFilter? filter,
+    String? farmerId,
+  }) async {
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+
+    if (filter != null) {
+      queryParams.addAll(filter.toQueryParams());
+    }
+
+    if (farmerId != null && farmerId.isNotEmpty) {
+      queryParams['farmerId'] = farmerId;
+    }
+
+    final uri = Uri.parse('${ApiConstants.baseUrl}/products').replace(
+      queryParameters: queryParams,
+    );
+
+    final response = await http.get(uri);
+
+    final dynamic data = response.body.isEmpty ? {} : jsonDecode(response.body);
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        data is Map
+            ? data['message']?.toString() ?? 'Failed to load products'
+            : 'Failed to load products',
+      );
+    }
+
+    // Backend returns { data: [...], total, page, limit, totalPages, hasMore }
+    // If backend returns a raw List (legacy or fallback), wrap it gracefully:
+    if (data is List) {
+      return {
+        'data': data.map((item) => Map<String, dynamic>.from(item)).toList(),
+        'total': data.length,
+        'page': page,
+        'limit': limit,
+        'totalPages': 1,
+        'hasMore': false,
+      };
+    }
+
+    if (data is Map) {
+      final rawList = data['data'] as List? ?? [];
+      final items = rawList
+          .map((item) => Map<String, dynamic>.from(item as Map))
+          .toList();
+      return {
+        'data': items,
+        'total': data['total'] ?? items.length,
+        'page': data['page'] ?? page,
+        'limit': data['limit'] ?? limit,
+        'totalPages': data['totalPages'] ?? 1,
+        'hasMore': data['hasMore'] ?? false,
+      };
+    }
+
+    return {
+      'data': <Map<String, dynamic>>[],
+      'total': 0,
+      'page': page,
+      'limit': limit,
+      'totalPages': 0,
+      'hasMore': false,
+    };
   }
 
   // ============================================================

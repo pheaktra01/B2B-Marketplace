@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UploadedFiles,
   UseGuards,
@@ -27,6 +28,7 @@ import {
 
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { QueryProductDto } from './dto/query-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -41,7 +43,21 @@ export class ProductsController {
   // ============================================================
 
   @Get()
-  async findAll() {
+  async findAll(@Query() query: QueryProductDto) {
+    if (
+      query.page != null ||
+      query.limit != null ||
+      query.search != null ||
+      query.category != null ||
+      query.condition != null ||
+      query.location != null ||
+      query.maxMoq != null ||
+      query.inStockOnly != null ||
+      query.sortBy != null ||
+      query.farmerId != null
+    ) {
+      return this.productsService.findAllPaginated(query);
+    }
     return this.productsService.findAll();
   }
 

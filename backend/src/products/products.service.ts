@@ -4,9 +4,10 @@ import {
 } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { CreateProductDto } from './dto/create-product.dto';
+import { QueryProductDto } from './dto/query-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './enterties/product.entity';
 import { User } from '../users/entities/user.entity';
@@ -99,7 +100,7 @@ export class ProductsService {
   }
 
   // ============================================================
-  // GET ALL
+  // GET ALL (LEGACY LIST)
   // ============================================================
 
   async findAll() {
@@ -109,7 +110,116 @@ export class ProductsService {
       },
     });
 
-    return Promise.all(products.map((product) => this.withPublisher(product)));
+    return this.withPublishers(products);
+  }
+
+  // ============================================================
+  // GET ALL PAGINATED & FILTERED
+  // ============================================================
+
+  async findAllPaginated(query: QueryProductDto) {
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.max(1, Math.min(100, query.limit ?? 10));
+    const skip = (page - 1) * limit;
+
+    const qb = this.productRepo.createQueryBuilder('product');
+
+    // 1. Search Query (name, description, category, location)
+    if (query.search && query.search.trim().length > 0) {
+      const search = `%${query.search.trim().toLowerCase()}%`;
+      qb.andWhere(
+        '(LOWER(product.name) LIKE :search OR LOWER(product.description) LIKE :search OR LOWER(product.category) LIKE :search OR LOWER(product.location) LIKE :search)',
+        { search },
+      );
+    }
+
+    // 2. Category Filter
+    if (query.category && query.category.toLowerCase() !== 'all') {
+      qb.andWhere('LOWER(product.category) = :category', {
+        category: query.category.toLowerCase(),
+      });
+    }
+
+    // 3. Condition / Quality Filter
+    if (query.condition && query.condition.toLowerCase() !== 'all') {
+      const cond = query.condition.toLowerCase();
+      if (cond.includes('organic') || cond.includes('gap')) {
+        qb.andWhere(
+          '(LOWER(product.condition) LIKE :cond OR LOWER(product.name) LIKE :cond OR LOWER(product.description) LIKE :cond)',
+          { cond: '%organic%' },
+        );
+      } else if (cond.includes('fresh')) {
+        qb.andWhere('LOWER(product.condition) LIKE :cond', {
+          cond: '%fresh%',
+        });
+      } else {
+        qb.andWhere('LOWER(product.condition) = :condition', {
+          condition: query.condition.toLowerCase(),
+        });
+      }
+    }
+
+    // 4. Location Filter
+    if (query.location && query.location.toLowerCase() !== 'all') {
+      qb.andWhere('LOWER(product.location) LIKE :location', {
+        location: `%${query.location.toLowerCase()}%`,
+      });
+    }
+
+    // 5. In Stock Only
+    if (query.inStockOnly === true || `${query.inStockOnly}` === 'true') {
+      qb.andWhere('product.isAvailable = true AND product.quantity > 0');
+    }
+
+    // 6. Max MOQ Filter
+    if (query.maxMoq != null && query.maxMoq > 0) {
+      qb.andWhere('product.minOrder <= :maxMoq', { maxMoq: query.maxMoq });
+    }
+
+    // 7. Specific Farmer Filter
+    if (query.farmerId) {
+      qb.andWhere('product.farmerId = :farmerId', {
+        farmerId: query.farmerId,
+      });
+    }
+
+    // 8. Sorting
+    switch (query.sortBy) {
+      case 'price_low':
+        qb.orderBy('product.price', 'ASC');
+        break;
+      case 'price_high':
+        qb.orderBy('product.price', 'DESC');
+        break;
+      case 'moq_low':
+        qb.orderBy('product.minOrder', 'ASC');
+        break;
+      case 'newest':
+        qb.orderBy('product.createdAt', 'DESC');
+        break;
+      case 'relevance':
+      default:
+        qb.orderBy('product.createdAt', 'DESC');
+        break;
+    }
+
+    const [items, total] = await qb
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    const data = await this.withPublishers(items);
+    const totalPages = Math.ceil(total / limit);
+    const hasMore = page < totalPages;
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasMore,
+    };
   }
 
   // ============================================================
@@ -128,7 +238,7 @@ export class ProductsService {
       },
     });
 
-    return Promise.all(products.map((product) => this.withPublisher(product)));
+    return this.withPublishers(products);
   }
 
   // ============================================================
@@ -150,6 +260,44 @@ export class ProductsService {
     }
 
     return this.withPublisher(product);
+  }
+
+  private async withPublishers(products: Product[]) {
+    if (products.length === 0) return [];
+
+    const farmerIds = Array.from(
+      new Set(products.map((p) => p.farmerId).filter(Boolean)),
+    );
+
+    const publishers =
+      farmerIds.length > 0
+        ? await this.userRepo.find({
+            where: { id: In(farmerIds) },
+            select: {
+              id: true,
+              name: true,
+              role: true,
+              avatarUrl: true,
+            },
+          })
+        : [];
+
+    const publisherMap = new Map(publishers.map((u) => [u.id, u]));
+
+    return products.map((product) => {
+      const publisher = publisherMap.get(product.farmerId);
+      return {
+        ...product,
+        publisher: publisher
+          ? {
+              id: publisher.id,
+              name: publisher.name,
+              role: publisher.role,
+              avatarUrl: publisher.avatarUrl,
+            }
+          : null,
+      };
+    });
   }
 
   private async withPublisher(product: Product) {

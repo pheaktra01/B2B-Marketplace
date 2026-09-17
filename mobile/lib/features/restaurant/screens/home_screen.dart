@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/core/search/marketplace_search_bar.dart';
+import 'package:mobile/core/search/marketplace_search_filter.dart';
+import 'package:mobile/core/search/paginated_search_controller.dart';
+import 'package:mobile/core/search/pagination_loading_indicator.dart';
 import 'package:mobile/features/auth/widgets/auth_language_switch.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
 import 'package:mobile/features/product/screens/product_card.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
-import 'package:mobile/features/product/services/product_service.dart';
 import 'package:mobile/features/profile/services/user_service.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
@@ -28,17 +31,17 @@ class _HomeScreenState extends State<HomeScreen> {
   static const Color textMuted = Color(0xFF64748B);
 
   // Controllers & Services
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  late final PaginatedSearchController _productSearchController =
+      PaginatedSearchController(limit: 12, autoLoad: false);
   final CartService _cartService = CartService();
   final UserService _userService = UserService();
   final NotificationService _notificationService = NotificationService();
 
   // State Data
-  bool _isLoading = true;
-  String? _errorMessage;
   String? _addingProductId;
 
-  List<Map<String, dynamic>> _products = [];
   List<Map<String, dynamic>> _recommendedFarmers = [];
   Set<String> _favoriteIds = {};
 
@@ -51,7 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
   // Filters & Layout State
   int _selectedCategoryIndex = 0;
   String _activeQuickFilter = 'All';
-  String _searchQuery = '';
   String _sortBy = 'newest';
   bool _isGridView = true;
 
@@ -112,21 +114,60 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_onSearchChanged);
+    _scrollController.addListener(_onScroll);
+    _productSearchController.addListener(_onProductControllerChanged);
     _loadAllHomeData();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (currentScroll >= maxScroll - 300) {
+      _productSearchController.loadMore();
+    }
+  }
+
+  void _onProductControllerChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _productSearchController.removeListener(_onProductControllerChanged);
+    _productSearchController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    setState(() {
-      _searchQuery = _searchController.text.trim();
-    });
+  void _applyProductFilters() {
+    String? condition;
+    bool? inStockOnly;
+    double? maxMoq;
+
+    if (_activeQuickFilter == 'Organic / GAP') {
+      condition = 'organic';
+    } else if (_activeQuickFilter == 'In Stock') {
+      inStockOnly = true;
+    } else if (_activeQuickFilter == 'Low MOQ (≤10kg)') {
+      maxMoq = 10;
+    }
+
+    final categoryName = _categories[_selectedCategoryIndex]['name'].toString();
+    final category = categoryName == 'All' ? null : categoryName;
+
+    _productSearchController.updateFilter(
+      MarketplaceSearchFilter(
+        searchQuery: _searchController.text.trim(),
+        category: category,
+        condition: condition,
+        inStockOnly: inStockOnly,
+        maxMoq: maxMoq,
+        sortBy: _sortBy,
+      ),
+    );
   }
 
   // ==========================================================
@@ -202,127 +243,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadProducts() async {
     try {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
-
-      final products = await ProductService.getAllProducts();
       final favIds = await FavoritesService.getFavoriteIds();
-
-      if (!mounted) return;
-
-      setState(() {
-        _products = products
-            .map((product) => Map<String, dynamic>.from(product))
-            .toList();
-        _favoriteIds = favIds.toSet();
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _favoriteIds = favIds.toSet();
+        });
+      }
     } catch (e) {
-      debugPrint('Failed to load products: $e');
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _errorMessage = e.toString();
-      });
+      debugPrint('Failed to load favorites: $e');
     }
+    _applyProductFilters();
   }
 
   // ==========================================================
-  // FILTERING & SORTING LOGIC
+  // FILTERING & PRODUCTS ACCESSOR
   // ==========================================================
 
   List<Map<String, dynamic>> get _filteredProducts {
-    List<Map<String, dynamic>> list = List.from(_products);
+    final list = _productSearchController.items;
 
-    // 1. Category Filter
-    final selectedCategory =
-        _categories[_selectedCategoryIndex]['name'].toString();
-    if (selectedCategory != 'All') {
-      list = list.where((product) {
-        final category = product['category']?.toString().toLowerCase() ?? '';
-        return category == selectedCategory.toLowerCase();
-      }).toList();
-    }
-
-    // 2. Search Query Filter
-    if (_searchQuery.isNotEmpty) {
-      final query = _searchQuery.toLowerCase();
-      list = list.where((product) {
-        final name = product['name']?.toString().toLowerCase() ?? '';
-        final farm = _getFarmerName(product).toLowerCase();
-        final loc = product['location']?.toString().toLowerCase() ?? '';
-        final desc = product['description']?.toString().toLowerCase() ?? '';
-        final cat = product['category']?.toString().toLowerCase() ?? '';
-
-        return name.contains(query) ||
-            farm.contains(query) ||
-            loc.contains(query) ||
-            desc.contains(query) ||
-            cat.contains(query);
-      }).toList();
-    }
-
-    // 3. Quick Filter Chip
-    if (_activeQuickFilter == 'Organic / GAP') {
-      list = list.where((product) {
-        final cond = product['condition']?.toString().toLowerCase() ?? '';
-        final name = product['name']?.toString().toLowerCase() ?? '';
-        final desc = product['description']?.toString().toLowerCase() ?? '';
-        return cond.contains('organic') ||
-            cond.contains('gap') ||
-            name.contains('organic') ||
-            desc.contains('organic');
-      }).toList();
-    } else if (_activeQuickFilter == 'In Stock') {
-      list = list.where((product) {
-        final isAvail = product['isAvailable'] ?? true;
-        final qty = _toDouble(product['quantity']);
-        return isAvail && qty > 0;
-      }).toList();
-    } else if (_activeQuickFilter == 'Low MOQ (≤10kg)') {
-      list = list.where((product) {
-        final minOrder = _toDouble(product['minOrder']);
-        return minOrder <= 10;
-      }).toList();
-    } else if (_activeQuickFilter == 'Top Farmers') {
+    if (_activeQuickFilter == 'Top Farmers') {
       final recommendedFarmerIds = _recommendedFarmers
           .map((f) => f['id']?.toString())
           .whereType<String>()
           .toSet();
 
-      list = list.where((product) {
+      return list.where((product) {
         final farmerId = product['farmerId']?.toString() ??
             product['publisher']?['id']?.toString();
         return farmerId != null && recommendedFarmerIds.contains(farmerId);
       }).toList();
-    }
-
-    // 4. Sorting
-    switch (_sortBy) {
-      case 'price_asc':
-        list.sort((a, b) =>
-            _toDouble(a['price']).compareTo(_toDouble(b['price'])));
-        break;
-      case 'price_desc':
-        list.sort((a, b) =>
-            _toDouble(b['price']).compareTo(_toDouble(a['price'])));
-        break;
-      case 'moq_asc':
-        list.sort((a, b) =>
-            _toDouble(a['minOrder']).compareTo(_toDouble(b['minOrder'])));
-        break;
-      case 'newest':
-      default:
-        list.sort((a, b) {
-          final dateA = DateTime.tryParse(a['createdAt']?.toString() ?? '') ??
-              DateTime(2000);
-          final dateB = DateTime.tryParse(b['createdAt']?.toString() ?? '') ??
-              DateTime(2000);
-          return dateB.compareTo(dateA);
-        });
-        break;
     }
 
     return list;
@@ -488,6 +438,7 @@ class _HomeScreenState extends State<HomeScreen> {
           color: primaryColor,
           onRefresh: _loadAllHomeData,
           child: CustomScrollView(
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               // 1. Top Custom App Bar / Buyer Header
@@ -539,6 +490,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // 8. Products Feed (Grid or List)
               _buildProductFeedSliver(l10n),
+
+              // 9. Pagination Loading Indicator
+              SliverToBoxAdapter(
+                child: PaginationLoadingIndicator(
+                  isLoadingMore: _productSearchController.isLoadingMore,
+                  hasMore: _productSearchController.hasMore,
+                  itemCount: _filteredProducts.length,
+                  onRetry: _productSearchController.loadMore,
+                ),
+              ),
 
               // Bottom Padding
               const SliverToBoxAdapter(
@@ -793,60 +754,22 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSearchBar(AppLocalizations? l10n) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 14, right: 10),
-            child: Icon(Icons.search_rounded, color: primaryColor, size: 22),
-          ),
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              style: const TextStyle(fontSize: 14, color: textDark),
-              decoration: InputDecoration(
-                hintText: l10n?.searchProduceHint ??
-                    'Search vegetables, fruits, farm name...',
-                hintStyle: const TextStyle(color: textMuted, fontSize: 14),
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-          if (_searchQuery.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.close_rounded, size: 18, color: textMuted),
-              onPressed: () {
-                _searchController.clear();
-              },
-            ),
-          Container(
-            height: 24,
-            width: 1,
-            color: Colors.grey.shade300,
-          ),
-          IconButton(
-            icon: const Icon(Icons.tune_rounded, color: primaryColor, size: 20),
-            onPressed: () {
-              context.push(AppRoutes.restaurantSearch);
-            },
-            tooltip: 'Advanced Search & Filter',
-          ),
-        ],
-      ),
+    return MarketplaceSearchBar(
+      controller: _searchController,
+      hintText: l10n?.searchProduceHint ??
+          'Search vegetables, fruits, farm name...',
+      primaryColor: primaryColor,
+      showFilterButton: true,
+      activeFilterCount: _productSearchController.filter.activeFilterCount,
+      onChanged: (text) {
+        _productSearchController.onSearchQueryChanged(text);
+      },
+      onClear: () {
+        _productSearchController.onSearchQueryChanged('');
+      },
+      onFilterTap: () {
+        context.push(AppRoutes.restaurantSearch);
+      },
     );
   }
 
@@ -1002,6 +925,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   setState(() {
                     _selectedCategoryIndex = index;
                   });
+                  _applyProductFilters();
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
@@ -1074,6 +998,7 @@ class _HomeScreenState extends State<HomeScreen> {
               setState(() {
                 _activeQuickFilter = name;
               });
+              _applyProductFilters();
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -1348,6 +1273,7 @@ class _HomeScreenState extends State<HomeScreen> {
               tooltip: l10n?.sort ?? 'Sort',
               onSelected: (val) {
                 setState(() => _sortBy = val);
+                _applyProductFilters();
               },
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
@@ -1475,7 +1401,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProductFeedSliver(AppLocalizations? l10n) {
-    if (_isLoading) {
+    if (_productSearchController.isLoading) {
       return const SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 60),
@@ -1486,7 +1412,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    if (_errorMessage != null) {
+    if (_productSearchController.error != null) {
       return SliverToBoxAdapter(
         child: _buildErrorState(l10n),
       );
@@ -1891,6 +1817,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 _selectedCategoryIndex = 0;
                 _activeQuickFilter = 'All';
               });
+              _applyProductFilters();
             },
             icon: const Icon(Icons.refresh_rounded, size: 16),
             label: Text(l10n?.resetAllFilters ?? 'Reset All Filters'),
@@ -1922,13 +1849,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            _errorMessage ?? '',
+            _productSearchController.error ?? '',
             textAlign: TextAlign.center,
             style: const TextStyle(color: textMuted, fontSize: 12),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: _loadAllHomeData,
+            onPressed: () => _productSearchController.loadInitial(),
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,
               foregroundColor: Colors.white,

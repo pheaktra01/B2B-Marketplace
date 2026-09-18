@@ -201,15 +201,67 @@ export class ProductsController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FilesInterceptor('images', 5, {
+      storage: diskStorage({
+        destination: join(
+          process.cwd(),
+          'uploads',
+          'products',
+        ),
+
+        filename: (
+          req,
+          file,
+          callback,
+        ) => {
+          const uniqueName =
+            `${Date.now()}-${Math.round(Math.random() * 1e9)}${extname(file.originalname)}`;
+
+          callback(
+            null,
+            uniqueName,
+          );
+        },
+      }),
+
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+
+      fileFilter: (
+        req,
+        file,
+        callback,
+      ) => {
+        if (
+          !file.mimetype.startsWith(
+            'image/',
+          )
+        ) {
+          return callback(
+            new Error(
+              'Only image files are allowed',
+            ),
+            false,
+          );
+        }
+
+        callback(null, true);
+      },
+    }),
+  )
   async update(
     @Param('id') id: string,
     @Req() req: any,
+    @UploadedFiles() files: Express.Multer.File[],
     @Body() dto: UpdateProductDto,
   ) {
     return this.productsService.update(
       id,
       req.user.id,
       dto,
+      files,
     );
   }
 

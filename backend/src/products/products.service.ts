@@ -332,6 +332,7 @@ export class ProductsService {
     id: string,
     farmerId: string,
     dto: UpdateProductDto,
+    files?: Express.Multer.File[],
   ) {
     const product =
       await this.productRepo.findOne({
@@ -347,7 +348,8 @@ export class ProductsService {
       );
     }
 
-    Object.assign(product, dto);
+    const { existingImages, ...fieldsToUpdate } = dto as any;
+    Object.assign(product, fieldsToUpdate);
 
     if (dto.harvestDate) {
       product.harvestDate =
@@ -357,6 +359,33 @@ export class ProductsService {
     if (dto.availableUntil) {
       product.availableUntil =
         new Date(dto.availableUntil);
+    }
+
+    // Handle image updates
+    if ((files && files.length > 0) || existingImages !== undefined) {
+      let preservedImages: string[] = [];
+      if (existingImages) {
+        if (Array.isArray(existingImages)) {
+          preservedImages = existingImages.map((img) => img.toString());
+        } else if (typeof existingImages === 'string') {
+          try {
+            const parsed = JSON.parse(existingImages);
+            if (Array.isArray(parsed)) {
+              preservedImages = parsed.map((img) => img.toString());
+            } else if (parsed) {
+              preservedImages = [parsed.toString()];
+            }
+          } catch {
+            preservedImages = [existingImages];
+          }
+        }
+      }
+
+      const newUploadedUrls = (files ?? []).map(
+        (file) => `/uploads/products/${file.filename}`,
+      );
+
+      product.imageUrls = [...preservedImages, ...newUploadedUrls];
     }
 
     const saved = await this.productRepo.save(product);

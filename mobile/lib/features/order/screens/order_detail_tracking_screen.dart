@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
 import 'package:mobile/features/order/models/order_model.dart';
@@ -662,16 +663,33 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
               child: Row(
                 children: [
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
                       color: primaryGreen.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.grey.shade200,
+                        width: 0.8,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.eco_outlined,
-                      color: primaryGreen,
-                      size: 20,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                          ? Image.network(
+                              ApiConstants.imageUrl(item.imageUrl!),
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => const Icon(
+                                Icons.eco_outlined,
+                                color: primaryGreen,
+                                size: 22,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.eco_outlined,
+                              color: primaryGreen,
+                              size: 22,
+                            ),
                     ),
                   ),
                   const SizedBox(width: 10),

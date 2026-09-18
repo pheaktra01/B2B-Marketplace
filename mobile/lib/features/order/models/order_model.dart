@@ -151,6 +151,7 @@ class OrderItemModel {
   final double quantity;
   final double unitPrice;
   final double subtotal;
+  final String? imageUrl;
 
   const OrderItemModel({
     this.productId,
@@ -158,15 +159,32 @@ class OrderItemModel {
     required this.quantity,
     this.unitPrice = 0,
     required this.subtotal,
+    this.imageUrl,
   });
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
+    String? img = json['imageUrl']?.toString() ?? json['image_url']?.toString();
+    if (img == null || img.isEmpty) {
+      if (json['imageUrls'] is List && (json['imageUrls'] as List).isNotEmpty) {
+        img = (json['imageUrls'] as List).first.toString();
+      } else if (json['product'] is Map) {
+        final p = json['product'] as Map<String, dynamic>;
+        img = p['imageUrl']?.toString() ?? p['image_url']?.toString();
+        if (img == null || img.isEmpty) {
+          if (p['imageUrls'] is List && (p['imageUrls'] as List).isNotEmpty) {
+            img = (p['imageUrls'] as List).first.toString();
+          }
+        }
+      }
+    }
+
     return OrderItemModel(
       productId: json['productId']?.toString(),
       productName: json['productName']?.toString() ?? 'Product',
       quantity: OrderModel._toDouble(json['quantity']),
       unitPrice: OrderModel._toDouble(json['unitPrice']),
       subtotal: OrderModel._toDouble(json['subtotal']),
+      imageUrl: img,
     );
   }
 }

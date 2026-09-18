@@ -65,4 +65,11 @@ export class OrderItem {
     scale: 2,
   })
   subtotal: number;
+
+  @Column({
+    name: 'image_url',
+    type: 'text',
+    nullable: true,
+  })
+  imageUrl: string | null;
 }

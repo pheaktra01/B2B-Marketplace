@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import {
   DataSource,
+  In,
   Repository,
 } from 'typeorm';
 
@@ -318,6 +319,11 @@ export class OrderService {
 
                   subtotal:
                     itemSubtotal,
+
+                  imageUrl:
+                    product.imageUrls && product.imageUrls.length > 0
+                      ? product.imageUrls[0]
+                      : null,
                 },
               );
 
@@ -549,15 +555,17 @@ export class OrderService {
         },
       });
 
-    return orders;
+    return this.withProductImages(orders);
   }
 
   async getFarmerOrders(farmerId: string) {
-    return this.orderRepository.find({
+    const orders = await this.orderRepository.find({
       where: { farmerId },
       relations: { items: true },
       order: { createdAt: 'DESC' },
     });
+
+    return this.withProductImages(orders);
   }
 
   async updateOrderStatus(
@@ -718,6 +726,60 @@ export class OrderService {
       );
     }
 
-    return order;
+    const [enriched] = await this.withProductImages([order]);
+    return enriched;
+  }
+
+  // ==========================================
+  // ENRICH ORDER ITEMS WITH PRODUCT IMAGES
+  // ==========================================
+
+  private async withProductImages(orders: Order[]): Promise<Order[]> {
+    if (!orders || orders.length === 0) return orders;
+
+    // Collect product IDs from items where imageUrl is not set
+    const missingProductIds = new Set<string>();
+    for (const order of orders) {
+      if (order.items) {
+        for (const item of order.items) {
+          if (item.productId && !item.imageUrl) {
+            missingProductIds.add(item.productId);
+          }
+        }
+      }
+    }
+
+    let productMap = new Map<string, Product>();
+    if (missingProductIds.size > 0) {
+      try {
+        const products = await this.productRepository.find({
+          where: { id: In(Array.from(missingProductIds)) },
+          select: { id: true, name: true, imageUrls: true },
+        });
+        productMap = new Map(products.map((p) => [p.id, p]));
+      } catch (e) {
+        console.error('Failed to load product images for orders:', e);
+      }
+    }
+
+    return orders.map((order) => {
+      if (!order.items) return order;
+      const updatedItems = order.items.map((item) => {
+        if (item.imageUrl) return item;
+        const prod = productMap.get(item.productId);
+        const img =
+          prod?.imageUrls && prod.imageUrls.length > 0
+            ? prod.imageUrls[0]
+            : null;
+        return {
+          ...item,
+          imageUrl: img,
+        };
+      });
+      return {
+        ...order,
+        items: updatedItems,
+      } as Order;
+    });
   }
 }

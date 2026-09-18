@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -10,8 +11,13 @@ import {
   Query,
   Req,
   DefaultValuePipe,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 import { ChatService } from './chat.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
@@ -25,6 +31,52 @@ export class ChatController {
   constructor(
     private readonly chatService: ChatService,
   ) {}
+
+  // =========================================================
+  // ATTACHMENT UPLOAD
+  // =========================================================
+
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/chat',
+        filename: (req, file, callback) => {
+          const uniqueName = `${Date.now()}-${Math.round(
+            Math.random() * 1e9,
+          )}${extname(file.originalname)}`;
+          callback(null, uniqueName);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        if (!file.mimetype.startsWith('image/')) {
+          return callback(
+            new BadRequestException(
+              `Only image files are allowed. Received: ${file.mimetype}`,
+            ),
+            false,
+          );
+        }
+        callback(null, true);
+      },
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB
+      },
+    }),
+  )
+  uploadAttachment(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+    const relativePath = `/uploads/chat/${file.filename}`;
+    return {
+      url: relativePath,
+      filename: file.filename,
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+    };
+  }
 
   // =========================================================
   // CONVERSATIONS

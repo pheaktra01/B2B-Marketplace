@@ -43,7 +43,7 @@ async function bootstrap() {
     'uploads',
   );
 
-  ['', 'products', 'avatar', 'cover'].forEach((sub) => {
+  ['', 'products', 'avatar', 'cover', 'chat'].forEach((sub) => {
     const dir = join(uploadsPath, sub);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });

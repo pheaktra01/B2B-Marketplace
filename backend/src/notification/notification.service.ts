@@ -313,6 +313,10 @@ export class NotificationService {
       type = NotificationType.CHAT_IMAGE;
       title = senderName;
       message = `${senderName} sent you a photo.`;
+    } else if (messageType === 'product') {
+      type = NotificationType.MESSAGE;
+      title = senderName;
+      message = `${senderName} shared a product with you.`;
     } else if (orderId || messageType === 'order') {
       type = NotificationType.CHAT_ORDER;
       title = senderName;

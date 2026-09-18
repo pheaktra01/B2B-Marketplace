@@ -47,20 +47,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   List<Map<String, dynamic>> _relatedProducts = [];
 
+  late Map<String, dynamic> _product;
+  bool _isLoadingProduct = false;
+
   // ==========================================================
   // GETTERS & DATA PARSING
   // ==========================================================
 
   String get _productId {
-    return widget.product['id']?.toString() ?? '';
+    return _product['id']?.toString() ?? '';
   }
 
   String get _productName {
-    return widget.product['name']?.toString() ?? 'Unnamed Product';
+    return _product['name']?.toString() ??
+        _product['title']?.toString() ??
+        'Unnamed Product';
   }
 
   String get _description {
-    final value = widget.product['description']?.toString();
+    final value = _product['description']?.toString();
     if (value == null || value.trim().isEmpty) {
       return 'Fresh high-quality agricultural produce grown and harvested directly by local farmers with sustainable practices.';
     }
@@ -68,75 +73,75 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   String get _category {
-    return widget.product['category']?.toString() ?? '';
+    return _product['category']?.toString() ?? '';
   }
 
   String get _condition {
-    return widget.product['condition']?.toString() ?? 'Fresh';
+    return _product['condition']?.toString() ?? 'Fresh';
   }
 
   String get _farmName {
-    final publisher = widget.product['publisher'];
+    final publisher = _product['publisher'];
     if (publisher is Map && publisher['name'] != null) {
       return publisher['name'].toString();
     }
-    return widget.product['farmerName']?.toString() ??
-        widget.product['farmName']?.toString() ??
-        widget.product['farmer']?['name']?.toString() ??
+    return _product['farmerName']?.toString() ??
+        _product['farmName']?.toString() ??
+        _product['farmer']?['name']?.toString() ??
         'Local Farm';
   }
 
   String get _location {
-    return widget.product['location']?.toString() ?? 'Cambodia';
+    return _product['location']?.toString() ?? 'Cambodia';
   }
 
   String get _deliveryMethod {
-    return widget.product['deliveryMethod']?.toString() ?? 'Farmer Delivery';
+    return _product['deliveryMethod']?.toString() ?? 'Farmer Delivery';
   }
 
   double get _pricePerKg {
-    final value = widget.product['price'];
+    final value = _product['price'];
     if (value is num) return value.toDouble();
     return double.tryParse(value?.toString() ?? '') ?? 0.0;
   }
 
   double get _availableQuantity {
-    final value = widget.product['quantity'];
+    final value = _product['quantity'];
     if (value is num) return value.toDouble();
     return double.tryParse(value?.toString() ?? '') ?? 0.0;
   }
 
   double get _minOrder {
-    final value = widget.product['minOrder'];
+    final value = _product['minOrder'];
     if (value is num) return value.toDouble();
     final parsed = double.tryParse(value?.toString() ?? '');
     return (parsed != null && parsed > 0) ? parsed : 1.0;
   }
 
   double get _deliveryFee {
-    final value = widget.product['deliveryFee'];
+    final value = _product['deliveryFee'];
     if (value is num) return value.toDouble();
     return double.tryParse(value?.toString() ?? '') ?? 0.0;
   }
 
   bool get _isAvailable {
-    final value = widget.product['isAvailable'];
+    final value = _product['isAvailable'];
     if (value is bool) return value;
     return _availableQuantity > 0;
   }
 
   String? get _farmerId {
-    final value = widget.product['farmerId'];
+    final value = _product['farmerId'];
     if (value != null && value.toString().isNotEmpty) return value.toString();
-    final publisher = widget.product['publisher'];
+    final publisher = _product['publisher'];
     if (publisher is Map && publisher['id'] != null) {
       return publisher['id'].toString();
     }
-    final farmer = widget.product['farmer'];
+    final farmer = _product['farmer'];
     if (farmer is Map && farmer['id'] != null) {
       return farmer['id'].toString();
     }
-    final pubId = widget.product['publisherId'];
+    final pubId = _product['publisherId'];
     if (pubId != null && pubId.toString().isNotEmpty) {
       return pubId.toString();
     }
@@ -151,15 +156,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   String get _harvestDate {
-    return _formatDate(widget.product['harvestDate']);
+    return _formatDate(_product['harvestDate']);
   }
 
   String get _availableUntil {
-    return _formatDate(widget.product['availableUntil']);
+    return _formatDate(_product['availableUntil']);
   }
 
   List<String> get _productImages {
-    final images = widget.product['imageUrls'];
+    final images = _product['imageUrls'];
     if (images is List && images.isNotEmpty) {
       return images
           .map((img) => img.toString().trim())
@@ -167,7 +172,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           .map((img) => ApiConstants.imageUrl(img))
           .toList();
     }
-    final single = widget.product['imageUrl']?.toString().trim();
+    final single = _product['imageUrl']?.toString().trim();
     if (single != null && single.isNotEmpty) {
       return [ApiConstants.imageUrl(single)];
     }
@@ -181,11 +186,40 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   void initState() {
     super.initState();
+    _product = Map<String, dynamic>.from(widget.product);
     _orderQuantity = _minOrder > 0 ? _minOrder : 1.0;
     _checkFavoriteStatus();
     _checkIfProductIsInCart();
     _loadPublisherProfile();
     _loadRelatedProducts();
+    _fetchProductDetails();
+  }
+
+  Future<void> _fetchProductDetails() async {
+    final id = _productId;
+    if (id.isEmpty) return;
+    try {
+      if (_productImages.isEmpty || _product['price'] == null || _product['quantity'] == null) {
+        if (mounted) setState(() => _isLoadingProduct = true);
+      }
+      final fetched = await ProductService.getProduct(id);
+      if (!mounted) return;
+      setState(() {
+        _product = {
+          ..._product,
+          ...fetched,
+        };
+        _isLoadingProduct = false;
+        _orderQuantity = _minOrder > 0 ? _minOrder : 1.0;
+      });
+      _checkFavoriteStatus();
+      _checkIfProductIsInCart();
+      _loadPublisherProfile();
+      _loadRelatedProducts();
+    } catch (e) {
+      debugPrint('Failed to refresh product details: $e');
+      if (mounted) setState(() => _isLoadingProduct = false);
+    }
   }
 
   @override
@@ -214,7 +248,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Future<void> _loadPublisherProfile() async {
-    final publisher = widget.product['publisher'];
+    final publisher = _product['publisher'];
     if (publisher is Map) {
       final avatar = publisher['avatarUrl']?.toString();
       if (mounted) {
@@ -687,10 +721,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: images.isEmpty
-                    ? const Center(
-                        child: Icon(Icons.eco_outlined,
-                            size: 64, color: primaryGreen),
-                      )
+                    ? (_isLoadingProduct
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              color: primaryGreen,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                        : const Center(
+                            child: Icon(Icons.eco_outlined,
+                                size: 64, color: primaryGreen),
+                          ))
                     : PageView.builder(
                         controller: _pageController,
                         itemCount: images.length,

@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import '../../../core/constants/api_constants.dart';
 
 class ChatService {
@@ -286,6 +288,41 @@ class ChatService {
     }
 
     return jsonDecode(response.body);
+  }
+
+  // Upload chat image
+  Future<String> uploadChatImage(Uint8List bytes, String filename) async {
+    final token = await _getToken();
+    final uri = Uri.parse('$baseUrl/chat/upload');
+    final request = http.MultipartRequest('POST', uri);
+    if (token != null && token.isNotEmpty) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    final mimeType = lookupMimeType(filename) ?? 'image/jpeg';
+    final mimeParts = mimeType.split('/');
+
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'file',
+        bytes,
+        filename: filename,
+        contentType: MediaType(
+          mimeParts[0],
+          mimeParts.length > 1 ? mimeParts[1] : 'jpeg',
+        ),
+      ),
+    );
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Failed to upload image: ${response.body}');
+    }
+
+    final data = jsonDecode(response.body);
+    return data['url']?.toString() ?? '';
   }
 
   // Mark conversation as read

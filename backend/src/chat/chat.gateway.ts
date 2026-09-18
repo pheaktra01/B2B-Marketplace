@@ -231,6 +231,31 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .emit('conversation_deleted', payload);
   }
 
+  @OnEvent('chat.message.deleted')
+  async handleMessageDeleted(payload: {
+    conversationId: string;
+    messageId: string;
+    deletedBy: string;
+  }) {
+    this.server
+      .to(this.room(payload.conversationId))
+      .emit('message_deleted', payload);
+
+    const participants = await this.participantRepository.find({
+      where: { conversationId: payload.conversationId },
+    });
+    for (const participant of participants) {
+      this.server
+        .to(this.userRoom(participant.userId))
+        .emit('message_deleted', payload);
+      this.server
+        .to(this.userRoom(participant.userId))
+        .emit('conversation_updated', {
+          conversationId: payload.conversationId,
+        });
+    }
+  }
+
   @OnEvent('notification.created')
   handleNotificationCreated(notification: Record<string, unknown>) {
     const userId = notification.userId?.toString();

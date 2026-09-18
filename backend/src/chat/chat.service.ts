@@ -21,6 +21,8 @@ import { User } from '../users/entities/user.entity';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationType } from 'src/notification/entities/notification.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import * as fs from 'fs';
+import { join } from 'path';
 import { OnlinePresenceService } from './online-presence.service';
 
 @Injectable()
@@ -488,6 +490,57 @@ export class ChatService {
 
     return {
       success: true,
+    };
+  }
+
+  // =========================================================
+  // DELETE MESSAGE
+  // =========================================================
+
+  async deleteMessage(
+    messageId: string,
+    currentUserId: string,
+  ) {
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId },
+    });
+
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+
+    await this.ensureParticipant(message.conversationId, currentUserId);
+
+    if (message.senderId !== currentUserId) {
+      throw new ForbiddenException('You can only delete your own messages');
+    }
+
+    const conversationId = message.conversationId;
+
+    // If it was an image message, clean up local file if exists
+    if (message.messageType === MessageType.IMAGE && message.content) {
+      try {
+        const filePath = join(process.cwd(), message.content.replace(/^\//, ''));
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch {
+        // Ignored
+      }
+    }
+
+    await this.messageRepository.delete(messageId);
+
+    this.eventEmitter.emit('chat.message.deleted', {
+      conversationId,
+      messageId,
+      deletedBy: currentUserId,
+    });
+
+    return {
+      success: true,
+      messageId,
+      conversationId,
     };
   }
 

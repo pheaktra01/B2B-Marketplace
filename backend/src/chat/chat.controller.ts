@@ -181,4 +181,26 @@ export class ChatController {
       req.user.id,
     );
   }
+
+  @Delete('messages/:messageId')
+  async deleteMessage(
+    @Req() req: any,
+    @Param('messageId') messageId: string,
+  ) {
+    return this.chatService.deleteMessage(
+      messageId,
+      req.user.id,
+    );
+  }
+
+  @Delete('conversations/:conversationId/messages/:messageId')
+  async deleteConversationMessage(
+    @Req() req: any,
+    @Param('messageId') messageId: string,
+  ) {
+    return this.chatService.deleteMessage(
+      messageId,
+      req.user.id,
+    );
+  }
 }

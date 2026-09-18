@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
+import 'package:mobile/features/chat/models/conversation_model.dart';
 
 class ConversationCard extends StatelessWidget {
   final String conversationId;
@@ -134,7 +135,7 @@ class ConversationCard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              message,
+                              Conversation.formatPreview(null, message),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(

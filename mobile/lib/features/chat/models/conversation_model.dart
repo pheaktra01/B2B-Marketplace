@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:mobile/core/constants/api_constants.dart';
 
 class Conversation {
@@ -35,12 +36,9 @@ class Conversation {
 
     String previewMessage = 'No messages yet';
     if (lastMessage != null) {
-      final msgType = lastMessage['messageType']?.toString() ?? 'text';
-      if (msgType == 'image') {
-        previewMessage = '📷 Photo';
-      } else {
-        previewMessage = lastMessage['content']?.toString() ?? '';
-      }
+      final msgType = lastMessage['messageType']?.toString();
+      final content = lastMessage['content']?.toString();
+      previewMessage = formatPreview(msgType, content);
     }
 
     return Conversation(
@@ -59,6 +57,129 @@ class Conversation {
           ? 'assets/default_avatar.jpg'
           : ApiConstants.imageUrl(participant['avatarUrl'].toString()),
     );
+  }
+
+  static String formatPreview(String? msgType, String? rawContent) {
+    if (rawContent == null || rawContent.trim().isEmpty) {
+      if (msgType == 'image') return '📷 Photo';
+      if (msgType == 'product') return '🛒 Shared a product';
+      if (msgType == 'order') return '📄 Shared an order quote';
+      if (msgType == 'attachment' || msgType == 'file') return '📎 Shared an attachment';
+      return 'No messages yet';
+    }
+
+    final trimmed = rawContent.trim();
+
+    // 1. Explicit messageType handling
+    if (msgType == 'image') {
+      return '📷 Photo';
+    }
+
+    if (msgType == 'product') {
+      final title = _extractProductTitle(trimmed);
+      if (title != null && title.isNotEmpty) {
+        return '🛒 Shared a product: $title';
+      }
+      return '🛒 Shared a product';
+    }
+
+    if (msgType == 'order') {
+      final orderRef = _extractOrderRef(trimmed);
+      if (orderRef != null && orderRef.isNotEmpty) {
+        return '📄 Shared an order quote ($orderRef)';
+      }
+      return '📄 Shared an order quote';
+    }
+
+    if (msgType == 'attachment' || msgType == 'file') {
+      return '📎 Shared an attachment';
+    }
+
+    // 2. Safety Net for JSON/structured payloads (even if messageType was 'text' or null)
+    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+        (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+      // Check if it represents a product
+      if (trimmed.contains('title') || trimmed.contains('price') || trimmed.contains('unit')) {
+        final title = _extractProductTitle(trimmed);
+        if (title != null && title.isNotEmpty) {
+          return '🛒 Shared a product: $title';
+        }
+        return '🛒 Shared a product';
+      }
+
+      // Check if it represents an order
+      if (trimmed.contains('displayId') ||
+          trimmed.contains('itemCount') ||
+          (trimmed.contains('status') && trimmed.contains('total'))) {
+        final orderRef = _extractOrderRef(trimmed);
+        if (orderRef != null && orderRef.isNotEmpty) {
+          return '📄 Shared an order quote ($orderRef)';
+        }
+        return '📄 Shared an order quote';
+      }
+
+      // Check if it represents an image payload
+      if (trimmed.contains('imageUrl') || trimmed.contains('imageUrls')) {
+        return '📷 Photo';
+      }
+
+      // Fallback for any other structured payload
+      return '📎 Shared an attachment';
+    }
+
+    // Check if raw text looks like a direct image URL or path
+    final lower = trimmed.toLowerCase();
+    if (lower.startsWith('/uploads/') ||
+        lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.png') ||
+        lower.endsWith('.webp') ||
+        lower.endsWith('.gif')) {
+      return '📷 Photo';
+    }
+
+    return trimmed;
+  }
+
+  static String? _extractProductTitle(String raw) {
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map) {
+        final t = decoded['title']?.toString() ?? decoded['name']?.toString();
+        if (t != null && t.trim().isNotEmpty) return t.trim();
+      }
+    } catch (_) {}
+
+    final match = RegExp(r'''['"](?:title|name)['"]\s*:\s*['"]([^'"]+)['"]''').firstMatch(raw);
+    if (match != null && match.group(1) != null) {
+      return match.group(1)!.trim();
+    }
+    return null;
+  }
+
+  static String? _extractOrderRef(String raw) {
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map) {
+        final displayId = decoded['displayId']?.toString();
+        if (displayId != null && displayId.isNotEmpty) {
+          return displayId.startsWith('#') ? displayId : '#$displayId';
+        }
+        final orderId = decoded['id']?.toString();
+        if (orderId != null && orderId.isNotEmpty) {
+          final shortId = orderId.length >= 8 ? orderId.substring(0, 8) : orderId;
+          return '#$shortId';
+        }
+      }
+    } catch (_) {}
+
+    final match = RegExp(r'''['"](?:displayId|id)['"]\s*:\s*['"]([^'"]+)['"]''').firstMatch(raw);
+    if (match != null && match.group(1) != null) {
+      final id = match.group(1)!.trim();
+      final shortId = id.length > 8 ? id.substring(0, 8) : id;
+      return '#$shortId';
+    }
+    return null;
   }
 
   static String formatTime(DateTime? value) {

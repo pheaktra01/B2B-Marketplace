@@ -121,12 +121,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
         }
 
         if (msgData != null) {
-          final msgType = msgData['messageType']?.toString() ?? 'text';
-          if (msgType == 'image') {
-            preview = '📷 Photo';
-          } else {
-            preview = msgData['content']?.toString() ?? preview;
-          }
+          final msgType = msgData['messageType']?.toString();
+          final content = msgData['content']?.toString();
+          preview = Conversation.formatPreview(msgType, content ?? preview);
 
           final createdAtStr = msgData['createdAt']?.toString();
           if (createdAtStr != null) {

@@ -6,6 +6,8 @@ import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
 import 'package:mobile/l10n/app_localizations.dart';
 
+import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
+
 class RestaurantOrdersScreen extends StatefulWidget {
   const RestaurantOrdersScreen({super.key});
 
@@ -58,23 +60,26 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
   List<OrderModel> get _filteredOrders {
     if (_selectedFilter == 0) return _orders;
 
-    return _orders.where((order) {
-      final status = order.status.toLowerCase();
-      if (_selectedFilter == 1) {
-        // Active
-        return status == 'pending' ||
-            status == 'confirmed' ||
-            status == 'processing' ||
-            status == 'shipped';
-      } else if (_selectedFilter == 2) {
-        // Delivered
-        return status == 'delivered';
-      } else if (_selectedFilter == 3) {
-        // Cancelled
-        return status == 'cancelled';
-      }
-      return true;
-    }).toList();
+    switch (_selectedFilter) {
+      case 1:
+        return _orders
+            .where((o) =>
+                o.status.toLowerCase() == 'pending' ||
+                o.status.toLowerCase() == 'confirmed' ||
+                o.status.toLowerCase() == 'processing' ||
+                o.status.toLowerCase() == 'shipped')
+            .toList();
+      case 2:
+        return _orders
+            .where((o) => o.status.toLowerCase() == 'delivered')
+            .toList();
+      case 3:
+        return _orders
+            .where((o) => o.status.toLowerCase() == 'cancelled')
+            .toList();
+      default:
+        return _orders;
+    }
   }
 
   Color _getStatusColor(String status) {
@@ -161,6 +166,9 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: const RestaurantBottomNavBar(
+        currentIndex: 2,
       ),
     );
   }

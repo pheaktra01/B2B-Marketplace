@@ -11,8 +11,10 @@ import 'package:mobile/features/chat/services/chat_service.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
 import 'package:mobile/features/product/services/product_service.dart';
+import 'package:mobile/features/profile/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatScreen extends StatefulWidget {
   final String conversationId;
@@ -44,6 +46,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   late String _participantName;
   String? _participantAvatarUrl;
+  String? _participantPhone;
+  String? _participantId;
   late bool _isOnline;
 
   bool _isOtherTyping = false;
@@ -214,6 +218,8 @@ class _ChatScreenState extends State<ChatScreen> {
         final name = participant['name']?.toString().trim();
         final avatar = participant['avatarUrl']?.toString().trim();
         final isOnline = participant['isOnline'] == true;
+        final phone = participant['phone']?.toString().trim();
+        final id = participant['id']?.toString().trim();
 
         setState(() {
           if (name != null && name.isNotEmpty && !_isGenericName(name)) {
@@ -224,6 +230,12 @@ class _ChatScreenState extends State<ChatScreen> {
           }
           if (isOnline) {
             _isOnline = true;
+          }
+          if (phone != null && phone.isNotEmpty) {
+            _participantPhone = phone;
+          }
+          if (id != null && id.isNotEmpty) {
+            _participantId = id;
           }
         });
       }
@@ -781,6 +793,266 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final clean = phoneNumber.replaceAll(RegExp(r'[^0-9+]'), '');
+    final uri = Uri.parse('tel:$clean');
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrl(uri);
+      }
+    } catch (e) {
+      debugPrint('Could not launch phone call: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open phone dialer: $phoneNumber')),
+        );
+      }
+    }
+  }
+
+  Future<void> _showCallDialog() async {
+    String? phone = _participantPhone;
+
+    // If phone is missing, fetch from user service or conversation
+    if (phone == null || phone.isEmpty) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF0C6B2D)),
+        ),
+      );
+      try {
+        if (_participantId != null && _participantId!.isNotEmpty) {
+          final res = await UserService().getUserById(_participantId!);
+          final data = res['data'] ?? res;
+          if (data is Map && data['phone'] != null) {
+            phone = data['phone'].toString().trim();
+            _participantPhone = phone;
+          }
+        } else {
+          final data = await _chatService.getConversation(widget.conversationId);
+          final participant = data['participant'] as Map<String, dynamic>?;
+          if (participant != null && participant['phone'] != null) {
+            phone = participant['phone'].toString().trim();
+            _participantPhone = phone;
+          }
+        }
+      } catch (e) {
+        debugPrint('Failed to fetch participant phone: $e');
+      }
+      if (mounted) Navigator.pop(context); // dismiss loading dialog
+    }
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        final hasPhone = phone != null && phone.trim().isNotEmpty;
+
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    _buildParticipantAvatar(radius: 34),
+                    Container(
+                      width: 15,
+                      height: 15,
+                      decoration: BoxDecoration(
+                        color: _isOnline ? const Color(0xFF12B76A) : const Color(0xFF98A2B3),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2.5),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                Text(
+                  _displayParticipantName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1D2939),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+
+                Text(
+                  _isOnline ? 'Active now on marketplace' : 'Offline',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: _isOnline ? const Color(0xFF0C6B2D) : Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                if (hasPhone) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF2F4F7),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFE4E7EC)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.phone_rounded, color: Color(0xFF0C6B2D), size: 20),
+                        const SizedBox(width: 10),
+                        Text(
+                          phone,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: Color(0xFF1D2939),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.copy_rounded, size: 18),
+                          label: const Text('Copy'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF344054),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: const BorderSide(color: Color(0xFFD0D5DD)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            Clipboard.setData(ClipboardData(text: phone!));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Phone number copied to clipboard'),
+                                duration: Duration(seconds: 2),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.call_rounded, size: 20),
+                          label: const Text(
+                            'Call Phone',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0C6B2D),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            _makePhoneCall(phone!);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF3F2),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFFECDCA)),
+                    ),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.phone_disabled_rounded, color: Color(0xFFD92D20), size: 28),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'No Phone Number Provided',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFB42318),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '$_displayParticipantName has not added a contact phone number yet. You can chat with them directly here.',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            color: Color(0xFF555555),
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0C6B2D),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Back to Chat'),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 6),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _scrollToBottom({bool animate = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_messagesScrollController.hasClients) return;
@@ -922,11 +1194,7 @@ class _ChatScreenState extends State<ChatScreen> {
       actions: [
         IconButton(
           icon: const Icon(Icons.phone_outlined, color: Color(0xFF344054), size: 21),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Voice call feature coming soon')),
-            );
-          },
+          onPressed: _showCallDialog,
         ),
         IconButton(
           icon: const Icon(Icons.more_vert_rounded, color: Color(0xFF344054), size: 21),

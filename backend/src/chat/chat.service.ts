@@ -204,6 +204,7 @@ export class ChatService {
           name: otherParticipant.user.name,
           role: otherParticipant.user.role,
           avatarUrl: otherParticipant.user.avatarUrl,
+          phone: otherParticipant.user.phone,
           isOnline: this.onlinePresenceService.isUserOnline(otherParticipant.user.id),
         },
 
@@ -275,6 +276,7 @@ export class ChatService {
             name: otherParticipant.user.name,
             role: otherParticipant.user.role,
             avatarUrl: otherParticipant.user.avatarUrl,
+            phone: otherParticipant.user.phone,
             isOnline: this.onlinePresenceService.isUserOnline(otherParticipant.user.id),
           }
         : null,

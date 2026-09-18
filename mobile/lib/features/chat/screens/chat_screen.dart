@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/core/constants/api_constants.dart';
@@ -357,6 +358,12 @@ class _ChatScreenState extends State<ChatScreen> {
             }).toList();
           });
         },
+        onMessageDeleted: (deletedMessageId) {
+          if (!mounted) return;
+          setState(() {
+            _messages.removeWhere((m) => m.id == deletedMessageId);
+          });
+        },
         onTyping: (userId) {
           if (userId == _currentUserId) return;
           if (!mounted) return;
@@ -635,6 +642,145 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  void _showMessageOptions(ChatMessage msg) {
+    final isMe = msg.senderId == _currentUserId;
+    final isSending = msg.id.startsWith('temp_');
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 4, bottom: 12),
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                if (msg.messageType == 'text') ...[
+                  ListTile(
+                    leading: const Icon(Icons.copy_rounded, color: Color(0xFF344054)),
+                    title: const Text(
+                      'Copy Text',
+                      style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+                    ),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      Clipboard.setData(ClipboardData(text: msg.content));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Message copied to clipboard'),
+                          duration: Duration(seconds: 1),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(height: 1),
+                ],
+                if (isMe && !isSending) ...[
+                  ListTile(
+                    leading: const Icon(Icons.delete_outline_rounded, color: Color(0xFFD92D20)),
+                    title: const Text(
+                      'Delete Message',
+                      style: TextStyle(
+                        color: Color(0xFFD92D20),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _confirmDeleteMessage(msg);
+                    },
+                  ),
+                ],
+                const SizedBox(height: 4),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _confirmDeleteMessage(ChatMessage msg) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Delete Message?',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        content: const Text(
+          'Are you sure you want to delete this message? It will be permanently removed for everyone in this conversation.',
+          style: TextStyle(color: Color(0xFF475467), fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _deleteMessage(msg.id);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD92D20),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteMessage(String messageId) async {
+    final removedIndex = _messages.indexWhere((m) => m.id == messageId);
+    if (removedIndex == -1) return;
+    final removedMessage = _messages[removedIndex];
+
+    setState(() {
+      _messages.removeAt(removedIndex);
+    });
+
+    try {
+      await _chatService.deleteMessage(messageId);
+    } catch (e) {
+      debugPrint('Failed to delete message: $e');
+      if (mounted) {
+        setState(() {
+          _messages.insert(removedIndex, removedMessage);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete message: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _scrollToBottom({bool animate = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_messagesScrollController.hasClients) return;
@@ -908,6 +1054,8 @@ class _ChatScreenState extends State<ChatScreen> {
         widgets.add(_buildDateChip(msg.createdAt!));
       }
 
+      Widget bubbleWidget;
+
       // Render Product Message, Image Message, Order Message, or Normal Chat Bubble
       if (msg.messageType == 'product') {
         Map<String, dynamic> pData = {};
@@ -936,45 +1084,41 @@ class _ChatScreenState extends State<ChatScreen> {
             (pData['quantity'] != null ? '${pData['quantity']} available' : 'Available');
         final productId = pData['id']?.toString() ?? '';
 
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Align(
-              alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-              child: ProductMessageCard(
-                imageUrl: imageUrl.isNotEmpty
-                    ? ApiConstants.imageUrl(imageUrl)
-                    : 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500',
-                title: title,
-                price: price,
-                unit: unit,
-                description: description,
-                qty: qty,
-                time: _formatMessageTime(msg.createdAt),
-                onTap: productId.isNotEmpty
-                    ? () {
-                        context.push(
-                          AppRoutes.productDetail,
-                          extra: pData,
-                        );
-                      }
-                    : null,
-              ),
+        bubbleWidget = Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Align(
+            alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+            child: ProductMessageCard(
+              imageUrl: imageUrl.isNotEmpty
+                  ? ApiConstants.imageUrl(imageUrl)
+                  : 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500',
+              title: title,
+              price: price,
+              unit: unit,
+              description: description,
+              qty: qty,
+              time: _formatMessageTime(msg.createdAt),
+              onTap: productId.isNotEmpty
+                  ? () {
+                      context.push(
+                        AppRoutes.productDetail,
+                        extra: pData,
+                      );
+                    }
+                  : null,
             ),
           ),
         );
       } else if (msg.messageType == 'image') {
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Align(
-              alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-              child: _ImageMessageBubble(
-                isMe: isMe,
-                imageUrl: msg.content,
-                time: _formatMessageTime(msg.createdAt),
-                status: msg.status,
-              ),
+        bubbleWidget = Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Align(
+            alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+            child: _ImageMessageBubble(
+              isMe: isMe,
+              imageUrl: msg.content,
+              time: _formatMessageTime(msg.createdAt),
+              status: msg.status,
             ),
           ),
         );
@@ -994,43 +1138,47 @@ class _ChatScreenState extends State<ChatScreen> {
         final total = oData['total']?.toString() ?? '';
         final itemCount = oData['itemCount']?.toString() ?? '';
 
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Align(
-              alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-              child: _OrderMessageCard(
-                isMe: isMe,
-                orderId: orderId,
-                displayId: displayId,
-                status: status,
-                total: total,
-                itemCount: itemCount,
-                time: _formatMessageTime(msg.createdAt),
-                onTap: orderId.isNotEmpty
-                    ? () {
-                        context.push(
-                          AppRoutes.restaurantOrderTracking,
-                          extra: orderId,
-                        );
-                      }
-                    : null,
-              ),
+        bubbleWidget = Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Align(
+            alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+            child: _OrderMessageCard(
+              isMe: isMe,
+              orderId: orderId,
+              displayId: displayId,
+              status: status,
+              total: total,
+              itemCount: itemCount,
+              time: _formatMessageTime(msg.createdAt),
+              onTap: orderId.isNotEmpty
+                  ? () {
+                      context.push(
+                        AppRoutes.restaurantOrderTracking,
+                        extra: orderId,
+                      );
+                    }
+                  : null,
             ),
           ),
         );
       } else {
-        widgets.add(
-          _MessageBubble(
-            isMe: isMe,
-            message: msg.content,
-            time: _formatMessageTime(msg.createdAt),
-            status: msg.status,
-            avatarUrl: _participantAvatarUrl,
-            participantName: _displayParticipantName,
-          ),
+        bubbleWidget = _MessageBubble(
+          isMe: isMe,
+          message: msg.content,
+          time: _formatMessageTime(msg.createdAt),
+          status: msg.status,
+          avatarUrl: _participantAvatarUrl,
+          participantName: _displayParticipantName,
         );
       }
+
+      widgets.add(
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onLongPress: () => _showMessageOptions(msg),
+          child: bubbleWidget,
+        ),
+      );
     }
 
     if (_isOtherTyping) {

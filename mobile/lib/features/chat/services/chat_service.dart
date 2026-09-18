@@ -29,6 +29,7 @@ class ChatService {
     String conversationId, {
     required void Function(Map<String, dynamic> message) onMessage,
     void Function(Map<String, dynamic> payload)? onMessagesRead,
+    void Function(String messageId)? onMessageDeleted,
     void Function(String userId)? onTyping,
     void Function(String userId)? onStopTyping,
     void Function(String userId, bool isOnline)? onUserStatusChanged,
@@ -67,6 +68,14 @@ class ChatService {
       socket.on('messages_read', (data) {
         if (data is Map) {
           onMessagesRead(Map<String, dynamic>.from(data));
+        }
+      });
+    }
+
+    if (onMessageDeleted != null) {
+      socket.on('message_deleted', (data) {
+        if (data is Map && data['messageId'] != null) {
+          onMessageDeleted(data['messageId'].toString());
         }
       });
     }
@@ -158,6 +167,15 @@ class ChatService {
 
     socket.on('messages_read', (data) {
       debugPrint('Socket event messages_read: $data');
+      if (data is Map) {
+        onConversationUpdated(Map<String, dynamic>.from(data));
+      } else {
+        onConversationUpdated(null);
+      }
+    });
+
+    socket.on('message_deleted', (data) {
+      debugPrint('Socket event message_deleted: $data');
       if (data is Map) {
         onConversationUpdated(Map<String, dynamic>.from(data));
       } else {
@@ -354,6 +372,18 @@ class ChatService {
 
     if (response.statusCode != 200) {
       throw Exception('Failed to delete conversation: ${response.body}');
+    }
+  }
+
+  // Delete single message
+  Future<void> deleteMessage(String messageId) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/chat/messages/$messageId'),
+      headers: await _headers(),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete message: ${response.body}');
     }
   }
 }

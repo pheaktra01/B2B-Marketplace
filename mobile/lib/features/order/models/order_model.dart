@@ -3,6 +3,7 @@ import 'package:mobile/l10n/app_localizations.dart';
 class OrderModel {
   final String id;
   final String farmerId;
+  final String? restaurantId;
   final String status;
   final String paymentMethod;
   final String paymentStatus;
@@ -15,9 +16,18 @@ class OrderModel {
   final DateTime? createdAt;
   final List<OrderItemModel> items;
 
+  // Enriched party profiles
+  final String? buyerName;
+  final String? buyerPhone;
+  final String? buyerAvatarUrl;
+  final String? farmerName;
+  final String? farmerPhone;
+  final String? farmerAvatarUrl;
+
   OrderModel({
     required this.id,
     required this.farmerId,
+    this.restaurantId,
     required this.status,
     required this.paymentMethod,
     required this.paymentStatus,
@@ -29,12 +39,37 @@ class OrderModel {
     required this.total,
     this.createdAt,
     this.items = const [],
+    this.buyerName,
+    this.buyerPhone,
+    this.buyerAvatarUrl,
+    this.farmerName,
+    this.farmerPhone,
+    this.farmerAvatarUrl,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
+    final buyer = json['buyer'] as Map<String, dynamic>?;
+    final farmer = json['farmer'] as Map<String, dynamic>?;
+
+    final buyerName = json['buyerName']?.toString() ??
+        buyer?['name']?.toString() ??
+        json['customerName']?.toString();
+    final buyerPhone = json['buyerPhone']?.toString() ??
+        buyer?['phone']?.toString();
+    final buyerAvatarUrl = json['buyerAvatarUrl']?.toString() ??
+        buyer?['avatarUrl']?.toString();
+
+    final farmerName = json['farmerName']?.toString() ??
+        farmer?['name']?.toString();
+    final farmerPhone = json['farmerPhone']?.toString() ??
+        farmer?['phone']?.toString();
+    final farmerAvatarUrl = json['farmerAvatarUrl']?.toString() ??
+        farmer?['avatarUrl']?.toString();
+
     return OrderModel(
       id: json['id']?.toString() ?? '',
       farmerId: json['farmerId']?.toString() ?? '',
+      restaurantId: json['restaurantId']?.toString() ?? buyer?['id']?.toString(),
       status: json['status']?.toString() ?? '',
       paymentMethod: json['paymentMethod']?.toString() ?? '',
       paymentStatus: json['paymentStatus']?.toString() ?? '',
@@ -52,6 +87,12 @@ class OrderModel {
                 Map<String, dynamic>.from(item as Map),
               ))
           .toList(),
+      buyerName: buyerName,
+      buyerPhone: buyerPhone,
+      buyerAvatarUrl: buyerAvatarUrl,
+      farmerName: farmerName,
+      farmerPhone: farmerPhone,
+      farmerAvatarUrl: farmerAvatarUrl,
     );
   }
 

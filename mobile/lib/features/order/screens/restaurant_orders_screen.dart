@@ -412,6 +412,44 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                   ),
                 ],
 
+                if (order.farmerName != null &&
+                    order.farmerName!.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.eco_outlined,
+                        size: 15,
+                        color: primaryGreen,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Seller: ${order.farmerName!}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (order.farmerPhone != null &&
+                          order.farmerPhone!.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          order.farmerPhone!,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 10),
                   child: Divider(height: 1),

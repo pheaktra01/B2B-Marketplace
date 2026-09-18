@@ -555,7 +555,7 @@ export class OrderService {
         },
       });
 
-    return this.withProductImages(orders);
+    return this.withOrderDetails(orders);
   }
 
   async getFarmerOrders(farmerId: string) {
@@ -565,7 +565,7 @@ export class OrderService {
       order: { createdAt: 'DESC' },
     });
 
-    return this.withProductImages(orders);
+    return this.withOrderDetails(orders);
   }
 
   async updateOrderStatus(
@@ -726,26 +726,49 @@ export class OrderService {
       );
     }
 
-    const [enriched] = await this.withProductImages([order]);
+    const [enriched] = await this.withOrderDetails([order]);
     return enriched;
   }
 
   // ==========================================
-  // ENRICH ORDER ITEMS WITH PRODUCT IMAGES
+  // ENRICH ORDERS WITH USER PROFILES & PRODUCT IMAGES
   // ==========================================
 
-  private async withProductImages(orders: Order[]): Promise<Order[]> {
+  private async withOrderDetails(orders: Order[]): Promise<any[]> {
     if (!orders || orders.length === 0) return orders;
 
-    // Collect product IDs from items where imageUrl is not set
+    const userIds = new Set<string>();
     const missingProductIds = new Set<string>();
+
     for (const order of orders) {
+      if (order.restaurantId) userIds.add(order.restaurantId);
+      if (order.farmerId) userIds.add(order.farmerId);
+
       if (order.items) {
         for (const item of order.items) {
           if (item.productId && !item.imageUrl) {
             missingProductIds.add(item.productId);
           }
         }
+      }
+    }
+
+    let userMap = new Map<string, any>();
+    if (userIds.size > 0) {
+      try {
+        const users = await this.userRepository.find({
+          where: { id: In(Array.from(userIds)) },
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            role: true,
+            avatarUrl: true,
+          },
+        });
+        userMap = new Map(users.map((u) => [u.id, u]));
+      } catch (e) {
+        console.error('Failed to load users for orders:', e);
       }
     }
 
@@ -763,8 +786,10 @@ export class OrderService {
     }
 
     return orders.map((order) => {
-      if (!order.items) return order;
-      const updatedItems = order.items.map((item) => {
+      const buyer = userMap.get(order.restaurantId) || null;
+      const farmer = userMap.get(order.farmerId) || null;
+
+      const updatedItems = (order.items || []).map((item) => {
         if (item.imageUrl) return item;
         const prod = productMap.get(item.productId);
         const img =
@@ -776,10 +801,19 @@ export class OrderService {
           imageUrl: img,
         };
       });
+
       return {
         ...order,
+        buyer,
+        farmer,
+        buyerName: buyer?.name || null,
+        buyerPhone: buyer?.phone || null,
+        buyerAvatarUrl: buyer?.avatarUrl || null,
+        farmerName: farmer?.name || null,
+        farmerPhone: farmer?.phone || null,
+        farmerAvatarUrl: farmer?.avatarUrl || null,
         items: updatedItems,
-      } as Order;
+      };
     });
   }
 }

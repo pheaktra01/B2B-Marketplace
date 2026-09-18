@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
+import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
+import 'package:mobile/features/chat/services/chat_service.dart';
 import 'package:mobile/features/order/models/order_model.dart';
 import 'package:mobile/features/order/services/order_service.dart';
 import 'package:mobile/l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OrderDetailTrackingScreen extends StatefulWidget {
   final String orderId;
@@ -27,9 +30,11 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
   static const Color pageBgColor = Color(0xFFF7F9F8);
 
   final OrderService _orderService = OrderService();
+  final ChatService _chatService = ChatService();
 
   OrderModel? _order;
   bool _isLoading = false;
+  bool _isOpeningChat = false;
   String? _errorMessage;
   bool _isFarmer = false;
 
@@ -38,9 +43,7 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
     super.initState();
     _order = widget.initialOrder;
     _checkRole();
-    if (_order == null) {
-      _loadOrder();
-    }
+    _loadOrder(silent: _order != null);
   }
 
   Future<void> _checkRole() async {
@@ -49,6 +52,74 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
       setState(() {
         _isFarmer = role == 'farmer';
       });
+    }
+  }
+
+  Future<void> _makePhoneCall(String? phone) async {
+    if (phone == null || phone.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Phone number not available')),
+      );
+      return;
+    }
+    final cleaned = phone.replaceAll(RegExp(r'[^0-9+]'), '');
+    final uri = Uri.parse('tel:$cleaned');
+    try {
+      final launched = await launchUrl(uri);
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch call to $phone')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error calling $phone: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _openDirectChat({
+    required String? targetUserId,
+    required String targetName,
+    String? targetAvatarUrl,
+  }) async {
+    if (targetUserId == null || targetUserId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User contact information not available')),
+      );
+      return;
+    }
+
+    setState(() => _isOpeningChat = true);
+    try {
+      final conversation = await _chatService.createConversation(targetUserId);
+      final conversationId = conversation['id']?.toString();
+      if (conversationId == null || conversationId.isEmpty) {
+        throw Exception('Conversation ID was not returned');
+      }
+
+      if (!mounted) return;
+      await context.push(
+        AppRoutes.chatConversation,
+        extra: ChatConversationArgs(
+          conversationId: conversationId,
+          participantName: targetName,
+          participantAvatarUrl: targetAvatarUrl,
+          isOnline: false,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Unable to open chat: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isOpeningChat = false);
     }
   }
 
@@ -90,11 +161,13 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
     }
   }
 
-  Future<void> _loadOrder() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  Future<void> _loadOrder({bool silent = false}) async {
+    if (!silent) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+    }
 
     try {
       final order = await _orderService.getOrderById(widget.orderId);
@@ -107,7 +180,9 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = e.toString();
+        if (!silent) {
+          _errorMessage = e.toString();
+        }
       });
     }
   }
@@ -219,6 +294,11 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
 
             const SizedBox(height: 16),
 
+            // Partner Info Card (Buyer for Farmer, Grower for Restaurant)
+            _buildPartnerInfoCard(order, l10n),
+
+            const SizedBox(height: 16),
+
             // Visual Tracking Stepper
             _buildTrackingTimeline(order, l10n),
 
@@ -245,6 +325,196 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
             const SizedBox(height: 16),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPartnerInfoCard(OrderModel order, AppLocalizations? l10n) {
+    final isFarmerView = _isFarmer;
+    final title = isFarmerView ? 'Customer Information' : 'Farmer Information';
+    final name = isFarmerView
+        ? (order.buyerName?.isNotEmpty == true ? order.buyerName! : 'Customer')
+        : (order.farmerName?.isNotEmpty == true
+            ? order.farmerName!
+            : 'Grower / Farmer');
+    final phone = isFarmerView ? order.buyerPhone : order.farmerPhone;
+    final avatarUrl =
+        isFarmerView ? order.buyerAvatarUrl : order.farmerAvatarUrl;
+    final targetUserId = isFarmerView ? order.restaurantId : order.farmerId;
+    final roleBadge = isFarmerView ? 'Buyer' : 'Grower';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: primaryGreen.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      isFarmerView ? Icons.person_outline : Icons.eco_outlined,
+                      color: primaryGreen,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: primaryGreen.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  roleBadge,
+                  style: const TextStyle(
+                    color: primaryGreen,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1),
+          ),
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: primaryGreen.withValues(alpha: 0.1),
+                backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                    ? NetworkImage(ApiConstants.imageUrl(avatarUrl))
+                    : null,
+                child: avatarUrl == null || avatarUrl.isEmpty
+                    ? Text(
+                        name.isNotEmpty ? name[0].toUpperCase() : '?',
+                        style: const TextStyle(
+                          color: primaryGreen,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Colors.black87,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.phone_outlined,
+                          size: 13,
+                          color: Colors.grey.shade600,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            phone != null && phone.isNotEmpty
+                                ? phone
+                                : 'No phone provided',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: phone != null && phone.isNotEmpty
+                                  ? Colors.grey.shade700
+                                  : Colors.grey.shade400,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (phone != null && phone.isNotEmpty)
+                IconButton(
+                  onPressed: () => _makePhoneCall(phone),
+                  style: IconButton.styleFrom(
+                    backgroundColor: primaryGreen.withValues(alpha: 0.1),
+                    foregroundColor: primaryGreen,
+                    padding: const EdgeInsets.all(8),
+                    minimumSize: const Size(40, 40),
+                  ),
+                  icon: const Icon(Icons.phone, size: 18),
+                  tooltip: 'Call',
+                ),
+              const SizedBox(width: 6),
+              IconButton(
+                onPressed: _isOpeningChat
+                    ? null
+                    : () => _openDirectChat(
+                          targetUserId: targetUserId,
+                          targetName: name,
+                          targetAvatarUrl: avatarUrl,
+                        ),
+                style: IconButton.styleFrom(
+                  backgroundColor: primaryGreen,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.all(8),
+                  minimumSize: const Size(40, 40),
+                ),
+                icon: _isOpeningChat
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.chat_bubble_outline, size: 18),
+                tooltip: 'Chat',
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -1021,9 +1291,13 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
             width: double.infinity,
             height: 48,
             child: OutlinedButton.icon(
-              onPressed: () {
-                context.go(AppRoutes.farmerChat);
-              },
+              onPressed: _isOpeningChat
+                  ? null
+                  : () => _openDirectChat(
+                        targetUserId: order.restaurantId,
+                        targetName: order.buyerName ?? 'Customer',
+                        targetAvatarUrl: order.buyerAvatarUrl,
+                      ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: primaryGreen,
                 side: const BorderSide(color: primaryGreen),
@@ -1031,9 +1305,20 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              icon: const Icon(Icons.chat_outlined, size: 18),
+              icon: _isOpeningChat
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: primaryGreen,
+                      ),
+                    )
+                  : const Icon(Icons.chat_outlined, size: 18),
               label: Text(
-                l10n?.openChats ?? 'Open Chats',
+                _isOpeningChat
+                    ? 'Opening...'
+                    : (l10n?.openChats ?? 'Chat with Customer'),
                 style: const TextStyle(
                     fontWeight: FontWeight.bold, fontSize: 14),
               ),
@@ -1071,9 +1356,13 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
           width: double.infinity,
           height: 48,
           child: ElevatedButton.icon(
-            onPressed: () {
-              context.go(AppRoutes.restaurantChat);
-            },
+            onPressed: _isOpeningChat
+                ? null
+                : () => _openDirectChat(
+                      targetUserId: order.farmerId,
+                      targetName: order.farmerName ?? 'Grower / Farmer',
+                      targetAvatarUrl: order.farmerAvatarUrl,
+                    ),
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryGreen,
               foregroundColor: Colors.white,
@@ -1082,9 +1371,20 @@ class _OrderDetailTrackingScreenState extends State<OrderDetailTrackingScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            icon: const Icon(Icons.chat_outlined, size: 18),
+            icon: _isOpeningChat
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.chat_outlined, size: 18),
             label: Text(
-              l10n?.messageGrowerFarmer ?? 'Message Grower / Farmer',
+              _isOpeningChat
+                  ? 'Opening...'
+                  : (l10n?.messageGrowerFarmer ?? 'Message Grower / Farmer'),
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
           ),

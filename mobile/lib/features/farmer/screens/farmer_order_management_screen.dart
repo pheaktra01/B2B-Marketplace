@@ -302,6 +302,42 @@ class _FarmerOrderManagementScreenState
                   ),
                 ],
               ),
+              if (order.buyerName != null && order.buyerName!.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.person_outline,
+                      size: 16,
+                      color: primaryGreen,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        order.buyerName!,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (order.buyerPhone != null &&
+                        order.buyerPhone!.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      Text(
+                        order.buyerPhone!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
               const SizedBox(height: 8),
               Text(
                 items.isEmpty ? 'No items' : items,

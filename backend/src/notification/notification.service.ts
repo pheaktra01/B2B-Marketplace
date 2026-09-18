@@ -161,6 +161,27 @@ export class NotificationService {
     };
   }
 
+  async markConversationNotificationsAsRead(
+    userId: string,
+    conversationId: string,
+  ) {
+    const unread = await this.notificationRepository.find({
+      where: {
+        userId,
+        referenceId: conversationId,
+        isRead: false,
+      },
+    });
+
+    if (unread.length > 0) {
+      for (const n of unread) {
+        n.isRead = true;
+      }
+      await this.notificationRepository.save(unread);
+      await this.emitUnreadCount(userId);
+    }
+  }
+
   // =========================================================
   // MARK ALL AS READ
   // =========================================================

@@ -188,7 +188,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleMessagesRead(payload: {
     conversationId: string;
     readerId: string;
-    messageId: string;
+    messageId?: string;
     lastReadAt: Date;
   }) {
     // 1. Notify the conversation room that messages were marked read
@@ -201,7 +201,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     for (const participant of participants) {
       this.server
         .to(this.userRoom(participant.userId))
-        .emit('conversation_updated', { conversationId: payload.conversationId });
+        .emit('conversation_updated', {
+          conversationId: payload.conversationId,
+          readerId: payload.readerId,
+          lastReadAt: payload.lastReadAt,
+        });
     }
   }
 

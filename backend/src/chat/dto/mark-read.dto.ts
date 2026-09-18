@@ -1,6 +1,7 @@
-import { IsUUID } from "class-validator";
+import { IsOptional, IsUUID } from 'class-validator';
 
 export class MarkReadDto {
-    @IsUUID()
-    messageId: string;
-}
+  @IsOptional()
+  @IsUUID()
+  messageId?: string;
+}

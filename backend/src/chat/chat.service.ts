@@ -181,6 +181,9 @@ export class ChatService {
         .andWhere('message.sender_id != :userId', {
           userId: currentUserId,
         })
+        .andWhere('message.status = :sentStatus', {
+          sentStatus: MessageStatus.SENT,
+        })
         .andWhere(
           participant.lastReadAt
             ? 'message.created_at > :lastReadAt'
@@ -408,43 +411,55 @@ export class ChatService {
   async markAsRead(
     conversationId: string,
     currentUserId: string,
-    dto: MarkReadDto,
+    dto?: MarkReadDto,
   ) {
     const participant = await this.ensureParticipant(
       conversationId,
       currentUserId,
     );
 
-    const message = await this.messageRepository.findOne({
-      where: {
-        id: dto.messageId,
-        conversationId,
-      },
-    });
-
-    if (!message) {
-      throw new NotFoundException('Message not found');
+    let message: Message | null = null;
+    if (dto?.messageId) {
+      message = await this.messageRepository.findOne({
+        where: {
+          id: dto.messageId,
+          conversationId,
+        },
+      });
     }
 
-    participant.lastReadAt = message.createdAt;
+    // Set lastReadAt to the current timestamp so all prior messages are read
+    participant.lastReadAt = new Date();
 
     await this.participantRepository.save(participant);
 
-    // Update message status to READ for incoming messages up to this timestamp
-    await this.messageRepository
+    // Update message status to READ for incoming messages
+    const updateQuery = this.messageRepository
       .createQueryBuilder()
       .update(Message)
       .set({ status: MessageStatus.READ })
       .where('conversation_id = :conversationId', { conversationId })
       .andWhere('sender_id != :currentUserId', { currentUserId })
-      .andWhere('created_at <= :createdAt', { createdAt: message.createdAt })
-      .andWhere('status = :sentStatus', { sentStatus: MessageStatus.SENT })
-      .execute();
+      .andWhere('status = :sentStatus', { sentStatus: MessageStatus.SENT });
+
+    if (message) {
+      updateQuery.andWhere('created_at <= :createdAt', { createdAt: message.createdAt });
+    }
+
+    await updateQuery.execute();
+
+    // Mark corresponding notifications as read if any
+    try {
+      await this.notificationService.markConversationNotificationsAsRead(
+        currentUserId,
+        conversationId,
+      );
+    } catch (_) {}
 
     this.eventEmitter.emit('chat.messages.read', {
       conversationId,
       readerId: currentUserId,
-      messageId: dto.messageId,
+      messageId: dto?.messageId,
       lastReadAt: participant.lastReadAt,
     });
 

@@ -176,10 +176,16 @@ class _ChatScreenState extends State<ChatScreen> {
         _scrollToBottom(animate: false);
 
         if (_messages.isNotEmpty) {
-          final latest = _messages.last;
-          if (latest.senderId != _currentUserId) {
-            await _chatService.markAsRead(widget.conversationId, latest.id);
+          String? messageIdToMark;
+          for (final m in _messages.reversed) {
+            if (m.senderId != _currentUserId && !m.id.startsWith('temp_')) {
+              messageIdToMark = m.id;
+              break;
+            }
           }
+          await _chatService.markAsRead(widget.conversationId, messageIdToMark);
+        } else {
+          await _chatService.markAsRead(widget.conversationId);
         }
       }
 
@@ -878,6 +884,14 @@ class _ChatScreenState extends State<ChatScreen> {
             _unseenNewMessages = 0;
           });
           _scrollToBottom(animate: true);
+          String? messageIdToMark;
+          for (final m in _messages.reversed) {
+            if (m.senderId != _currentUserId && !m.id.startsWith('temp_')) {
+              messageIdToMark = m.id;
+              break;
+            }
+          }
+          _chatService.markAsRead(widget.conversationId, messageIdToMark);
         },
         borderRadius: BorderRadius.circular(24),
         child: Container(

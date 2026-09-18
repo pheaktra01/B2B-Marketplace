@@ -289,15 +289,22 @@ class ChatService {
   }
 
   // Mark conversation as read
-  Future<void> markAsRead(String conversationId, String messageId) async {
-    final response = await http.patch(
-      Uri.parse('$baseUrl/chat/conversations/$conversationId/read'),
-      headers: await _headers(),
-      body: jsonEncode({'messageId': messageId}),
-    );
+  Future<void> markAsRead(String conversationId, [String? messageId]) async {
+    try {
+      final body = messageId != null
+          ? jsonEncode({'messageId': messageId})
+          : jsonEncode({});
+      final response = await http.patch(
+        Uri.parse('$baseUrl/chat/conversations/$conversationId/read'),
+        headers: await _headers(),
+        body: body,
+      );
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to mark conversation as read: ${response.body}');
+      if (response.statusCode != 200) {
+        debugPrint('Failed to mark conversation as read: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Error marking conversation as read: $e');
     }
   }
 

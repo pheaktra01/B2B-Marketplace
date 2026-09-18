@@ -114,6 +114,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
         DateTime? newTime = current.updatedAt;
         int unread = current.unreadCount;
 
+        // If this update indicates messages were read by the current user, clear unread count
+        final readerId = data['readerId']?.toString();
+        if (readerId != null && readerId == _currentUserId) {
+          unread = 0;
+        }
+
         if (msgData != null) {
           final msgType = msgData['messageType']?.toString() ?? 'text';
           if (msgType == 'image') {
@@ -418,6 +424,16 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         unreadCount: item.unreadCount,
                         isOnline: item.isOnline,
                         onTap: () async {
+                          // Optimistically reset unread count immediately so the badge disappears
+                          if (item.unreadCount > 0) {
+                            setState(() {
+                              final idx = _conversations.indexWhere((c) => c.id == item.id);
+                              if (idx != -1) {
+                                _conversations[idx] = _conversations[idx].copyWith(unreadCount: 0);
+                              }
+                            });
+                          }
+
                           await context.push(
                             AppRoutes.chatConversation,
                             extra: ChatConversationArgs(

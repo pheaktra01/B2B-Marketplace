@@ -404,32 +404,93 @@ class ProductService {
   static Future<Map<String, dynamic>> updateProduct({
     required String productId,
     required Map<String, dynamic> data,
+    List<String>? existingImages,
+    List<XFile>? newImages,
   }) async {
-    final response = await http.patch(
-      Uri.parse(
-        '${ApiConstants.baseUrl}/products/$productId',
-      ),
-      headers: await _headers(),
-      body: jsonEncode(data),
+    final token = await _getToken();
+    final uri = Uri.parse(
+      '${ApiConstants.baseUrl}/products/$productId',
     );
 
-    final responseData = response.body.isEmpty
-        ? {}
-        : jsonDecode(response.body);
+    if (newImages != null && newImages.isNotEmpty) {
+      final request = http.MultipartRequest(
+        'PATCH',
+        uri,
+      );
 
-    if (response.statusCode < 200 ||
-        response.statusCode >= 300) {
-      throw Exception(
-        responseData is Map
-            ? responseData['message']?.toString() ??
-                'Failed to update product'
-            : 'Failed to update product',
+      request.headers['Authorization'] = 'Bearer $token';
+
+      data.forEach((key, value) {
+        if (value != null) {
+          request.fields[key] = value.toString();
+        }
+      });
+
+      if (existingImages != null) {
+        request.fields['existingImages'] = jsonEncode(existingImages);
+      }
+
+      for (final image in newImages) {
+        final mimeType = lookupMimeType(image.name) ?? 'image/jpeg';
+        final mimeParts = mimeType.split('/');
+        final bytes = await image.readAsBytes();
+
+        final multipartFile = http.MultipartFile.fromBytes(
+          'images',
+          bytes,
+          filename: image.name,
+          contentType: MediaType(
+            mimeParts[0],
+            mimeParts[1],
+          ),
+        );
+
+        request.files.add(multipartFile);
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      final responseData = response.body.isEmpty ? {} : jsonDecode(response.body);
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw Exception(
+          responseData is Map
+              ? responseData['message']?.toString() ?? 'Failed to update product'
+              : 'Failed to update product',
+        );
+      }
+
+      return Map<String, dynamic>.from(responseData);
+    } else {
+      final payload = Map<String, dynamic>.from(data);
+      if (existingImages != null) {
+        payload['existingImages'] = existingImages;
+      }
+
+      final response = await http.patch(
+        uri,
+        headers: await _headers(),
+        body: jsonEncode(payload),
+      );
+
+      final responseData = response.body.isEmpty
+          ? {}
+          : jsonDecode(response.body);
+
+      if (response.statusCode < 200 ||
+          response.statusCode >= 300) {
+        throw Exception(
+          responseData is Map
+              ? responseData['message']?.toString() ??
+                  'Failed to update product'
+              : 'Failed to update product',
+        );
+      }
+
+      return Map<String, dynamic>.from(
+        responseData,
       );
     }
-
-    return Map<String, dynamic>.from(
-      responseData,
-    );
   }
 
   // ============================================================

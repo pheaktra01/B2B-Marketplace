@@ -46,6 +46,9 @@ jobs:
       # Docker Build
       #################################
 
+      - name: Setup Environment File
+        run: cp .env.example .env
+
       - name: Build Docker Images
         run: docker compose build
 
@@ -88,18 +91,21 @@ jobs:
       # Docker Compose Test
       #################################
 
-      - name: Start Containers
+      - name: Setup Environment File
+        run: cp .env.example .env
 
+      - name: Start Containers
         run: docker compose up -d
 
       - name: Check Containers
-
         run: docker ps
 
+      - name: Show Container Logs on Failure
+        if: failure()
+        run: docker compose logs
+
       - name: Stop Containers
-
         if: always()
-
         run: docker compose down -v
 
   #################################################

@@ -5,6 +5,7 @@ import {
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { CartItem } from './cart-item.entity';
 
@@ -13,6 +14,7 @@ export class Cart {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column({ name: 'restaurant_id', type: 'uuid' })
   restaurantId: string;
 

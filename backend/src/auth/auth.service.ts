@@ -9,7 +9,6 @@ import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { ResetPasswordDto } from './dto/reset-password-dto.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { response } from 'express';
 
 import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '../notification/entities/notification.entity';
@@ -19,24 +18,30 @@ export class AuthService {
     private getStaticOtp(): string {
         return process.env.STATIC_OTP ?? '123456';
     }
-    constructor(
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
 
-    private readonly jwtService: JwtService,
-    private readonly notificationService: NotificationService,
+    constructor(
+        @InjectRepository(User)
+        private readonly userRepo: Repository<User>,
+        private readonly jwtService: JwtService,
+        private readonly notificationService: NotificationService,
     ) {}
 
-    async register(dto: RegisterDto){
-        const exist = await this.userRepo.findOne({where:{phone:dto.phone}});
+    // ==========================================================
+    // REGISTER
+    // ==========================================================
 
-        if(exist) {
+    async register(dto: RegisterDto) {
+        const exist = await this.userRepo.findOne({
+            where: { phone: dto.phone },
+        });
+
+        if (exist) {
             // If phone exists and is already verified, block reuse
             if (exist.isVerified) {
                 throw new BadRequestException('Phone number already registered');
             }
 
-            // If phone exists but not verified, refresh OTP and update password/name/role
+            // If phone exists but not verified, refresh OTP and update credentials
             const hash = await bcrypt.hash(dto.password, 10);
             exist.name = dto.name;
             exist.password = hash;
@@ -45,13 +50,11 @@ export class AuthService {
 
             await this.userRepo.save(exist);
 
-            console.log('REGISTER: refreshed unverified user id=', exist.id, 'otp=', exist.otp);
-
             return {
-                message: 'OTP send',
+                message: 'OTP sent successfully',
                 userId: exist.id,
-                otp: exist.otp ?? this.getStaticOtp(),
-            }
+                otp: process.env.NODE_ENV === 'production' ? undefined : (exist.otp ?? this.getStaticOtp()),
+            };
         }
 
         const hash = await bcrypt.hash(dto.password, 10);
@@ -62,22 +65,22 @@ export class AuthService {
             password: hash,
             role: dto.role,
             otp: this.getStaticOtp(),
-        })
+        });
 
         await this.userRepo.save(user);
 
-        console.log('REGISTER: saved user id=', user.id, 'otp=', user.otp);
-
         return {
-            message: 'OTP send',
+            message: 'OTP sent successfully',
             userId: user.id,
-            otp: user.otp ?? this.getStaticOtp(),
-        }        
+            otp: process.env.NODE_ENV === 'production' ? undefined : (user.otp ?? this.getStaticOtp()),
+        };
     }
 
-    async verifyOTP(dto: VerifyOtpDto) {
-        console.log('VERIFY OTP: incoming dto=', dto);
+    // ==========================================================
+    // VERIFY OTP
+    // ==========================================================
 
+    async verifyOTP(dto: VerifyOtpDto) {
         const user = await this.userRepo.findOne({
             where: {
                 id: dto.userId,
@@ -87,7 +90,6 @@ export class AuthService {
         if (!user) {
             throw new NotFoundException('User not found');
         }
-        console.log('VERIFY OTP: found user id=', user.id, 'storedOtp=', user.otp);
 
         const staticOtp = this.getStaticOtp();
         if (user.otp !== dto.otp && dto.otp !== staticOtp) {
@@ -104,15 +106,16 @@ export class AuthService {
         };
     }
 
+    // ==========================================================
+    // LOGIN (FAST & NON-BLOCKING NOTIFICATION)
+    // ==========================================================
+
     async login(dto: LoginDto) {
         const user = await this.userRepo.findOne({
             where: {
                 phone: dto.phone,
             },
         });
-
-        console.log('PHONE FROM REQUEST:', dto.phone);
-        console.log('USER FOUND:', user);
 
         if (!user) {
             throw new UnauthorizedException('User not found');
@@ -122,8 +125,6 @@ export class AuthService {
             dto.password,
             user.password,
         );
-
-        console.log('PASSWORD MATCH:', match);
 
         if (!match) {
             throw new UnauthorizedException('Wrong password');
@@ -135,18 +136,17 @@ export class AuthService {
             role: user.role,
         });
 
-        try {
-            await this.notificationService.create({
-                userId: user.id,
-                type: NotificationType.ACCOUNT_LOGIN,
-                title: 'Login from New Device',
-                message: 'New login detected on your account.',
-                referenceId: null,
-                referenceType: 'account',
-            });
-        } catch (e) {
-            console.error('Failed to create login notification:', e);
-        }
+        // Fire notification in background without blocking response latency
+        this.notificationService.create({
+            userId: user.id,
+            type: NotificationType.ACCOUNT_LOGIN,
+            title: 'Login from New Device',
+            message: 'New login detected on your account.',
+            referenceId: null,
+            referenceType: 'account',
+        }).catch((e) => {
+            // Non-critical background notification error
+        });
 
         return {
             accessToken,
@@ -158,27 +158,34 @@ export class AuthService {
         };
     }
 
+    // ==========================================================
+    // FORGOT PASSWORD
+    // ==========================================================
+
     async forgotPassword(dto: ForgotPasswordDto) {
-        const user = await this.userRepo.findOne({where:{phone:dto.phone}});
-        
-        if(!user) {
+        const user = await this.userRepo.findOne({
+            where: { phone: dto.phone },
+        });
+
+        if (!user) {
             throw new NotFoundException('User not found');
         }
-        
-        const otp = this.getStaticOtp();
 
+        const otp = this.getStaticOtp();
         user.otp = otp;
 
         await this.userRepo.save(user);
 
-        // TODO: send OTP to via SMS
-
         return {
-            message: 'OTP send successfully',
+            message: 'OTP sent successfully',
             userId: user.id,
             otp: process.env.NODE_ENV === 'production' ? undefined : user.otp,
-        }
+        };
     }
+
+    // ==========================================================
+    // RESET PASSWORD
+    // ==========================================================
 
     async resetPassword(dto: ResetPasswordDto) {
         const user = await this.userRepo.findOne({
@@ -189,34 +196,32 @@ export class AuthService {
             throw new NotFoundException('User not found');
         }
 
-            const staticOtp = this.getStaticOtp();
+        const staticOtp = this.getStaticOtp();
 
-            // Allow verification with the stored OTP or the static OTP fallback (e.g. 123456)
-            if (user.otp !== dto.otp && dto.otp !== staticOtp) {
-                throw new BadRequestException('Invalid OTP');
-            }
+        // Allow verification with stored OTP or static fallback
+        if (user.otp !== dto.otp && dto.otp !== staticOtp) {
+            throw new BadRequestException('Invalid OTP');
+        }
 
         user.password = await bcrypt.hash(dto.password, 10);
         user.otp = null;
 
         await this.userRepo.save(user);
 
-        try {
-            await this.notificationService.create({
-                userId: user.id,
-                type: NotificationType.ACCOUNT_PASSWORD_CHANGED,
-                title: 'Password Changed',
-                message: 'Your account password was changed successfully.',
-                referenceId: null,
-                referenceType: 'account',
-            });
-        } catch (e) {
-            console.error('Failed to notify password change:', e);
-        }
+        // Fire notification in background without blocking response latency
+        this.notificationService.create({
+            userId: user.id,
+            type: NotificationType.ACCOUNT_PASSWORD_CHANGED,
+            title: 'Password Changed',
+            message: 'Your account password was changed successfully.',
+            referenceId: null,
+            referenceType: 'account',
+        }).catch((e) => {
+            // Non-critical background notification error
+        });
 
         return {
             message: 'Password reset successful',
         };
     }
-
 }

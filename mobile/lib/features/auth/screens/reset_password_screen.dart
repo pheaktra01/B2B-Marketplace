@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
@@ -27,6 +28,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
+  bool _autoValidate = false;
 
   // Validation states for password dynamic checklist
   bool _isLongEnough = false;
@@ -152,6 +154,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           ),
                           child: Form(
                             key: _formKey,
+                            autovalidateMode: _autoValidate
+                                ? AutovalidateMode.onUserInteraction
+                                : AutovalidateMode.disabled,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -192,6 +197,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 TextFormField(
                                   controller: _passwordController,
                                   obscureText: _obscurePassword,
+                                  textInputAction: TextInputAction.next,
                                   decoration: _buildInputDecoration(
                                     hint: l10n.enterNewPassword,
                                     prefixIcon: Icons.lock_outline,
@@ -226,6 +232,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 TextFormField(
                                   controller: _confirmPasswordController,
                                   obscureText: _obscureConfirmPassword,
+                                  textInputAction: TextInputAction.done,
+                                  onFieldSubmitted: (_) => _handleReset(),
                                   decoration: _buildInputDecoration(
                                     hint: l10n.confirmNewPassword,
                                     prefixIcon: Icons.verified_user_outlined,
@@ -280,80 +288,33 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                       ),
                                       elevation: 1,
                                     ),
-                                    onPressed: _isLoading
-                                        ? null
-                                        : () async {
-                                            if (!_formKey.currentState!.validate() ||
-                                                !_isLongEnough ||
-                                                !_hasNumberOrSymbol) {
-                                              return;
-                                            }
-
-                                            final messenger = ScaffoldMessenger.of(context);
-
-                                            setState(() {
-                                              _isLoading = true;
-                                            });
-
-                                            try {
-                                              final response = await _authService.resetPassword(
-                                                phone: widget.phoneNumber,
-                                                otp: widget.otp,
-                                                password: _passwordController.text,
-                                              );
-                                              final data = response['data'] as Map<String, dynamic>;
-
-                                              final status = response['statusCode'] as int;
-                                              if (status >= 200 && status < 300) {
-                                                if (!context.mounted) {
-                                                  return;
-                                                }
-
-                                                context.go(AppRoutes.login);
-                                              } else {
-                                                if (!mounted) {
-                                                  return;
-                                                }
-
-                                                messenger.showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      data['message']?.toString() ?? 'Reset password failed',
-                                                    ),
+                                    onPressed: _isLoading ? null : _handleReset,
+                                    child: AnimatedSwitcher(
+                                      duration: const Duration(milliseconds: 200),
+                                      child: _isLoading
+                                          ? const SizedBox(
+                                              width: 22,
+                                              height: 22,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2.5,
+                                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                              ),
+                                            )
+                                          : Row(
+                                              key: const ValueKey('reset_idle'),
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  l10n.resetPassword,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
-                                                );
-                                              }
-                                            } catch (error) {
-                                              if (!mounted) {
-                                                return;
-                                              }
-
-                                              messenger.showSnackBar(
-                                                SnackBar(
-                                                  content: Text('Unable to reset password: $error'),
                                                 ),
-                                              );
-                                            } finally {
-                                              if (mounted) {
-                                                setState(() {
-                                                  _isLoading = false;
-                                                });
-                                              }
-                                            }
-                                          },
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          l10n.resetPassword,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        const Icon(Icons.arrow_forward_ios, size: 16),
-                                      ],
+                                                const SizedBox(width: 8),
+                                                const Icon(Icons.arrow_forward_ios, size: 16),
+                                              ],
+                                            ),
                                     ),
                                   ),
                                 ),
@@ -396,6 +357,77 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleReset() async {
+    if (_isLoading) return;
+
+    FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
+
+    if (!_autoValidate) {
+      setState(() {
+        _autoValidate = true;
+      });
+    }
+
+    if (!_formKey.currentState!.validate() ||
+        !_isLongEnough ||
+        !_hasNumberOrSymbol) {
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _authService.resetPassword(
+        phone: widget.phoneNumber,
+        otp: widget.otp,
+        password: _passwordController.text,
+      );
+      final data = response['data'] as Map<String, dynamic>;
+
+      final status = response['statusCode'] as int;
+      if (status >= 200 && status < 300) {
+        if (!mounted) {
+          return;
+        }
+
+        context.go(AppRoutes.login);
+      } else {
+        if (!mounted) {
+          return;
+        }
+
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              data['message']?.toString() ?? 'Reset password failed',
+            ),
+          ),
+        );
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Unable to reset password: $error'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   // Common UI styling rules for TextFields

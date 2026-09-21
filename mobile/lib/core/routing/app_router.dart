@@ -59,6 +59,35 @@ class AppRouter {
   static final GlobalKey<NavigatorState> rootNavigatorKey =
       GlobalKey<NavigatorState>();
 
+  static Page<dynamic> _buildAuthPage({
+    required LocalKey key,
+    required Widget child,
+  }) {
+    return CustomTransitionPage<void>(
+      key: key,
+      child: child,
+      transitionDuration: const Duration(milliseconds: 260),
+      reverseTransitionDuration: const Duration(milliseconds: 220),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeInOutCubic,
+          reverseCurve: Curves.easeInOutCubic,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.03, 0.0),
+              end: Offset.zero,
+            ).animate(curved),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+
   static final GoRouter router = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.splash,
@@ -101,25 +130,37 @@ class AppRouter {
       ),
       GoRoute(
         path: AppRoutes.language,
-        builder: (context, state) => const LanguageSelectionScreen(),
+        pageBuilder: (context, state) => _buildAuthPage(
+          key: state.pageKey,
+          child: const LanguageSelectionScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.getStarted,
-        builder: (context, state) => const GetStartedScreen(),
+        pageBuilder: (context, state) => _buildAuthPage(
+          key: state.pageKey,
+          child: const GetStartedScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.roleSelection,
-        builder: (context, state) => const RoleSelectionScreen(),
+        pageBuilder: (context, state) => _buildAuthPage(
+          key: state.pageKey,
+          child: const RoleSelectionScreen(),
+        ),
       ),
 
       // Auth
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => _buildAuthPage(
+          key: state.pageKey,
+          child: const LoginScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.signUp,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra;
           final role = extra is String
               ? extra
@@ -127,47 +168,62 @@ class AppRouter {
                   ? extra['role']?.toString()
                   : null) ??
               'restaurant';
-          return SignUpScreen(selectedRole: role);
+          return _buildAuthPage(
+            key: state.pageKey,
+            child: SignUpScreen(selectedRole: role),
+          );
         },
       ),
       GoRoute(
         path: AppRoutes.verifyPhone,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final args = state.extra as VerifyPhoneArgs;
-          return VerifyPhoneScreen(
-            type: args.type,
-            phoneNumber: args.phoneNumber,
-            selectedRole: args.selectedRole,
-            userId: args.userId,
-            initialOtp: args.initialOtp,
-            password: args.password,
+          return _buildAuthPage(
+            key: state.pageKey,
+            child: VerifyPhoneScreen(
+              type: args.type,
+              phoneNumber: args.phoneNumber,
+              selectedRole: args.selectedRole,
+              userId: args.userId,
+              initialOtp: args.initialOtp,
+              password: args.password,
+            ),
           );
         },
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
-        builder: (context, state) => const ForgotPasswordScreen(),
+        pageBuilder: (context, state) => _buildAuthPage(
+          key: state.pageKey,
+          child: const ForgotPasswordScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.resetPassword,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final args = state.extra as ResetPasswordArgs;
-          return ResetPasswordScreen(
-            phoneNumber: args.phoneNumber,
-            otp: args.otp,
+          return _buildAuthPage(
+            key: state.pageKey,
+            child: ResetPasswordScreen(
+              phoneNumber: args.phoneNumber,
+              otp: args.otp,
+            ),
           );
         },
       ),
       GoRoute(
         path: AppRoutes.setupProfile,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final role = state.extra is String
               ? state.extra as String
               : (state.extra is Map<String, dynamic>
                   ? (state.extra as Map<String, dynamic>)['role']?.toString()
                   : null) ??
               'restaurant';
-          return SetupProfileScreen(role: role);
+          return _buildAuthPage(
+            key: state.pageKey,
+            child: SetupProfileScreen(role: role),
+          );
         },
       ),
 

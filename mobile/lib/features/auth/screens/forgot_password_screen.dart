@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
@@ -19,6 +20,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _authService = AuthService();
 
   bool _isLoading = false;
+  bool _autoValidate = false;
 
   String get phone => _identifierController.text;
 
@@ -137,7 +139,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                         child: Form(
                           key: _formKey,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          autovalidateMode: _autoValidate
+                              ? AutovalidateMode.onUserInteraction
+                              : AutovalidateMode.disabled,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -176,6 +180,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               TextFormField(
                                 controller: _identifierController,
                                 keyboardType: TextInputType.phone,
+                                textInputAction: TextInputAction.done,
+                                onFieldSubmitted: (_) => _handleSubmit(),
                                 decoration: InputDecoration(
                                   hintText: l10n.phoneHint,
                                   hintStyle: const TextStyle(
@@ -207,7 +213,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: const BorderSide(
-                                      color: Colors.black26,
+                                      color: Color(0xFF0F6221),
                                       width: 1.5,
                                     ),
                                   ),
@@ -240,84 +246,33 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     ),
                                     elevation: 1,
                                   ),
-                                  onPressed: _isLoading
-                                      ? null
-                                      : () async {
-                                          if (!_formKey.currentState!.validate()) {
-                                            return;
-                                          }
-
-                                          Navigator.of(context);
-                                          final messenger = ScaffoldMessenger.of(context);
-
-                                          setState(() {
-                                            _isLoading = true;
-                                          });
-
-                                          try {
-                                            final response = await _authService.forgotPassword(
-                                              phone: _identifierController.text.trim(),
-                                            );
-                                            final data = response['data'] as Map<String, dynamic>;
-
-                                            final status = response['statusCode'] as int;
-                                            if (status >= 200 && status < 300) {
-                                              if (!context.mounted) {
-                                                return;
-                                              }
-
-                                              context.push(
-                                                AppRoutes.verifyPhone,
-                                                extra: VerifyPhoneArgs(
-                                                  type: VerificationType.forgotPassword,
-                                                  phoneNumber: _identifierController.text.trim(),
-                                                  initialOtp: data['otp']?.toString(),
+                                  onPressed: _isLoading ? null : _handleSubmit,
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 200),
+                                    child: _isLoading
+                                        ? const SizedBox(
+                                            width: 22,
+                                            height: 22,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            ),
+                                          )
+                                        : Row(
+                                            key: const ValueKey('forgot_idle'),
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                l10n.send,
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
                                                 ),
-                                              );
-                                            } else {
-                                              if (!mounted) {
-                                                return;
-                                              }
-
-                                              messenger.showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    data['message']?.toString() ?? l10n.unableToRequestOtp,
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                          } catch (error) {
-                                            if (!mounted) {
-                                              return;
-                                            }
-
-                                            messenger.showSnackBar(
-                                              SnackBar(
-                                                content: Text('${l10n.unableToRequestOtp}: $error'),
                                               ),
-                                            );
-                                          } finally {
-                                            if (mounted) {
-                                              setState(() {
-                                                _isLoading = false;
-                                              });
-                                            }
-                                          }
-                                        },
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        l10n.send,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Icon(Icons.arrow_forward_ios, size: 16),
-                                    ],
+                                              const SizedBox(width: 8),
+                                              const Icon(Icons.arrow_forward_ios, size: 16),
+                                            ],
+                                          ),
                                   ),
                                 ),
                               ),
@@ -362,5 +317,80 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleSubmit() async {
+    if (_isLoading) return;
+
+    FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
+
+    if (!_autoValidate) {
+      setState(() {
+        _autoValidate = true;
+      });
+    }
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _authService.forgotPassword(
+        phone: _identifierController.text.trim(),
+      );
+      final data = response['data'] as Map<String, dynamic>;
+
+      final status = response['statusCode'] as int;
+      if (status >= 200 && status < 300) {
+        if (!mounted) {
+          return;
+        }
+
+        context.push(
+          AppRoutes.verifyPhone,
+          extra: VerifyPhoneArgs(
+            type: VerificationType.forgotPassword,
+            phoneNumber: _identifierController.text.trim(),
+            initialOtp: data['otp']?.toString(),
+          ),
+        );
+      } else {
+        if (!mounted) {
+          return;
+        }
+
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              data['message']?.toString() ?? l10n.unableToRequestOtp,
+            ),
+          ),
+        );
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('${l10n.unableToRequestOtp}: $error'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 }

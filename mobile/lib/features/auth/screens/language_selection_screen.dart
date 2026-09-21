@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/app_locale.dart';
 import 'package:mobile/core/routing/app_routes.dart';
@@ -95,6 +96,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                             ),
                           ),
                           onPressed: () async {
+                            HapticFeedback.lightImpact();
                             final locale = selectedIndex == 0 ? const Locale('km') : const Locale('en');
                             await AppLocale.setLocale(locale);
                             if (!context.mounted) return;
@@ -133,6 +135,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     
     return InkWell(
       onTap: () {
+        HapticFeedback.selectionClick();
         setState(() => selectedIndex = index);
         final locale = index == 0 ? const Locale('km') : const Locale('en');
         AppLocale.setLocale(locale);

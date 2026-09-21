@@ -5,6 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 
 import { OrderItem } from './order-item.entity';
@@ -30,16 +31,22 @@ export enum PaymentMethod {
 }
 
 @Entity('orders')
+@Index(['restaurantId', 'createdAt'])
+@Index(['farmerId', 'createdAt'])
+@Index(['restaurantId', 'status'])
+@Index(['farmerId', 'status'])
 export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column({
     name: 'restaurant_id',
     type: 'uuid',
   })
   restaurantId: string;
 
+  @Index()
   @Column({
     name: 'farmer_id',
     type: 'uuid',

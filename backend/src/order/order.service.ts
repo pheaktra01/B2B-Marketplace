@@ -185,6 +185,9 @@ export class OrderService {
         const buyerName = buyer?.name ?? 'Green Garden Restaurant';
 
         const createdOrders: Order[] = [];
+        const allOrderItems: OrderItem[] = [];
+        const productsToSave: Product[] = [];
+        const notificationsToSave: Notification[] = [];
 
         for (const [
           farmerId,
@@ -284,7 +287,7 @@ export class OrderService {
             );
 
           // ------------------------------------
-          // Create Order Items
+          // Create Order Items & Update Inventory
           // ------------------------------------
 
           for (const item of items) {
@@ -327,10 +330,7 @@ export class OrderService {
                 },
               );
 
-            await manager.save(
-              OrderItem,
-              orderItem,
-            );
+            allOrderItems.push(orderItem);
 
             // ----------------------------------
             // Reduce inventory
@@ -348,36 +348,33 @@ export class OrderService {
               product.isAvailable = false;
 
               // Out of stock notification for farmer
-              const outOfStockNotif = manager.create(Notification, {
-                userId: farmerId,
-                type: NotificationType.PRODUCT_OUT_OF_STOCK,
-                title: 'Out of Stock',
-                message: `${product.name} is now out of stock.`,
-                referenceId: product.id,
-                referenceType: 'product',
-                isRead: false,
-              });
-              await manager.save(Notification, outOfStockNotif);
-              this.eventEmitter.emit('notification.created', outOfStockNotif);
+              notificationsToSave.push(
+                manager.create(Notification, {
+                  userId: farmerId,
+                  type: NotificationType.PRODUCT_OUT_OF_STOCK,
+                  title: 'Out of Stock',
+                  message: `${product.name} is now out of stock.`,
+                  referenceId: product.id,
+                  referenceType: 'product',
+                  isRead: false,
+                }),
+              );
             } else if (Number(product.quantity) <= 5) {
               // Low stock notification for farmer
-              const lowStockNotif = manager.create(Notification, {
-                userId: farmerId,
-                type: NotificationType.PRODUCT_LOW_STOCK,
-                title: 'Low Stock',
-                message: `Your ${product.name} stock is running low.`,
-                referenceId: product.id,
-                referenceType: 'product',
-                isRead: false,
-              });
-              await manager.save(Notification, lowStockNotif);
-              this.eventEmitter.emit('notification.created', lowStockNotif);
+              notificationsToSave.push(
+                manager.create(Notification, {
+                  userId: farmerId,
+                  type: NotificationType.PRODUCT_LOW_STOCK,
+                  title: 'Low Stock',
+                  message: `Your ${product.name} stock is running low.`,
+                  referenceId: product.id,
+                  referenceType: 'product',
+                  isRead: false,
+                }),
+              );
             }
 
-            await manager.save(
-              Product,
-              product,
-            );
+            productsToSave.push(product);
           }
 
           const orderNum = savedOrder.id.slice(0, 8);
@@ -385,87 +382,94 @@ export class OrderService {
           // ------------------------------------
           // 1. Notify Farmer of new order
           // ------------------------------------
-          const farmerNotification = manager.create(
-            Notification,
-            {
-              userId: farmerId,
-              type: NotificationType.ORDER_CREATED,
-              title: 'New Order',
-              message: `You received a new order from ${buyerName}.`,
-              referenceId: savedOrder.id,
-              referenceType: 'order',
-              isRead: false,
-            },
+          notificationsToSave.push(
+            manager.create(
+              Notification,
+              {
+                userId: farmerId,
+                type: NotificationType.ORDER_CREATED,
+                title: 'New Order',
+                message: `You received a new order from ${buyerName}.`,
+                referenceId: savedOrder.id,
+                referenceType: 'order',
+                isRead: false,
+              },
+            ),
           );
-          await manager.save(
-            Notification,
-            farmerNotification,
-          );
-          this.eventEmitter.emit('notification.created', farmerNotification);
 
           // ------------------------------------
           // 2. Notify Restaurant of order placed
           // ------------------------------------
-          const buyerNotification = manager.create(
-            Notification,
-            {
-              userId: restaurantId,
-              type: NotificationType.ORDER_PLACED,
-              title: 'Order Placed',
-              message: 'Your order has been placed successfully.',
-              referenceId: savedOrder.id,
-              referenceType: 'order',
-              isRead: false,
-            },
+          notificationsToSave.push(
+            manager.create(
+              Notification,
+              {
+                userId: restaurantId,
+                type: NotificationType.ORDER_PLACED,
+                title: 'Order Placed',
+                message: 'Your order has been placed successfully.',
+                referenceId: savedOrder.id,
+                referenceType: 'order',
+                isRead: false,
+              },
+            ),
           );
-          await manager.save(
-            Notification,
-            buyerNotification,
-          );
-          this.eventEmitter.emit('notification.created', buyerNotification);
 
           // ------------------------------------
           // 3. Payment Notifications
           // ------------------------------------
-          const buyerPaymentNotif = manager.create(
-            Notification,
-            {
-              userId: restaurantId,
-              type: NotificationType.PAYMENT_SUCCESS,
-              title: 'Payment Successful',
-              message: `Payment for order #${orderNum} was successful.`,
-              referenceId: savedOrder.id,
-              referenceType: 'order',
-              isRead: false,
-            },
+          notificationsToSave.push(
+            manager.create(
+              Notification,
+              {
+                userId: restaurantId,
+                type: NotificationType.PAYMENT_SUCCESS,
+                title: 'Payment Successful',
+                message: `Payment for order #${orderNum} was successful.`,
+                referenceId: savedOrder.id,
+                referenceType: 'order',
+                isRead: false,
+              },
+            ),
           );
-          await manager.save(
-            Notification,
-            buyerPaymentNotif,
-          );
-          this.eventEmitter.emit('notification.created', buyerPaymentNotif);
 
-          const farmerPaymentNotif = manager.create(
-            Notification,
-            {
-              userId: farmerId,
-              type: NotificationType.PAYMENT_RECEIVED,
-              title: 'Payment Received',
-              message: `You received payment for order #${orderNum}.`,
-              referenceId: savedOrder.id,
-              referenceType: 'order',
-              isRead: false,
-            },
+          notificationsToSave.push(
+            manager.create(
+              Notification,
+              {
+                userId: farmerId,
+                type: NotificationType.PAYMENT_RECEIVED,
+                title: 'Payment Received',
+                message: `You received payment for order #${orderNum}.`,
+                referenceId: savedOrder.id,
+                referenceType: 'order',
+                isRead: false,
+              },
+            ),
           );
-          await manager.save(
-            Notification,
-            farmerPaymentNotif,
-          );
-          this.eventEmitter.emit('notification.created', farmerPaymentNotif);
 
           createdOrders.push(
             savedOrder,
           );
+        }
+
+        // --------------------------------------
+        // Batch save OrderItems, Products & Notifications
+        // --------------------------------------
+
+        if (allOrderItems.length > 0) {
+          await manager.save(OrderItem, allOrderItems);
+        }
+
+        if (productsToSave.length > 0) {
+          await manager.save(Product, productsToSave);
+        }
+
+        if (notificationsToSave.length > 0) {
+          await manager.save(Notification, notificationsToSave);
+          for (const notif of notificationsToSave) {
+            this.eventEmitter.emit('notification.created', notif);
+          }
         }
 
         // --------------------------------------
@@ -601,6 +605,7 @@ export class OrderService {
 
     // Notify buyer (restaurant) and farmer of status change
     try {
+      const notificationsToSave: Notification[] = [];
       const orderNum = order.id.slice(0, 8);
       let buyerType = NotificationType.ORDER_STATUS_CHANGED;
       let buyerTitle = 'Order Status Updated';
@@ -653,8 +658,7 @@ export class OrderService {
           referenceType: 'order',
           isRead: false,
         });
-        await this.notificationRepository.save(farmerPayNotif);
-        this.eventEmitter.emit('notification.created', farmerPayNotif);
+        notificationsToSave.push(farmerPayNotif);
       } else if (status === OrderStatus.CANCELLED) {
         buyerType = NotificationType.ORDER_REJECTED;
         buyerTitle = 'Order Rejected / Cancelled';
@@ -674,8 +678,7 @@ export class OrderService {
         referenceType: 'order',
         isRead: false,
       });
-      await this.notificationRepository.save(buyerNotification);
-      this.eventEmitter.emit('notification.created', buyerNotification);
+      notificationsToSave.push(buyerNotification);
 
       const farmerNotification = this.notificationRepository.create({
         userId: order.farmerId,
@@ -686,8 +689,12 @@ export class OrderService {
         referenceType: 'order',
         isRead: false,
       });
-      await this.notificationRepository.save(farmerNotification);
-      this.eventEmitter.emit('notification.created', farmerNotification);
+      notificationsToSave.push(farmerNotification);
+
+      await this.notificationRepository.save(notificationsToSave);
+      for (const n of notificationsToSave) {
+        this.eventEmitter.emit('notification.created', n);
+      }
     } catch (e) {
       console.error('Failed to create status notifications:', e);
     }
@@ -753,36 +760,40 @@ export class OrderService {
       }
     }
 
-    let userMap = new Map<string, any>();
-    if (userIds.size > 0) {
-      try {
-        const users = await this.userRepository.find({
-          where: { id: In(Array.from(userIds)) },
-          select: {
-            id: true,
-            name: true,
-            phone: true,
-            role: true,
-            avatarUrl: true,
-          },
-        });
-        userMap = new Map(users.map((u) => [u.id, u]));
-      } catch (e) {
-        console.error('Failed to load users for orders:', e);
-      }
-    }
+    const userQueryPromise =
+      userIds.size > 0
+        ? this.userRepository.find({
+            where: { id: In(Array.from(userIds)) },
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+              role: true,
+              avatarUrl: true,
+            },
+          })
+        : Promise.resolve([]);
 
+    const productQueryPromise =
+      missingProductIds.size > 0
+        ? this.productRepository.find({
+            where: { id: In(Array.from(missingProductIds)) },
+            select: { id: true, name: true, imageUrls: true },
+          })
+        : Promise.resolve([]);
+
+    let userMap = new Map<string, any>();
     let productMap = new Map<string, Product>();
-    if (missingProductIds.size > 0) {
-      try {
-        const products = await this.productRepository.find({
-          where: { id: In(Array.from(missingProductIds)) },
-          select: { id: true, name: true, imageUrls: true },
-        });
-        productMap = new Map(products.map((p) => [p.id, p]));
-      } catch (e) {
-        console.error('Failed to load product images for orders:', e);
-      }
+
+    try {
+      const [users, products] = await Promise.all([
+        userQueryPromise,
+        productQueryPromise,
+      ]);
+      userMap = new Map(users.map((u) => [u.id, u]));
+      productMap = new Map(products.map((p) => [p.id, p]));
+    } catch (e) {
+      console.error('Failed to load enrichment details for orders:', e);
     }
 
     return orders.map((order) => {

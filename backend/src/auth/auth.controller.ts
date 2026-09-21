@@ -36,12 +36,6 @@ export class AuthController {
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        console.log('LOGIN SUCCESS');
-        console.log('User ID:', result.user.id);
-        console.log('User:', result.user.name);
-        console.log('Role:', result.user.role);
-        console.log('Access token generated:', !!result.accessToken);
-
         return {
             message: 'Login successful',
             accessToken: result.accessToken,
@@ -52,19 +46,11 @@ export class AuthController {
     @Post('logout')
     @HttpCode(HttpStatus.OK)
     logout(@Res({ passthrough: true }) response: Response) {
-        console.log('=================================');
-        console.log('USER LOGOUT REQUEST RECEIVED');
-        console.log('Time:', new Date().toISOString());
-        console.log('=================================');
-
         response.clearCookie('accessToken', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
         });
-
-        console.log('Access token cookie cleared');
-        console.log('Logout successful');
 
         return {
             message: 'Logout successful',

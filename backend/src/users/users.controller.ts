@@ -81,12 +81,6 @@ export class UsersController {
       }),
 
       fileFilter: (req, file, callback) => {
-        console.log('========== UPLOAD ==========');
-        console.log('Field:', file.fieldname);
-        console.log('Name:', file.originalname);
-        console.log('MIME:', file.mimetype);
-        console.log('============================');
-
         if (!file.mimetype.startsWith('image/')) {
           return callback(
             new Error(`Only image files are allowed. Received: ${file.mimetype}`),
@@ -134,12 +128,6 @@ export class UsersController {
       }),
 
       fileFilter: (req, file, callback) => {
-        console.log('========== UPLOAD ==========');
-        console.log('Field:', file.fieldname);
-        console.log('Name:', file.originalname);
-        console.log('MIME:', file.mimetype);
-        console.log('============================');
-
         if (!file.mimetype.startsWith('image/')) {
           return callback(
             new Error(`Only image files are allowed. Received: ${file.mimetype}`),

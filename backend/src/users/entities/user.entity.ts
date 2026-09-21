@@ -5,6 +5,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 
 export enum UserRole {
@@ -13,6 +14,7 @@ export enum UserRole {
 }
 
 @Entity('users')
+@Index(['role', 'isActive'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -26,6 +28,7 @@ export class User {
   @Column()
   password: string;
 
+  @Index()
   @Column({
     type: 'enum',
     enum: UserRole,

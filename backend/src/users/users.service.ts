@@ -3,8 +3,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { In, Repository } from 'typeorm';
+import { User, UserRole } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -69,11 +69,37 @@ export class UsersService {
       .limit(Math.min(Math.max(limit, 1), 20))
       .getRawMany();
 
-    const farmers = await Promise.all(
-      rows.map(async (row) => {
-        const farmer = await this.userRepo.findOne({
-          where: { id: row.farmerId, role: 'farmer' as any },
-        });
+    if (!rows.length) {
+      return [];
+    }
+
+    const farmerIds = rows.map((row) => row.farmerId).filter(Boolean);
+    if (!farmerIds.length) {
+      return [];
+    }
+
+    const farmers = await this.userRepo.find({
+      where: {
+        id: In(farmerIds),
+        role: UserRole.FARMER,
+      },
+      select: {
+        id: true,
+        name: true,
+        avatarUrl: true,
+        coverUrl: true,
+        businessName: true,
+        address: true,
+        bio: true,
+        phone: true,
+      },
+    });
+
+    const farmerMap = new Map(farmers.map((farmer) => [farmer.id, farmer]));
+
+    return rows
+      .map((row) => {
+        const farmer = farmerMap.get(row.farmerId);
         if (!farmer) return null;
         return {
           id: farmer.id,
@@ -86,10 +112,8 @@ export class UsersService {
           phone: farmer.phone,
           orderCount: Number(row.orderCount),
         };
-      }),
-    );
-
-    return farmers.filter(Boolean);
+      })
+      .filter(Boolean);
   }
 
   async updateProfile(
@@ -137,29 +161,27 @@ export class UsersService {
 
     await this.userRepo.save(user);
 
-    try {
-      if (phoneChanged) {
-        await this.notificationService.create({
+    const notificationPayload = phoneChanged
+      ? {
           userId: user.id,
           type: NotificationType.ACCOUNT_PHONE_CHANGED,
           title: 'Phone Number Changed',
           message: 'Your account phone number was updated successfully.',
           referenceId: null,
           referenceType: 'account',
-        });
-      } else {
-        await this.notificationService.create({
+        }
+      : {
           userId: user.id,
           type: NotificationType.ACCOUNT_PROFILE_UPDATED,
           title: 'Profile Updated',
           message: 'Your profile details have been updated successfully.',
           referenceId: null,
           referenceType: 'account',
-        });
-      }
-    } catch (e) {
+        };
+
+    this.notificationService.create(notificationPayload).catch((e) => {
       console.error('Failed to notify profile update:', e);
-    }
+    });
 
     const { password, refreshToken, ...rest } = user as any;
 
@@ -240,7 +262,7 @@ export class UsersService {
     };
   }
 
-  private deleteFile(fileUrl: string) {
+  private async deleteFile(fileUrl: string) {
     try {
       const relativePath = fileUrl.replace(/^\/+/, '');
 
@@ -249,9 +271,7 @@ export class UsersService {
         relativePath,
       );
 
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+      await fs.promises.unlink(filePath).catch(() => {});
     } catch (error) {
       console.error(
         'Failed to delete old file:',

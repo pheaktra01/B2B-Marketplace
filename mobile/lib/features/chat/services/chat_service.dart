@@ -9,10 +9,19 @@ import '../../../core/constants/api_constants.dart';
 
 class ChatService {
   static String get baseUrl => ApiConstants.baseUrl;
+  static String? _cachedToken;
+
+  static void clearTokenCache() {
+    _cachedToken = null;
+  }
 
   Future<String?> _getToken() async {
+    if (_cachedToken != null && _cachedToken!.isNotEmpty) {
+      return _cachedToken;
+    }
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('accessToken');
+    _cachedToken = prefs.getString('accessToken');
+    return _cachedToken;
   }
 
   Future<Map<String, String>> _headers() async {
@@ -208,10 +217,12 @@ class ChatService {
 
   // Get all conversations
   Future<List<dynamic>> getConversations() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/chat/conversations'),
-      headers: await _headers(),
-    );
+    final response = await http
+        .get(
+          Uri.parse('$baseUrl/chat/conversations'),
+          headers: await _headers(),
+        )
+        .timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load conversations: ${response.body}');
@@ -228,10 +239,12 @@ class ChatService {
 
   // Get single conversation by ID
   Future<Map<String, dynamic>> getConversation(String conversationId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/chat/conversations/$conversationId'),
-      headers: await _headers(),
-    );
+    final response = await http
+        .get(
+          Uri.parse('$baseUrl/chat/conversations/$conversationId'),
+          headers: await _headers(),
+        )
+        .timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load conversation: ${response.body}');
@@ -246,11 +259,13 @@ class ChatService {
 
   // Create or get conversation
   Future<Map<String, dynamic>> createConversation(String participantId) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/chat/conversations'),
-      headers: await _headers(),
-      body: jsonEncode({'participantId': participantId}),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/chat/conversations'),
+          headers: await _headers(),
+          body: jsonEncode({'participantId': participantId}),
+        )
+        .timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Failed to create conversation: ${response.body}');
@@ -274,7 +289,9 @@ class ChatService {
       '$baseUrl/chat/conversations/$conversationId/messages',
     ).replace(queryParameters: queryParameters);
 
-    final response = await http.get(uri, headers: await _headers());
+    final response = await http
+        .get(uri, headers: await _headers())
+        .timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to load messages: ${response.body}');
@@ -295,11 +312,13 @@ class ChatService {
     String content, {
     String messageType = 'text',
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/chat/conversations/$conversationId/messages'),
-      headers: await _headers(),
-      body: jsonEncode({'content': content, 'messageType': messageType}),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/chat/conversations/$conversationId/messages'),
+          headers: await _headers(),
+          body: jsonEncode({'content': content, 'messageType': messageType}),
+        )
+        .timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Failed to send message: ${response.body}');
@@ -332,7 +351,7 @@ class ChatService {
       ),
     );
 
-    final streamedResponse = await request.send();
+    final streamedResponse = await request.send().timeout(const Duration(seconds: 25));
     final response = await http.Response.fromStream(streamedResponse);
 
     if (response.statusCode != 200 && response.statusCode != 201) {
@@ -349,11 +368,13 @@ class ChatService {
       final body = messageId != null
           ? jsonEncode({'messageId': messageId})
           : jsonEncode({});
-      final response = await http.patch(
-        Uri.parse('$baseUrl/chat/conversations/$conversationId/read'),
-        headers: await _headers(),
-        body: body,
-      );
+      final response = await http
+          .patch(
+            Uri.parse('$baseUrl/chat/conversations/$conversationId/read'),
+            headers: await _headers(),
+            body: body,
+          )
+          .timeout(const Duration(seconds: 15));
 
       if (response.statusCode != 200) {
         debugPrint('Failed to mark conversation as read: ${response.body}');
@@ -365,10 +386,12 @@ class ChatService {
 
   // Delete conversation
   Future<void> deleteConversation(String conversationId) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/chat/conversations/$conversationId'),
-      headers: await _headers(),
-    );
+    final response = await http
+        .delete(
+          Uri.parse('$baseUrl/chat/conversations/$conversationId'),
+          headers: await _headers(),
+        )
+        .timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to delete conversation: ${response.body}');
@@ -377,10 +400,12 @@ class ChatService {
 
   // Delete single message
   Future<void> deleteMessage(String messageId) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/chat/messages/$messageId'),
-      headers: await _headers(),
-    );
+    final response = await http
+        .delete(
+          Uri.parse('$baseUrl/chat/messages/$messageId'),
+          headers: await _headers(),
+        )
+        .timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200) {
       throw Exception('Failed to delete message: ${response.body}');

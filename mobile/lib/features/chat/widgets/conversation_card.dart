@@ -80,7 +80,11 @@ class ConversationCard extends StatelessWidget {
                       backgroundImage: avatarUrl.isEmpty || avatarUrl == 'assets/default_avatar.jpg'
                           ? const AssetImage('assets/default_avatar.jpg') as ImageProvider
                           : (avatarUrl.startsWith('http') || avatarUrl.startsWith('/')
-                              ? NetworkImage(ApiConstants.imageUrl(avatarUrl))
+                              ? ResizeImage(
+                                  NetworkImage(ApiConstants.imageUrl(avatarUrl)),
+                                  width: 104,
+                                  height: 104,
+                                )
                               : AssetImage(avatarUrl) as ImageProvider),
                     ),
                     Positioned(

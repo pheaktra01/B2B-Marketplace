@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +33,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
   String? _currentUserId;
   String _searchQuery = '';
   io.Socket? _socket;
+  Timer? _silentSyncDebounce;
+  Timer? _searchDebounce;
 
   // ============================================================
   // COLORS
@@ -84,7 +87,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
     if (!mounted) return;
 
     if (data == null) {
-      _loadConversations(silent: true);
+      _scheduleSilentSync();
       return;
     }
 
@@ -94,7 +97,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           data['id']?.toString();
 
       if (conversationId == null || conversationId.isEmpty) {
-        _loadConversations(silent: true);
+        _scheduleSilentSync();
         return;
       }
 
@@ -151,16 +154,27 @@ class _ChatListScreenState extends State<ChatListScreen> {
         });
       }
 
-      // Fetch server state silently in background to keep data pristine
-      _loadConversations(silent: true);
+      // Debounce silent fetch in background to avoid redundant bursts
+      _scheduleSilentSync();
     } catch (e) {
       debugPrint('Error handling realtime update: $e');
-      _loadConversations(silent: true);
+      _scheduleSilentSync();
     }
+  }
+
+  void _scheduleSilentSync() {
+    _silentSyncDebounce?.cancel();
+    _silentSyncDebounce = Timer(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _loadConversations(silent: true);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _silentSyncDebounce?.cancel();
+    _searchDebounce?.cancel();
     _socket?.disconnect();
     _socket?.dispose();
     super.dispose();
@@ -262,9 +276,16 @@ class _ChatListScreenState extends State<ChatListScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: TextField(
-              onChanged: (value) => setState(() {
-                _searchQuery = value.trim().toLowerCase();
-              }),
+              onChanged: (value) {
+                _searchDebounce?.cancel();
+                _searchDebounce = Timer(const Duration(milliseconds: 200), () {
+                  if (mounted) {
+                    setState(() {
+                      _searchQuery = value.trim().toLowerCase();
+                    });
+                  }
+                });
+              },
               decoration: InputDecoration(
                 hintText: l10n.searchConversations,
                 hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),

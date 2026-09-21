@@ -411,6 +411,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (content.isEmpty || _isSending) return;
 
     _isSending = true;
+    HapticFeedback.lightImpact();
 
     final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
     final tempMsg = ChatMessage(
@@ -1269,40 +1270,33 @@ class _ChatScreenState extends State<ChatScreen> {
       return _buildEmptyState();
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          controller: _messagesScrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight - 20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Loading Older Messages Indicator
-                if (_isLoadingOlder)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    child: Center(
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Color(0xFF0C6B2D),
-                        ),
-                      ),
-                    ),
-                  ),
+    final messageWidgets = _buildMessageListWithDateChips();
 
-                // Render Messages in Chronological Order (Oldest at top, Newest at bottom)
-                ..._buildMessageListWithDateChips(),
-              ],
-            ),
-          ),
-        );
+    return ListView.builder(
+      controller: _messagesScrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      itemCount: messageWidgets.length + (_isLoadingOlder ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (_isLoadingOlder) {
+          if (index == 0) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF0C6B2D),
+                  ),
+                ),
+              ),
+            );
+          }
+          return messageWidgets[index - 1];
+        }
+        return messageWidgets[index];
       },
     );
   }
@@ -2177,6 +2171,7 @@ class ProductMessageCard extends StatelessWidget {
               imageUrl,
               height: 125,
               width: double.infinity,
+              cacheWidth: 600,
               fit: BoxFit.cover,
               errorBuilder: (_, error, stackTrace) => Container(
                 height: 125,
@@ -2362,6 +2357,8 @@ class _ImageMessageBubble extends StatelessWidget {
                 fullUrl,
                 width: 240,
                 height: 200,
+                cacheWidth: 480,
+                cacheHeight: 400,
                 fit: BoxFit.cover,
                 loadingBuilder: (context, child, progress) {
                   if (progress == null) return child;

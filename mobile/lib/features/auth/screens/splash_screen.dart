@@ -23,15 +23,17 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Remove the native OS splash screen once Flutter starts rendering (mobile only)
-    if (!kIsWeb) {
-      FlutterNativeSplash.remove();
-    }
+    // Remove native splash after the first Flutter frame has painted to prevent flash
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!kIsWeb) {
+        FlutterNativeSplash.remove();
+      }
+    });
 
     // Initialize smooth entrance animation
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1100),
     );
 
     _fadeAnimation = CurvedAnimation(
@@ -48,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animationController.forward();
 
-    // Start auto-login and navigation check
+    // Start auto-login and navigation check concurrently
     _checkAutoLogin();
   }
 
@@ -60,12 +62,17 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _checkAutoLogin() async {
     try {
-      // Allow user to see the animated splash brand (2 seconds total)
-      await Future.delayed(const Duration(milliseconds: 2000));
+      // Run the brand animation threshold concurrently with token validation
+      final results = await Future.wait([
+        Future.delayed(const Duration(milliseconds: 1200)),
+        AuthService.isTokenValid(),
+        AuthService.getUserRole(),
+      ]);
+
       if (!mounted) return;
 
-      final isValid = await AuthService.isTokenValid();
-      final role = await AuthService.getUserRole();
+      final isValid = results[1] as bool;
+      final role = results[2] as String?;
 
       debugPrint('SPLASH AUTO-LOGIN CHECK: isValid=$isValid, role=$role');
 

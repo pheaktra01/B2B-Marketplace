@@ -26,18 +26,18 @@ export class CartService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  // =========================
+  // ==========================================================
   // GET CART
-  // =========================
+  // ==========================================================
 
   async getCart(restaurantId: string) {
     let cart = await this.cartRepository.findOne({
       where: { restaurantId },
-        relations: {
-            items: {
-                product: true,
-            },
+      relations: {
+        items: {
+          product: true,
         },
+      },
     });
 
     if (!cart) {
@@ -52,9 +52,9 @@ export class CartService {
     return this.formatCart(cart);
   }
 
-  // =========================
-  // ADD TO CART
-  // =========================
+  // ==========================================================
+  // ADD TO CART (OPTIMIZED WITH PARALLEL QUERIES & IN-MEMORY FORMAT)
+  // ==========================================================
 
   async addToCart(
     restaurantId: string,
@@ -62,60 +62,57 @@ export class CartService {
   ) {
     const { productId, quantity } = addToCartDto;
 
-    // Find product
-    const product = await this.productRepository.findOne({
-      where: { id: productId },
-    });
+    // Concurrently fetch product details and existing cart in parallel
+    const [product, existingCart] = await Promise.all([
+      this.productRepository.findOne({
+        where: { id: productId },
+      }),
+      this.cartRepository.findOne({
+        where: { restaurantId },
+        relations: {
+          items: {
+            product: true,
+          },
+        },
+      }),
+    ]);
 
     if (!product) {
       throw new NotFoundException('Product not found');
     }
 
-    // Check availability
     if (!product.isAvailable) {
-      throw new BadRequestException(
-        'This product is currently unavailable',
-      );
+      throw new BadRequestException('This product is currently unavailable');
     }
 
-    // Check minimum order
     if (quantity < product.minOrder) {
       throw new BadRequestException(
         `Minimum order quantity is ${product.minOrder}`,
       );
     }
 
-    // Check available stock
     if (quantity > product.quantity) {
       throw new BadRequestException(
         `Only ${product.quantity} units are available`,
       );
     }
 
-    // Find or create cart
-    let cart = await this.cartRepository.findOne({
-      where: { restaurantId },
-    });
-
+    // Ensure cart exists
+    let cart = existingCart;
     if (!cart) {
       cart = this.cartRepository.create({
         restaurantId,
+        items: [],
       });
-
       cart = await this.cartRepository.save(cart);
+      cart.items = [];
     }
 
-    // Check if product already exists in cart
-    let cartItem = await this.cartItemRepository.findOne({
-      where: {
-        cartId: cart.id,
-        productId,
-      },
-    });
+    // Check if item already exists in cart
+    const cartItem = cart.items?.find((item) => item.productId === productId);
 
     if (cartItem) {
-      const newQuantity =
-        Number(cartItem.quantity) + Number(quantity);
+      const newQuantity = Number(cartItem.quantity) + Number(quantity);
 
       if (newQuantity > product.quantity) {
         throw new BadRequestException(
@@ -124,25 +121,32 @@ export class CartService {
       }
 
       cartItem.quantity = newQuantity;
-
-      await this.cartItemRepository.save(cartItem);
+      await this.cartItemRepository.update(cartItem.id, {
+        quantity: newQuantity,
+      });
     } else {
-      cartItem = this.cartItemRepository.create({
+      const newItem = this.cartItemRepository.create({
         cartId: cart.id,
         productId: product.id,
         quantity,
         unitPrice: product.price,
       });
 
-      await this.cartItemRepository.save(cartItem);
+      const savedItem = await this.cartItemRepository.save(newItem);
+      savedItem.product = product;
+
+      if (!cart.items) {
+        cart.items = [];
+      }
+      cart.items.push(savedItem);
     }
 
-    return this.getCart(restaurantId);
+    return this.formatCart(cart);
   }
 
-  // =========================
-  // UPDATE CART ITEM
-  // =========================
+  // ==========================================================
+  // UPDATE CART ITEM (OPTIMIZED: SINGLE SELECT + DIRECT UPDATE)
+  // ==========================================================
 
   async updateCartItem(
     restaurantId: string,
@@ -151,34 +155,31 @@ export class CartService {
   ) {
     const cart = await this.cartRepository.findOne({
       where: { restaurantId },
+      relations: {
+        items: {
+          product: true,
+        },
+      },
     });
 
     if (!cart) {
       throw new NotFoundException('Cart not found');
     }
 
-    const cartItem = await this.cartItemRepository.findOne({
-        where: {
-            cartId: cart.id,
-            productId,
-        },
-        relations: {
-            product: true,
-        },
-    });
+    const cartItem = cart.items?.find((item) => item.productId === productId);
 
     if (!cartItem) {
-      throw new NotFoundException(
-        'Product is not in your cart',
-      );
+      throw new NotFoundException('Product is not in your cart');
     }
 
     const product = cartItem.product;
 
+    if (!product) {
+      throw new NotFoundException('Product details could not be found');
+    }
+
     if (!product.isAvailable) {
-      throw new BadRequestException(
-        'This product is currently unavailable',
-      );
+      throw new BadRequestException('This product is currently unavailable');
     }
 
     if (updateCartDto.quantity < product.minOrder) {
@@ -193,16 +194,19 @@ export class CartService {
       );
     }
 
+    // Update in database directly
     cartItem.quantity = updateCartDto.quantity;
+    await this.cartItemRepository.update(cartItem.id, {
+      quantity: updateCartDto.quantity,
+    });
 
-    await this.cartItemRepository.save(cartItem);
-
-    return this.getCart(restaurantId);
+    // Return formatted cart immediately without querying the database again
+    return this.formatCart(cart);
   }
 
-  // =========================
-  // REMOVE ITEM
-  // =========================
+  // ==========================================================
+  // REMOVE ITEM (OPTIMIZED: SINGLE SELECT + DIRECT DELETE)
+  // ==========================================================
 
   async removeFromCart(
     restaurantId: string,
@@ -210,37 +214,37 @@ export class CartService {
   ) {
     const cart = await this.cartRepository.findOne({
       where: { restaurantId },
+      relations: {
+        items: {
+          product: true,
+        },
+      },
     });
 
     if (!cart) {
       throw new NotFoundException('Cart not found');
     }
 
-    const cartItem = await this.cartItemRepository.findOne({
-      where: {
-        cartId: cart.id,
-        productId,
-      },
-    });
+    const itemIndex = cart.items?.findIndex((item) => item.productId === productId);
 
-    if (!cartItem) {
-      throw new NotFoundException(
-        'Product is not in your cart',
-      );
+    if (itemIndex === -1 || itemIndex === undefined) {
+      throw new NotFoundException('Product is not in your cart');
     }
 
-    await this.cartItemRepository.remove(cartItem);
+    const [removedItem] = cart.items.splice(itemIndex, 1);
+    await this.cartItemRepository.delete(removedItem.id);
 
-    return this.getCart(restaurantId);
+    return this.formatCart(cart);
   }
 
-  // =========================
+  // ==========================================================
   // CLEAR CART
-  // =========================
+  // ==========================================================
 
   async clearCart(restaurantId: string) {
     const cart = await this.cartRepository.findOne({
       where: { restaurantId },
+      select: { id: true },
     });
 
     if (!cart) {
@@ -256,23 +260,30 @@ export class CartService {
     };
   }
 
-  // =========================
+  // ==========================================================
   // FORMAT CART
-  // =========================
+  // ==========================================================
 
   private formatCart(cart: Cart) {
     const items = cart.items ?? [];
 
-    const formattedItems = items.map((item) => ({
-      id: item.id,
-      productId: item.productId,
-      productName: item.product?.name,
-      imageUrl: item.product?.imageUrls,
-      quantity: Number(item.quantity),
-      unitPrice: Number(item.unitPrice),
-      subtotal:
-        Number(item.quantity) * Number(item.unitPrice),
-    }));
+    const formattedItems = items.map((item) => {
+      const quantity = Number(item.quantity);
+      const unitPrice = Number(item.unitPrice);
+      const subtotal = Number((quantity * unitPrice).toFixed(2));
+
+      return {
+        id: item.id,
+        productId: item.productId,
+        productName: item.product?.name ?? 'Product',
+        imageUrl: item.product?.imageUrls ?? [],
+        quantity,
+        unitPrice,
+        subtotal,
+        deliveryFee: Number(item.product?.deliveryFee ?? 0),
+        deliveryMethod: item.product?.deliveryMethod ?? 'Local Delivery',
+      };
+    });
 
     const total = formattedItems.reduce(
       (sum, item) => sum + item.subtotal,

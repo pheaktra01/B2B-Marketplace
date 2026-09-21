@@ -290,131 +290,36 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
                                     ),
                                     elevation: 1,
                                   ),
-                                  onPressed: _isLoading
-                                      ? null
-                                      : () async {
-                                          if (_currentOtpCode.length != 6) {
-                                            return;
-                                          }
-
-                                          final messenger = ScaffoldMessenger.of(context);
-
-                                          setState(() {
-                                            _isLoading = true;
-                                          });
-
-                                          try {
-                                            switch (widget.type) {
-                                              case VerificationType.login:
-                                                if (widget.selectedRole == 'farmer') {
-                                                  context.go(AppRoutes.farmerDashboard);
-                                                } else {
-                                                  context.go(AppRoutes.restaurantHome);
-                                                }
-                                                break;
-
-                                              case VerificationType.signup:
-                                                if (widget.userId == null || widget.userId!.isEmpty) {
-                                                  throw StateError('Missing user id for verification');
-                                                }
-                                                final response = await _authService.verifyOtp(
-                                                  userId: widget.userId!,
-                                                  otp: _currentOtpCode,
-                                                );
-                                                final data = response['data'] as Map<String, dynamic>;
-
-                                                final status = response['statusCode'] as int;
-                                                if (status < 200 || status >= 300) {
-                                                  throw StateError(data['message']?.toString() ?? 'OTP verification failed');
-                                                }
-
-                                                final prefs = await SharedPreferences.getInstance();
-                                                await prefs.setString('userId', widget.userId!);
-
-                                                // After successful verification, if we have the password (from signup), auto-login
-                                                if (widget.password != null && widget.password!.isNotEmpty) {
-                                                  final loginResp = await _authService.login(
-                                                    phone: widget.phoneNumber,
-                                                    password: widget.password!,
-                                                  );
-
-                                                  final loginData = loginResp['data'] as Map<String, dynamic>;
-
-                                                  final loginStatus = loginResp['statusCode'] as int;
-                                                  if (loginStatus >= 200 && loginStatus < 300) {
-                                                    final user = loginData['user'] as Map<String, dynamic>?;
-                                                    final role = user?['role']?.toString();
-                                                    final loggedInUserId = user?['id']?.toString();
-
-                                                    if (loggedInUserId != null && loggedInUserId.isNotEmpty) {
-                                                      await prefs.setString('userId', loggedInUserId);
-                                                    }
-
-                                                    if (!context.mounted) return;
-                                                    context.go(
-                                                      AppRoutes.setupProfile,
-                                                      extra: role ?? widget.selectedRole ?? 'restaurant',
-                                                    );
-                                                  } else {
-                                                    // If login failed, still navigate to setupProfile
-                                                    if (!context.mounted) return;
-                                                    context.go(
-                                                      AppRoutes.setupProfile,
-                                                      extra: widget.selectedRole ?? 'restaurant',
-                                                    );
-                                                  }
-                                                } else {
-                                                  // No password provided: route to setupProfile
-                                                  if (!context.mounted) return;
-                                                  context.go(
-                                                    AppRoutes.setupProfile,
-                                                    extra: widget.selectedRole ?? 'restaurant',
-                                                  );
-                                                }
-                                                break;
-
-                                              case VerificationType.forgotPassword:
-                                                if (!context.mounted) return;
-                                                context.push(AppRoutes.resetPassword, extra: ResetPasswordArgs(
-                                                  phoneNumber: widget.phoneNumber,
-                                                  otp: _currentOtpCode,
-                                                ));
-                                                break;
-                                            }
-                                          } catch (error) {
-                                            if (!mounted) {
-                                              return;
-                                            }
-
-                                            messenger.showSnackBar(
-                                              SnackBar(
-                                                content: Text('Unable to verify OTP: $error'),
+                                  onPressed: _isLoading ? null : _handleVerify,
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 200),
+                                    child: _isLoading
+                                        ? const SizedBox(
+                                            width: 22,
+                                            height: 22,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            ),
+                                          )
+                                        : Row(
+                                            key: const ValueKey('verify_idle'),
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                _getButtonText(l10n),
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
-                                            );
-                                          } finally {
-                                            if (mounted) {
-                                              setState(() {
-                                                _isLoading = false;
-                                              });
-                                            }
-                                          }
-                                        },
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        _getButtonText(l10n),
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Icon(
-                                        Icons.arrow_forward_ios,
-                                        size: 16,
-                                      ),
-                                    ],
+                                              const SizedBox(width: 8),
+                                              const Icon(
+                                                Icons.arrow_forward_ios,
+                                                size: 16,
+                                              ),
+                                            ],
+                                          ),
                                   ),
                                 ),
                               ),
@@ -494,7 +399,119 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
     );
   }
 
-  // Generates custom independent dynamic input slots handling keyboard focus
+  Future<void> _handleVerify() async {
+    if (_isLoading) return;
+    if (_currentOtpCode.length != 6) {
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
+
+    final messenger = ScaffoldMessenger.of(context);
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      switch (widget.type) {
+        case VerificationType.login:
+          if (widget.selectedRole == 'farmer') {
+            context.go(AppRoutes.farmerDashboard);
+          } else {
+            context.go(AppRoutes.restaurantHome);
+          }
+          break;
+
+        case VerificationType.signup:
+          if (widget.userId == null || widget.userId!.isEmpty) {
+            throw StateError('Missing user id for verification');
+          }
+          final response = await _authService.verifyOtp(
+            userId: widget.userId!,
+            otp: _currentOtpCode,
+          );
+          final data = response['data'] as Map<String, dynamic>;
+
+          final status = response['statusCode'] as int;
+          if (status < 200 || status >= 300) {
+            throw StateError(data['message']?.toString() ?? 'OTP verification failed');
+          }
+
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userId', widget.userId!);
+
+          // After successful verification, if we have the password (from signup), auto-login
+          if (widget.password != null && widget.password!.isNotEmpty) {
+            final loginResp = await _authService.login(
+              phone: widget.phoneNumber,
+              password: widget.password!,
+            );
+
+            final loginData = loginResp['data'] as Map<String, dynamic>;
+
+            final loginStatus = loginResp['statusCode'] as int;
+            if (loginStatus >= 200 && loginStatus < 300) {
+              final user = loginData['user'] as Map<String, dynamic>?;
+              final role = user?['role']?.toString();
+              final loggedInUserId = user?['id']?.toString();
+
+              if (loggedInUserId != null && loggedInUserId.isNotEmpty) {
+                await prefs.setString('userId', loggedInUserId);
+              }
+
+              if (!mounted) return;
+              context.go(
+                AppRoutes.setupProfile,
+                extra: role ?? widget.selectedRole ?? 'restaurant',
+              );
+            } else {
+              // If login failed, still navigate to setupProfile
+              if (!mounted) return;
+              context.go(
+                AppRoutes.setupProfile,
+                extra: widget.selectedRole ?? 'restaurant',
+              );
+            }
+          } else {
+            // No password provided: route to setupProfile
+            if (!mounted) return;
+            context.go(
+              AppRoutes.setupProfile,
+              extra: widget.selectedRole ?? 'restaurant',
+            );
+          }
+          break;
+
+        case VerificationType.forgotPassword:
+          if (!mounted) return;
+          context.push(AppRoutes.resetPassword, extra: ResetPasswordArgs(
+            phoneNumber: widget.phoneNumber,
+            otp: _currentOtpCode,
+          ));
+          break;
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Unable to verify OTP: $error'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  // Generates custom independent dynamic input slots handling keyboard focus & pasting
   Widget _buildOtpBox(int index, Color fillColor, double width) {
     return SizedBox(
       width: width,
@@ -506,7 +523,7 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
         textAlign: TextAlign.center,
         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         inputFormatters: [
-          LengthLimitingTextInputFormatter(1),
+          LengthLimitingTextInputFormatter(6),
           FilteringTextInputFormatter.digitsOnly,
         ],
         decoration: InputDecoration(
@@ -523,16 +540,37 @@ class _VerifyPhoneScreenState extends State<VerifyPhoneScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Colors.black26, width: 1.5),
+            borderSide: const BorderSide(color: Color(0xFF0F6221), width: 1.5),
           ),
         ),
         onChanged: (value) {
+          // Handle multi-digit paste (e.g. user pasted a 6-digit code)
+          if (value.length > 1) {
+            final digits = value.replaceAll(RegExp(r'\D'), '');
+            for (int i = 0; i < digits.length && (index + i) < 6; i++) {
+              _controllers[index + i].text = digits[i];
+            }
+            if (index + digits.length >= 6) {
+              _focusNodes[5].unfocus();
+              if (_currentOtpCode.length == 6) {
+                _handleVerify();
+              }
+            } else {
+              FocusScope.of(context).requestFocus(_focusNodes[(index + digits.length).clamp(0, 5)]);
+            }
+            return;
+          }
+
           if (value.isNotEmpty) {
+            HapticFeedback.selectionClick();
             // Forward pass focus handling
             if (index < 5) {
               FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
             } else {
               _focusNodes[index].unfocus(); // Done inputting final digit
+              if (_currentOtpCode.length == 6) {
+                _handleVerify();
+              }
             }
           } else {
             // Backward pass deletion focus handling

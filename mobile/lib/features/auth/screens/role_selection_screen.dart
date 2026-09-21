@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/l10n/app_localizations.dart';
@@ -193,6 +194,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                           onPressed: _selectedRole == null
                               ? null
                               : () {
+                                  HapticFeedback.lightImpact();
                                   context.push(
                                     AppRoutes.signUp,
                                     extra: _selectedRole!,
@@ -275,6 +277,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
   }) {
     return InkWell(
       onTap: () {
+        HapticFeedback.selectionClick();
         setState(() {
           _selectedRole = id;
         });

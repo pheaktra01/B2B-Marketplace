@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,29 +8,64 @@ import '../../../core/constants/api_constants.dart';
 import '../../notification/services/push_notification_service.dart';
 
 class AuthService {
+  static SharedPreferences? _cachedPrefs;
+  static String? _cachedRole;
+  static String? _cachedToken;
+
+  /// Fast cached access to SharedPreferences to prevent repeated disk I/O
+  static Future<SharedPreferences> _getPrefs() async {
+    return _cachedPrefs ??= await SharedPreferences.getInstance();
+  }
+
   Future<Map<String, dynamic>> _post(
     String path,
     Map<String, dynamic> body,
   ) async {
-    final response = await http.post(
-      Uri.parse('${ApiConstants.auth}/$path'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(body),
-    );
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiConstants.auth}/$path'),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 15));
 
-    final decodedBody = response.body.isEmpty ? {} : jsonDecode(response.body);
+      final decodedBody =
+          response.body.isEmpty ? {} : jsonDecode(response.body);
 
-    return {
-      'statusCode': response.statusCode,
-      'data': decodedBody,
-    };
+      return {
+        'statusCode': response.statusCode,
+        'data': decodedBody,
+      };
+    } on TimeoutException {
+      return {
+        'statusCode': 408,
+        'data': {
+          'message': 'Connection timed out. Please check your network and try again.',
+        },
+      };
+    } on SocketException {
+      return {
+        'statusCode': 503,
+        'data': {
+          'message': 'Unable to connect to server. Please check your internet connection.',
+        },
+      };
+    } catch (e) {
+      return {
+        'statusCode': 500,
+        'data': {
+          'message': 'An unexpected error occurred: $e',
+        },
+      };
+    }
   }
 
   static Future<bool> isTokenValid() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('accessToken');
+    final prefs = await _getPrefs();
+    final token = _cachedToken ?? prefs.getString('accessToken');
     final expiry = prefs.getInt('tokenExpiry');
 
     if (token == null || token.isEmpty || expiry == null) {
@@ -42,16 +79,23 @@ class AuthService {
       return false;
     }
 
+    _cachedToken = token;
     return true;
   }
 
   static Future<String?> getUserRole() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('userRole');
+    if (_cachedRole != null && _cachedRole!.isNotEmpty) {
+      return _cachedRole;
+    }
+    final prefs = await _getPrefs();
+    _cachedRole = prefs.getString('userRole');
+    return _cachedRole;
   }
 
   static Future<void> clearAuth() async {
-    final prefs = await SharedPreferences.getInstance();
+    _cachedToken = null;
+    _cachedRole = null;
+    final prefs = await _getPrefs();
     await prefs.remove('accessToken');
     await prefs.remove('userId');
     await prefs.remove('userRole');
@@ -83,11 +127,12 @@ class AuthService {
       debugPrint('Token length: ${token?.toString().length ?? 0}');
 
       if (token != null && token.toString().isNotEmpty) {
-        final prefs = await SharedPreferences.getInstance();
+        final prefs = await _getPrefs();
 
+        _cachedToken = token.toString();
         await prefs.setString(
           'accessToken',
-          token.toString(),
+          _cachedToken!,
         );
 
         final userId = data['user']?['id'] ?? data['id'];
@@ -100,9 +145,10 @@ class AuthService {
 
         final role = data['user']?['role'] ?? data['role'];
         if (role != null) {
+          _cachedRole = role.toString();
           await prefs.setString(
             'userRole',
-            role.toString(),
+            _cachedRole!,
           );
         }
 
@@ -123,11 +169,15 @@ class AuthService {
         debugPrint('Token Expiry: ${DateTime.fromMillisecondsSinceEpoch(sevenDaysExpiry)}');
         debugPrint('=============================================');
 
-        // Sync FCM device token with backend
-        await PushNotificationService.syncTokenWithBackend();
+        // Sync FCM device token with backend asynchronously
+        unawaited(PushNotificationService.syncTokenWithBackend().catchError((e) {
+          debugPrint('Error syncing push token: $e');
+        }));
 
-        // Start listening to realtime notifications for instant alerts
-        await PushNotificationService.startRealtimeNotificationListener();
+        // Start listening to realtime notifications
+        unawaited(PushNotificationService.startRealtimeNotificationListener().catchError((e) {
+          debugPrint('Error starting notification listener: $e');
+        }));
       }
     }
 
@@ -181,23 +231,24 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final token = prefs.getString('accessToken');
+    final prefs = await _getPrefs();
+    final token = _cachedToken ?? prefs.getString('accessToken');
 
     debugPrint('========== LOGOUT ==========');
     debugPrint('Token exists: ${token != null}');
     debugPrint('Token length: ${token?.length ?? 0}');
 
     try {
-      final response = await http.post(
-        Uri.parse('${ApiConstants.auth}/logout'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null && token.isNotEmpty)
-            'Authorization': 'Bearer $token',
-        },
-      );
+      final response = await http
+          .post(
+            Uri.parse('${ApiConstants.auth}/logout'),
+            headers: {
+              'Content-Type': 'application/json',
+              if (token != null && token.isNotEmpty)
+                'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
 
       final decodedBody =
           response.body.isEmpty ? {} : jsonDecode(response.body);

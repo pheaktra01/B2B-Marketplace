@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/auth/services/auth_service.dart';
@@ -20,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _autoValidate = false;
 
   @override
   void dispose() {
@@ -86,8 +88,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               child: Form(
                                 key: _formKey,
-                                autovalidateMode:
-                                    AutovalidateMode.onUserInteraction,
+                                autovalidateMode: _autoValidate
+                                    ? AutovalidateMode.onUserInteraction
+                                    : AutovalidateMode.disabled,
                                 child: Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.start,
@@ -197,6 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     TextFormField(
                                       controller: _phoneController,
                                       keyboardType: TextInputType.phone,
+                                      textInputAction: TextInputAction.next,
                                       validator: (value) {
                                         final cleaned = (value ?? '').replaceAll(RegExp(r'\s+'), '');
                                         if (cleaned.isEmpty) {
@@ -281,6 +285,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     TextFormField(
                                       controller: _passwordController,
                                       obscureText: _obscurePassword,
+                                      textInputAction: TextInputAction.done,
+                                      onFieldSubmitted: (_) => _handleLogin(),
                                       validator: (value) {
                                         if (value == null ||
                                             value.isEmpty) {
@@ -366,23 +372,36 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 BorderRadius.circular(12),
                                           ),
                                         ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              l10n.login,
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            const Icon(
-                                              Icons.chevron_right,
-                                              size: 20,
-                                            ),
-                                          ],
+                                        child: AnimatedSwitcher(
+                                          duration: const Duration(milliseconds: 200),
+                                          child: _isLoading
+                                              ? const SizedBox(
+                                                  width: 22,
+                                                  height: 22,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2.5,
+                                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                  ),
+                                                )
+                                              : Row(
+                                                  key: const ValueKey('login_idle'),
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      l10n.login,
+                                                      style: const TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 6),
+                                                    const Icon(
+                                                      Icons.chevron_right,
+                                                      size: 20,
+                                                    ),
+                                                  ],
+                                                ),
                                         ),
                                       ),
                                     ),
@@ -487,6 +506,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleLogin() async {
     if (_isLoading) return;
+
+    // Immediately dismiss the keyboard cleanly to prevent layout jumpiness
+    FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
+
+    if (!_autoValidate) {
+      setState(() {
+        _autoValidate = true;
+      });
+    }
 
     if (!_formKey.currentState!.validate()) {
       return;

@@ -4,7 +4,7 @@ import {
 } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 
 import {
   Notification,
@@ -49,7 +49,7 @@ export class NotificationService {
   }
 
   // =========================================================
-  // GET MY NOTIFICATIONS
+  // GET MY NOTIFICATIONS (INDEX-OPTIMIZED PAGINATION)
   // =========================================================
 
   async getMyNotifications(
@@ -84,7 +84,7 @@ export class NotificationService {
   }
 
   // =========================================================
-  // GET UNREAD COUNT
+  // GET UNREAD COUNT (INDEX-OPTIMIZED)
   // =========================================================
 
   async getUnreadCount(userId: string) {
@@ -122,32 +122,28 @@ export class NotificationService {
   }
 
   // =========================================================
-  // MARK ONE AS READ
+  // MARK ONE AS READ (ATOMIC DIRECT UPDATE)
   // =========================================================
 
   async markAsRead(
     notificationId: string,
     userId: string,
   ) {
-    const notification =
-      await this.notificationRepository.findOne({
-        where: {
-          id: notificationId,
-          userId,
-        },
-      });
+    const result = await this.notificationRepository.update(
+      {
+        id: notificationId,
+        userId,
+      },
+      {
+        isRead: true,
+      },
+    );
 
-    if (!notification) {
+    if (result.affected === 0) {
       throw new NotFoundException(
         'Notification not found',
       );
     }
-
-    notification.isRead = true;
-
-    await this.notificationRepository.save(
-      notification,
-    );
 
     this.eventEmitter.emit('notification.read', {
       notificationId,
@@ -161,29 +157,32 @@ export class NotificationService {
     };
   }
 
+  // =========================================================
+  // MARK CONVERSATION NOTIFICATIONS AS READ (ATOMIC BATCH UPDATE)
+  // =========================================================
+
   async markConversationNotificationsAsRead(
     userId: string,
     conversationId: string,
   ) {
-    const unread = await this.notificationRepository.find({
-      where: {
+    const result = await this.notificationRepository.update(
+      {
         userId,
         referenceId: conversationId,
         isRead: false,
       },
-    });
+      {
+        isRead: true,
+      },
+    );
 
-    if (unread.length > 0) {
-      for (const n of unread) {
-        n.isRead = true;
-      }
-      await this.notificationRepository.save(unread);
+    if ((result.affected ?? 0) > 0) {
       await this.emitUnreadCount(userId);
     }
   }
 
   // =========================================================
-  // MARK ALL AS READ
+  // MARK ALL AS READ (ATOMIC DIRECT UPDATE)
   // =========================================================
 
   async markAllAsRead(userId: string) {
@@ -212,30 +211,23 @@ export class NotificationService {
   }
 
   // =========================================================
-  // DELETE NOTIFICATION
+  // DELETE NOTIFICATION (ATOMIC DIRECT DELETE)
   // =========================================================
 
   async delete(
     notificationId: string,
     userId: string,
   ) {
-    const notification =
-      await this.notificationRepository.findOne({
-        where: {
-          id: notificationId,
-          userId,
-        },
-      });
+    const result = await this.notificationRepository.delete({
+      id: notificationId,
+      userId,
+    });
 
-    if (!notification) {
+    if (result.affected === 0) {
       throw new NotFoundException(
         'Notification not found',
       );
     }
-
-    await this.notificationRepository.delete(
-      notificationId,
-    );
 
     this.eventEmitter.emit('notification.deleted', {
       notificationId,
@@ -287,14 +279,17 @@ export class NotificationService {
 
     // Check if there is an unread chat notification for this conversation in the last 10 minutes
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-    const existing = await this.notificationRepository
-      .createQueryBuilder('n')
-      .where('n.user_id = :userId', { userId })
-      .andWhere('n.reference_id = :conversationId', { conversationId })
-      .andWhere('n.is_read = :isRead', { isRead: false })
-      .andWhere('n.created_at >= :since', { since: tenMinutesAgo })
-      .orderBy('n.created_at', 'DESC')
-      .getOne();
+    const existing = await this.notificationRepository.findOne({
+      where: {
+        userId,
+        referenceId: conversationId,
+        isRead: false,
+        createdAt: MoreThanOrEqual(tenMinutesAgo),
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
 
     if (existing) {
       existing.title = senderName;
@@ -336,7 +331,7 @@ export class NotificationService {
   }
 
   // =========================================================
-  // BROADCAST SYSTEM NOTIFICATION
+  // BROADCAST SYSTEM NOTIFICATION (MEMORY & BATCH OPTIMIZED)
   // =========================================================
 
   async broadcastSystemNotification(dto: {
@@ -347,7 +342,7 @@ export class NotificationService {
   }) {
     const type = dto.type ?? NotificationType.SYSTEM_ANNOUNCEMENT;
 
-    let usersQuery = this.userRepository.createQueryBuilder('user');
+    let usersQuery = this.userRepository.createQueryBuilder('user').select('user.id');
     if (dto.targetRole) {
       usersQuery = usersQuery.where('user.role = :role', {
         role: dto.targetRole,
@@ -370,7 +365,10 @@ export class NotificationService {
     }
 
     if (createdNotifications.length > 0) {
-      await this.notificationRepository.save(createdNotifications);
+      await this.notificationRepository.save(createdNotifications, {
+        chunk: 500,
+      });
+
       for (const n of createdNotifications) {
         this.eventEmitter.emit('notification.created', n);
       }

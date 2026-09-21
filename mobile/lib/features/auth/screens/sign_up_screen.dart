@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/core/routing/route_args.dart';
@@ -35,6 +36,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _obscureConfirmPassword = true;
   bool _agreedToTerms = false;
   bool _isLoading = false;
+  bool _autoValidate = false;
 
   @override
   void dispose() {
@@ -97,7 +99,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               padding: EdgeInsets.all(isDesktopOrTablet ? 32.0 : 24.0),
                               child: Form(
                                 key: _formKey,
-                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                autovalidateMode: _autoValidate
+                                    ? AutovalidateMode.onUserInteraction
+                                    : AutovalidateMode.disabled,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
@@ -449,147 +453,173 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                                     const SizedBox(height: 24),
 
-                                    // --- Sign Up Button ---
-                                    SizedBox(
-                                      width: double.infinity,
-                                      height: 52,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: brandGreen,
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                          elevation: 0,
-                                        ),
-                                        onPressed: _isLoading
-                                            ? null
-                                            : () async {
-                                                if (!_formKey.currentState!.validate() || !_agreedToTerms) {
-                                                  return;
-                                                }
+                                     // --- Sign Up Button ---
+                                     SizedBox(
+                                       width: double.infinity,
+                                       height: 52,
+                                       child: ElevatedButton(
+                                         style: ElevatedButton.styleFrom(
+                                           backgroundColor: brandGreen,
+                                           foregroundColor: Colors.white,
+                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                           elevation: 0,
+                                         ),
+                                         onPressed: _isLoading ? null : _handleSignUp,
+                                         child: AnimatedSwitcher(
+                                           duration: const Duration(milliseconds: 200),
+                                           child: _isLoading
+                                               ? const SizedBox(
+                                                   width: 22,
+                                                   height: 22,
+                                                   child: CircularProgressIndicator(
+                                                     strokeWidth: 2.5,
+                                                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                   ),
+                                                 )
+                                               : Row(
+                                                   key: const ValueKey('signup_idle'),
+                                                   mainAxisAlignment: MainAxisAlignment.center,
+                                                   children: [
+                                                     Text(
+                                                       l10n.signup,
+                                                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                                     ),
+                                                   ],
+                                                 ),
+                                         ),
+                                       ),
+                                     ),
 
-                                                final messenger = ScaffoldMessenger.of(context);
+                                     const SizedBox(height: 24),
 
-                                                setState(() {
-                                                  _isLoading = true;
-                                                });
+                                     // --- Already have an account? Log In ---
+                                     Row(
+                                       mainAxisAlignment: MainAxisAlignment.center,
+                                       children: [
+                                         Text(
+                                           l10n.alreadyHaveAccount,
+                                           style: const TextStyle(
+                                             color: Colors.black54,
+                                             fontSize: 14,
+                                           ),
+                                         ),
+                                         GestureDetector(
+                                           onTap: () {
+                                             if (context.canPop()) {
+                                               context.pop();
+                                             } else {
+                                               context.go(AppRoutes.login);
+                                             }
+                                           },
+                                           child: Text(
+                                             l10n.login,
+                                             style: const TextStyle(
+                                               color: brandGreen,
+                                               fontSize: 14,
+                                               fontWeight: FontWeight.bold,
+                                             ),
+                                           ),
+                                         ),
+                                       ],
+                                     ),
+                                   ],
+                                 ),
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+                     ),
+                   ),
+                 ),
+               ),
+             );
+           },
+         ),
+       ),
+     );
+   }
 
-                                                try {
-                                                  final cleanPhone = _phoneController.text.replaceAll(RegExp(r'\s+'), '');
-                                                  final response = await _authService.register(
-                                                    name: _nameController.text.trim(),
-                                                    phone: cleanPhone,
-                                                    password: _passwordController.text,
-                                                    role: widget.selectedRole,
-                                                  );
-                                                  final data = response['data'] as Map<String, dynamic>;
+  Future<void> _handleSignUp() async {
+    if (_isLoading) return;
 
-                                                  if (response['statusCode'] == 201 || response['statusCode'] == 200) {
-                                                    if (!context.mounted) {
-                                                      return;
-                                                    }
+    // Cleanly unfocus keyboard and provide haptic feedback
+    FocusScope.of(context).unfocus();
+    HapticFeedback.lightImpact();
 
-                                                    context.push(
-                                                      AppRoutes.verifyPhone,
-                                                      extra: VerifyPhoneArgs(
-                                                        type: VerificationType.signup,
-                                                        phoneNumber: cleanPhone,
-                                                        selectedRole: widget.selectedRole,
-                                                        userId: data['userId']?.toString(),
-                                                        initialOtp: data['otp']?.toString() ?? '123456',
-                                                        password: _passwordController.text,
-                                                      ),
-                                                    );
-                                                  } else {
-                                                    if (!mounted) {
-                                                      return;
-                                                    }
+    if (!_autoValidate) {
+      setState(() {
+        _autoValidate = true;
+      });
+    }
 
-                                                    messenger.showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          data['message']?.toString() ?? 'Sign up failed',
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }
-                                                } catch (error) {
-                                                  if (!mounted) {
-                                                    return;
-                                                  }
+    if (!_formKey.currentState!.validate() || !_agreedToTerms) {
+      if (!_agreedToTerms) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please accept the terms and conditions to proceed'),
+          ),
+        );
+      }
+      return;
+    }
 
-                                                  messenger.showSnackBar(
-                                                    SnackBar(
-                                                      content: Text('Unable to sign up: $error'),
-                                                    ),
-                                                  );
-                                                } finally {
-                                                  if (mounted) {
-                                                    setState(() {
-                                                      _isLoading = false;
-                                                    });
-                                                  }
-                                                }
-                                              },
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              l10n.signup,
-                                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
+    final messenger = ScaffoldMessenger.of(context);
 
-                                    const SizedBox(height: 24),
+    setState(() {
+      _isLoading = true;
+    });
 
-                                    // --- Already have an account? Log In ---
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          l10n.alreadyHaveAccount,
-                                          style: const TextStyle(
-                                            color: Colors.black54,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            if (context.canPop()) {
-                                              context.pop();
-                                            } else {
-                                              context.go(AppRoutes.login);
-                                            }
-                                          },
-                                          child: Text(
-                                            l10n.login,
-                                            style: const TextStyle(
-                                              color: brandGreen,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+    try {
+      final cleanPhone = _phoneController.text.replaceAll(RegExp(r'\s+'), '');
+      final response = await _authService.register(
+        name: _nameController.text.trim(),
+        phone: cleanPhone,
+        password: _passwordController.text,
+        role: widget.selectedRole,
+      );
+      final data = response['data'] as Map<String, dynamic>;
+
+      if (response['statusCode'] == 201 || response['statusCode'] == 200) {
+        if (!mounted) return;
+
+        context.push(
+          AppRoutes.verifyPhone,
+          extra: VerifyPhoneArgs(
+            type: VerificationType.signup,
+            phoneNumber: cleanPhone,
+            selectedRole: widget.selectedRole,
+            userId: data['userId']?.toString(),
+            initialOtp: data['otp']?.toString() ?? '123456',
+            password: _passwordController.text,
+          ),
+        );
+      } else {
+        if (!mounted) return;
+
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              data['message']?.toString() ?? 'Sign up failed',
+            ),
+          ),
+        );
+      }
+    } catch (error) {
+      if (!mounted) return;
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Unable to sign up: $error'),
         ),
-      ),
-    );
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   // Helper widget builder for form input fields
@@ -600,6 +630,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     required TextEditingController controller,
     String? Function(String?)? validator,
     TextInputType keyboardType = TextInputType.text,
+    TextInputAction textInputAction = TextInputAction.next,
+    void Function(String)? onFieldSubmitted,
     bool obscureText = false,
     Widget? suffixIcon,
     Color fillColor = const Color(0xFFF3F4F6),
@@ -621,6 +653,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           TextFormField(
             controller: controller,
             keyboardType: keyboardType,
+            textInputAction: textInputAction,
+            onFieldSubmitted: onFieldSubmitted,
             obscureText: obscureText,
             validator: validator,
             decoration: InputDecoration(

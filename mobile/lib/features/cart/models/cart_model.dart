@@ -63,6 +63,80 @@ class Cart {
   double get grandTotal {
     return total + deliveryFee + tax;
   }
+
+  // ==========================================================
+  // IMMUTABLE HELPERS FOR OPTIMISTIC UI
+  // ==========================================================
+
+  Cart copyWith({
+    String? id,
+    String? restaurantId,
+    List<CartItem>? items,
+    double? total,
+    int? itemCount,
+  }) {
+    return Cart(
+      id: id ?? this.id,
+      restaurantId: restaurantId ?? this.restaurantId,
+      items: items ?? this.items,
+      total: total ?? this.total,
+      itemCount: itemCount ?? this.itemCount,
+    );
+  }
+
+  /// Optimistically updates the quantity of an item by productId or itemId.
+  /// Recalculates item subtotal and cart total immediately.
+  Cart updateItemQuantity({
+    required String productId,
+    required double newQuantity,
+  }) {
+    if (newQuantity <= 0) {
+      return removeItem(productId: productId);
+    }
+
+    final updatedItems = items.map((item) {
+      if (item.productId == productId || item.id == productId) {
+        final newSubtotal = item.unitPrice * newQuantity;
+        return item.copyWith(
+          quantity: newQuantity,
+          subtotal: newSubtotal,
+        );
+      }
+      return item;
+    }).toList();
+
+    final newTotal = updatedItems.fold<double>(
+      0.0,
+      (sum, item) => sum + item.subtotal,
+    );
+
+    return copyWith(
+      items: updatedItems,
+      total: newTotal,
+      itemCount: updatedItems.length,
+    );
+  }
+
+  /// Optimistically removes an item by productId or itemId.
+  /// Recalculates total immediately.
+  Cart removeItem({
+    required String productId,
+  }) {
+    final updatedItems = items.where((item) {
+      return item.productId != productId && item.id != productId;
+    }).toList();
+
+    final newTotal = updatedItems.fold<double>(
+      0.0,
+      (sum, item) => sum + item.subtotal,
+    );
+
+    return copyWith(
+      items: updatedItems,
+      total: newTotal,
+      itemCount: updatedItems.length,
+    );
+  }
 }
 
 class CartItem {
@@ -145,5 +219,29 @@ class CartItem {
     }
 
     return imageUrls.first;
+  }
+
+  CartItem copyWith({
+    String? id,
+    String? productId,
+    String? productName,
+    List<String>? imageUrls,
+    double? quantity,
+    double? unitPrice,
+    double? subtotal,
+    double? deliveryFee,
+    String? deliveryMethod,
+  }) {
+    return CartItem(
+      id: id ?? this.id,
+      productId: productId ?? this.productId,
+      productName: productName ?? this.productName,
+      imageUrls: imageUrls ?? this.imageUrls,
+      quantity: quantity ?? this.quantity,
+      unitPrice: unitPrice ?? this.unitPrice,
+      subtotal: subtotal ?? this.subtotal,
+      deliveryFee: deliveryFee ?? this.deliveryFee,
+      deliveryMethod: deliveryMethod ?? this.deliveryMethod,
+    );
   }
 }

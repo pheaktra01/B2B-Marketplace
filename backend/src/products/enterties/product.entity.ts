@@ -4,9 +4,13 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 
 @Entity('products')
+@Index(['farmerId', 'createdAt'])
+@Index(['isAvailable', 'createdAt'])
+@Index(['category', 'isAvailable'])
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -17,12 +21,14 @@ export class Product {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
+  @Index()
   @Column({ type: 'varchar' })
   category: string;
 
   @Column({ type: 'varchar', default: 'Fresh' })
   condition: string;
 
+  @Index()
   @Column({
     type: 'decimal',
     precision: 10,
@@ -74,6 +80,7 @@ export class Product {
   })
   deliveryFee: number;
 
+  @Index()
   @Column({ type: 'uuid' })
   farmerId: string;
 

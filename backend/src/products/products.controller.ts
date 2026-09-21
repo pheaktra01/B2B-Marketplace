@@ -147,41 +147,6 @@ export class ProductsController {
     @UploadedFiles() files: Express.Multer.File[],
     @Body() dto: CreateProductDto,
   ) {
-    console.log(
-      '=================================',
-    );
-
-    console.log('CREATE PRODUCT');
-
-    console.log(
-      'Farmer ID:',
-      req.user.id,
-    );
-
-    console.log(
-      'Farmer Name:',
-      req.user.name,
-    );
-
-    console.log(
-      'Farmer Role:',
-      req.user.role,
-    );
-
-    console.log(
-      'Product:',
-      dto.name,
-    );
-
-    console.log(
-      'Images:',
-      files?.length ?? 0,
-    );
-
-    console.log(
-      '=================================',
-    );
-
     const imageUrls =
       (files ?? []).map(
         (file) =>

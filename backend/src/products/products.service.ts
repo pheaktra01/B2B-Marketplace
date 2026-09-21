@@ -83,18 +83,17 @@ export class ProductsService {
       product,
     );
 
-    try {
-      await this.notificationService.create({
-        userId: farmerId,
-        type: NotificationType.PRODUCT_PUBLISHED,
-        title: 'Product Published',
-        message: `Your ${saved.name} product is now available.`,
-        referenceId: saved.id,
-        referenceType: 'product',
-      });
-    } catch (e) {
-      console.error('Failed to notify product published:', e);
-    }
+    // Fire notification asynchronously in the background
+    this.notificationService.create({
+      userId: farmerId,
+      type: NotificationType.PRODUCT_PUBLISHED,
+      title: 'Product Published',
+      message: `Your ${saved.name} product is now available.`,
+      referenceId: saved.id,
+      referenceType: 'product',
+    }).catch((e) => {
+      // Non-critical background notification error
+    });
 
     return saved;
   }
@@ -126,17 +125,17 @@ export class ProductsService {
 
     // 1. Search Query (name, description, category, location)
     if (query.search && query.search.trim().length > 0) {
-      const search = `%${query.search.trim().toLowerCase()}%`;
+      const search = `%${query.search.trim()}%`;
       qb.andWhere(
-        '(LOWER(product.name) LIKE :search OR LOWER(product.description) LIKE :search OR LOWER(product.category) LIKE :search OR LOWER(product.location) LIKE :search)',
+        '(product.name ILIKE :search OR product.description ILIKE :search OR product.category ILIKE :search OR product.location ILIKE :search)',
         { search },
       );
     }
 
     // 2. Category Filter
     if (query.category && query.category.toLowerCase() !== 'all') {
-      qb.andWhere('LOWER(product.category) = :category', {
-        category: query.category.toLowerCase(),
+      qb.andWhere('product.category ILIKE :category', {
+        category: query.category.trim(),
       });
     }
 
@@ -145,24 +144,24 @@ export class ProductsService {
       const cond = query.condition.toLowerCase();
       if (cond.includes('organic') || cond.includes('gap')) {
         qb.andWhere(
-          '(LOWER(product.condition) LIKE :cond OR LOWER(product.name) LIKE :cond OR LOWER(product.description) LIKE :cond)',
+          '(product.condition ILIKE :cond OR product.name ILIKE :cond OR product.description ILIKE :cond)',
           { cond: '%organic%' },
         );
       } else if (cond.includes('fresh')) {
-        qb.andWhere('LOWER(product.condition) LIKE :cond', {
+        qb.andWhere('product.condition ILIKE :cond', {
           cond: '%fresh%',
         });
       } else {
-        qb.andWhere('LOWER(product.condition) = :condition', {
-          condition: query.condition.toLowerCase(),
+        qb.andWhere('product.condition ILIKE :condition', {
+          condition: query.condition.trim(),
         });
       }
     }
 
     // 4. Location Filter
     if (query.location && query.location.toLowerCase() !== 'all') {
-      qb.andWhere('LOWER(product.location) LIKE :location', {
-        location: `%${query.location.toLowerCase()}%`,
+      qb.andWhere('product.location ILIKE :location', {
+        location: `%${query.location.trim()}%`,
       });
     }
 
@@ -390,65 +389,57 @@ export class ProductsService {
 
     const saved = await this.productRepo.save(product);
 
-    try {
-      await this.notificationService.create({
+    // Fire notifications asynchronously in the background
+    this.notificationService.create({
+      userId: farmerId,
+      type: NotificationType.PRODUCT_UPDATED,
+      title: 'Product Updated',
+      message: `Your product information for ${saved.name} has been updated.`,
+      referenceId: saved.id,
+      referenceType: 'product',
+    }).catch(() => {});
+
+    if (Number(saved.quantity) <= 0) {
+      this.notificationService.create({
         userId: farmerId,
-        type: NotificationType.PRODUCT_UPDATED,
-        title: 'Product Updated',
-        message: `Your product information for ${saved.name} has been updated.`,
+        type: NotificationType.PRODUCT_OUT_OF_STOCK,
+        title: 'Out of Stock',
+        message: `${saved.name} is now out of stock.`,
         referenceId: saved.id,
         referenceType: 'product',
-      });
-
-      if (Number(saved.quantity) <= 0) {
-        await this.notificationService.create({
-          userId: farmerId,
-          type: NotificationType.PRODUCT_OUT_OF_STOCK,
-          title: 'Out of Stock',
-          message: `${saved.name} is now out of stock.`,
-          referenceId: saved.id,
-          referenceType: 'product',
-        });
-      } else if (Number(saved.quantity) <= 5) {
-        await this.notificationService.create({
-          userId: farmerId,
-          type: NotificationType.PRODUCT_LOW_STOCK,
-          title: 'Low Stock',
-          message: `Your ${saved.name} stock is running low (${saved.quantity} left).`,
-          referenceId: saved.id,
-          referenceType: 'product',
-        });
-      }
-    } catch (e) {
-      console.error('Failed to notify product updated:', e);
+      }).catch(() => {});
+    } else if (Number(saved.quantity) <= 5) {
+      this.notificationService.create({
+        userId: farmerId,
+        type: NotificationType.PRODUCT_LOW_STOCK,
+        title: 'Low Stock',
+        message: `Your ${saved.name} stock is running low (${saved.quantity} left).`,
+        referenceId: saved.id,
+        referenceType: 'product',
+      }).catch(() => {});
     }
 
     return saved;
   }
 
   // ============================================================
-  // DELETE
+  // DELETE (ATOMIC DIRECT DELETE)
   // ============================================================
 
   async remove(
     id: string,
     farmerId: string,
   ) {
-    const product =
-      await this.productRepo.findOne({
-        where: {
-          id,
-          farmerId,
-        },
-      });
+    const result = await this.productRepo.delete({
+      id,
+      farmerId,
+    });
 
-    if (!product) {
+    if (result.affected === 0) {
       throw new NotFoundException(
         'Product not found',
       );
     }
-
-    await this.productRepo.remove(product);
 
     return {
       message:

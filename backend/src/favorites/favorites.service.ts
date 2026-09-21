@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Favorite } from './entities/favorite.entity';
 import { Product } from '../products/enterties/product.entity';
 import { User } from '../users/entities/user.entity';
@@ -16,6 +16,10 @@ export class FavoritesService {
     private readonly userRepo: Repository<User>,
   ) {}
 
+  // ==========================================================
+  // GET FAVORITE PRODUCTS (OPTIMIZED: ELIMINATES N+1 QUERIES)
+  // ==========================================================
+
   async getFavoriteProducts(userId: string) {
     const favorites = await this.favoriteRepo.find({
       where: { userId },
@@ -27,8 +31,45 @@ export class FavoritesService {
       .map((f) => f.product)
       .filter((p): p is Product => p !== null && p !== undefined);
 
-    return Promise.all(products.map((product) => this.withPublisher(product)));
+    if (products.length === 0) {
+      return [];
+    }
+
+    // Extract all unique farmer IDs to batch query in a single round-trip
+    const uniqueFarmerIds = Array.from(
+      new Set(products.map((p) => p.farmerId).filter(Boolean)),
+    );
+
+    const farmers =
+      uniqueFarmerIds.length > 0
+        ? await this.userRepo.find({
+            where: { id: In(uniqueFarmerIds) },
+            select: {
+              id: true,
+              name: true,
+              avatarUrl: true,
+              phone: true,
+              role: true,
+            },
+          })
+        : [];
+
+    const farmerMap = new Map(farmers.map((farmer) => [farmer.id, farmer]));
+
+    return products.map((product) => {
+      const publisher = farmerMap.get(product.farmerId);
+      return {
+        ...product,
+        farmer: publisher ?? null,
+        farmerName: publisher?.name ?? 'Local Farm',
+        farmName: publisher?.name ?? 'Local Farm',
+      };
+    });
   }
+
+  // ==========================================================
+  // GET FAVORITE PRODUCT IDS
+  // ==========================================================
 
   async getFavoriteProductIds(userId: string): Promise<string[]> {
     const favorites = await this.favoriteRepo.find({
@@ -39,6 +80,10 @@ export class FavoritesService {
     return favorites.map((f) => f.productId);
   }
 
+  // ==========================================================
+  // GET FAVORITE COUNT
+  // ==========================================================
+
   async getFavoriteCount(userId: string): Promise<{ count: number }> {
     const count = await this.favoriteRepo.count({
       where: { userId },
@@ -46,28 +91,40 @@ export class FavoritesService {
     return { count };
   }
 
+  // ==========================================================
+  // IS FAVORITE (LIGHTWEIGHT EXISTS QUERY)
+  // ==========================================================
+
   async isFavorite(userId: string, productId: string): Promise<{ isFavorite: boolean }> {
-    const existing = await this.favoriteRepo.findOne({
+    const isFav = await this.favoriteRepo.exists({
       where: { userId, productId },
     });
-    return { isFavorite: !!existing };
+    return { isFavorite: isFav };
   }
+
+  // ==========================================================
+  // TOGGLE FAVORITE (OPTIMIZED: PARALLEL LOOKUP & MINIMAL COLUMNS)
+  // ==========================================================
 
   async toggleFavorite(
     userId: string,
     productId: string,
   ): Promise<{ isFavorite: boolean; message: string }> {
-    const product = await this.productRepo.findOne({
-      where: { id: productId },
-    });
+    // Concurrently verify product and check existing favorite status
+    const [product, existing] = await Promise.all([
+      this.productRepo.findOne({
+        where: { id: productId },
+        select: { id: true },
+      }),
+      this.favoriteRepo.findOne({
+        where: { userId, productId },
+        select: { id: true },
+      }),
+    ]);
 
     if (!product) {
       throw new NotFoundException('Product not found');
     }
-
-    const existing = await this.favoriteRepo.findOne({
-      where: { userId, productId },
-    });
 
     if (existing) {
       await this.favoriteRepo.delete(existing.id);
@@ -80,25 +137,5 @@ export class FavoritesService {
       await this.favoriteRepo.save(favorite);
       return { isFavorite: true, message: 'Added to favorites' };
     }
-  }
-
-  private async withPublisher(product: Product) {
-    const publisher = await this.userRepo.findOne({
-      where: { id: product.farmerId },
-      select: {
-        id: true,
-        name: true,
-        avatarUrl: true,
-        phone: true,
-        role: true,
-      },
-    });
-
-    return {
-      ...product,
-      farmer: publisher,
-      farmerName: publisher?.name ?? 'Local Farm',
-      farmName: publisher?.name ?? 'Local Farm',
-    };
   }
 }

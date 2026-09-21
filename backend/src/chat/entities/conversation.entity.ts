@@ -4,11 +4,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { ConversationParticipant } from './conversation-participant.entity';
 import { Message } from './message.entity';
 
 @Entity('conversations')
+@Index(['updatedAt'])
 export class Conversation {
   @PrimaryGeneratedColumn('uuid')
   id: string;

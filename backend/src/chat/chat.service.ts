@@ -113,7 +113,7 @@ export class ChatService {
     userA: string,
     userB: string,
   ): Promise<Conversation | null> {
-    const conversations = await this.conversationRepository
+    return this.conversationRepository
       .createQueryBuilder('conversation')
       .innerJoin(
         'conversation.participants',
@@ -127,9 +127,8 @@ export class ChatService {
         'participantB.userId = :userB',
         { userB },
       )
-      .getMany();
-
-    return conversations.length > 0 ? conversations[0] : null;
+      .take(1)
+      .getOne();
   }
 
   // =========================================================
@@ -153,48 +152,88 @@ export class ChatService {
       },
     });
 
+    if (!participants.length) {
+      return [];
+    }
+
+    const conversationIds = participants
+      .map((p) => p.conversationId)
+      .filter(Boolean);
+
+    if (!conversationIds.length) {
+      return [];
+    }
+
+    // Batch fetch latest message and unread count across all conversations
+    const [lastMessagesRaw, unreadCountsRaw] = await Promise.all([
+      this.messageRepository
+        .createQueryBuilder('m')
+        .distinctOn(['m.conversation_id'])
+        .select('m.id', 'id')
+        .addSelect('m.conversation_id', 'conversationId')
+        .addSelect('m.content', 'content')
+        .addSelect('m.message_type', 'messageType')
+        .addSelect('m.created_at', 'createdAt')
+        .where('m.conversation_id IN (:...conversationIds)', {
+          conversationIds,
+        })
+        .orderBy('m.conversation_id')
+        .addOrderBy('m.created_at', 'DESC')
+        .getRawMany(),
+
+      this.messageRepository
+        .createQueryBuilder('m')
+        .innerJoin(
+          ConversationParticipant,
+          'cp',
+          'cp.conversation_id = m.conversation_id AND cp.user_id = :currentUserId',
+          { currentUserId },
+        )
+        .select('m.conversation_id', 'conversationId')
+        .addSelect('COUNT(m.id)', 'unreadCount')
+        .where('m.conversation_id IN (:...conversationIds)', {
+          conversationIds,
+        })
+        .andWhere('m.sender_id != :currentUserId', { currentUserId })
+        .andWhere('m.status = :sentStatus', { sentStatus: MessageStatus.SENT })
+        .andWhere(
+          '(cp.last_read_at IS NULL OR m.created_at > cp.last_read_at)',
+        )
+        .groupBy('m.conversation_id')
+        .getRawMany(),
+    ]);
+
+    const lastMessageMap = new Map<string, any>();
+    for (const msg of lastMessagesRaw) {
+      lastMessageMap.set(msg.conversationId, {
+        id: msg.id,
+        content: msg.content,
+        messageType: msg.messageType,
+        createdAt: msg.createdAt,
+      });
+    }
+
+    const unreadCountMap = new Map<string, number>();
+    for (const row of unreadCountsRaw) {
+      unreadCountMap.set(row.conversationId, Number(row.unreadCount));
+    }
+
     const results: any[] = [];
 
     for (const participant of participants) {
       const conversation = participant.conversation;
+      if (!conversation) continue;
 
-      const otherParticipant = conversation.participants.find(
+      const otherParticipant = conversation.participants?.find(
         (p) => p.userId !== currentUserId,
       );
 
-      if (!otherParticipant) {
+      if (!otherParticipant?.user) {
         continue;
       }
 
-      const lastMessage = await this.messageRepository.findOne({
-        where: {
-          conversationId: conversation.id,
-        },
-        order: {
-          createdAt: 'DESC',
-        },
-      });
-
-      const unreadCount = await this.messageRepository
-        .createQueryBuilder('message')
-        .where('message.conversation_id = :conversationId', {
-          conversationId: conversation.id,
-        })
-        .andWhere('message.sender_id != :userId', {
-          userId: currentUserId,
-        })
-        .andWhere('message.status = :sentStatus', {
-          sentStatus: MessageStatus.SENT,
-        })
-        .andWhere(
-          participant.lastReadAt
-            ? 'message.created_at > :lastReadAt'
-            : '1=1',
-          participant.lastReadAt
-            ? { lastReadAt: participant.lastReadAt }
-            : {},
-        )
-        .getCount();
+      const lastMessage = lastMessageMap.get(conversation.id) || null;
+      const unreadCount = unreadCountMap.get(conversation.id) || 0;
 
       results.push({
         id: conversation.id,
@@ -205,7 +244,9 @@ export class ChatService {
           role: otherParticipant.user.role,
           avatarUrl: otherParticipant.user.avatarUrl,
           phone: otherParticipant.user.phone,
-          isOnline: this.onlinePresenceService.isUserOnline(otherParticipant.user.id),
+          isOnline: this.onlinePresenceService.isUserOnline(
+            otherParticipant.user.id,
+          ),
         },
 
         lastMessage: lastMessage
@@ -312,6 +353,10 @@ export class ChatService {
           id: before,
           conversationId,
         },
+        select: {
+          id: true,
+          createdAt: true,
+        },
       });
 
       if (beforeMessage) {
@@ -333,35 +378,30 @@ export class ChatService {
   // SEND MESSAGE
   // =========================================================
 
-    async sendMessage(
-        conversationId: string,
-        currentUserId: string,
-        dto: SendMessageDto,
-    ) {
+  async sendMessage(
+    conversationId: string,
+    currentUserId: string,
+    dto: SendMessageDto,
+  ) {
     await this.ensureParticipant(
-        conversationId,
-        currentUserId,
+      conversationId,
+      currentUserId,
     );
 
     const message = this.messageRepository.create({
-        conversationId,
-        senderId: currentUserId,
-        content: dto.content,
-        messageType:
-        dto.messageType ?? MessageType.TEXT,
-        status: MessageStatus.SENT,
+      conversationId,
+      senderId: currentUserId,
+      content: dto.content,
+      messageType: dto.messageType ?? MessageType.TEXT,
+      status: MessageStatus.SENT,
     });
 
-    const savedMessage =
-        await this.messageRepository.save(message);
+    const savedMessage = await this.messageRepository.save(message);
 
-    try {
-      await this.conversationRepository.update(conversationId, {
-        updatedAt: new Date(),
-      });
-    } catch {
-      // Ignored
-    }
+    // Update conversation updatedAt asynchronously
+    this.conversationRepository
+      .update(conversationId, { updatedAt: new Date() })
+      .catch(() => {});
 
     this.eventEmitter.emit('chat.message.created', {
       id: savedMessage.id,
@@ -374,23 +414,21 @@ export class ChatService {
       updatedAt: savedMessage.updatedAt,
     });
 
-    // Find the other participant
-    const participants =
-        await this.participantRepository.find({
-            where: {
-            conversationId,
-            },
-        });
+    // Notify other participant asynchronously without blocking message return
+    (async () => {
+      const participants = await this.participantRepository.find({
+        where: { conversationId },
+        select: { userId: true },
+      });
 
-    const otherParticipant = participants.find(
-        (participant) =>
-            participant.userId !== currentUserId,
-        );
+      const otherParticipant = participants.find(
+        (participant) => participant.userId !== currentUserId,
+      );
 
-    if (otherParticipant) {
-      try {
+      if (otherParticipant) {
         const sender = await this.userRepository.findOne({
           where: { id: currentUserId },
+          select: { name: true },
         });
         const senderName = sender?.name ?? 'Someone';
 
@@ -400,13 +438,13 @@ export class ChatService {
           senderName,
           messageType: savedMessage.messageType,
         });
-      } catch (e) {
-        console.error('Failed to create chat notification:', e);
       }
-    }
+    })().catch((e) => {
+      console.error('Failed to create chat notification:', e);
+    });
 
     return savedMessage;
-    }
+  }
 
   // =========================================================
   // MARK READ
@@ -519,16 +557,10 @@ export class ChatService {
 
     const conversationId = message.conversationId;
 
-    // If it was an image message, clean up local file if exists
+    // If it was an image message, clean up local file if exists (non-blocking)
     if (message.messageType === MessageType.IMAGE && message.content) {
-      try {
-        const filePath = join(process.cwd(), message.content.replace(/^\//, ''));
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      } catch {
-        // Ignored
-      }
+      const filePath = join(process.cwd(), message.content.replace(/^\//, ''));
+      fs.promises.unlink(filePath).catch(() => {});
     }
 
     await this.messageRepository.delete(messageId);

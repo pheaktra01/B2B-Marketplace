@@ -170,6 +170,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const participants = await this.participantRepository.find({
       where: { conversationId },
+      select: { userId: true },
     });
     for (const participant of participants) {
       this.server
@@ -197,6 +198,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // 2. Notify participants to refresh conversation list
     const participants = await this.participantRepository.find({
       where: { conversationId: payload.conversationId },
+      select: { userId: true },
     });
     for (const participant of participants) {
       this.server
@@ -243,6 +245,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const participants = await this.participantRepository.find({
       where: { conversationId: payload.conversationId },
+      select: { userId: true },
     });
     for (const participant of participants) {
       this.server

@@ -6,12 +6,16 @@ import {
   JoinColumn,
   CreateDateColumn,
   Unique,
+  Index,
 } from 'typeorm';
 import { Conversation } from './conversation.entity';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('conversation_participants')
 @Unique(['conversationId', 'userId'])
+@Index(['userId', 'joinedAt'])
+@Index(['userId'])
+@Index(['conversationId'])
 export class ConversationParticipant {
   @PrimaryGeneratedColumn('uuid')
   id: string;

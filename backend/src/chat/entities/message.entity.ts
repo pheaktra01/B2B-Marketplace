@@ -24,6 +24,8 @@ export enum MessageStatus {
 }
 
 @Entity('messages')
+@Index(['conversationId', 'createdAt'])
+@Index(['conversationId', 'senderId', 'status'])
 export class Message {
   @PrimaryGeneratedColumn('uuid')
   id: string;

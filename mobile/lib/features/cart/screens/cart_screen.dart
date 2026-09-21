@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
@@ -6,8 +9,8 @@ import 'package:mobile/core/routing/route_args.dart';
 import 'package:mobile/features/cart/models/cart_model.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/farmer/widgets/farmer_app_bar.dart';
-import 'package:mobile/features/profile/services/user_service.dart';
 import 'package:mobile/features/notification/services/notification_service.dart';
+import 'package:mobile/features/profile/services/user_service.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -18,7 +21,7 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   // ==========================================================
-  // COLORS
+  // COLORS & THEME
   // ==========================================================
 
   static const Color pageBgColor = Color(0xFFF7F9F8);
@@ -31,20 +34,22 @@ class _CartScreenState extends State<CartScreen> {
   // ==========================================================
 
   final CartService _cartService = CartService();
+  final UserService _userService = UserService();
 
   // ==========================================================
   // STATE
   // ==========================================================
 
   Cart? _cart;
+  Cart? _previousCartSnapshot;
   bool _isLoading = true;
+  bool _isSyncingBeforeCheckout = false;
   String? _errorMessage;
   String? _avatarUrl;
 
-  final UserService _userService = UserService();
-
-  // Track which item is currently being updated
-  String? _updatingItemId;
+  // Optimistic & Debounce Tracking
+  final Map<String, Timer> _debounceTimers = {};
+  final Set<String> _syncingProductIds = {};
 
   // Delivery Address
   String _deliveryAddress = 'Building 42, St 271, Boeng Tumpun, Phnom Penh';
@@ -60,7 +65,7 @@ class _CartScreenState extends State<CartScreen> {
   String? _selectedPreset;
 
   // ==========================================================
-  // INIT
+  // INIT & DISPOSE
   // ==========================================================
 
   @override
@@ -68,6 +73,16 @@ class _CartScreenState extends State<CartScreen> {
     super.initState();
     _loadCart();
     _loadUserProfile();
+  }
+
+  @override
+  void dispose() {
+    for (final timer in _debounceTimers.values) {
+      timer.cancel();
+    }
+    _debounceTimers.clear();
+    _notesController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserProfile() async {
@@ -81,12 +96,6 @@ class _CartScreenState extends State<CartScreen> {
     } catch (e) {
       debugPrint('Error loading user profile in cart: $e');
     }
-  }
-
-  @override
-  void dispose() {
-    _notesController.dispose();
-    super.dispose();
   }
 
   // ==========================================================
@@ -107,6 +116,7 @@ class _CartScreenState extends State<CartScreen> {
 
       setState(() {
         _cart = cart;
+        _previousCartSnapshot = null;
         _isLoading = false;
       });
     } catch (e) {
@@ -114,55 +124,88 @@ class _CartScreenState extends State<CartScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = e.toString();
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
       });
     }
   }
 
   // ==========================================================
-  // UPDATE QUANTITY
+  // OPTIMISTIC QUANTITY STEPPER WITH DEBOUNCE (0ms UI LATENCY)
   // ==========================================================
 
-  Future<void> _updateQuantity(
-    CartItem item,
-    double newQuantity,
-  ) async {
+  void _onQuantityChanged(CartItem item, double newQuantity) {
+    HapticFeedback.selectionClick();
+
     if (newQuantity <= 0) {
-      await _removeItem(item);
+      _confirmOrRemoveItem(item);
       return;
     }
 
-    if (_updatingItemId != null) return;
+    // Save snapshot before local change if not already saved
+    _previousCartSnapshot ??= _cart;
 
+    // 1. Instant local optimistic update (0ms perceived latency)
     setState(() {
-      _updatingItemId = item.id;
+      _cart = _cart?.updateItemQuantity(
+        productId: item.productId,
+        newQuantity: newQuantity,
+      );
     });
+
+    // 2. Debounce backend sync by 400ms to batch rapid taps
+    _debounceTimers[item.productId]?.cancel();
+    _debounceTimers[item.productId] = Timer(
+      const Duration(milliseconds: 400),
+      () => _syncQuantityToServer(item.productId, newQuantity),
+    );
+  }
+
+  Future<void> _syncQuantityToServer(
+    String productId,
+    double quantity,
+  ) async {
+    if (!mounted) return;
+    setState(() => _syncingProductIds.add(productId));
 
     try {
       final updatedCart = await _cartService.updateCartItem(
-        productId: item.productId,
-        quantity: newQuantity,
+        productId: productId,
+        quantity: quantity,
       );
 
       if (!mounted) return;
 
-      setState(() {
-        _cart = updatedCart;
-      });
+      // Update state with server response only if no other debounced tap is pending
+      if (!_debounceTimers.containsKey(productId)) {
+        setState(() {
+          _cart = updatedCart;
+          _previousCartSnapshot = null;
+        });
+      }
     } catch (e) {
       if (!mounted) return;
 
+      // Rollback to prior snapshot
+      if (_previousCartSnapshot != null) {
+        setState(() {
+          _cart = _previousCartSnapshot;
+          _previousCartSnapshot = null;
+        });
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to update ${item.productName}'),
-          backgroundColor: Colors.red,
+          content: Text(
+            'Failed to update item: ${e.toString().replaceAll('Exception: ', '')}',
+          ),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
         ),
       );
     } finally {
       if (mounted) {
-        setState(() {
-          _updatingItemId = null;
-        });
+        setState(() => _syncingProductIds.remove(productId));
       }
     }
   }
@@ -171,11 +214,22 @@ class _CartScreenState extends State<CartScreen> {
   // REMOVE ITEM
   // ==========================================================
 
-  Future<void> _removeItem(CartItem item) async {
-    if (_updatingItemId != null) return;
+  Future<void> _confirmOrRemoveItem(CartItem item) async {
+    await _removeItem(item);
+  }
 
+  Future<void> _removeItem(CartItem item) async {
+    HapticFeedback.mediumImpact();
+
+    // Cancel pending debounce for this item
+    _debounceTimers[item.productId]?.cancel();
+    _debounceTimers.remove(item.productId);
+
+    final backupCart = _cart;
+
+    // 1. Instant local optimistic deletion
     setState(() {
-      _updatingItemId = item.id;
+      _cart = _cart?.removeItem(productId: item.productId);
     });
 
     try {
@@ -193,24 +247,25 @@ class _CartScreenState extends State<CartScreen> {
         SnackBar(
           content: Text('${item.productName} removed from cart'),
           backgroundColor: primaryGreen,
+          behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
         ),
       );
     } catch (e) {
       if (!mounted) return;
 
+      // Rollback on failure
+      setState(() {
+        _cart = backupCart;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to remove ${item.productName}'),
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
         ),
       );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _updatingItemId = null;
-        });
-      }
     }
   }
 
@@ -219,6 +274,8 @@ class _CartScreenState extends State<CartScreen> {
   // ==========================================================
 
   Future<void> _confirmClearCart() async {
+    HapticFeedback.mediumImpact();
+
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -257,8 +314,9 @@ class _CartScreenState extends State<CartScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to clear cart: $e'),
-          backgroundColor: Colors.red,
+          content: Text('Failed to clear cart: ${e.toString().replaceAll('Exception: ', '')}'),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       setState(() => _isLoading = false);
@@ -270,6 +328,7 @@ class _CartScreenState extends State<CartScreen> {
   // ==========================================================
 
   void _showAddressPicker() {
+    HapticFeedback.selectionClick();
     final controller = TextEditingController(text: _deliveryAddress);
 
     showModalBottomSheet<void>(
@@ -357,6 +416,58 @@ class _CartScreenState extends State<CartScreen> {
           ),
         );
       },
+    );
+  }
+
+  // ==========================================================
+  // PROCEED TO CHECKOUT
+  // ==========================================================
+
+  Future<void> _proceedToCheckout() async {
+    HapticFeedback.lightImpact();
+    FocusScope.of(context).unfocus();
+
+    if (_cart == null || _cart!.items.isEmpty) return;
+
+    // Flush any pending debounced quantity updates before navigating
+    if (_debounceTimers.isNotEmpty) {
+      setState(() => _isSyncingBeforeCheckout = true);
+
+      final timerEntries = List<MapEntry<String, Timer>>.from(_debounceTimers.entries);
+      for (final entry in timerEntries) {
+        entry.value.cancel();
+        _debounceTimers.remove(entry.key);
+
+        final item = _cart!.items.cast<CartItem?>().firstWhere(
+              (i) => i != null && (i.productId == entry.key || i.id == entry.key),
+              orElse: () => null,
+            );
+
+        if (item != null) {
+          try {
+            final updated = await _cartService.updateCartItem(
+              productId: item.productId,
+              quantity: item.quantity,
+            );
+            _cart = updated;
+          } catch (_) {
+            // Keep current cart state if individual sync fails
+          }
+        }
+      }
+
+      if (mounted) setState(() => _isSyncingBeforeCheckout = false);
+    }
+
+    if (!mounted || _cart == null) return;
+
+    context.push(
+      AppRoutes.restaurantCheckout,
+      extra: CheckoutArgs(
+        cart: _cart!,
+        deliveryNotes: _notesController.text.trim(),
+        deliveryAddress: _deliveryAddress,
+      ),
     );
   }
 
@@ -456,14 +567,16 @@ class _CartScreenState extends State<CartScreen> {
                           _avatarUrl!,
                           width: 36,
                           height: 36,
+                          cacheWidth: 100,
+                          cacheHeight: 100,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               Image.asset(
-                                'assets/default_avatar.jpg',
-                                width: 36,
-                                height: 36,
-                                fit: BoxFit.cover,
-                              ),
+                            'assets/default_avatar.jpg',
+                            width: 36,
+                            height: 36,
+                            fit: BoxFit.cover,
+                          ),
                         )
                       : Image.asset(
                           'assets/default_avatar.jpg',
@@ -557,7 +670,8 @@ class _CartScreenState extends State<CartScreen> {
             ),
           ],
         ),
-        Container(
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: darkGreenBadge,
@@ -667,10 +781,10 @@ class _CartScreenState extends State<CartScreen> {
       separatorBuilder: (_, unused) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final item = items[index];
-        final isUpdating = _updatingItemId == item.id;
+        final isSyncing = _syncingProductIds.contains(item.productId);
 
         return Dismissible(
-          key: Key(item.id),
+          key: ValueKey('cart_${item.productId}_${item.id}'),
           direction: DismissDirection.endToStart,
           background: Container(
             alignment: Alignment.centerRight,
@@ -728,13 +842,13 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: isUpdating ? null : () => _removeItem(item),
+                            onTap: () => _removeItem(item),
                             child: Padding(
                               padding: const EdgeInsets.only(left: 4),
                               child: Icon(
                                 Icons.close,
                                 size: 18,
-                                color: isUpdating ? Colors.grey : Colors.grey.shade500,
+                                color: Colors.grey.shade500,
                               ),
                             ),
                           ),
@@ -753,15 +867,19 @@ class _CartScreenState extends State<CartScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Subtotal: ${_formatPrice(item.subtotal)}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey.shade700,
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: Text(
+                              'Subtotal: ${_formatPrice(item.subtotal)}',
+                              key: ValueKey<String>(_formatPrice(item.subtotal)),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade700,
+                              ),
                             ),
                           ),
-                          _buildQuantityStepper(item, isUpdating),
+                          _buildQuantityStepper(item, isSyncing),
                         ],
                       ),
                     ],
@@ -791,6 +909,8 @@ class _CartScreenState extends State<CartScreen> {
       imageUrl,
       width: 72,
       height: 72,
+      cacheWidth: 150,
+      cacheHeight: 150,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => Container(
         width: 72,
@@ -805,7 +925,14 @@ class _CartScreenState extends State<CartScreen> {
           height: 72,
           color: Colors.grey.shade100,
           child: const Center(
-            child: CircularProgressIndicator(strokeWidth: 2, color: primaryGreen),
+            child: SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: primaryGreen,
+              ),
+            ),
           ),
         );
       },
@@ -813,10 +940,10 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   // ==========================================================
-  // QUANTITY STEPPER
+  // QUANTITY STEPPER (ZERO-LAG OPTIMISTIC)
   // ==========================================================
 
-  Widget _buildQuantityStepper(CartItem item, bool isUpdating) {
+  Widget _buildQuantityStepper(CartItem item, bool isSyncing) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
@@ -829,9 +956,7 @@ class _CartScreenState extends State<CartScreen> {
           // MINUS
           InkWell(
             borderRadius: BorderRadius.circular(20),
-            onTap: isUpdating
-                ? null
-                : () => _updateQuantity(item, item.quantity - 1),
+            onTap: () => _onQuantityChanged(item, item.quantity - 1),
             child: Container(
               width: 32,
               height: 32,
@@ -843,33 +968,32 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
           ),
-          // VALUE
+          // VALUE (ANIMATED SMOOTH TRANSITION)
           Container(
             constraints: const BoxConstraints(minWidth: 36),
             alignment: Alignment.center,
-            child: isUpdating
-                ? const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: primaryGreen,
-                    ),
-                  )
-                : Text(
-                    _formatQuantity(item.quantity),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                  ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 150),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(
+                  scale: Tween<double>(begin: 0.85, end: 1.0).animate(animation),
+                  child: FadeTransition(opacity: animation, child: child),
+                );
+              },
+              child: Text(
+                _formatQuantity(item.quantity),
+                key: ValueKey<double>(item.quantity),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ),
           ),
           // PLUS
           InkWell(
             borderRadius: BorderRadius.circular(20),
-            onTap: isUpdating
-                ? null
-                : () => _updateQuantity(item, item.quantity + 1),
+            onTap: () => _onQuantityChanged(item, item.quantity + 1),
             child: Container(
               width: 32,
               height: 32,
@@ -949,6 +1073,7 @@ class _CartScreenState extends State<CartScreen> {
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 onSelected: (selected) {
+                  HapticFeedback.selectionClick();
                   setState(() {
                     if (selected) {
                       _selectedPreset = preset;
@@ -994,8 +1119,10 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildOrderSummaryCard() {
     final subtotal = _cart?.total ?? 0;
-    const deliveryFee = 2.00;
-    final estimatedTax = subtotal * 0.03;
+    final deliveryFee = (_cart?.deliveryFee != null && _cart!.deliveryFee > 0)
+        ? _cart!.deliveryFee
+        : (subtotal > 0 ? 2.00 : 0.0);
+    final estimatedTax = _cart?.tax ?? (subtotal * 0.03);
     final total = subtotal + deliveryFee + estimatedTax;
 
     return Container(
@@ -1042,12 +1169,19 @@ class _CartScreenState extends State<CartScreen> {
                   color: primaryGreen,
                 ),
               ),
-              Text(
-                _formatPrice(total),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: primaryGreen,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: Text(
+                  _formatPrice(total),
+                  key: ValueKey<String>(_formatPrice(total)),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: primaryGreen,
+                  ),
                 ),
               ),
             ],
@@ -1057,19 +1191,9 @@ class _CartScreenState extends State<CartScreen> {
             width: double.infinity,
             height: 50,
             child: ElevatedButton(
-              onPressed: _cart == null || _cart!.items.isEmpty
+              onPressed: (_cart == null || _cart!.items.isEmpty || _isSyncingBeforeCheckout)
                   ? null
-                  : () {
-                      FocusScope.of(context).unfocus();
-                      context.push(
-                        AppRoutes.restaurantCheckout,
-                        extra: CheckoutArgs(
-                          cart: _cart!,
-                          deliveryNotes: _notesController.text.trim(),
-                          deliveryAddress: _deliveryAddress,
-                        ),
-                      );
-                    },
+                  : _proceedToCheckout,
               style: ElevatedButton.styleFrom(
                 backgroundColor: buttonOrange,
                 disabledBackgroundColor: Colors.grey.shade300,
@@ -1078,21 +1202,30 @@ class _CartScreenState extends State<CartScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Proceed to Checkout (${_cart?.itemCount ?? 0})',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
+              child: _isSyncingBeforeCheckout
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Proceed to Checkout (${_cart?.itemCount ?? 0})',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
-                ],
-              ),
             ),
           ),
         ],
@@ -1158,7 +1291,7 @@ class _CartScreenState extends State<CartScreen> {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                // Navigate safely to restaurant home tab
+                HapticFeedback.lightImpact();
                 context.go(AppRoutes.restaurantHome);
               },
               style: ElevatedButton.styleFrom(
@@ -1207,7 +1340,10 @@ class _CartScreenState extends State<CartScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _loadCart,
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                _loadCart();
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryGreen,
                 foregroundColor: Colors.white,

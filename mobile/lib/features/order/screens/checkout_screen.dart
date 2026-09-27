@@ -5,7 +5,7 @@ import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/cart/models/cart_model.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
 import 'package:mobile/features/order/models/order_model.dart';
-import 'package:mobile/features/order/screens/khqr_payment_modal.dart';
+import 'package:mobile/features/order/widgets/khqr_payment_modal.dart';
 import 'package:mobile/features/order/services/order_service.dart';
 
 class CheckoutScreen extends StatefulWidget {

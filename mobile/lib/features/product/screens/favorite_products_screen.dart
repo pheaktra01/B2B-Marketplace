@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile/core/constants/api_constants.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/features/cart/services/cart_service.dart';
-import 'package:mobile/features/product/screens/product_card.dart';
+import 'package:mobile/features/product/widgets/product_card.dart';
 import 'package:mobile/features/product/services/favorites_service.dart';
 import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 import 'package:mobile/l10n/app_localizations.dart';

@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/core/routing/app_routes.dart';
 import 'package:mobile/l10n/app_localizations.dart';
-import 'package:mobile/features/product/screens/product_card.dart';
+import 'package:mobile/features/product/widgets/product_card.dart';
 import 'package:mobile/features/product/services/product_service.dart';
 
 class AddProductFlowScreen extends StatefulWidget {

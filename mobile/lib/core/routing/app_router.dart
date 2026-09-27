@@ -29,9 +29,9 @@ import 'package:mobile/features/farmer/screens/farmer_order_management_screen.da
 import 'package:mobile/features/farmer/screens/farmer_profile_screen.dart';
 import 'package:mobile/features/farmer/screens/farmer_settings_screen.dart';
 import 'package:mobile/features/farmer/screens/inventory_screen.dart';
-import 'package:mobile/features/farmer/widgets/edit_product_screen.dart';
+import 'package:mobile/features/farmer/screens/edit_product_screen.dart';
 import 'package:mobile/features/farmer/widgets/farmer_bottom_nav_bar.dart';
-import 'package:mobile/features/farmer/widgets/farmer_product_detail_screen.dart';
+import 'package:mobile/features/farmer/screens/farmer_product_detail_screen.dart';
 
 // Notification
 import 'package:mobile/features/notification/screens/notifications_screen.dart';
@@ -49,10 +49,12 @@ import 'package:mobile/features/product/screens/add_product_screen.dart';
 import 'package:mobile/features/product/screens/favorite_products_screen.dart';
 import 'package:mobile/features/product/screens/product_detail_screen.dart';
 
+// Profile
+import 'package:mobile/features/profile/screens/user_profile_screen.dart';
+
 import 'package:mobile/features/restaurant/screens/buyer_farmer_profile_screen.dart';
 import 'package:mobile/features/restaurant/screens/home_screen.dart';
 import 'package:mobile/features/restaurant/screens/search_market_screen.dart';
-import 'package:mobile/features/restaurant/screens/user_profile_screen.dart';
 import 'package:mobile/features/restaurant/widgets/restaurant_bottom_nav_bar.dart';
 
 class AppRouter {

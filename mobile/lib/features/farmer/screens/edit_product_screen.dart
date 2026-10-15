@@ -1173,8 +1173,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 const SizedBox(height: 3),
                 Text(
                   _isAvailable
-                      ? 'Visible to restaurants on marketplace'
-                      : 'Product is currently unlisted from marketplace',
+                      ? 'Visible to restaurants on FarmLink'
+                      : 'Product is currently unlisted from FarmLink',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey.shade600,

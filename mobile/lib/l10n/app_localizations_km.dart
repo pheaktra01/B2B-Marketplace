@@ -9,7 +9,7 @@ class AppLocalizationsKm extends AppLocalizations {
   AppLocalizationsKm([String locale = 'km']) : super(locale);
 
   @override
-  String get appTitle => 'ទីផ្សារ';
+  String get appTitle => 'FarmLink';
 
   @override
   String get login => 'ចូលគណនី';

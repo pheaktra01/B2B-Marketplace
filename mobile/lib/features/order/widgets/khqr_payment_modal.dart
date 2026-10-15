@@ -231,7 +231,7 @@ class _KhqrPaymentModalState
                         // =================================================
 
                         const Text(
-                          'VERDANT MARKETPLACE',
+                          'FARMLINK',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight:
@@ -592,7 +592,7 @@ class _KhqrPaymentModalState
      */
 
     final qrData =
-        'VerdantMarketplace'
+        'FarmLink'
         '|amount=${widget.totalAmount.toStringAsFixed(2)}';
 
     final encodedData =

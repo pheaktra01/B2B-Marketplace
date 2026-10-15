@@ -488,7 +488,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
               // 6. Footer branding
               Center(
                 child: Text(
-                  'B2B Marketplace • Farmer Edition v1.0.0',
+                  'FarmLink • Farmer Edition v1.0.0',
                   style: TextStyle(
                     fontSize: 11,
                     color: Colors.grey.shade500,
@@ -1552,7 +1552,7 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
               children: [
                 Icon(Icons.email_outlined, size: 16, color: primaryGreen),
                 SizedBox(width: 8),
-                Text('support@b2bmarketplace.com', style: TextStyle(fontWeight: FontWeight.w600)),
+                Text('support@farmlink.com', style: TextStyle(fontWeight: FontWeight.w600)),
               ],
             ),
           ],

@@ -903,7 +903,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 const SizedBox(height: 4),
 
                 Text(
-                  _isOnline ? 'Active now on marketplace' : 'Offline',
+                  _isOnline ? 'Active now on FarmLink' : 'Offline',
                   style: TextStyle(
                     fontSize: 13,
                     color: _isOnline ? const Color(0xFF0C6B2D) : Colors.grey.shade600,

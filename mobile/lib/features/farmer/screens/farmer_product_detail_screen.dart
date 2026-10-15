@@ -137,8 +137,8 @@ class _FarmerProductDetailScreenState extends State<FarmerProductDetailScreen> {
           SnackBar(
             content: Text(
               newValue
-                  ? 'Product is now available on marketplace.'
-                  : 'Product is now hidden from marketplace.',
+                  ? 'Product is now available on FarmLink.'
+                  : 'Product is now hidden from FarmLink.',
             ),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -951,7 +951,7 @@ class _FarmerProductDetailScreenState extends State<FarmerProductDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isAvailable ? 'Listed on Marketplace' : 'Listing is Hidden',
+                  isAvailable ? 'Listed on FarmLink' : 'Listing is Hidden',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -962,7 +962,7 @@ class _FarmerProductDetailScreenState extends State<FarmerProductDetailScreen> {
                 Text(
                   isAvailable
                       ? 'Buyers and restaurants can discover this product'
-                      : 'Product is paused and hidden from marketplace catalog',
+                      : 'Product is paused and hidden from FarmLink catalog',
                   style: TextStyle(
                     fontSize: 11,
                     color: Colors.grey.shade600,

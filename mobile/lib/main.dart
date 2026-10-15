@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       valueListenable: AppLocale.notifier,
       builder: (context, locale, _) {
         return MaterialApp.router(
-          title: 'PsarKasekor',
+          title: 'FarmLink',
           debugShowCheckedModeBanner: false,
 
           locale: locale,

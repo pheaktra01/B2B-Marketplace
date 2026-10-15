@@ -133,7 +133,7 @@ class _FarmerAppBarState extends State<FarmerAppBar> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'PsarKasekor',
+                  'FarmLink',
                   style: TextStyle(
                     color: const Color(0xFF2E7D32).withValues(alpha: 0.9),
                     fontWeight: FontWeight.bold,

@@ -66,7 +66,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        l10n?.selectLanguageDescription ?? 'Select your language to use\nPsarKasekor',
+                        l10n?.selectLanguageDescription ?? 'Select your language to use\nFarmLink',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: bodyFontSize,

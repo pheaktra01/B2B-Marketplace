@@ -131,7 +131,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectLanguageDescription.
   ///
   /// In en, this message translates to:
-  /// **'Select your language to use\nPsarKasekor'**
+  /// **'Select your language to use\nFarmLink'**
   String get selectLanguageDescription;
 
   /// No description provided for @continueButton.
@@ -173,7 +173,7 @@ abstract class AppLocalizations {
   /// No description provided for @farmersMarket.
   ///
   /// In en, this message translates to:
-  /// **'Farmers Market'**
+  /// **'FarmLink'**
   String get farmersMarket;
 
   /// No description provided for @farmersMarketDescription.
@@ -2643,7 +2643,7 @@ abstract class AppLocalizations {
   /// No description provided for @howToUseApp.
   ///
   /// In en, this message translates to:
-  /// **'How would you like to use PsarKasekor?'**
+  /// **'How would you like to use FarmLink?'**
   String get howToUseApp;
 
   /// No description provided for @roleSelectionDescription.

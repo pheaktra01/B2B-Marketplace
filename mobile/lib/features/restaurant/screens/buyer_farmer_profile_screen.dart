@@ -433,7 +433,7 @@ class _BuyerFarmerProfileScreenState extends State<BuyerFarmerProfileScreen>
     final title = _businessName ?? _farmerName;
     Clipboard.setData(
       ClipboardData(
-        text: 'Check out $title on B2B Marketplace! Location: ${_address ?? "Cambodia"}',
+        text: 'Check out $title on FarmLink! Location: ${_address ?? "Cambodia"}',
       ),
     );
     ScaffoldMessenger.of(context).showSnackBar(

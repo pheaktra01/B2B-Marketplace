@@ -4,7 +4,7 @@
   "signup": "បង្កើតគណនី",
   "language": "ភាសា",
   "chooseLanguage": "ជ្រើសរើសភាសារបស់អ្នក",
-  "selectLanguageDescription": "ជ្រើសរើសភាសាដែលអ្នកចង់ប្រើ\nPsarKasekor",
+  "selectLanguageDescription": "ជ្រើសរើសភាសាដែលអ្នកចង់ប្រើ\nFarmLink",
 
   "continueButton": "បន្ត",
   "getStartedTitle": "ពីកសិដ្ឋានផ្ទាល់ទៅផ្ទះបាយរបស់អ្នក",
@@ -13,7 +13,7 @@
   "trustedChefs": "មានការជឿទុកចិត្តពីចុងភៅជាង ៥០០ នាក់",
   "termsPrivacy": "ដោយបន្ត អ្នកយល់ព្រមតាមលក្ខខណ្ឌ និងគោលការណ៍ឯកជនភាពរបស់យើង",
 
-  "farmersMarket": "ផ្សារកសិករ",
+  "farmersMarket": "FarmLink",
   "farmersMarketDescription": "ទីផ្សារផលិតផលកសិកម្មស្រស់ៗ សម្រាប់ចុងភៅអាជីព។",
   "welcomeBack": "សូមស្វាគមន៍មកវិញ",
   "phoneNumber": "លេខទូរស័ព្ទ",
@@ -511,7 +511,7 @@
   "phoneHint": "០១២៣៤៥៦៧៨ ឬ +85512345678",
   "unableToRequestOtp": "មិនអាចស្នើសុំលេខកូដបានទេ",
 
-  "howToUseApp": "តើអ្នកចង់ប្រើប្រាស់ផ្សារកសិករយ៉ាងដូចម្តេច?",
+  "howToUseApp": "តើអ្នកចង់ប្រើប្រាស់ FarmLink យ៉ាងដូចម្តេច?",
   "roleSelectionDescription": "ចូលរួមជាមួយបណ្តាញកសិកម្មឈានមុខគេរបស់យើង។ សូមជ្រើសរើសតួនាទីរបស់អ្នកដើម្បីចាប់ផ្តើម។",
   "iAmRestaurant": "ខ្ញុំជាភោជនីយដ្ឋាន",
   "restaurantRoleDescription": "បញ្ជាទិញគ្រឿងផ្សំស្រស់ៗដោយផ្ទាល់ពីផលិតករក្នុងស្រុក ជាមួយនឹងសេវាដឹកជញ្ជូនដែលទុកចិត្តបាន។",

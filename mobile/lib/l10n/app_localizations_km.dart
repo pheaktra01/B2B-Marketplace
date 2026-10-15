@@ -25,7 +25,7 @@ class AppLocalizationsKm extends AppLocalizations {
 
   @override
   String get selectLanguageDescription =>
-      'ជ្រើសរើសភាសាដែលអ្នកចង់ប្រើ\nPsarKasekor';
+      'ជ្រើសរើសភាសាដែលអ្នកចង់ប្រើ\nFarmLink';
 
   @override
   String get continueButton => 'បន្ត';
@@ -48,7 +48,7 @@ class AppLocalizationsKm extends AppLocalizations {
       'ដោយបន្ត អ្នកយល់ព្រមតាមលក្ខខណ្ឌ និងគោលការណ៍ឯកជនភាពរបស់យើង';
 
   @override
-  String get farmersMarket => 'ផ្សារកសិករ';
+  String get farmersMarket => 'FarmLink';
 
   @override
   String get farmersMarketDescription =>
@@ -1376,7 +1376,7 @@ class AppLocalizationsKm extends AppLocalizations {
   String get unableToRequestOtp => 'មិនអាចស្នើសុំលេខកូដបានទេ';
 
   @override
-  String get howToUseApp => 'តើអ្នកចង់ប្រើប្រាស់ផ្សារកសិករយ៉ាងដូចម្តេច?';
+  String get howToUseApp => 'តើអ្នកចង់ប្រើប្រាស់ FarmLink យ៉ាងដូចម្តេច?';
 
   @override
   String get roleSelectionDescription =>

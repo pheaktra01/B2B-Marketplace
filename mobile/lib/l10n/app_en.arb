@@ -1,10 +1,10 @@
 {
-  "appTitle": "Marketplace",
+  "appTitle": "FarmLink",
   "login": "Login",
   "signup": "Sign Up",
   "language": "Language",
   "chooseLanguage": "Choose Your Language",
-  "selectLanguageDescription": "Select your language to use\nPsarKasekor",
+  "selectLanguageDescription": "Select your language to use\nFarmLink",
   "continueButton": "Continue",
 
   "getStartedTitle": "Direct from Farm to Your Kitchen",
@@ -13,7 +13,7 @@
   "trustedChefs": "Trusted by over 500 top chefs",
   "termsPrivacy": "By continuing, you agree to our Terms and Privacy Policy",
 
-  "farmersMarket": "Farmers Market",
+  "farmersMarket": "FarmLink",
   "farmersMarketDescription": "Fresh agricultural products marketplace for professional chefs.",
   "welcomeBack": "Welcome Back",
   "phoneNumber": "Phone Number",
@@ -639,7 +639,7 @@
   "phoneHint": "012345678 or +85512345678",
   "unableToRequestOtp": "Unable to request OTP",
 
-  "howToUseApp": "How would you like to use PsarKasekor?",
+  "howToUseApp": "How would you like to use FarmLink?",
   "roleSelectionDescription": "Join our leading agricultural network. Please choose your role to get started.",
   "iAmRestaurant": "I am a Restaurant",
   "restaurantRoleDescription": "Order fresh ingredients directly from local producers with reliable delivery.",

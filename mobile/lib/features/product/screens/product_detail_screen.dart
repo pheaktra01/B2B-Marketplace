@@ -318,7 +318,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   void _shareProduct() {
     Clipboard.setData(ClipboardData(
-      text: 'Check out $_productName on B2B Marketplace at \$${_pricePerKg.toStringAsFixed(2)}/kg!',
+      text: 'Check out $_productName on FarmLink at \$${_pricePerKg.toStringAsFixed(2)}/kg!',
     ));
     final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(

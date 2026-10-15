@@ -192,7 +192,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                           // App Title
                           Text(
-                            'PsarKasekor',
+                            'FarmLink',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white,

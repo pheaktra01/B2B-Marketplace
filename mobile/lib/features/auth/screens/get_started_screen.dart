@@ -76,7 +76,7 @@ class GetStartedScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          'PsarKasekor',
+                          'FarmLink',
                           style: TextStyle(
                             fontSize: isDesktop ? 38 : 30,
                             fontWeight: FontWeight.w700,

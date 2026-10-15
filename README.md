@@ -494,7 +494,3 @@ All protected endpoints require an `Authorization: Bearer <token>` header (or va
 - **Notifications:** `notification_created`, `notification_read`, `notification_read_all`, `notification_count_updated`
 
 ---
-
-## 📄 License
-
-This software is developed as part of an engineering internship project. Distributed under the MIT License. See `LICENSE` for more information.

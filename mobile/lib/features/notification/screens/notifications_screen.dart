@@ -589,7 +589,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             icon: const Icon(Icons.notifications_active_outlined, color: primaryGreen),
             onPressed: () async {
               await PushNotificationService.showTestNotification(
-                title: 'PsarKasekor Notification',
+                title: 'FarmLink Notification',
                 body:
                     'Testing lock screen notification! If you lock your phone now, this appears on your lock screen.',
               );

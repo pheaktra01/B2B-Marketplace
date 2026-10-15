@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Marketplace';
+  String get appTitle => 'FarmLink';
 
   @override
   String get login => 'Login';
@@ -25,7 +25,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectLanguageDescription =>
-      'Select your language to use\nPsarKasekor';
+      'Select your language to use\nFarmLink';
 
   @override
   String get continueButton => 'Continue';
@@ -48,7 +48,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'By continuing, you agree to our Terms and Privacy Policy';
 
   @override
-  String get farmersMarket => 'Farmers Market';
+  String get farmersMarket => 'FarmLink';
 
   @override
   String get farmersMarketDescription =>
@@ -1373,7 +1373,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unableToRequestOtp => 'Unable to request OTP';
 
   @override
-  String get howToUseApp => 'How would you like to use PsarKasekor?';
+  String get howToUseApp => 'How would you like to use FarmLink?';
 
   @override
   String get roleSelectionDescription =>

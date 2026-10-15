@@ -481,7 +481,7 @@ class PushNotificationService {
       await _rawNotificationSub?.cancel();
       _rawNotificationSub = NotificationService.onRawNotification.listen((data) {
         debugPrint('Realtime notification received via Socket.IO: $data');
-        final title = data['title']?.toString() ?? 'PsarKasekor Notification';
+        final title = data['title']?.toString() ?? 'FarmLink Notification';
         final body = data['message']?.toString() ?? '';
 
         showNotification(
